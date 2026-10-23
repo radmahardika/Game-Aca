@@ -164,6 +164,11 @@
     startLoop();
   };
   G.musicRefresh = function () { G.music(wanted); };
+  // Hentikan musik sementara (misalnya saat bacaan Al-Qur'an diputar), lalu lanjutkan.
+  G.musicHold = function (on) {
+    if (on) stopLoop();
+    else if (ac && G.save.music && wanted && !timer) startLoop();
+  };
 
   G.jingle = function () {
     if (!ac || !G.save.music) return;

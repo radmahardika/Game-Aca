@@ -489,12 +489,38 @@
     spr.udin = buildPerson({ head: 'cap', headColor: '#a0652d', shirt: '#f2e6c9', pants: '#6d5a4a', hair: '#dcdcdc', mustache: true });
     spr.chick = toCanvas(CHICK, Object.assign({}, OBJ_PAL, { y: '#ffe066', o: '#f08a1a' }));
     spr.hydrant = toCanvas(HYDRANT, Object.assign({}, OBJ_PAL, { r: '#e8241c', R: '#9e1a14', w: '#dddddd' }));
+    // Kampung Hijau: teman-teman TPA, Ustadz Hasan, Nenek
+    spr.dika = buildPerson({ head: 'cap', headColor: '#3fa34d', shirt: '#f4c430', pants: '#3a4a6a' });
+    spr.salma = buildPerson({ head: 'hijab', headColor: '#ff8ad8', shirt: '#ffd1ec', pants: '#8a4fd8' });
+    spr.umar = buildPerson({ head: 'peci', headColor: '#1f1f1f', shirt: '#ffffff', pants: '#3a4a6a' });
+    spr.aisyah = buildPerson({ head: 'hijab', headColor: '#7fd3ff', shirt: '#d4f1ff', pants: '#2f7fd1' });
+    spr.hasan = buildPerson({ head: 'peci', headColor: '#1f1f1f', shirt: '#ffffff', pants: '#e6e6e6', mustache: true });
+    spr.nenek = buildPerson({ head: 'hijab', headColor: '#a0652d', shirt: '#e0a96d', pants: '#6d5a4a', hair: '#dcdcdc' });
+    // set jalan untuk teman yang ikut rombongan (tampak depan, kaki melangkah)
+    spr.kidSet = {};
+    ['dika', 'salma', 'umar', 'aisyah'].forEach((k) => {
+      const w = walkSet(spr[k]);
+      spr.kidSet[k] = { down: w, up: w, left: w, right: w };
+    });
     spr.bread = toCanvas(BREAD, OBJ_PAL);
     spr.bucket = toCanvas(BUCKET, OBJ_PAL);
     spr.drop = toCanvas(DROP, OBJ_PAL);
     spr.rung = toCanvas(RUNG, OBJ_PAL);
     spr.crown = toCanvas(CROWN, OBJ_PAL);
     spr.star = toCanvas(STAR, OBJ_PAL);
+    spr.trophy = toCanvas([
+      '.kkkkkkkkkk.',
+      'kkyyyyyyyykk',
+      'ykyyyywyyyky',
+      'ykyyyywyyyky',
+      '.kkyyyyyykk.',
+      '..kkyyyykk..',
+      '....kyyk....',
+      '....kyyk....',
+      '...kkyykk...',
+      '..kyyyyyyk..',
+      '..kkkkkkkk..',
+    ], OBJ_PAL);
     spr.fireIcon = fireIcon('happy');
     spr.flame = smallFlame();
     spr.badges = [
@@ -578,6 +604,7 @@
     I.rung = iconURL(spr.rung);
     I.flame = iconURL(spr.flame);
     I.star = iconURL(spr.star);
+    I.trophy = iconURL(spr.trophy);
     I.aksa = iconURL(spr.aksa);
     I.ara = iconURL(spr.ara);
     I.araTruck = iconURL(spr.araDir({}).right[0]);

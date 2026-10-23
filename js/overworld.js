@@ -1,7 +1,7 @@
-// Dunia top-down Desa Ceria: peta petak, jalan 4 arah, Ara mengikuti, ketuk untuk berjalan.
+// Dunia top-down: peta petak (Desa Ceria, Kampung Hijau), gerak bebas analog stik, Ara & teman mengikuti.
 (function () {
   const G = (window.G = window.G || {});
-  const T = 16, MW = 32, MH = 22;
+  const T = 16;
   const R = Math.round;
   const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   const hash = (n) => {
@@ -9,51 +9,99 @@
     return s - Math.floor(s);
   };
 
-  // ---------- Tata letak peta ----------
-  const BUILD = [
-    { id: 'hall', x: 12, y: 2, w: 7, h: 4 },
-    { id: 'bakery', x: 3, y: 5, w: 5, h: 3 },
-    { id: 'station', x: 22, y: 4, w: 5, h: 3 },
-    { id: 'houseAni', x: 3, y: 13, w: 4, h: 3 },
-    { id: 'house2', x: 27, y: 13, w: 4, h: 3 },
-  ];
-  const TREES = [[2, 3], [9, 3], [10, 6], [20, 3], [28, 2], [2, 9], [12, 18], [13, 8], [20, 9], [29, 19], [22, 19], [4, 19], [17, 18], [26, 18], [24, 14], [7, 19], [19, 19], [11, 2], [29, 9], [27, 10]];
-  const CAT_TREE = [10, 14];
-  const SIGN = [14, 12];
-  const FLAG = [19, 4];
-  const PILE = [25, 16];
-  const TRUCK = { x: 26, y: 7, w: 4, h: 2 };
-  const BOSS_TILE = [15, 7];
-  const COOP = { x: 5, y: 2, w: 2, h: 2 };
-  const HYDRANT = [20, 12];
-  const NPCS = {
-    ani: { x: 9, y: 15 },
-    budi: { x: 7, y: 8 },
-    joko: { x: 25, y: 8 },
-    kades: { x: 16, y: 7 },
-    siti: { x: 7, y: 3 },
-    udin: { x: 21, y: 12 },
-  };
+  // ---------- Peta ----------
+  // Setiap peta: ukuran, tanah (buildGround), bangunan, benda padat (solid), benda yang bisa
+  // diajak bicara (thing), gambar tambahan (draw), posisi awal, dan kunci simpan posisi.
+  G.MAPS = G.MAPS || {};
+  let map = null;
+  let MW = 32, MH = 22;
+  let ground = [];
+  const inRect = (x, y, r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
+  const at = (p, x, y) => p[0] === x && p[1] === y;
+  const solved = (id) => !!(G.save.solved && G.save.solved[id]);
 
-  const ground = [];
-  function buildGround() {
-    for (let y = 0; y < MH; y++) {
-      ground[y] = [];
-      for (let x = 0; x < MW; x++) ground[y][x] = x === 0 || y === 0 || x === MW - 1 || y === MH - 1 ? 'T' : '.';
+  // Kerangka tanah: tepi peta berupa pohon.
+  function baseGround(w, h) {
+    const g = [];
+    for (let y = 0; y < h; y++) {
+      g[y] = [];
+      for (let x = 0; x < w; x++) g[y][x] = x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'T' : '.';
     }
-    const path = (x, y) => (ground[y][x] = '=');
-    for (let x = 1; x < MW - 1; x++) path(x, 11);
-    for (let y = 6; y < MH - 1; y++) path(15, y);
-    for (let y = 8; y <= 10; y++) path(5, y);
-    for (let y = 7; y <= 10; y++) path(24, y);
-    path(5, 16);
-    for (let x = 5; x <= 8; x++) path(x, 17);
-    for (let y = 12; y <= 17; y++) path(8, y);
-    for (let y = 14; y <= 16; y++) for (let x = 18; x <= 21; x++) ground[y][x] = 'w';
-    for (let x = 17; x <= 22; x++) if (ground[13][x] === '.') ground[13][x] = '#';
-    for (let x = 9; x <= 12; x++) ground[9][x] = '#';
-    TREES.forEach(([x, y]) => (ground[y][x] = 'T'));
+    return g;
   }
+
+  // ---------- Peta 1: Desa Ceria ----------
+  const D = {
+    BUILD: [
+      { id: 'hall', x: 12, y: 2, w: 7, h: 4 },
+      { id: 'bakery', x: 3, y: 5, w: 5, h: 3 },
+      { id: 'station', x: 22, y: 4, w: 5, h: 3 },
+      { id: 'houseAni', x: 3, y: 13, w: 4, h: 3 },
+      { id: 'house2', x: 27, y: 13, w: 4, h: 3 },
+    ],
+    TREES: [[2, 3], [9, 3], [10, 6], [20, 3], [28, 2], [2, 9], [12, 18], [13, 8], [20, 9], [29, 19], [22, 19], [4, 19], [17, 18], [26, 18], [24, 14], [7, 19], [19, 19], [11, 2], [29, 9], [27, 10]],
+    CAT_TREE: [10, 14],
+    SIGN: [14, 12],
+    FLAG: [19, 4],
+    PILE: [25, 16],
+    TRUCK: { x: 26, y: 7, w: 4, h: 2 },
+    BOSS_TILE: [15, 7],
+    COOP: { x: 5, y: 2, w: 2, h: 2 },
+    HYDRANT: [20, 12],
+    NPCS: {
+      ani: { x: 9, y: 15 },
+      budi: { x: 7, y: 8 },
+      joko: { x: 25, y: 8 },
+      kades: { x: 16, y: 7 },
+      siti: { x: 7, y: 3 },
+      udin: { x: 21, y: 12 },
+    },
+  };
+  const bossActive = () => G.PROBLEMS.every((p) => solved(p.id)) && !solved('raja');
+
+  G.MAPS.desa = {
+    w: 32, h: 22,
+    posKey: 'pos',
+    start: { aksa: [15, 12], ara: [16, 12] },
+    BUILD: D.BUILD,
+    signs: [D.SIGN],
+    buildGround() {
+      const g = baseGround(32, 22);
+      const path = (x, y) => (g[y][x] = '=');
+      for (let x = 1; x < 31; x++) path(x, 11);
+      for (let y = 6; y < 21; y++) path(15, y);
+      for (let y = 8; y <= 10; y++) path(5, y);
+      for (let y = 7; y <= 10; y++) path(24, y);
+      path(5, 16);
+      for (let x = 5; x <= 8; x++) path(x, 17);
+      for (let y = 12; y <= 17; y++) path(8, y);
+      for (let y = 14; y <= 16; y++) for (let x = 18; x <= 21; x++) g[y][x] = 'w';
+      for (let x = 17; x <= 22; x++) if (g[13][x] === '.') g[13][x] = '#';
+      for (let x = 9; x <= 12; x++) g[9][x] = '#';
+      D.TREES.forEach(([x, y]) => (g[y][x] = 'T'));
+      return g;
+    },
+    solid(x, y) {
+      if (inRect(x, y, D.TRUCK) || inRect(x, y, D.COOP)) return true;
+      if ([D.CAT_TREE, D.SIGN, D.FLAG, D.PILE, D.HYDRANT].some((p) => at(p, x, y))) return true;
+      if (Object.values(D.NPCS).some((n) => n.x === x && n.y === y)) return true;
+      return bossActive() && at(D.BOSS_TILE, x, y);
+    },
+    thing(x, y) {
+      for (const [id, n] of Object.entries(D.NPCS)) if (n.x === x && n.y === y) return id;
+      if (at(D.CAT_TREE, x, y)) return 'ani';
+      if (at(D.PILE, x, y)) return 'api';
+      if (inRect(x, y, D.TRUCK)) return 'joko';
+      if (inRect(x, y, D.COOP)) return 'siti';
+      if (at(D.HYDRANT, x, y)) return 'udin';
+      if (at(D.SIGN, x, y)) return 'papan';
+      if (bossActive() && at(D.BOSS_TILE, x, y)) return 'raja';
+      const b = D.BUILD.find((bb) => inRect(x, y, bb));
+      if (b && b.id === 'bakery') return 'budi';
+      if (b && b.id === 'hall') return 'kades';
+      return null;
+    },
+  };
 
   // ---------- Status dunia ----------
   const W = {
@@ -63,42 +111,22 @@
     near: null,
     cam: { x: 0, y: 0 },
     shake: 0,
+    followers: [], // sprite set teman yang ikut rombongan (di belakang Ara)
+    region: 'desa',
   };
   G.world = W;
+  W.bossActive = bossActive;
 
-  const solved = (id) => !!(G.save.solved && G.save.solved[id]);
-  W.bossActive = () => G.PROBLEMS.every((p) => solved(p.id)) && !solved('raja');
-
-  function inRect(x, y, r) { return x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h; }
+  // Petak tidak bisa dilewati: tepi, pohon, air, pagar, sawah, bangunan, benda padat peta.
   function blocked(x, y) {
     if (x < 0 || y < 0 || x >= MW || y >= MH) return true;
     const g = ground[y][x];
-    if (g === 'T' || g === 'w' || g === '#') return true;
-    if (BUILD.some((b) => inRect(x, y, b))) return true;
-    if (inRect(x, y, TRUCK) || inRect(x, y, COOP)) return true;
-    const at = (p) => p[0] === x && p[1] === y;
-    if (at(CAT_TREE) || at(SIGN) || at(FLAG) || at(PILE) || at(HYDRANT)) return true;
-    if (Object.values(NPCS).some((n) => n.x === x && n.y === y)) return true;
-    if (W.bossActive() && at(BOSS_TILE)) return true;
-    return false;
+    if (g === 'T' || g === 'w' || g === '#' || g === 's') return true;
+    if (map.BUILD.some((b) => inRect(x, y, b))) return true;
+    return map.solid(x, y);
   }
-
-  // Apa yang ada di petak ini (untuk tombol A / ketuk)?
-  function thingAt(x, y) {
-    const at = (p) => p[0] === x && p[1] === y;
-    for (const [id, n] of Object.entries(NPCS)) if (n.x === x && n.y === y) return id;
-    if (at(CAT_TREE)) return 'ani';
-    if (at(PILE)) return 'api';
-    if (inRect(x, y, TRUCK)) return 'joko';
-    if (inRect(x, y, COOP)) return 'siti';
-    if (at(HYDRANT)) return 'udin';
-    if (at(SIGN)) return 'papan';
-    if (W.bossActive() && at(BOSS_TILE)) return 'raja';
-    const b = BUILD.find((bb) => inRect(x, y, bb));
-    if (b && b.id === 'bakery') return 'budi';
-    if (b && b.id === 'hall') return 'kades';
-    return null;
-  }
+  // Apa yang ada di petak ini (untuk tombol A)?
+  const thingAt = (x, y) => map.thing(x, y);
 
   // ---------- Gambar petak (lapisan statis) ----------
   let layer = null;
@@ -131,7 +159,7 @@
       });
     }
   }
-  const isPath = (x, y) => ground[y] && ground[y][x] === '=';
+  const isPath = (x, y) => ground[y] && (ground[y][x] === '=' || ground[y][x] === 'b');
   function drawPath(c, tx, ty) {
     px(c, tx * T, ty * T, T, T, '#e8c98a');
     for (let i = 0; i < 4; i++) {
@@ -139,19 +167,35 @@
       px(c, tx * T + R(h * 14), ty * T + R(hash(h * 3) * 14), 1, 1, '#d4b071');
     }
     const e = '#c49a5a';
-    if (!isPath(tx, ty - 1) && !BUILD.some((b) => inRect(tx, ty - 1, b))) px(c, tx * T, ty * T, T, 2, e);
+    if (!isPath(tx, ty - 1) && !map.BUILD.some((b) => inRect(tx, ty - 1, b))) px(c, tx * T, ty * T, T, 2, e);
     if (!isPath(tx, ty + 1)) px(c, tx * T, ty * T + T - 2, T, 2, e);
     if (!isPath(tx - 1, ty)) px(c, tx * T, ty * T, 2, T, e);
     if (!isPath(tx + 1, ty)) px(c, tx * T + T - 2, ty * T, 2, T, e);
   }
   function drawWater(c, tx, ty) {
-    const isW = (x, y) => ground[y] && ground[y][x] === 'w';
+    const isW = (x, y) => ground[y] && (ground[y][x] === 'w' || ground[y][x] === 'b');
     px(c, tx * T, ty * T, T, T, '#4fb3ff');
     const k = '#2b1d1a', edge = '#a8e0ff';
     if (!isW(tx, ty - 1)) { px(c, tx * T, ty * T, T, 2, k); px(c, tx * T, ty * T + 2, T, 1, edge); }
     if (!isW(tx, ty + 1)) px(c, tx * T, ty * T + T - 2, T, 2, k);
     if (!isW(tx - 1, ty)) px(c, tx * T, ty * T, 2, T, k);
     if (!isW(tx + 1, ty)) px(c, tx * T + T - 2, ty * T, 2, T, k);
+  }
+  function drawSawah(c, tx, ty) {
+    px(c, tx * T, ty * T, T, T, '#6fc3e8');
+    for (let r = 0; r < 4; r++)
+      for (let k = 0; k < 4; k++) {
+        const x = tx * T + k * 4 + 1, y = ty * T + r * 4 + 1;
+        px(c, x, y + 1, 1, 2, '#3f8f38');
+        px(c, x + 1, y, 1, 3, '#5fb447');
+        px(c, x + 2, y + 1, 1, 2, '#3f8f38');
+      }
+  }
+  function drawBridge(c, tx, ty) {
+    drawWater(c, tx, ty);
+    px(c, tx * T, ty * T - 1, T, T + 2, '#2b1d1a');
+    px(c, tx * T, ty * T + 1, T, T - 2, '#c98a45');
+    for (let i = 0; i < 4; i++) px(c, tx * T + i * 4, ty * T + 1, 1, T - 2, '#8a5a2b');
   }
   function drawFence(c, tx, ty) {
     const x = tx * T;
@@ -168,7 +212,13 @@
       station: { roof: '#d63c2f', roofD: '#9e2a22', wall: '#e8e8e8' },
       houseAni: { roof: '#e86fa0', roofD: '#b84f7c', wall: '#ffe6f0' },
       house2: { roof: '#3b7dd8', roofD: '#2a5aa0', wall: '#ffe6a8' },
+      houseNenek: { roof: '#8a5a2b', roofD: '#6e4520', wall: '#f7e2c0' },
+      houseDika: { roof: '#3fa34d', roofD: '#2f6b2a', wall: '#ffe6a8' },
+      mushola: { roof: '#2f9e8f', roofD: '#1f6e64', wall: '#ffffff' },
+      pasar: { roof: '#f4a020', roofD: '#c97a00', wall: '#ffe6a8' },
+      panggung: { roof: '#d63c2f', roofD: '#9e2a22', wall: '#f7e2c0' },
     }[b.id];
+    if (map.drawBuilding && map.drawBuilding(c, b, { px: (...a) => px(c, ...a), x, y, w, h, look })) return;
     const rh = R(h * 0.56);
     px(c, x - 2, y, w + 4, rh, '#2b1d1a');
     px(c, x - 1, y + 1, w + 2, rh - 2, look.roof);
@@ -232,12 +282,13 @@
         const g = ground[y][x];
         if (g === '=') drawPath(c, x, y);
         else if (g === 'w') drawWater(c, x, y);
+        else if (g === 'b') drawBridge(c, x, y);
+        else if (g === 's') drawSawah(c, x, y);
         else drawGrass(c, x, y);
         if (g === '#') drawFence(c, x, y);
       }
-    // jalan kecil depan pintu
-    BUILD.forEach((b) => drawBuilding(c, b));
-    drawSign(c, SIGN[0], SIGN[1]);
+    map.BUILD.forEach((b) => drawBuilding(c, b));
+    (map.signs || []).forEach(([x, y]) => drawSign(c, x, y));
   }
 
   // Pohon top-down (pra-render)
@@ -301,8 +352,23 @@
 
   let trail = [];
   function resetTrail() {
-    trail = [{ x: W.ara.x, y: W.ara.y }, { x: W.aksa.x, y: W.aksa.y }];
+    const back = { up: [0, 1], down: [0, -1], left: [1, 0], right: [-1, 0] }[W.aksa.dir] || [0, -1];
+    // jejak lurus di belakang Aksa, mundur sampai menabrak sesuatu
+    trail = [{ x: W.aksa.x, y: W.aksa.y }];
+    let x = W.aksa.x, y = W.aksa.y;
+    for (let i = 0; i < 120; i++) {
+      const nx = x + back[0], ny = y + back[1];
+      if (!canStand(nx, ny)) break;
+      x = nx; y = ny;
+      trail.unshift({ x, y });
+    }
+    follow(W.ara, FOLLOW);
+    W.followers.forEach((f, i) => follow(f, FOLLOW * (i + 2)));
   }
+  W.setFollowers = function (sets) {
+    W.followers = sets.map((set) => ({ set, x: W.aksa.x, y: W.aksa.y, dir: 'down', walk: 0 }));
+    W.followers.forEach((f, i) => follow(f, FOLLOW * (i + 2)));
+  };
 
   let bumpT = 0;
   function moveAksa(dt) {
@@ -325,32 +391,39 @@
     if (P.moving) {
       const last = trail[trail.length - 1];
       if (Math.hypot(P.x - last.x, P.y - last.y) >= 1) trail.push({ x: P.x, y: P.y });
-      if (trail.length > 80) trail.shift();
+      if (trail.length > 240) trail.shift();
     }
   }
 
-  // Ara mengikuti jejak Aksa sejauh FOLLOW piksel.
-  function moveAra() {
-    const A = W.ara;
-    let need = FOLLOW, target = trail[0];
+  // Titik pada jejak Aksa sejauh `dist` piksel ke belakang.
+  function trailPoint(dist) {
+    let need = dist;
     for (let i = trail.length - 1; i > 0; i--) {
       const a = trail[i], b = trail[i - 1];
       const d = Math.hypot(a.x - b.x, a.y - b.y);
       if (d >= need) {
         const k = need / d;
-        target = { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k };
-        need = 0;
-        break;
+        return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k };
       }
       need -= d;
     }
-    const ox = A.x, oy = A.y;
-    if (need === 0 || Math.hypot(target.x - A.x, target.y - A.y) > 0.5) { A.x = target.x; A.y = target.y; }
-    const moved = Math.hypot(A.x - ox, A.y - oy);
-    A.dir = faceFrom(A.x - ox, A.y - oy, A.dir);
-    A.moving = moved > 0.05;
-    A.walk = A.moving ? A.walk + moved / T : 0;
-    [A.tx, A.ty] = tileOf(A);
+    return trail[0];
+  }
+  // Ara (dan teman yang ikut rombongan) mengikuti jejak Aksa.
+  function follow(e, dist) {
+    const target = trailPoint(dist);
+    const ox = e.x, oy = e.y;
+    e.x = target.x;
+    e.y = target.y;
+    const moved = Math.hypot(e.x - ox, e.y - oy);
+    e.dir = faceFrom(e.x - ox, e.y - oy, e.dir || 'down');
+    e.moving = moved > 0.05;
+    e.walk = e.moving ? (e.walk || 0) + moved / T : 0;
+    [e.tx, e.ty] = tileOf(e);
+  }
+  function moveAra() {
+    follow(W.ara, FOLLOW);
+    W.followers.forEach((f, i) => follow(f, FOLLOW * (i + 2)));
   }
 
   // Cari hal terdekat yang bisa diajak bicara (warga, papan, Ara).
@@ -396,6 +469,95 @@
     W.near = n && n.id !== 'ara' ? n.id : null; // Ara tidak membuat tombol A berkedip
   }
 
+  G.MAPS.desa.draw = function (ctx, t, dt, items) {
+      // pohon kucing
+      items.push({ y: D.CAT_TREE[1] * T + 15, f: () => {
+        put(ctx, bigTreeImg, D.CAT_TREE[0] * T + 8, D.CAT_TREE[1] * T + 16);
+        if (!G.save.solved.kucing) ctx.drawImage(G.spr.cat, D.CAT_TREE[0] * T + 1, D.CAT_TREE[1] * T - 26 + (Math.sin(t * 6) > 0.6 ? -1 : 0));
+      } });
+      if (G.save.solved.kucing) items.push({ y: 16 * T + 10, f: () => ctx.drawImage(G.spr.cat, 10 * T, 16 * T + 4) });
+
+      // toko roti terbakar
+      if (!G.save.solved.roti) {
+        items.push({ y: 7 * T + 15, f: () => {
+          [[4, 5], [6, 5], [5, 6], [7, 6]].forEach(([fx, fy], i) => G.drawFire(ctx, fx * T + 2 + (i % 2) * 6, fy * T + 12, 8, 12, t + i, { noFace: true, seed: i }));
+        } });
+        if (Math.random() < dt * 3) G.fx.smoke(5.5 * T, 5 * T, 1);
+      }
+
+      // truk & tumpukan daun
+      items.push({ y: (D.TRUCK.y + D.TRUCK.h) * T - 1, f: () => G.side.truck(ctx, D.TRUCK.x * T, (D.TRUCK.y + D.TRUCK.h) * T, G.save.solved.truk ? 1 : 0, t, !!G.save.solved.truk) });
+      items.push({ y: D.PILE[1] * T + 14, f: () => {
+        G.side.leafPile(ctx, D.PILE[0] * T + 8, D.PILE[1] * T + 14);
+        if (!G.save.solved.daun) {
+          G.drawFire(ctx, D.PILE[0] * T + 8, D.PILE[1] * T + 10, 11, 15, t, { mood: Math.sin(t * 2) > 0.5 ? 'laugh' : 'happy' });
+          bubble(ctx, D.PILE[0] * T + 8, D.PILE[1] * T - 8);
+        }
+      } });
+
+      // kandang ayam & anak ayam
+      items.push({ y: (D.COOP.y + D.COOP.h) * T - 1, f: () => {
+        const x = D.COOP.x * T, by = (D.COOP.y + D.COOP.h) * T;
+        shadow(ctx, x + 16, by, 14);
+        px(ctx, x + 1, by - 18, 30, 18, '#2b1d1a');
+        px(ctx, x + 2, by - 17, 28, 16, '#c98a45');
+        for (let i = 0; i < 4; i++) px(ctx, x + 2, by - 15 + i * 4, 28, 1, '#a0652d');
+        px(ctx, x - 1, by - 24, 34, 7, '#2b1d1a');
+        px(ctx, x, by - 23, 32, 5, '#d63c2f');
+        const open = !G.save.solved.ayam;
+        px(ctx, x + 11, by - 11, 10, 10, '#2b1d1a');
+        px(ctx, x + 12, by - 10, 8, 9, open ? '#4a3426' : '#a0652d');
+        if (!open) for (let i = 0; i < 3; i++) ctx.drawImage(G.spr.chick, x + 3 + i * 9, by - 30 + (Math.sin(t * 4 + i) > 0.7 ? -1 : 0));
+      } });
+      if (!G.save.solved.ayam) {
+        [[4, 4], [7, 1], [8, 4], [3, 2], [9, 2]].forEach(([cx, cy], i) => {
+          const wx = cx * T + 4 + Math.sin(t * 1.3 + i * 2) * 5, wy = cy * T + 8 + Math.cos(t * 1.1 + i) * 3;
+          items.push({ y: wy + 7, f: () => ctx.drawImage(G.spr.chick, R(wx), R(wy) + (Math.sin(t * 9 + i) > 0.5 ? -1 : 0)) });
+        });
+      }
+
+      // hidran
+      items.push({ y: D.HYDRANT[1] * T + 15, f: () => {
+        shadow(ctx, D.HYDRANT[0] * T + 8, D.HYDRANT[1] * T + 15, 5);
+        put(ctx, G.spr.hydrant, D.HYDRANT[0] * T + 8, D.HYDRANT[1] * T + 15);
+        if (!G.save.solved.hidran && Math.random() < 0.6) {
+          G.fx.add({ x: D.HYDRANT[0] * T + 3, y: D.HYDRANT[1] * T + 6, vx: -20 - Math.random() * 15, vy: -30 - Math.random() * 20, g: 120, life: 0.7, color: Math.random() < 0.3 ? '#d4f1ff' : '#4fb3ff', size: 2 });
+          G.fx.add({ x: D.HYDRANT[0] * T + 13, y: D.HYDRANT[1] * T + 6, vx: 20 + Math.random() * 15, vy: -30 - Math.random() * 20, g: 120, life: 0.7, color: Math.random() < 0.3 ? '#d4f1ff' : '#4fb3ff', size: 2 });
+        }
+      } });
+
+      // tiang bendera
+      items.push({ y: D.FLAG[1] * T + 15, f: () => {
+        const x = D.FLAG[0] * T + 7, by = D.FLAG[1] * T + 15;
+        shadow(ctx, x + 1, by + 1, 4);
+        px(ctx, x, by - 34, 2, 34, '#cccccc');
+        const wave = Math.floor(t * 4) % 2;
+        px(ctx, x + 2, by - 34 + wave, 12, 4, '#e8241c');
+        px(ctx, x + 2, by - 30 + wave, 12, 4, '#ffffff');
+      } });
+
+      // warga
+      const need = { ani: 'kucing', budi: 'roti', joko: 'truk', siti: 'ayam', udin: 'hidran' };
+      for (const [id, n] of Object.entries(D.NPCS)) {
+        items.push({ y: n.y * T + 15, f: () => {
+          shadow(ctx, n.x * T + 8, n.y * T + 15);
+          const bob = id === 'kades' && bossActive() ? (Math.sin(t * 12) > 0 ? -1 : 0) : 0;
+          put(ctx, G.spr[id], n.x * T + 8, n.y * T + 15 + bob);
+          const show = (need[id] && !G.save.solved[need[id]]) || (id === 'kades' && bossActive());
+          if (show) bubble(ctx, n.x * T + 8, n.y * T - 9);
+        } });
+      }
+
+      // boss
+      if (bossActive()) {
+        items.push({ y: D.BOSS_TILE[1] * T + 15, f: () => {
+          shadow(ctx, D.BOSS_TILE[0] * T + 8, D.BOSS_TILE[1] * T + 16, 14);
+          G.drawFire(ctx, D.BOSS_TILE[0] * T + 8, D.BOSS_TILE[1] * T + 16, 28, 36, t, { mood: Math.sin(t * 1.5) > 0.3 ? 'laugh' : 'happy', crown: true, angry: true });
+        } });
+        if (Math.random() < dt * 2) G.fx.smoke(D.BOSS_TILE[0] * T + 8, D.BOSS_TILE[1] * T - 20, 1);
+      }
+  };
+
   // ---------- Gambar dunia ----------
   function frameOf(set, e) {
     const i = e.moving || e.walk > 0 ? Math.floor(e.walk * 2) % 4 : 0;
@@ -423,96 +585,12 @@
         if (ground[y][x] === 'T' && inView(x * T, y * T))
           items.push({ y: y * T + 15, f: () => put(ctx, treeImg, x * T + 8, y * T + 16) });
 
-    // pohon kucing
-    items.push({ y: CAT_TREE[1] * T + 15, f: () => {
-      put(ctx, bigTreeImg, CAT_TREE[0] * T + 8, CAT_TREE[1] * T + 16);
-      if (!G.save.solved.kucing) ctx.drawImage(G.spr.cat, CAT_TREE[0] * T + 1, CAT_TREE[1] * T - 26 + (Math.sin(t * 6) > 0.6 ? -1 : 0));
-    } });
-    if (G.save.solved.kucing) items.push({ y: 16 * T + 10, f: () => ctx.drawImage(G.spr.cat, 10 * T, 16 * T + 4) });
-
-    // toko roti terbakar
-    if (!G.save.solved.roti) {
-      items.push({ y: 7 * T + 15, f: () => {
-        [[4, 5], [6, 5], [5, 6], [7, 6]].forEach(([fx, fy], i) => G.drawFire(ctx, fx * T + 2 + (i % 2) * 6, fy * T + 12, 8, 12, t + i, { noFace: true, seed: i }));
-      } });
-      if (Math.random() < dt * 3) G.fx.smoke(5.5 * T, 5 * T, 1);
-    }
-
-    // truk & tumpukan daun
-    items.push({ y: (TRUCK.y + TRUCK.h) * T - 1, f: () => G.side.truck(ctx, TRUCK.x * T, (TRUCK.y + TRUCK.h) * T, G.save.solved.truk ? 1 : 0, t, !!G.save.solved.truk) });
-    items.push({ y: PILE[1] * T + 14, f: () => {
-      G.side.leafPile(ctx, PILE[0] * T + 8, PILE[1] * T + 14);
-      if (!G.save.solved.daun) {
-        G.drawFire(ctx, PILE[0] * T + 8, PILE[1] * T + 10, 11, 15, t, { mood: Math.sin(t * 2) > 0.5 ? 'laugh' : 'happy' });
-        bubble(ctx, PILE[0] * T + 8, PILE[1] * T - 8);
-      }
-    } });
-
-    // kandang ayam & anak ayam
-    items.push({ y: (COOP.y + COOP.h) * T - 1, f: () => {
-      const x = COOP.x * T, by = (COOP.y + COOP.h) * T;
-      shadow(ctx, x + 16, by, 14);
-      px(ctx, x + 1, by - 18, 30, 18, '#2b1d1a');
-      px(ctx, x + 2, by - 17, 28, 16, '#c98a45');
-      for (let i = 0; i < 4; i++) px(ctx, x + 2, by - 15 + i * 4, 28, 1, '#a0652d');
-      px(ctx, x - 1, by - 24, 34, 7, '#2b1d1a');
-      px(ctx, x, by - 23, 32, 5, '#d63c2f');
-      const open = !G.save.solved.ayam;
-      px(ctx, x + 11, by - 11, 10, 10, '#2b1d1a');
-      px(ctx, x + 12, by - 10, 8, 9, open ? '#4a3426' : '#a0652d');
-      if (!open) for (let i = 0; i < 3; i++) ctx.drawImage(G.spr.chick, x + 3 + i * 9, by - 30 + (Math.sin(t * 4 + i) > 0.7 ? -1 : 0));
-    } });
-    if (!G.save.solved.ayam) {
-      [[4, 4], [7, 1], [8, 4], [3, 2], [9, 2]].forEach(([cx, cy], i) => {
-        const wx = cx * T + 4 + Math.sin(t * 1.3 + i * 2) * 5, wy = cy * T + 8 + Math.cos(t * 1.1 + i) * 3;
-        items.push({ y: wy + 7, f: () => ctx.drawImage(G.spr.chick, R(wx), R(wy) + (Math.sin(t * 9 + i) > 0.5 ? -1 : 0)) });
-      });
-    }
-
-    // hidran
-    items.push({ y: HYDRANT[1] * T + 15, f: () => {
-      shadow(ctx, HYDRANT[0] * T + 8, HYDRANT[1] * T + 15, 5);
-      put(ctx, G.spr.hydrant, HYDRANT[0] * T + 8, HYDRANT[1] * T + 15);
-      if (!G.save.solved.hidran && Math.random() < 0.6) {
-        G.fx.add({ x: HYDRANT[0] * T + 3, y: HYDRANT[1] * T + 6, vx: -20 - Math.random() * 15, vy: -30 - Math.random() * 20, g: 120, life: 0.7, color: Math.random() < 0.3 ? '#d4f1ff' : '#4fb3ff', size: 2 });
-        G.fx.add({ x: HYDRANT[0] * T + 13, y: HYDRANT[1] * T + 6, vx: 20 + Math.random() * 15, vy: -30 - Math.random() * 20, g: 120, life: 0.7, color: Math.random() < 0.3 ? '#d4f1ff' : '#4fb3ff', size: 2 });
-      }
-    } });
-
-    // tiang bendera
-    items.push({ y: FLAG[1] * T + 15, f: () => {
-      const x = FLAG[0] * T + 7, by = FLAG[1] * T + 15;
-      shadow(ctx, x + 1, by + 1, 4);
-      px(ctx, x, by - 34, 2, 34, '#cccccc');
-      const wave = Math.floor(t * 4) % 2;
-      px(ctx, x + 2, by - 34 + wave, 12, 4, '#e8241c');
-      px(ctx, x + 2, by - 30 + wave, 12, 4, '#ffffff');
-    } });
-
-    // warga
-    const need = { ani: 'kucing', budi: 'roti', joko: 'truk', siti: 'ayam', udin: 'hidran' };
-    for (const [id, n] of Object.entries(NPCS)) {
-      items.push({ y: n.y * T + 15, f: () => {
-        shadow(ctx, n.x * T + 8, n.y * T + 15);
-        const bob = id === 'kades' && W.bossActive() ? (Math.sin(t * 12) > 0 ? -1 : 0) : 0;
-        put(ctx, G.spr[id], n.x * T + 8, n.y * T + 15 + bob);
-        const show = (need[id] && !G.save.solved[need[id]]) || (id === 'kades' && W.bossActive());
-        if (show) bubble(ctx, n.x * T + 8, n.y * T - 9);
-      } });
-    }
-
-    // boss
-    if (W.bossActive()) {
-      items.push({ y: BOSS_TILE[1] * T + 15, f: () => {
-        shadow(ctx, BOSS_TILE[0] * T + 8, BOSS_TILE[1] * T + 16, 14);
-        G.drawFire(ctx, BOSS_TILE[0] * T + 8, BOSS_TILE[1] * T + 16, 28, 36, t, { mood: Math.sin(t * 1.5) > 0.3 ? 'laugh' : 'happy', crown: true, angry: true });
-      } });
-      if (Math.random() < dt * 2) G.fx.smoke(BOSS_TILE[0] * T + 8, BOSS_TILE[1] * T - 20, 1);
-    }
+    map.draw(ctx, t, dt, items);
 
     // Aksa & Ara
     const araSet = G.spr.araDir(G.save.equip);
     items.push({ y: W.ara.y + 14.5, f: () => { shadow(ctx, W.ara.x + 8, W.ara.y + 15, 6); put(ctx, frameOf(araSet, W.ara), W.ara.x + 8, W.ara.y + 15); } });
+    W.followers.forEach((f) => items.push({ y: f.y + 14, f: () => { shadow(ctx, f.x + 8, f.y + 15, 6); put(ctx, frameOf(f.set, f), f.x + 8, f.y + 16); } }));
     items.push({ y: P.y + 15, f: () => { shadow(ctx, P.x + 8, P.y + 15, 6); put(ctx, frameOf(G.spr.aksaDir, P), P.x + 8, P.y + 16); } });
 
     items.sort((a, b) => a.y - b.y).forEach((i) => i.f());
@@ -524,33 +602,39 @@
     const { S } = G.view;
     return [(wx - W.cam.x) * S, (wy - W.cam.y) * S];
   };
-  W.bossScreen = () => W.toScreen(BOSS_TILE[0] * T + 8, BOSS_TILE[1] * T);
 
   W.save = function () {
-    G.save.pos = { x: W.aksa.tx, y: W.aksa.ty, dir: W.aksa.dir, ax: W.ara.tx, ay: W.ara.ty };
+    G.save[map.posKey] = { x: W.aksa.tx, y: W.aksa.ty, dir: W.aksa.dir };
   };
   W.restore = function () {
-    const p = G.save.pos;
-    if (!p || blocked(p.x, p.y)) return;
-    Object.assign(W.aksa, { tx: p.x, ty: p.y, x: p.x * T, y: p.y * T, dir: p.dir || 'down', moving: false });
-    const ax = blocked(p.ax, p.ay) ? p.x : p.ax, ay = blocked(p.ax, p.ay) ? p.y - 1 : p.ay;
-    Object.assign(W.ara, { tx: ax, ty: ay, x: ax * T, y: ay * T, moving: false });
+    const p = G.save[map.posKey];
+    const [sx, sy] = p && !blocked(p.x, p.y) ? [p.x, p.y] : map.start.aksa;
+    Object.assign(W.aksa, { tx: sx, ty: sy, x: sx * T, y: sy * T, dir: (p && p.dir) || 'down', moving: false });
     resetTrail();
   };
   W.place = function (x, y, dir) {
     Object.assign(W.aksa, { x, y, dir: dir || W.aksa.dir });
-    Object.assign(W.ara, { x: x - 14, y });
     resetTrail();
   };
 
+  const layers = {};
+  // Pindah ke peta lain (desa / kampung).
+  W.load = function (name) {
+    map = G.MAPS[name];
+    W.region = name;
+    MW = map.w;
+    MH = map.h;
+    ground = map.ground || (map.ground = map.buildGround());
+    layer = layers[name] || (layers[name] = (buildLayer(), layer));
+    W.followers = [];
+    W.restore();
+  };
   W.init = function () {
-    buildGround();
-    buildLayer();
     treeImg = makeTree(11);
     bigTreeImg = makeTree(15);
-    W.restore();
-    resetTrail();
+    W.load('desa');
   };
+  W.helpers = () => ({ px, disc, shadow, bubble, put, T, inRect, at, blocked, frameOf, treeImg, bigTreeImg });
   G.scenes.world = function () {
     return { draw, ownsFx: true };
   };

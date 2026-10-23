@@ -5,7 +5,7 @@
   const R = Math.round;
 
   // ---------- Simpan progres ----------
-  G.VERSION = 6;
+  G.VERSION = 7;
   const KEY = 'aksa-pemadam-v2';
   const fresh = () => ({ solved: {}, stars: {}, acc: {}, equip: {}, intro: false, tut: false, music: true, sfx: true, pos: null });
   function load() {
@@ -80,7 +80,7 @@
     const x = c.getContext('2d');
     x.imageSmoothingEnabled = false;
     const S = G.spr;
-    const pic = { aksa: S.aksa, ara: S.araWith(G.save.equip), ani: S.ani, budi: S.budi, joko: S.joko, kades: S.kades, siti: S.siti, udin: S.udin }[who];
+    const pic = who === 'ara' ? S.araWith(G.save.equip) : ['api', 'raja', 'papan'].includes(who) ? null : S[who];
     if (pic) {
       const k = Math.max(1, Math.floor((size - 4) / Math.max(pic.width, pic.height)));
       const w = pic.width * k, h = pic.height * k;
@@ -160,13 +160,27 @@
     ui.innerHTML = '';
     const t = el(`<div class="title">
       <h1><span class="t1">Aksa</span><span class="t2">si Pemadam Cilik</span></h1>
-      <button class="btn big red" id="play">▶ Main</button>
+      <div class="regions">
+        <button class="btn big red" id="play">🚒 Desa Ceria<small>Berhitung</small></button>
+        <button class="btn big green" id="playK" ${G.kampung.ready() ? '' : 'disabled'}>📖 Kampung Hijau<small>${G.kampung.ready() ? 'Juz Amma' : 'Segera hadir'}</small></button>
+      </div>
       <div class="ver">versi ${G.VERSION}</div>
     </div>`);
     ui.appendChild(t);
+    tap($('#playK', t), () => {
+      if (!G.kampung.ready()) return;
+      G.music('town');
+      G.wipe(() => {
+        G.world.load('kampung');
+        enterWorld();
+        G.world.setFollowers(G.kampung.joinedSets());
+        dialog(G.kampung.intro(), () => { G.persist(); backToWorld(); });
+      });
+    });
     tap($('#play', t), () => {
       G.music('town');
       G.wipe(() => {
+        G.world.load('desa');
         enterWorld();
         if (!G.save.intro) {
           dialog(G.INTRO.concat(araReminder()), () => {
@@ -193,8 +207,9 @@
     ui.innerHTML = '';
     hud = el(`<div class="hud">
       <div class="topbar">
-        <div class="pill">🏡 Desa Ceria</div>
+        <div class="pill">${G.world.region === 'kampung' ? '🌾 Kampung Hijau' : '🏡 Desa Ceria'}</div>
         <div class="spacer"></div>
+        <button class="btn small grey" id="peta" aria-label="Pilih wilayah">🗺️</button>
         <button class="btn small grey" id="mus"></button>
         <button class="btn small yellow" id="koleksi">🎒 Koleksi</button>
         <button class="btn small grey" id="setel" aria-label="Pengaturan">⚙️</button>
@@ -207,6 +222,7 @@
     musLabel();
     tap($('#mus', hud), () => { G.save.music = !G.save.music; G.persist(); musLabel(); G.musicRefresh(); });
     tap($('#koleksi', hud), showCollection);
+    tap($('#peta', hud), () => { G.world.save(); G.persist(); G.releaseStick(); G.wipe(showTitle); });
     tap($('#setel', hud), showSettings);
     const ab = $('.abtn', hud);
     ab.addEventListener('pointerdown', (e) => { e.preventDefault(); G.audioUnlock(); ab.classList.add('on'); G.world.pressA(); });
@@ -277,13 +293,39 @@
     if (!hud) return;
     const q = $('.quest', hud);
     const sv = G.save.solved;
-    if (sv.raja) q.innerHTML = '🏅 Desa Ceria aman!';
+    if (G.world.region === 'kampung') q.innerHTML = G.kampung.title();
+    else if (sv.raja) q.innerHTML = '🏅 Desa Ceria aman!';
     else if (G.world.bossActive()) q.innerHTML = '⭐ Ke Balai Desa! <img src="' + G.icons.crown + '" alt="">';
     else q.innerHTML = `<span class="qara"><img src="${G.icons.araTruck}" alt=""></span><span>Tinggal ${G.PROBLEMS.filter((p) => !sv[p.id]).length}:</span>` + G.PROBLEMS.map((p) => `<span class="qi ${sv[p.id] ? 'ok' : ''}"><img src="${G.icons[p.icon]}" alt="">${sv[p.id] ? '<b>✓</b>' : ''}</span>`).join('');
   }
 
+  // Jembatan untuk alur Kampung Hijau (js/kampung.js)
+  const kampungApi = {
+    dialog,
+    back: backToWorld,
+    persist: G.persist,
+    busy() { G.world.mode = 'busy'; G.world.save(); G.persist(); },
+    returnToWorld() { enterWorld(); G.world.mode = 'busy'; hudVisible(false); },
+    trophy(stars, first) {
+      G.world.mode = 'busy';
+      G.fx.confetti(100);
+      G.sfx.badge();
+      modal.innerHTML = '';
+      const c = el(`<div class="card reward">
+        <h2>Pentas Porseni Sukses!</h2>
+        <div class="stars big">${'<span class="on">★</span>'.repeat(stars)}${'<span>★</span>'.repeat(3 - stars)}</div>
+        <div class="gifts"><div class="gift"><img class="spin" src="${G.icons.trophy}" alt=""><span>${first ? 'Lencana baru' : 'Lencana'}<br><b>Bintang Porseni</b></span></div></div>
+        <button class="btn big green" id="lanjut">Lanjut</button>
+      </div>`);
+      modal.appendChild(c);
+      modal.classList.add('show');
+      tap($('#lanjut', c), () => { closeModal(); backToWorld(); G.fx.confetti(100); });
+    },
+  };
+
   G.world.onInteract = function (id) {
     if (G.world.mode !== 'walk') return;
+    if (G.world.region === 'kampung') return G.kampung.interact(id, kampungApi);
     const P = (pid) => G.ALL.find((p) => p.id === pid);
     const sv = G.save.solved;
     if (id === 'papan') return dialog(G.SIGN, backToWorld);
@@ -397,6 +439,14 @@
           ? `<div class="bd"><img src="${G.icons.badges[i]}" alt=""><span>${p.badge}</span><em>${'★'.repeat(st)}${'☆'.repeat(3 - st)}</em></div>`
           : `<div class="bd off"><img src="${G.icons.badges[i]}" alt=""><span>???</span></div>`;
       }).join('')}</div>
+      ${G.kampung.ready() ? `<h3>Kampung Hijau</h3>
+      <div class="badges">${G.FRIENDS.map((f) => {
+        const st = (G.save.kampung && G.save.kampung.stars[f.id]) || 0;
+        return `<div class="bd ${st ? '' : 'off'}"><canvas class="kid" data-k="${f.id}" width="20" height="26"></canvas><span>${st ? G.CHARS[f.id].name : '???'}</span>${st ? `<em>${'★'.repeat(st)}${'☆'.repeat(3 - st)}</em>` : ''}</div>`;
+      }).join('')}${(() => {
+        const st = (G.save.kampung && G.save.kampung.stars.porseni) || 0;
+        return `<div class="bd ${st ? '' : 'off'}"><img src="${G.icons.trophy}" alt=""><span>${st ? 'Bintang Porseni' : '???'}</span>${st ? `<em>${'★'.repeat(st)}${'☆'.repeat(3 - st)}</em>` : ''}</div>`;
+      })()}</div>` : ''}
       <h3>Aksesori Ara <small>(ketuk untuk pakai/lepas)</small></h3>
       <div class="accrow"><div class="arabig"></div><div class="accs"></div></div>
       <button class="btn green" id="tutup">Tutup</button>
@@ -415,6 +465,10 @@
       });
     };
     refresh();
+    c.querySelectorAll('canvas.kid').forEach((cv) => {
+      const k = cv.getContext('2d');
+      k.drawImage(G.spr[cv.dataset.k], 2, 1);
+    });
     modal.appendChild(c);
     modal.classList.add('show');
     tap($('#tutup', c), () => { closeModal(); backToWorld(); });

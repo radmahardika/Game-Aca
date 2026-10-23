@@ -659,3 +659,72 @@ body.portrait #rotate { display: flex; }
 @keyframes ready { 50% { transform: scale(1.1); box-shadow: 0 0 0 1.2vh #fff36a, 0 0.9vh 0 var(--ink); } }
 .teach::after { content: '☝️ geser di sini'; position: absolute; left: 8vh; bottom: 14vh; font-size: 4vh; font-weight: 700; color: #fff; -webkit-text-stroke: 0.4vh var(--ink); paint-order: stroke fill; animation: teachdrag 1.4s ease-in-out infinite; pointer-events: none; }
 @keyframes teachdrag { 50% { transform: translate(6vh, -3vh); } }
+
+/* =========================================================
+   Kampung Hijau: murajaah & panggung Porseni
+   ========================================================= */
+.mj { position: absolute; inset: 0; }
+.mj .run { position: absolute; top: 4vh; right: 3vw; }
+.mj-title { position: absolute; left: 3vw; top: 4vh; background: var(--cream); border: 0.6vh solid var(--ink); border-radius: 2vh; box-shadow: 0 0.8vh 0 var(--ink); padding: 1.2vh 2.4vh; animation: popin 0.3s ease-out; }
+.mj .ttl { font-weight: 700; font-size: 3.4vh; }
+.mj .sub { font-size: 2.4vh; font-weight: 700; opacity: 0.75; }
+.mj-banner { position: absolute; left: 50%; top: 5vh; transform: translateX(-50%); background: #f4c430; border: 0.6vh solid var(--ink); border-radius: 1.6vh; padding: 0.6vh 4vh; font-weight: 700; font-size: 5vh; box-shadow: 0 0.8vh 0 var(--ink); letter-spacing: 0.4vh; white-space: nowrap; }
+.mj-panel { position: absolute; left: 2vw; right: 2vw; bottom: 2vh; height: 44vh; display: flex; gap: 2vh; }
+.mj-left, .mj-right { background: var(--cream); border: 0.7vh solid var(--ink); border-radius: 2.6vh; box-shadow: 0 1vh 0 var(--ink); padding: 1.8vh 2.4vh; display: flex; flex-direction: column; gap: 1.2vh; min-width: 0; }
+.mj-left { flex: 1.05; justify-content: center; }
+.mj-right { flex: 1.2; justify-content: space-between; }
+.mj-right.names { display: grid; grid-template-rows: 1fr 1fr 1fr; gap: 1.4vh; }
+.mj-right.center { align-items: center; justify-content: center; }
+.mj .q { font-size: 3.2vh; font-weight: 700; }
+.mj .q.big { font-size: 5vh; }
+.mj .latin { font-size: 3.8vh; font-weight: 700; font-style: italic; line-height: 1.2; }
+.mj .latin.big { font-size: 4.6vh; }
+.mj .blank { display: inline-block; min-width: 12vh; border-bottom: 0.6vh solid var(--red); color: var(--red); text-align: center; font-style: normal; }
+.mj-play { font: inherit; display: flex; align-items: center; gap: 1.6vh; background: #fff; border: 0.5vh solid var(--ink); border-radius: 2vh; padding: 1.2vh 1.8vh; text-align: left; cursor: pointer; color: var(--ink); }
+.mj-play b { width: 8vh; height: 8vh; border-radius: 50%; background: #3b8ee8; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 4vh; border: 0.5vh solid var(--ink); box-shadow: 0 0.6vh 0 var(--ink); flex: none; }
+.mj-play.playing b { background: #45b04a; animation: grow 0.8s infinite; }
+.mj-play .lbl { font-size: 3vh; font-weight: 700; }
+.mj .wave { display: flex; gap: 0.6vh; align-items: center; height: 7vh; }
+.mj .wave i { width: 1.1vh; height: 30%; background: #3b8ee8; border-radius: 1vh; }
+.mj-play.playing .wave i { animation: wave 0.6s ease-in-out infinite; }
+.mj .wave i:nth-child(3n) { animation-delay: -0.2s; height: 70%; }
+.mj .wave i:nth-child(3n + 1) { animation-delay: -0.4s; height: 50%; }
+@keyframes wave { 50% { transform: scaleY(1.8); } }
+.mj-opt { display: flex; align-items: stretch; gap: 1.2vh; flex: 1; }
+.mj-opt .spk { flex: none; width: 9vh; font-size: 3.6vh; border: 0.55vh solid var(--ink); border-radius: 2vh; background: #fff; box-shadow: 0 0.7vh 0 var(--ink); cursor: pointer; }
+.mj-opt .spk.playing { background: #b8f0b0; }
+.mj-opt .pickopt { flex: 1; font: inherit; font-weight: 700; font-style: italic; font-size: 3.2vh; color: #fff; text-align: left; padding: 0.8vh 1.8vh; border: 0.55vh solid var(--ink); border-radius: 2vh; box-shadow: 0 0.7vh 0 var(--ink); text-shadow: 0 0.3vh 0 rgba(0, 0, 0, 0.3); cursor: pointer; line-height: 1.15; }
+.mj-opt.c0 .pickopt, .mj-name.c0 { background: #3b8ee8; }
+.mj-opt.c1 .pickopt, .mj-name.c1 { background: #45b04a; }
+.mj-opt.c2 .pickopt, .mj-name.c2 { background: #9a5ae0; }
+.mj-opt.right .pickopt, .mj-name.right { background: var(--yellow) !important; color: var(--ink); text-shadow: none; }
+.mj-opt.wrong .pickopt, .mj-name.wrong { background: #b9b2a2 !important; }
+.mj-name { font: inherit; border: 0.6vh solid var(--ink); border-radius: 2vh; box-shadow: 0 0.8vh 0 var(--ink); color: #fff; font-weight: 700; font-size: 4.6vh; text-shadow: 0 0.4vh 0 rgba(0, 0, 0, 0.3); cursor: pointer; }
+.mj-name.it { font-style: italic; }
+.mj button:disabled { cursor: default; }
+.mj-try { font-size: 3vh; font-weight: 700; color: var(--red); }
+.mj .slots { display: flex; flex-direction: column; gap: 0.8vh; }
+.mj .slot { display: flex; align-items: center; gap: 1.2vh; border: 0.45vh dashed var(--ink); border-radius: 1.6vh; padding: 0.4vh 1.2vh; min-height: 4.8vh; font-size: 2.8vh; font-weight: 700; font-style: italic; background: #fff; }
+.mj .slots.tight .slot { min-height: 3.6vh; font-size: 2.3vh; padding: 0.2vh 1vh; }
+.mj .slot.ok { border-style: solid; background: #d8f5c8; }
+.mj .slot em { font-style: normal; width: 4vh; height: 4vh; border-radius: 50%; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2.2vh; flex: none; }
+.mj .cards { display: flex; flex-wrap: wrap; gap: 1vh; align-content: flex-start; overflow: auto; }
+.mj .card2 { font: inherit; border: 0.5vh solid var(--ink); border-radius: 1.6vh; box-shadow: 0 0.6vh 0 var(--ink); padding: 0.8vh 1.4vh; font-size: 2.6vh; font-weight: 700; font-style: italic; background: #ffe066; cursor: pointer; color: var(--ink); text-align: left; }
+.mj .card2.used { visibility: hidden; }
+.mj .card2.shake { animation: shakex 0.4s; background: #ffb3a8; }
+
+/* Pilih wilayah di layar judul */
+.title .regions { margin-top: auto; margin-bottom: 7vh; display: flex; gap: 3vh; }
+.title .regions .btn { animation: bob 1.2s ease-in-out infinite; display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.title .regions .btn small { font-size: 2.6vh; opacity: 0.9; margin-top: 0.4vh; }
+.title .regions .btn:nth-child(2) { animation-delay: -0.6s; }
+.title .regions .btn:disabled { filter: grayscale(0.8); opacity: 0.7; animation: none; }
+.bd canvas.kid { width: 8vh; height: 10.4vh; image-rendering: pixelated; }
+.title .regions .btn { margin: 0; }
+.mj-right.names { justify-content: stretch; align-content: stretch; justify-items: stretch; }
+.mj-right.names > button { width: 100%; }
+.mj.stage-on .mj-panel { height: 50vh; }
+.mj .slots.tight { gap: 0.5vh; }
+.mj .slots.tight .slot { min-height: 3.4vh; font-size: 2.1vh; padding: 0.1vh 1vh; }
+.mj .slots.tight .slot em { width: 3.2vh; height: 3.2vh; font-size: 1.8vh; }
+.mj .cards .card2 { font-size: 2.3vh; padding: 0.6vh 1.2vh; }
