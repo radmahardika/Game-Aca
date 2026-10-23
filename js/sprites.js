@@ -168,7 +168,7 @@
   // ---------- Warga desa ----------
   function buildPerson(o) {
     const w = 16, h = 24, g = grid(w, h);
-    const pal = Object.assign({}, PAL, { H: o.headColor, c: o.shirt, q: o.pants, s: o.skin || PAL.s, x: o.accent || '#ffffff' });
+    const pal = Object.assign({}, PAL, { H: o.headColor, c: o.shirt, q: o.pants, s: o.skin || PAL.s, x: o.accent || '#ffffff', h: o.hair || PAL.h });
     for (let y = 0; y < h; y++)
       for (let x = 0; x < w; x++) {
         if (ell(7.5, 7, 3.6, 3.6, x, y)) g[y][x] = 's';
@@ -262,6 +262,30 @@
     '..kyykyyk..',
     '.kyyk.kyyk.',
     '.kkk...kkk.',
+  ];
+  const CHICK = [
+    '..kkkk..',
+    '.kyyyyk.',
+    'kyyeyyyk',
+    'kyyyyyoo',
+    'kyyyyyk.',
+    '.kyyyyk.',
+    '..kkkk..',
+    '..o..o..',
+  ];
+  const HYDRANT = [
+    '...kkkk...',
+    '..krrrrk..',
+    '.krrrrrrk.',
+    '.kkkkkkkk.',
+    'kkrrrrrrkk',
+    'kwrrrrrrwk',
+    'kkrrrrrrkk',
+    '.krrrrrrk.',
+    '.krrRrrrk.',
+    '.krrrrrrk.',
+    '.kRRRRRRk.',
+    'kkkkkkkkkk',
   ];
   const OBJ_PAL = Object.assign({}, PAL, {
     O: '#f7c66b', o: '#d98a2b', L: '#59b8ff', B: '#2f7fd1', T: '#a0652d', t: '#c98a45', b: '#6d6d6d', g: '#a8a8a8', y: '#f4c430', r: '#e8451c',
@@ -472,6 +496,10 @@
     spr.budi = buildPerson({ head: 'chef', headColor: '#fff', shirt: '#ffffff', pants: '#5a6b8a', apron: true, accent: '#f4c430', mustache: true });
     spr.joko = buildPerson({ head: 'cap', headColor: '#2f7fd1', shirt: '#3fa34d', pants: '#3a4a6a' });
     spr.kades = buildPerson({ head: 'peci', headColor: '#1f1f1f', shirt: '#b5652a', pants: '#2a2a2a', batik: true, accent: '#f4c430', mustache: true });
+    spr.siti = buildPerson({ head: 'hijab', headColor: '#3fa34d', shirt: '#9fe08a', pants: '#2f6b2a' });
+    spr.udin = buildPerson({ head: 'cap', headColor: '#a0652d', shirt: '#f2e6c9', pants: '#6d5a4a', hair: '#dcdcdc', mustache: true });
+    spr.chick = toCanvas(CHICK, Object.assign({}, OBJ_PAL, { y: '#ffe066', o: '#f08a1a' }));
+    spr.hydrant = toCanvas(HYDRANT, Object.assign({}, OBJ_PAL, { r: '#e8241c', R: '#9e1a14', w: '#dddddd' }));
     spr.bread = toCanvas(BREAD, OBJ_PAL);
     spr.bucket = toCanvas(BUCKET, OBJ_PAL);
     spr.drop = toCanvas(DROP, OBJ_PAL);
@@ -485,6 +513,8 @@
       buildBadge('#e8451c', '#ff9a6a'),
       buildBadge('#c98a45', '#f0c07a'),
       buildBadge('#2fa6b8', '#8ce0ea'),
+      buildBadge('#3fa34d', '#9fe08a'),
+      buildBadge('#8a4fd8', '#c9a6f5'),
       buildBadge('#e0a81e', '#fff0a0'),
     ];
 
@@ -551,6 +581,8 @@
     I.cat = iconURL(spr.cat);
     I.fire = iconURL(spr.fireIcon);
     I.bread = iconURL(spr.bread);
+    I.chick = iconURL(spr.chick, 8);
+    I.hydrant = iconURL(spr.hydrant);
     I.bucket = iconURL(spr.bucket);
     I.crown = iconURL(spr.crown);
     I.drop = iconURL(spr.drop);

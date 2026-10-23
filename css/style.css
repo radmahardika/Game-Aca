@@ -585,7 +585,7 @@ body.portrait #rotate { display: flex; }
 .moves {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 1.6vh;
   background: var(--cream);
   border: 0.7vh solid var(--ink);
@@ -594,7 +594,7 @@ body.portrait #rotate { display: flex; }
   padding: 1.6vh;
 }
 .moves.off { opacity: 0.5; }
-.moves .ans { width: auto; height: auto; font-size: 7.5vh; }
+.moves .ans { width: auto; height: auto; font-size: 9vh; }
 .moves .ans:nth-child(3) { background: #9a5ae0; }
 .moves .help {
   font: inherit;

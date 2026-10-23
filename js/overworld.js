@@ -25,11 +25,15 @@
   const PILE = [25, 16];
   const TRUCK = { x: 26, y: 7, w: 4, h: 2 };
   const BOSS_TILE = [15, 7];
+  const COOP = { x: 5, y: 2, w: 2, h: 2 };
+  const HYDRANT = [20, 12];
   const NPCS = {
     ani: { x: 9, y: 15 },
     budi: { x: 7, y: 8 },
     joko: { x: 25, y: 8 },
     kades: { x: 16, y: 7 },
+    siti: { x: 7, y: 3 },
+    udin: { x: 21, y: 12 },
   };
 
   const ground = [];
@@ -75,9 +79,9 @@
     const g = ground[y][x];
     if (g === 'T' || g === 'w' || g === '#') return true;
     if (BUILD.some((b) => inRect(x, y, b))) return true;
-    if (inRect(x, y, TRUCK)) return true;
+    if (inRect(x, y, TRUCK) || inRect(x, y, COOP)) return true;
     const at = (p) => p[0] === x && p[1] === y;
-    if (at(CAT_TREE) || at(SIGN) || at(FLAG) || at(PILE)) return true;
+    if (at(CAT_TREE) || at(SIGN) || at(FLAG) || at(PILE) || at(HYDRANT)) return true;
     if (Object.values(NPCS).some((n) => n.x === x && n.y === y)) return true;
     if (W.bossActive() && at(BOSS_TILE)) return true;
     return false;
@@ -90,6 +94,8 @@
     if (at(CAT_TREE)) return 'ani';
     if (at(PILE)) return 'api';
     if (inRect(x, y, TRUCK)) return 'joko';
+    if (inRect(x, y, COOP)) return 'siti';
+    if (at(HYDRANT)) return 'udin';
     if (at(SIGN)) return 'papan';
     if (W.bossActive() && at(BOSS_TILE)) return 'raja';
     const b = BUILD.find((bb) => inRect(x, y, bb));
@@ -357,7 +363,7 @@
     // ketuk pada bagian atas sprite NPC juga dihitung
     let id = thingAt(tx, ty);
     let target = [tx, ty];
-    if (!id && thingAt(tx, ty + 1) && ['ani', 'budi', 'joko', 'kades', 'raja'].includes(thingAt(tx, ty + 1))) {
+    if (!id && thingAt(tx, ty + 1) && ['ani', 'budi', 'joko', 'kades', 'raja', 'siti', 'udin'].includes(thingAt(tx, ty + 1))) {
       id = thingAt(tx, ty + 1);
       target = [tx, ty + 1];
     }
@@ -473,6 +479,37 @@
       }
     } });
 
+    // kandang ayam & anak ayam
+    items.push({ y: (COOP.y + COOP.h) * T - 1, f: () => {
+      const x = COOP.x * T, by = (COOP.y + COOP.h) * T;
+      shadow(ctx, x + 16, by, 14);
+      px(ctx, x + 1, by - 18, 30, 18, '#2b1d1a');
+      px(ctx, x + 2, by - 17, 28, 16, '#c98a45');
+      for (let i = 0; i < 4; i++) px(ctx, x + 2, by - 15 + i * 4, 28, 1, '#a0652d');
+      px(ctx, x - 1, by - 24, 34, 7, '#2b1d1a');
+      px(ctx, x, by - 23, 32, 5, '#d63c2f');
+      const open = !G.save.solved.ayam;
+      px(ctx, x + 11, by - 11, 10, 10, '#2b1d1a');
+      px(ctx, x + 12, by - 10, 8, 9, open ? '#4a3426' : '#a0652d');
+      if (!open) for (let i = 0; i < 3; i++) ctx.drawImage(G.spr.chick, x + 3 + i * 9, by - 30 + (Math.sin(t * 4 + i) > 0.7 ? -1 : 0));
+    } });
+    if (!G.save.solved.ayam) {
+      [[4, 4], [7, 1], [8, 4], [3, 2], [9, 2]].forEach(([cx, cy], i) => {
+        const wx = cx * T + 4 + Math.sin(t * 1.3 + i * 2) * 5, wy = cy * T + 8 + Math.cos(t * 1.1 + i) * 3;
+        items.push({ y: wy + 7, f: () => ctx.drawImage(G.spr.chick, R(wx), R(wy) + (Math.sin(t * 9 + i) > 0.5 ? -1 : 0)) });
+      });
+    }
+
+    // hidran
+    items.push({ y: HYDRANT[1] * T + 15, f: () => {
+      shadow(ctx, HYDRANT[0] * T + 8, HYDRANT[1] * T + 15, 5);
+      put(ctx, G.spr.hydrant, HYDRANT[0] * T + 8, HYDRANT[1] * T + 15);
+      if (!G.save.solved.hidran && Math.random() < 0.6) {
+        G.fx.add({ x: HYDRANT[0] * T + 3, y: HYDRANT[1] * T + 6, vx: -20 - Math.random() * 15, vy: -30 - Math.random() * 20, g: 120, life: 0.7, color: Math.random() < 0.3 ? '#d4f1ff' : '#4fb3ff', size: 2 });
+        G.fx.add({ x: HYDRANT[0] * T + 13, y: HYDRANT[1] * T + 6, vx: 20 + Math.random() * 15, vy: -30 - Math.random() * 20, g: 120, life: 0.7, color: Math.random() < 0.3 ? '#d4f1ff' : '#4fb3ff', size: 2 });
+      }
+    } });
+
     // tiang bendera
     items.push({ y: FLAG[1] * T + 15, f: () => {
       const x = FLAG[0] * T + 7, by = FLAG[1] * T + 15;
@@ -484,7 +521,7 @@
     } });
 
     // warga
-    const need = { ani: 'kucing', budi: 'roti', joko: 'truk' };
+    const need = { ani: 'kucing', budi: 'roti', joko: 'truk', siti: 'ayam', udin: 'hidran' };
     for (const [id, n] of Object.entries(NPCS)) {
       items.push({ y: n.y * T + 15, f: () => {
         shadow(ctx, n.x * T + 8, n.y * T + 15);

@@ -23,6 +23,7 @@
       const g = geo();
       if (B.p.enemy === 'truk') return { x: g.ex - 8, y: g.ey - 30 };
       if (B.p.enemy === 'roti') return { x: g.ex, y: g.ey - 24 };
+      if (B.p.enemy === 'hidran') return { x: g.ex, y: g.ey - 10 };
       return { x: g.ex, y: g.ey - 14 };
     };
     S.draw = function (ctx, t, dt) {
@@ -66,6 +67,36 @@
       } else if (B.p.enemy === 'truk') {
         S.fill += (S.fillT - S.fill) * Math.min(1, dt * 3);
         G.side.truck(ctx, g.ex - 30, g.ey + 4, S.fill, t, S.lights);
+      } else if (B.p.enemy === 'ayam') {
+        // kandang di kanan, anak ayam berlarian lalu masuk kandang
+        const kx = g.ex + 10, kb = g.ey + 2;
+        px(ctx, kx, kb - 18, 26, 18, '#2b1d1a');
+        px(ctx, kx + 1, kb - 17, 24, 16, '#c98a45');
+        px(ctx, kx - 2, kb - 24, 30, 7, '#2b1d1a');
+        px(ctx, kx - 1, kb - 23, 28, 5, '#d63c2f');
+        px(ctx, kx + 8, kb - 11, 10, 10, '#2b1d1a');
+        px(ctx, kx + 9, kb - 10, 8, 9, '#4a3426');
+        if (!S.chicks) {
+          const n = B.qs[0].b; // jumlah anak ayam di luar = angka di soal
+          S.chicks = Array.from({ length: n }, (_, i) => ({ bx: g.ex - 38 + (i % 5) * 11, x: g.ex - 38 + (i % 5) * 11, y: g.ey - 4 + Math.floor(i / 5) * 7 + (i % 2) * 2, i }));
+        }
+        S.chicks.forEach((c) => {
+          if (c.home) return;
+          if (S.gather) {
+            c.x += (kx + 13 - c.x) * Math.min(1, dt * (2 + c.i * 0.4));
+            c.y += (kb - 4 - c.y) * Math.min(1, dt * (2 + c.i * 0.4));
+            if (Math.abs(c.x - kx - 13) < 2) c.home = true;
+          } else c.x = c.bx + Math.sin(t * 2 + c.i * 1.7) * 2;
+          const hopc = Math.sin(t * 10 + c.i) > 0.4 ? -2 : 0;
+          G.drawSprite(ctx, G.spr.chick, c.x, c.y + hopc, Math.sin(t + c.i) > 0);
+        });
+      } else if (B.p.enemy === 'hidran') {
+        const hyd = G.spr.hydrant;
+        ctx.drawImage(hyd, g.ex - hyd.width, g.ey + 2 - hyd.height * 2, hyd.width * 2, hyd.height * 2);
+        if (B.left > 0) for (let i = 0; i < 4; i++) {
+          const side = i % 2 ? 1 : -1;
+          G.fx.add({ x: g.ex + side * 9, y: g.ey - 12, vx: side * (25 + Math.random() * 25), vy: -40 - Math.random() * 30, g: 140, life: 0.6, color: Math.random() < 0.3 ? '#d4f1ff' : '#4fb3ff', size: 2 });
+        }
       } else if (B.p.enemy === 'pohon') {
         G.side.tree(ctx, g.ex + 8, g.ey + 2, 30, 16);
         px(ctx, g.ex - 6, g.ey - 33, 14, 3, '#8a5a2b');
@@ -105,53 +136,6 @@
       ctx.fillRect(R(cx - hw), R(cy + y), hw * 2 + 1, 1);
     }
   }
-
-  // ---------- Bantuan visual (ten-frame yang bisa diketuk) ----------
-  G.visualFrames = function (q, kind, interactive) {
-    const wrap = el('<div class="frames"></div>');
-    const img = kind && kind !== 'dot' ? G.icons[kind] : null;
-    let count = 0;
-    const cell = (cls) => {
-      const c = el(`<div class="cell ${cls}">${img ? `<img src="${img}" alt="">` : '<i></i>'}</div>`);
-      if (interactive && cls.indexOf('gone') < 0) {
-        c.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (c.classList.contains('counted')) return;
-          count++;
-          c.classList.add('counted');
-          c.appendChild(el(`<b class="cnum">${count}</b>`));
-          G.sfx.count(count);
-        });
-      }
-      return c;
-    };
-    if (q.op === '×') {
-      for (let g = 0; g < q.a; g++) {
-        const grp = el('<div class="group"></div>');
-        for (let k = 0; k < q.b; k++) grp.appendChild(cell('cb'));
-        wrap.appendChild(grp);
-      }
-      wrap.classList.add('groups');
-      return wrap;
-    }
-    const items = [];
-    if (q.op === '+') {
-      for (let k = 0; k < q.a; k++) items.push('ca');
-      for (let k = 0; k < q.b; k++) items.push('cb');
-    } else {
-      for (let k = 0; k < q.a; k++) items.push(k >= q.a - q.b ? 'ca gone' : 'ca');
-    }
-    const frames = Math.ceil(items.length / 10);
-    for (let f = 0; f < frames; f++) {
-      const fr = el('<div class="tenframe"></div>');
-      for (let k = 0; k < 10; k++) {
-        const it = items[f * 10 + k];
-        fr.appendChild(it ? cell(it) : el('<div class="cell empty"></div>'));
-      }
-      wrap.appendChild(fr);
-    }
-    return wrap;
-  };
 
   // ---------- Transisi ----------
   G.wipe = function (mid) {
@@ -227,24 +211,18 @@
     m.classList.toggle('off', !q);
     if (!q) return;
     q.choices.forEach((c) => m.appendChild(el(`<button class="ans" data-v="${c}">${c}</button>`)));
-    m.appendChild(el('<button class="help">🦡<span>Bantuan<br>Ara</span></button>'));
   }
 
   function askQ(B) {
     if (current !== B) return;
     const q = B.qs[B.qi];
-    let wrongHere = 0, locked = false;
+    let locked = false;
     say(B, B.p.prompt(q), false, q.eq);
     moves(B, q);
     const dots = B.box.querySelectorAll('.pbox .qprog span');
     dots.forEach((d, i) => (d.className = i < B.qi ? 'ok' : i === B.qi ? 'now' : ''));
     const m = $('.moves', B.box);
-    if (!G.save.tut) {
-      const btn = [...m.querySelectorAll('.ans')].find((b) => +b.dataset.v === q.ans);
-      btn.appendChild(el('<span class="hand">👆</span>'));
-      $('.say', B.box).textContent = 'Ketuk jawaban yang benar!';
-    }
-    $('.help', m).addEventListener('click', (e) => { e.stopPropagation(); G.sfx.tap(); openHelp(B, q, 'Ketuk titiknya satu per satu, lalu hitung!'); });
+    if (!G.save.tut) $('.say', B.box).textContent = 'Hitung dulu, lalu ketuk jawabanmu!';
     m.querySelectorAll('.ans').forEach((b) => b.addEventListener('click', (e) => {
       e.stopPropagation();
       if (locked || b.disabled) return;
@@ -252,7 +230,6 @@
       if (v === q.ans) {
         locked = true;
         G.save.tut = true;
-        closeHelp(B);
         b.classList.add('right');
         m.querySelectorAll('button').forEach((x) => (x.disabled = x !== b));
         G.sfx.correct();
@@ -266,35 +243,14 @@
           else win(B);
         }, 1600);
       } else {
-        wrongHere++;
         B.mistakes++;
         b.classList.add('wrong');
         b.disabled = true;
         G.sfx.wrong();
         taunt(B);
-        const how = q.op === '+' ? 'Ketuk titiknya satu per satu, hitung semuanya!'
-          : q.op === '−' ? 'Yang dicoret sudah padam. Hitung yang tersisa!'
-          : `Ada ${q.a} kelompok, tiap kelompok ${q.b}. Hitung semuanya!`;
         $('.say', B.box).textContent = G.TRY[Math.floor(Math.random() * G.TRY.length)];
-        openHelp(B, q, how);
-        if (wrongHere >= 2) [...m.querySelectorAll('.ans')].find((x) => +x.dataset.v === q.ans).classList.add('glow');
       }
     }));
-  }
-
-  function openHelp(B, q, text) {
-    closeHelp(B);
-    const vis = typeof B.p.visual === 'function' ? B.p.visual(q) : B.p.visual;
-    const h = el(`<div class="helppop"><div class="hhead"><div class="hara"></div><div class="htext">${text}</div><button class="btn small grey hx">✕</button></div><div class="hvis"></div></div>`);
-    $('.hara', h).appendChild(G.portrait('ara', 30));
-    $('.hvis', h).appendChild(G.visualFrames(q, vis || 'dot', true));
-    $('.hx', h).addEventListener('click', (e) => { e.stopPropagation(); G.sfx.tap(); closeHelp(B); });
-    h.addEventListener('click', (e) => e.stopPropagation());
-    B.box.appendChild(h);
-  }
-  function closeHelp(B) {
-    const h = $('.helppop', B.box);
-    h && h.remove();
   }
 
   function praise(text) {
@@ -313,6 +269,15 @@
     const S = B.scene;
     const tg = S.target();
     const progress = (B.total - B.left + 1) / B.total;
+    if (B.p.enemy === 'ayam' || B.p.enemy === 'hidran') {
+      S.hop = 1;
+      G.sfx.step();
+      if (B.p.enemy === 'ayam') S.gather = true;
+      G.fx.burst(tg.x, tg.y - 6, 10, ['#ffd23f', '#ffffff'], 35, 40);
+      B.left--;
+      setBar(B);
+      return;
+    }
     if (B.p.enemy === 'pohon') {
       S.hop = 1;
       G.sfx.step();
@@ -336,11 +301,11 @@
 
   function taunt(B) {
     const S = B.scene, tg = S.target();
-    const word = { pohon: 'Meong!', truk: 'Byur!', roti: 'Panas!', raja: 'HOHOHO!' }[B.p.enemy] || 'Hihihi!';
+    const word = { pohon: 'Meong!', truk: 'Byur!', roti: 'Panas!', raja: 'HOHOHO!', ayam: 'Ciap ciap!', hidran: 'Byur!' }[B.p.enemy] || 'Hihihi!';
     if (B.p.enemy === 'api' || B.p.enemy === 'raja') { S.mood = 'laugh'; S.moodT = 1.2; G.sfx.laugh(); }
     else if (B.p.enemy === 'pohon') G.sfx.meow();
     else G.sfx.splash();
-    floatAt(word, tg.x, tg.y - 26, B.p.enemy === 'truk' ? '#2f7fd1' : '#e8451c');
+    floatAt(word, tg.x, tg.y - 26, ['truk', 'hidran'].includes(B.p.enemy) ? '#2f7fd1' : B.p.enemy === 'ayam' ? '#c97a00' : '#e8451c');
   }
 
   function win(B) {
@@ -369,6 +334,8 @@
       step();
     } else if (B.p.enemy === 'truk') {
       S.lights = true;
+    } else if (B.p.enemy === 'ayam' || B.p.enemy === 'hidran') {
+      G.fx.hearts(S.target().x, S.target().y - 10, 5);
     } else if (B.p.enemy !== 'roti') {
       S.mood = 'sad'; S.moodT = 99;
       const a = () => {

@@ -79,7 +79,7 @@
     const x = c.getContext('2d');
     x.imageSmoothingEnabled = false;
     const S = G.spr;
-    const pic = { aksa: S.aksa, ara: S.araWith(G.save.equip), ani: S.ani, budi: S.budi, joko: S.joko, kades: S.kades }[who];
+    const pic = { aksa: S.aksa, ara: S.araWith(G.save.equip), ani: S.ani, budi: S.budi, joko: S.joko, kades: S.kades, siti: S.siti, udin: S.udin }[who];
     if (pic) {
       const k = Math.max(1, Math.floor((size - 4) / Math.max(pic.width, pic.height)));
       const w = pic.width * k, h = pic.height * k;
@@ -197,11 +197,6 @@
         <button class="btn small grey" id="setel" aria-label="Pengaturan">⚙️</button>
       </div>
       <div class="quest"></div>
-      <div class="dpad">
-        <button data-d="up" class="u">▲</button><button data-d="left" class="l">◀</button>
-        <i class="c"></i>
-        <button data-d="right" class="r">▶</button><button data-d="down" class="d">▼</button>
-      </div>
       <button class="abtn">A<small>Bicara</small></button>
     </div>`);
     ui.appendChild(hud);
@@ -210,23 +205,6 @@
     tap($('#mus', hud), () => { G.save.music = !G.save.music; G.persist(); musLabel(); G.musicRefresh(); });
     tap($('#koleksi', hud), showCollection);
     tap($('#setel', hud), showSettings);
-    hud.querySelectorAll('.dpad button').forEach((b) => {
-      const d = b.dataset.d;
-      const down = (e) => {
-        e.preventDefault();
-        G.audioUnlock();
-        b.classList.add('on');
-        G.world.setHeld(d);
-      };
-      const up = () => {
-        b.classList.remove('on');
-        if (G.world.held === d) G.world.setHeld(null);
-      };
-      b.addEventListener('pointerdown', down);
-      b.addEventListener('pointerup', up);
-      b.addEventListener('pointerleave', up);
-      b.addEventListener('pointercancel', up);
-    });
     const ab = $('.abtn', hud);
     ab.addEventListener('pointerdown', (e) => { e.preventDefault(); G.audioUnlock(); ab.classList.add('on'); G.world.pressA(); });
     ab.addEventListener('pointerup', () => ab.classList.remove('on'));
@@ -275,7 +253,7 @@
       ]);
       return offer(P('daun'));
     }
-    const map = { ani: 'kucing', budi: 'roti', joko: 'truk' };
+    const map = { ani: 'kucing', budi: 'roti', joko: 'truk', siti: 'ayam', udin: 'hidran' };
     if (map[id]) offer(P(map[id]));
   };
 
@@ -308,8 +286,10 @@
         return dialog([{ who: 'ara', text: `Latihan selesai! Kamu dapat ${stars} bintang. Hebat!` }], backToWorld);
       }
       G.save.solved[p.id] = true;
-      G.save.acc[p.acc] = true;
-      G.save.equip[p.acc] = true;
+      if (p.acc) {
+        G.save.acc[p.acc] = true;
+        G.save.equip[p.acc] = true;
+      }
       G.persist();
       dialog(p.thanks, () => reward(p, stars));
     });
@@ -326,11 +306,11 @@
       <div class="stars big">${'<span class="on">★</span>'.repeat(stars)}${'<span>★</span>'.repeat(3 - stars)}</div>
       <div class="gifts">
         <div class="gift"><img class="spin" src="${G.icons.badges[idx]}" alt=""><span>Lencana<br><b>${p.badge}</b></span></div>
-        <div class="gift"><div class="araprev"></div><span>Ara dapat<br><b>${G.ACCESSORIES[p.acc]}</b></span></div>
+        ${p.acc ? `<div class="gift"><div class="araprev"></div><span>Ara dapat<br><b>${G.ACCESSORIES[p.acc]}</b></span></div>` : ''}
       </div>
       <button class="btn big green" id="lanjut">Lanjut</button>
     </div>`);
-    $('.araprev', c).appendChild(G.portrait('ara', 60));
+    if (p.acc) $('.araprev', c).appendChild(G.portrait('ara', 60));
     modal.appendChild(c);
     modal.classList.add('show');
     tap($('#lanjut', c), () => {

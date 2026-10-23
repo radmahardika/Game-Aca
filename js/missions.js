@@ -14,6 +14,8 @@
     api: { name: 'Api Jahil', color: '#e8451c' },
     raja: { name: 'Raja Api Jahil', color: '#b8240c' },
     papan: { name: 'Papan', color: '#8a5a2b' },
+    siti: { name: 'Bu Siti', color: '#3fa34d' },
+    udin: { name: 'Kakek Udin', color: '#7a7a7a' },
   };
 
   G.INTRO = [
@@ -22,7 +24,7 @@
     { who: 'aksa', text: 'Halo semuanya! Aku siap menolong!' },
     { who: 'ara', text: 'Gawat, Aksa! Banyak warga yang butuh bantuan hari ini!' },
     { who: 'ara', text: 'Cari warga yang ada tanda ❗ di atas kepalanya.' },
-    { who: 'ara', text: 'Jalan pakai tombol panah, atau ketuk tanah tujuanmu. Tekan tombol A untuk bicara!' },
+    { who: 'ara', text: 'Ketuk tanah untuk berjalan. Ketuk warga untuk bicara!' },
   ];
 
   G.BOSS_APPEAR = [
@@ -54,7 +56,6 @@
       bar: { label: 'Tangga', mode: 'fill', color: '#c98a45' },
       gens: [add10, add10, add10, add10, add10],
       prompt: () => 'Sambung tangganya!',
-      visual: 'rung',
       start: 'Si Oren terjebak di atas pohon!',
       win: 'Tangga sampai! Si Oren bisa turun!',
       ask: [
@@ -104,7 +105,6 @@
       bar: { label: 'Api', mode: 'drain', color: '#ff8c1a' },
       gens: [sub20, sub20, sub20, sub20, sub20],
       prompt: (q) => `Ada ${q.a} api. Padamkan ${q.b}. Sisa berapa?`,
-      visual: 'flame',
       start: 'Api kecil menyala di toko roti!',
       win: 'Semua api di toko roti padam!',
       ask: [
@@ -133,7 +133,6 @@
         q.op === '+' ? `Ada ${q.a} liter air. Tambah ${q.b} liter!`
         : q.op === '−' ? `Ada ${q.a} liter. Tumpah ${q.b} liter!`
         : `Ada ${q.a} ember. Tiap ember ${q.b} liter!`,
-      visual: (q) => (q.op === '×' ? 'drop' : null),
       start: 'Tangki air truk pemadam kosong!',
       win: 'Tangki air penuh!',
       ask: [
@@ -148,6 +147,46 @@
       after: [{ who: 'joko', text: 'Truk pemadam siap kapan saja!' }],
       badge: 'Ahli Air',
       acc: 'sepatu',
+    },
+    {
+      id: 'ayam',
+      title: 'Anak Ayam Lepas',
+      icon: 'chick',
+      npc: 'siti',
+      enemy: 'ayam',
+      enemyName: 'Anak Ayam Lepas',
+      bar: { label: 'Kandang', mode: 'fill', color: '#f4c430' },
+      gens: [add10],
+      prompt: (q) => `Ada ${q.a} anak ayam di kandang dan ${q.b} di luar. Semuanya berapa?`,
+      start: 'Anak ayam berlarian ke mana-mana!',
+      win: 'Semua anak ayam masuk kandang!',
+      ask: [
+        { who: 'siti', text: 'Aduh, pintu kandang terbuka! Anak ayamku lepas!' },
+        { who: 'aksa', text: 'Ayo kita hitung dan kumpulkan, Bu Siti!' },
+      ],
+      thanks: [{ who: 'siti', text: 'Anak ayamku lengkap lagi! Terima kasih, Aksa dan Ara!' }],
+      after: [{ who: 'siti', text: 'Ciap ciap! Anak ayamku senang sekali.' }],
+      badge: 'Sahabat Anak Ayam',
+    },
+    {
+      id: 'hidran',
+      title: 'Hidran Bocor',
+      icon: 'hydrant',
+      npc: 'udin',
+      enemy: 'hidran',
+      enemyName: 'Hidran Bocor',
+      bar: { label: 'Bocor', mode: 'drain', color: '#4fb3ff' },
+      gens: [sub20],
+      prompt: () => 'Putar kerannya! Jawab soal ini:',
+      start: 'Air hidran menyembur ke jalan!',
+      win: 'Hidran tertutup rapat!',
+      ask: [
+        { who: 'udin', text: 'Waduh, hidran air bocor! Jalan jadi licin!' },
+        { who: 'aksa', text: 'Serahkan pada kami, Kakek Udin!' },
+      ],
+      thanks: [{ who: 'udin', text: 'Hidrannya sudah rapat. Kalian anak hebat!' }],
+      after: [{ who: 'udin', text: 'Hidran ini penting untuk memadamkan api, lho!' }],
+      badge: 'Penjaga Hidran',
     },
   ];
 
@@ -190,5 +229,5 @@
   G.SIGN = [{ who: 'papan', text: '🏡 Selamat datang di Desa Ceria! Desa yang ramah dan ceria.' }];
 
   G.PRAISE = ['Hebat!', 'Pintar sekali!', 'Betul! Mantap!', 'Keren, Aksa!', 'Luar biasa!', 'Hore, benar!'];
-  G.TRY = ['Hampir! Ayo coba lagi.', 'Tidak apa-apa, kita hitung bareng!', 'Belum tepat. Kamu pasti bisa!'];
+  G.TRY = ['Belum tepat. Hitung lagi pelan-pelan ya!', 'Hampir! Coba hitung sekali lagi.', 'Belum benar. Kamu pasti bisa!'];
 })();
