@@ -114,19 +114,63 @@
       ctx.drawImage(ara, g.px - 34, g.py - ara.height * 2 + 2 + bounce * 0.7, ara.width * 2, ara.height * 2);
       const ak = G.spr.aksaBack;
       const ax = g.px + 2, ay = g.py - ak.height * 2 + 2 + bounce;
+      const hose = HOSE.includes(B.p.enemy);
       ctx.drawImage(ak, ax, ay, ak.width * 2, ak.height * 2);
-      if (S.spray > 0) {
-        S.spray -= dt;
-        const nx = ax + 28, ny = ay + 26;
-        px(ctx, nx - 4, ny, 8, 4, '#4a4a4a');
-        px(ctx, nx + 4, ny - 2, 4, 7, '#f4c430');
-        const tg = S.target();
-        for (let i = 0; i < 3; i++) G.fx.stream(nx + 8, ny, tg.x + (Math.random() - 0.5) * 8, tg.y + (Math.random() - 0.5) * 6, 0.5);
+      if (hose) {
+        drawHoseLine(ctx, ax, ay, g.py);
+        const tip = drawHoseHands(ctx, ax, ay);
+        if (S.spray > 0) {
+          S.spray -= dt;
+          const tg = S.target();
+          for (let i = 0; i < 3; i++) G.fx.stream(tip.x, tip.y, tg.x + (Math.random() - 0.5) * 8, tg.y + (Math.random() - 0.5) * 6, 0.5);
+        }
       }
       G.fx.draw(ctx);
     };
     S.ownsFx = true;
     return S;
+  }
+
+  // Selang pemadam: lawan yang disemprot air.
+  const HOSE = ['api', 'roti', 'raja', 'truk'];
+
+  // Selang menjuntai dari tangan Aksa di sisi kanan tubuh sampai ke tanah.
+  function drawHoseLine(ctx, ax, ay, py) {
+    const p0 = [ax + 58, py + 12], p1 = [ax + 44, ay + 38], p2 = [ax + 38, ay + 20];
+    for (let i = 0; i <= 40; i++) {
+      const t = i / 40, u = 1 - t;
+      const x = u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0];
+      const y = u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1];
+      ctx.fillStyle = '#2b1d1a';
+      ctx.fillRect(R(x - 2), R(y - 2), 5, 5);
+      ctx.fillStyle = '#e0a81e';
+      ctx.fillRect(R(x - 1), R(y - 1), 3, 2);
+    }
+  }
+
+  // Lengan terangkat memegang ujung selang di depan bahu; kembalikan posisi ujung semprotan.
+  function drawHoseHands(ctx, ax, ay) {
+    const box = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(R(x), R(y), w, h); };
+    // tutup tangan yang menggantung di samping badan
+    box(ax + 2, ay + 30, 2, 2, '#d63c2f');
+    box(ax + 28, ay + 30, 2, 2, '#d63c2f');
+    // lengan kanan: dari bahu naik ke depan
+    box(ax + 26, ay + 18, 12, 8, '#2b1d1a');
+    box(ax + 27, ay + 19, 10, 6, '#d63c2f');
+    box(ax + 27, ay + 22, 10, 2, '#f4c430');
+    // lengan kiri menyilang memegang selang
+    box(ax + 14, ay + 18, 14, 7, '#2b1d1a');
+    box(ax + 15, ay + 19, 12, 5, '#b8322a');
+    // sarung tangan
+    box(ax + 34, ay + 14, 8, 8, '#2b1d1a');
+    box(ax + 35, ay + 15, 6, 6, '#f4c430');
+    // ujung selang (nozzle) mengarah ke depan-kanan atas
+    box(ax + 39, ay + 9, 12, 7, '#2b1d1a');
+    box(ax + 40, ay + 10, 10, 5, '#b9b9b9');
+    box(ax + 40, ay + 10, 10, 1, '#e6e6e6');
+    box(ax + 49, ay + 9, 4, 7, '#2b1d1a');
+    box(ax + 50, ay + 10, 2, 5, '#d63c2f');
+    return { x: ax + 53, y: ay + 12 };
   }
 
   function ellipse(ctx, cx, cy, rx, ry, col) {
@@ -244,11 +288,22 @@
         }, 1600);
       } else {
         B.mistakes++;
+        locked = true;
         b.classList.add('wrong');
-        b.disabled = true;
+        m.querySelectorAll('button').forEach((x) => (x.disabled = true));
         G.sfx.wrong();
         taunt(B);
-        $('.say', B.box).textContent = G.TRY[Math.floor(Math.random() * G.TRY.length)];
+        $('.say', B.box).textContent = G.TRY[Math.floor(Math.random() * G.TRY.length)] + ' Ini soal baru!';
+        // ganti dengan soal baru yang berbeda supaya tidak bisa menebak
+        setTimeout(() => {
+          if (current !== B) return;
+          const gen = B.p.gens[B.qi % B.p.gens.length];
+          let nq, tries = 0;
+          do { nq = G.makeQuestions([gen])[0]; tries++; } while (nq.eq === q.eq && tries < 30);
+          B.qs[B.qi] = nq;
+          if (B.p.enemy === 'ayam') B.scene.chicks = null;
+          askQ(B);
+        }, 1800);
       }
     }));
   }

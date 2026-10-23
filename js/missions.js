@@ -229,5 +229,5 @@
   G.SIGN = [{ who: 'papan', text: '🏡 Selamat datang di Desa Ceria! Desa yang ramah dan ceria.' }];
 
   G.PRAISE = ['Hebat!', 'Pintar sekali!', 'Betul! Mantap!', 'Keren, Aksa!', 'Luar biasa!', 'Hore, benar!'];
-  G.TRY = ['Belum tepat. Hitung lagi pelan-pelan ya!', 'Hampir! Coba hitung sekali lagi.', 'Belum benar. Kamu pasti bisa!'];
+  G.TRY = ['Belum tepat.', 'Hampir!', 'Belum benar.'];
 })();
