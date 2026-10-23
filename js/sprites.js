@@ -580,6 +580,7 @@
     I.star = iconURL(spr.star);
     I.aksa = iconURL(spr.aksa);
     I.ara = iconURL(spr.ara);
+    I.araTruck = iconURL(spr.araDir({}).right[0]);
     I.badges = spr.badges.map((b) => iconURL(b));
   };
 })();

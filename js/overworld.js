@@ -90,6 +90,7 @@
   // Apa yang ada di petak ini (untuk tombol A / ketuk)?
   function thingAt(x, y) {
     const at = (p) => p[0] === x && p[1] === y;
+    if (W.ara.tx === x && W.ara.ty === y && !W.ara.moving) return 'ara';
     for (const [id, n] of Object.entries(NPCS)) if (n.x === x && n.y === y) return id;
     if (at(CAT_TREE)) return 'ani';
     if (at(PILE)) return 'api';
@@ -363,7 +364,7 @@
     // ketuk pada bagian atas sprite NPC juga dihitung
     let id = thingAt(tx, ty);
     let target = [tx, ty];
-    if (!id && thingAt(tx, ty + 1) && ['ani', 'budi', 'joko', 'kades', 'raja', 'siti', 'udin'].includes(thingAt(tx, ty + 1))) {
+    if (!id && thingAt(tx, ty + 1) && ['ani', 'budi', 'joko', 'kades', 'raja', 'siti', 'udin', 'ara'].includes(thingAt(tx, ty + 1))) {
       id = thingAt(tx, ty + 1);
       target = [tx, ty + 1];
     }

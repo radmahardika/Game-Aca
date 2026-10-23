@@ -1,13 +1,13 @@
 # Aksa si Pemadam Cilik 🚒
 
 Game petualangan pixel art untuk belajar berhitung (usia ±6 tahun).
-Aksa, pemadam kebakaran cilik, dan Ara, honey badger pemberani, menolong warga Desa Ceria dari ulah Api Jahil dengan menjawab soal berhitung.
+Aksa, pemadam kebakaran cilik, dan Ara, mobil pemadam kebakaran mini sahabatnya, menolong warga Desa Ceria dari ulah Api Jahil dengan menjawab soal berhitung.
 
 ## Isi Wilayah 1: Desa Ceria
 
-Dunia top-down ala Pokemon. Aksa berjalan ke 4 arah (tombol panah di layar atau ketuk tanah tujuan), Ara mengikuti di belakang. Warga yang butuh bantuan ditandai ❗, lalu tekan tombol **A** (atau ketuk warganya) untuk bicara. Semua soal dikerjakan dalam **battle**.
+Dunia top-down ala Pokemon. Ketuk tanah untuk berjalan, Ara mengikuti di belakang. Warga yang butuh bantuan ditandai ❗; ketuk warganya (atau tombol **A**) untuk bicara. Semua soal dikerjakan dalam **battle**.
 
-Empat masalah muncul bersamaan dan boleh diselesaikan dengan urutan bebas:
+Enam masalah muncul bersamaan dan boleh diselesaikan dengan urutan bebas:
 
 | Masalah | Warga | Materi |
 |---|---|---|
@@ -15,12 +15,15 @@ Empat masalah muncul bersamaan dan boleh diselesaikan dengan urutan bebas:
 | Api di Tumpukan Daun | Api Jahil | Penjumlahan ≤ 20 |
 | Toko Roti Terbakar | Pak Budi | Pengurangan ≤ 20 |
 | Tangki Truk Kosong | Pak Joko | Tambah/kurang + **1 soal perkalian** (hasil ≤ 15) |
+| Anak Ayam Lepas | Bu Siti | 1 soal penjumlahan ≤ 10 |
+| Hidran Bocor | Kakek Udin | 1 soal pengurangan ≤ 20 |
 
-Setelah keempatnya selesai, **Raja Api Jahil** muncul di depan Balai Desa sebagai boss terakhir (campuran tambah & kurang).
+Setelah keenamnya selesai, **Raja Api Jahil** muncul di depan Balai Desa sebagai boss terakhir (campuran tambah & kurang).
 
-- Tidak ada "kalah". Menu battle berisi 3 jawaban + **🦡 Bantuan Ara** (titik/ikon yang bisa diketuk satu per satu untuk menghitung). Kalau salah, bantuan terbuka otomatis. Kalau salah dua kali, jawaban yang benar akan berkedip.
+- Tidak ada "kalah". Battle berisi 3 pilihan jawaban. Kalau salah, soal langsung diganti soal baru supaya anak benar-benar menghitung, bukan menebak.
+- Ara (mobil pemadam mini) jadi asisten: setiap kali satu masalah selesai, saat game dibuka, atau saat Ara diketuk, Ara mengingatkan tinggal berapa warga lagi dan siapa saja.
 - Masalah yang sudah selesai bisa dimainkan lagi lewat **Latihan lagi** untuk mengejar 3 bintang.
-- Hadiah: lencana + aksesori Ara (helm, syal, kacamata, sepatu bot, jubah) yang bisa dipakai/dilepas di **Koleksi**.
+- Hadiah: lencana + aksesori Ara (sirene ganda, stiker bintang, kacamata keren, velg emas, bendera pahlawan) yang bisa dipakai/dilepas di **Koleksi**.
 - Musik latar chiptune (lagu desa & lagu battle) dan efek suara, bisa dimatikan dari tombol 🎵 atau ⚙️ Pengaturan. Tidak ada narasi suara.
 - Progres dan posisi Aksa tersimpan otomatis di perangkat.
 

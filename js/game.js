@@ -5,7 +5,7 @@
   const R = Math.round;
 
   // ---------- Simpan progres ----------
-  G.VERSION = 4;
+  G.VERSION = 5;
   const KEY = 'aksa-pemadam-v2';
   const fresh = () => ({ solved: {}, stars: {}, acc: {}, equip: {}, intro: false, tut: false, music: true, sfx: true, pos: null });
   function load() {
@@ -168,14 +168,14 @@
       G.wipe(() => {
         enterWorld();
         if (!G.save.intro) {
-          dialog(G.INTRO, () => {
+          dialog(G.INTRO.concat(araReminder()), () => {
             G.save.intro = true;
             G.persist();
             backToWorld();
             ui.classList.add('teach');
             setTimeout(() => ui.classList.remove('teach'), 6000);
           });
-        }
+        } else dialog([{ who: 'ara', text: 'Tin tin! Ayo lanjut menolong, Aksa!' }].concat(araReminder()), backToWorld);
       });
     });
   }
@@ -229,13 +229,26 @@
     }
   });
 
+  // Ara sebagai asisten: ingatkan berapa warga lagi yang perlu dibantu, dan siapa saja.
+  const WHO = { ani: 'Bu Ani', api: 'Api Jahil di tumpukan daun', budi: 'Pak Budi', joko: 'Pak Joko', siti: 'Bu Siti', udin: 'Kakek Udin' };
+  function araReminder() {
+    const sv = G.save.solved;
+    if (sv.raja) return [{ who: 'ara', text: 'Desa Ceria sudah aman semua. Kamu pahlawan, Aksa!' }];
+    const left = G.PROBLEMS.filter((p) => !sv[p.id]);
+    if (!left.length) return [{ who: 'ara', text: 'Semua warga sudah dibantu! Tinggal Raja Api Jahil di depan Balai Desa. Ayo!' }];
+    const names = left.map((p) => WHO[p.npc]);
+    const list = names.length === 1 ? names[0] : names.slice(0, -1).join(', ') + ', dan ' + names[names.length - 1];
+    const head = left.length === 1 ? 'Tinggal 1 warga lagi! Sedikit lagi, Aksa!' : `Tinggal ${left.length} warga lagi yang perlu kita bantu!`;
+    return [{ who: 'ara', text: head }, { who: 'ara', text: `Yang masih menunggu: ${list}. Cari tanda ❗ ya!` }];
+  }
+
   function updateQuest() {
     if (!hud) return;
     const q = $('.quest', hud);
     const sv = G.save.solved;
     if (sv.raja) q.innerHTML = '🏅 Desa Ceria aman!';
     else if (G.world.bossActive()) q.innerHTML = '⭐ Ke Balai Desa! <img src="' + G.icons.crown + '" alt="">';
-    else q.innerHTML = '<span>Tolong warga:</span>' + G.PROBLEMS.map((p) => `<span class="qi ${sv[p.id] ? 'ok' : ''}"><img src="${G.icons[p.icon]}" alt="">${sv[p.id] ? '<b>✓</b>' : ''}</span>`).join('');
+    else q.innerHTML = `<span class="qara"><img src="${G.icons.araTruck}" alt=""></span><span>Tinggal ${G.PROBLEMS.filter((p) => !sv[p.id]).length}:</span>` + G.PROBLEMS.map((p) => `<span class="qi ${sv[p.id] ? 'ok' : ''}"><img src="${G.icons[p.icon]}" alt="">${sv[p.id] ? '<b>✓</b>' : ''}</span>`).join('');
   }
 
   G.world.onInteract = function (id) {
@@ -243,6 +256,7 @@
     const P = (pid) => G.ALL.find((p) => p.id === pid);
     const sv = G.save.solved;
     if (id === 'papan') return dialog(G.SIGN, backToWorld);
+    if (id === 'ara') return dialog(araReminder(), backToWorld);
     if (id === 'kades') {
       const lines = sv.raja ? G.KADES.done : G.world.bossActive() ? G.KADES.boss : G.KADES.before;
       return dialog(lines, backToWorld);
@@ -318,6 +332,7 @@
     tap($('#lanjut', c), () => {
       closeModal();
       if (p.id !== 'raja' && G.world.bossActive()) return bossAppears();
+      if (p.id !== 'raja') return dialog([{ who: 'ara', text: 'Hebat, Aksa! Satu warga sudah tertolong!' }].concat(araReminder()), backToWorld);
       backToWorld();
       if (p.id === 'raja') G.fx.confetti(120);
     });
