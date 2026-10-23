@@ -642,3 +642,5 @@ body.portrait #rotate { display: flex; }
 .wipe.in i { transform: scaleX(1); }
 .wipe.out i { transform: scaleX(0); transition: transform 0.45s ease-out; }
 .bd em { font-style: normal; color: var(--yellow); -webkit-text-stroke: 0.2vh var(--ink); paint-order: stroke fill; font-size: 2.6vh; }
+
+.title .ver { position: absolute; right: 2vh; bottom: 1.5vh; font-size: 2.4vh; font-weight: 700; color: #fff; opacity: 0.85; text-shadow: 0 0.2vh 0 rgba(0, 0, 0, 0.4); }

@@ -5,6 +5,7 @@
   const R = Math.round;
 
   // ---------- Simpan progres ----------
+  G.VERSION = 4;
   const KEY = 'aksa-pemadam-v2';
   const fresh = () => ({ solved: {}, stars: {}, acc: {}, equip: {}, intro: false, tut: false, music: true, sfx: true, pos: null });
   function load() {
@@ -159,6 +160,7 @@
     const t = el(`<div class="title">
       <h1><span class="t1">Aksa</span><span class="t2">si Pemadam Cilik</span></h1>
       <button class="btn big red" id="play">▶ Main</button>
+      <div class="ver">versi ${G.VERSION}</div>
     </div>`);
     ui.appendChild(t);
     tap($('#play', t), () => {
