@@ -18,7 +18,10 @@
     n: '#262626', // badan Ara
     G: '#e4e4da', // punggung Ara
     g: '#9a9a92',
-    q: '#cfcfc4', // cakar
+    q: '#cfcfc4',
+    L: '#9fdcff', // kaca mobil Ara
+    B: '#3b7dd8', // lampu sirene biru
+    o: '#ffb347', // lampu belakang
     c: '#f39a2e', // kucing oranye
     C: '#c96f14',
   };
@@ -92,62 +95,49 @@
     '.kbbbbk..kbbbbk.',
     '.kkkkkk..kkkkkk.',
   ];
-  // ---------- Ara: honey badger pemberani (menghadap kanan) ----------
-  // ---------- Ara: honey badger pemberani (chibi, menghadap kanan) ----------
+  // ---------- Ara: mobil pemadam kebakaran mini (menghadap kanan) ----------
+  // Kaca depan = mata, gril = mulut. Dua baris kosong di atas untuk aksesori.
   const ARA = [
     '........................',
     '........................',
-    '............kkkkkk......',
-    '..........kkGGGGGGkk....',
-    '..kk.....kGGGGGGGGGGk...',
-    '.kGGk...kGGGGGGGGGGGGk..',
-    '.kGGGkkkGGGGGGGGGGGGGGk.',
-    '..kGGGGGGGGGGGGGGGGGGGGk',
-    '..kGGGGGGGGGGnnnnnnnnnnk',
-    '..kGGGGGGGGGnnnwwennnnnk',
-    '..kggggggggnnnnwwennnnnk',
-    '.knnnnnnnnnnnnnnpnnnnnek',
-    '.knnnnnnnnnnnnnnnnnnkkk.',
-    '.knnnnnnnnnnnnnnnnnk....',
-    '..knnnnnnnnnnnnnnnk.....',
-    '..knnkknnkkkknnkknnk....',
-    '..knnk.knk..knnk.knk....',
-    '..kqqk.kqk..kqqk.kqk....',
-    '..kkkk.kkk..kkkk.kkk....',
+    '...............kkkk.....',
+    '..............krrBBk....',
+    '..kkkkkkkkkkk.kkkkkkk...',
+    '..kgGgGgGgGgk.kLLLLLLk..',
+    '.kkkkkkkkkkkkkkLwwLLLLk.',
+    '.krrrrrrrrrrrrkLwekLLLk.',
+    '.krrrrrrrrrrrrkLLLLLLLk.',
+    '.kryyyyyyyyyyrkkkkkkkkkk',
+    '.krrrrrrrrrrrrrrrrrrrppk',
+    '.krrRRrrrrrrrrrrrrrrrrrk',
+    '.krkbbkrrrrrrrrrkbbkrrGk',
+    '.kkbbbbkkkkkkkkkbbbbkkkk',
+    '..bbGGbb.......bbGGbb...',
+    '..bbGGbb.......bbGGbb...',
+    '...bbbb.........bbbb....',
   ];
 
-  // Aksesori Ara, digambar di atas sprite Ara (koordinat grid yang sama).
-  const LEGS = [[3, 4], [8], [13, 14], [18]];
+  // Aksesori Ara (kunci lama dipertahankan agar progres tersimpan tetap berlaku):
+  // helm = Sirene Ganda, syal = Stiker Bintang, kacamata = Kacamata Keren,
+  // sepatu = Velg Emas, jubah = Bendera Pahlawan.
+  const INK = '#2b1d1a', GOLD = '#f4c430', LENS = '#1d2a3a', SHINE = '#7fd3ff';
+  const flag = (p, px0) => {
+    for (let y = 0; y <= 3; y++) p(px0, y, '#5a5a5a');
+    for (let x = 1; x <= 4; x++) { p(px0 + x, 0, '#e8241c'); p(px0 + x, 1, '#ffffff'); }
+  };
+  const beacon = (p, x0) => {
+    for (let x = x0; x <= x0 + 3; x++) p(x, 2, INK);
+    p(x0, 3, INK); p(x0 + 1, 3, GOLD); p(x0 + 2, 3, GOLD); p(x0 + 3, 3, INK);
+  };
   const ACC_DRAW = {
-    jubah: { px: (p) => {
-      for (let x = 3; x <= 11; x++) {
-        const bottom = 8 + Math.floor((x - 3) / 4);
-        for (let y = 6; y <= bottom; y++) p(x, y, y === bottom ? '#5b2a86' : '#8a4fd8');
-      }
-      p(2, 5, '#8a4fd8'); p(1, 4, '#5b2a86'); p(2, 4, '#8a4fd8');
-      p(11, 6, '#f4c430'); p(11, 7, '#f4c430');
-    } },
-    helm: { px: (p) => {
-      for (let x = 9; x <= 21; x++) p(x, 4, '#9e2a22');
-      for (let x = 11; x <= 19; x++) p(x, 3, '#d63c2f');
-      for (let x = 12; x <= 18; x++) p(x, 2, '#d63c2f');
-      for (let x = 13; x <= 17; x++) { p(x, 1, '#d63c2f'); p(x, 0, '#2b1d1a'); }
-      p(12, 1, '#2b1d1a'); p(18, 1, '#2b1d1a'); p(11, 2, '#2b1d1a'); p(19, 2, '#2b1d1a'); p(10, 3, '#2b1d1a'); p(20, 3, '#2b1d1a');
-      p(8, 4, '#2b1d1a'); p(22, 4, '#2b1d1a');
-      p(15, 2, '#f4c430'); p(15, 3, '#f4c430');
-    } },
-    syal: { px: (p) => {
-      for (let y = 8; y <= 13; y++) { p(11, y, '#f4c430'); p(12, y, '#e0a81e'); }
-      p(10, 13, '#f4c430'); p(10, 14, '#f4c430'); p(9, 14, '#e0a81e');
-    } },
+    jubah: { px: (p) => flag(p, 2) },
+    helm: { px: (p) => beacon(p, 10) },
+    syal: { px: (p) => { p(17, 10, GOLD); p(16, 11, GOLD); p(17, 11, GOLD); p(18, 11, GOLD); } },
     kacamata: { px: (p) => {
-      for (let x = 14; x <= 18; x++) { p(x, 8, '#2b1d1a'); p(x, 11, '#2b1d1a'); }
-      for (let y = 9; y <= 10; y++) { p(14, y, '#2b1d1a'); p(18, y, '#2b1d1a'); for (let x = 15; x <= 17; x++) p(x, y, '#7fd3ff'); }
-      p(15, 9, '#e6f7ff'); p(13, 9, '#2b1d1a'); p(12, 9, '#2b1d1a');
+      for (let x = 15; x <= 19; x++) { p(x, 6, LENS); p(x, 7, LENS); }
+      p(14, 6, LENS); p(16, 6, SHINE);
     } },
-    sepatu: { px: (p) => {
-      for (const leg of LEGS) for (const x of leg) { p(x, 16, '#d63c2f'); p(x, 17, '#d63c2f'); p(x, 18, '#9e2a22'); }
-    } },
+    sepatu: { px: (p) => { for (const x of [4, 5, 17, 18]) { p(x, 14, GOLD); p(x, 15, GOLD); } } },
   };
 
   // ---------- Kucing Si Oren ----------
@@ -424,35 +414,34 @@
     '..krrrrssrrrk...', '..kkrrrrrrrkk...', '...kRRRRRRRk....', '...kRRkkRRRk....', '...kyyk.kyyk....', '...kbbk.kbbbk...', '...kkkk.kkkkk...',
   ];
   const ARA_FRONT = [
-    '................', '................', '................',
-    '....kkkkkkkk....', '...kGGGGGGGGk...', '..kGGGGGGGGGGk..', '.kGGGGGGGGGGGGk.', '.knGGGGGGGGGGnk.',
-    '.knnwennnnewnnk.', '.knnpnneennpnnk.', '..knnnnnnnnnnk..', '.knnnnnnnnnnnnk.', 'knnnnnnnnnnnnnnk',
-    'knnnnnnnnnnnnnnk', '.knnnnnnnnnnnnk.', '.knnkk....kknnk.', '.kqqk......kqqk.', '.kkkk......kkkk.',
+    '................', '................',
+    '......kkkk......', '.....krrBBk.....', '..kkkkkkkkkkkk..', '.kLLLLLLLLLLLLk.',
+    '.kLwwLLLLLLwwLk.', '.kLweLLLLLLewLk.', '.kLLLLLLLLLLLLk.', 'kkkkkkkkkkkkkkkk',
+    'krrprrrrrrrrprrk', 'krrrrkkkkkkrrrrk', 'kyykrrGGGGrrkyyk', 'krrrkkkkkkkkrrrk',
+    'kGGGGGGGGGGGGGGk', 'kbbbkkkkkkkkbbbk', '.bbb........bbb.', '.bbb........bbb.',
   ];
   const ARA_BACK = [
-    '................', '................', '................',
-    '....kkkkkkkk....', '...kGGGGGGGGk...', '..kGGGGGGGGGGk..', '.knGGGGGGGGGGnk.', '.knnGGGGGGGGnnk.',
-    '.knnGGGGGGGGnnk.', '.knnnGGGGGGnnnk.', '..knnGGGGGGnnk..', '.knnnGGGGGGnnnk.', 'knnnnnGGGGnnnnnk',
-    'knnnnnGGGGnnnnnk', '.knnnnnGGnnnnnk.', '.knnkk.GG.kknnk.', '.kqqk..kk..kqqk.', '.kkkk......kkkk.',
+    '................', '................',
+    '......kkkk......', '.....krrBBk.....', '..kkkkkkkkkkkk..', '..kgGgGgGgGgGk..',
+    '.kkkkkkkkkkkkkk.', '.krrrrrkkrrrrrk.', '.krrrrrkkrrrrrk.', '.krrGrrkkrrGrrk.',
+    '.kyyyyykkyyyyyk.', '.krrrrrkkrrrrrk.', '.krrrrrkkrrrrrk.', 'kkookkkkkkkkookk',
+    'kGGGGGGGGGGGGGGk', 'kbbbkkkkkkkkbbbk', '.bbb........bbb.', '.bbb........bbb.',
   ];
   // Aksesori Ara untuk tampak depan/belakang (grid 16x18)
   const ACC_FB = {
-    helm: (p) => {
-      for (let x = 6; x <= 9; x++) { p(x, 0, '#2b1d1a'); p(x, 1, '#d63c2f'); }
-      p(5, 1, '#2b1d1a'); p(10, 1, '#2b1d1a');
-      for (let x = 4; x <= 11; x++) p(x, 2, '#d63c2f');
-      p(3, 2, '#2b1d1a'); p(12, 2, '#2b1d1a');
-      for (let x = 2; x <= 13; x++) p(x, 3, '#9e2a22');
-    },
-    helmFront: (p) => { p(7, 1, '#f4c430'); p(8, 1, '#f4c430'); p(7, 2, '#f4c430'); p(8, 2, '#f4c430'); },
-    syal: (p) => { for (let x = 3; x <= 12; x++) p(x, 10, x % 2 ? '#f4c430' : '#e0a81e'); p(11, 11, '#f4c430'); p(11, 12, '#e0a81e'); },
+    helm: (p) => { beacon(p, 1); beacon(p, 11); },
+    syal: (p) => { p(7, 10, GOLD); p(8, 10, GOLD); },
+    syalBack: (p) => { p(4, 8, GOLD); p(11, 8, GOLD); },
     kacamata: (p) => {
-      for (let x = 3; x <= 12; x++) p(x, 8, '#2b1d1a');
-      p(4, 8, '#7fd3ff'); p(5, 8, '#bfe8ff'); p(10, 8, '#7fd3ff'); p(11, 8, '#bfe8ff');
+      for (const x0 of [2, 10]) for (let x = x0; x <= x0 + 3; x++) { p(x, 6, LENS); p(x, 7, LENS); }
+      for (let x = 6; x <= 9; x++) p(x, 6, LENS);
+      p(3, 6, SHINE); p(11, 6, SHINE);
     },
-    sepatu: (p) => { for (const x of [2, 3, 12, 13]) p(x, 16, '#d63c2f'); for (const x of [1, 2, 3, 4, 11, 12, 13, 14]) p(x, 17, '#9e2a22'); },
-    jubahFront: (p) => { p(7, 10, '#f4c430'); p(8, 10, '#f4c430'); for (let y = 11; y <= 14; y++) { p(0, y, '#8a4fd8'); p(15, y, '#8a4fd8'); } },
-    jubahBack: (p) => { for (let y = 10; y <= 15; y++) for (let x = 3; x <= 12; x++) p(x, y, y === 15 || x === 3 || x === 12 ? '#5b2a86' : '#8a4fd8'); },
+    sepatu: (p) => { for (const x of [2, 13]) { p(x, 16, GOLD); p(x, 17, GOLD); } },
+    jubah: (p) => {
+      for (let y = 0; y <= 3; y++) p(15, y, '#5a5a5a');
+      for (let x = 11; x <= 14; x++) { p(x, 0, '#e8241c'); p(x, 1, '#ffffff'); }
+    },
   };
 
   // Frame langkah: geser kaki kiri atau kanan 1 piksel ke atas.
@@ -558,8 +547,8 @@
         return c;
       };
       const e = equip || {};
-      const front = paint(ARA_FRONT, [e.jubah && ACC_FB.jubahFront, e.syal && ACC_FB.syal, e.kacamata && ACC_FB.kacamata, e.sepatu && ACC_FB.sepatu, e.helm && ACC_FB.helm, e.helm && ACC_FB.helmFront]);
-      const back = paint(ARA_BACK, [e.syal && ACC_FB.syal, e.jubah && ACC_FB.jubahBack, e.sepatu && ACC_FB.sepatu, e.helm && ACC_FB.helm]);
+      const front = paint(ARA_FRONT, [e.jubah && ACC_FB.jubah, e.syal && ACC_FB.syal, e.kacamata && ACC_FB.kacamata, e.sepatu && ACC_FB.sepatu, e.helm && ACC_FB.helm]);
+      const back = paint(ARA_BACK, [e.syal && ACC_FB.syalBack, e.jubah && ACC_FB.jubah, e.sepatu && ACC_FB.sepatu, e.helm && ACC_FB.helm]);
       const side = spr.araWith(e);
       const bob = (img) => {
         const c = document.createElement('canvas');
@@ -569,8 +558,8 @@
       };
       const sideSet = (img) => [img, bob(img), img, bob(img)];
       return (araDirCache[key] = {
-        down: walkSet(front),
-        up: walkSet(back),
+        down: sideSet(front),
+        up: sideSet(back),
         right: sideSet(side),
         left: sideSet(flip(side)),
         back,

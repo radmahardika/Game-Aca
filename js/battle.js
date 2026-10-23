@@ -117,7 +117,7 @@
       const hose = HOSE.includes(B.p.enemy);
       ctx.drawImage(ak, ax, ay, ak.width * 2, ak.height * 2);
       if (hose) {
-        drawHoseLine(ctx, ax, ay, g.py);
+        drawHoseLine(ctx, ax, ay, g.py, g.px - 6);
         const tip = drawHoseHands(ctx, ax, ay);
         if (S.spray > 0) {
           S.spray -= dt;
@@ -134,9 +134,21 @@
   // Selang pemadam: lawan yang disemprot air.
   const HOSE = ['api', 'roti', 'raja', 'truk'];
 
-  // Selang menjuntai dari tangan Aksa di sisi kanan tubuh sampai ke tanah.
-  function drawHoseLine(ctx, ax, ay, py) {
-    const p0 = [ax + 58, py + 12], p1 = [ax + 44, ay + 38], p2 = [ax + 38, ay + 20];
+  // Selang tersambung ke Ara: menyusuri tanah di depan kaki Aksa, lalu naik ke tangannya di sisi kanan.
+  function drawHoseLine(ctx, ax, ay, py, fromX) {
+    const seg = (x0, y0, x1, y1) => {
+      const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 2);
+      for (let i = 0; i <= n; i++) {
+        const x = x0 + ((x1 - x0) * i) / n, y = y0 + ((y1 - y0) * i) / n;
+        ctx.fillStyle = '#2b1d1a';
+        ctx.fillRect(R(x - 2), R(y - 2), 5, 5);
+        ctx.fillStyle = '#e0a81e';
+        ctx.fillRect(R(x - 1), R(y - 1), 3, 2);
+      }
+    };
+    seg(fromX, py + 4, fromX + 6, py + 9);
+    seg(fromX + 6, py + 9, ax + 56, py + 9);
+    const p0 = [ax + 56, py + 9], p1 = [ax + 50, ay + 38], p2 = [ax + 38, ay + 20];
     for (let i = 0; i <= 40; i++) {
       const t = i / 40, u = 1 - t;
       const x = u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0];

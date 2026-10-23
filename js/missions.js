@@ -6,7 +6,7 @@
 
   G.CHARS = {
     aksa: { name: 'Aksa', color: '#d63c2f' },
-    ara: { name: 'Ara', color: '#3a3a3a' },
+    ara: { name: 'Ara', color: '#3b7dd8' },
     ani: { name: 'Bu Ani', color: '#e86fa0' },
     budi: { name: 'Pak Budi', color: '#c98a45' },
     joko: { name: 'Pak Joko', color: '#2f7fd1' },
@@ -19,7 +19,7 @@
   };
 
   G.INTRO = [
-    { who: 'ara', text: 'Halo! Aku Ara, si honey badger pemberani!' },
+    { who: 'ara', text: 'Halo! Aku Ara, mobil pemadam kebakaran mini! Tin tin!' },
     { who: 'ara', text: 'Ini sahabatku, Aksa. Pemadam kebakaran cilik dari Desa Ceria!' },
     { who: 'aksa', text: 'Halo semuanya! Aku siap menolong!' },
     { who: 'ara', text: 'Gawat, Aksa! Banyak warga yang butuh bantuan hari ini!' },
@@ -33,11 +33,11 @@
   ];
 
   G.ACCESSORIES = {
-    helm: 'Helm Mungil',
-    syal: 'Syal Kuning',
+    helm: 'Sirene Ganda',
+    syal: 'Stiker Bintang',
     kacamata: 'Kacamata Keren',
-    sepatu: 'Sepatu Bot',
-    jubah: 'Jubah Pahlawan',
+    sepatu: 'Velg Emas',
+    jubah: 'Bendera Pahlawan',
   };
 
   const add10 = () => add(10);
@@ -114,7 +114,7 @@
       ],
       thanks: [
         { who: 'budi', text: 'Rotiku selamat! Ini roti hangat untuk kalian.' },
-        { who: 'ara', text: 'Nyam nyam! Terima kasih, Pak Budi!' },
+        { who: 'ara', text: 'Hore! Terima kasih, Pak Budi!' },
       ],
       after: [{ who: 'budi', text: 'Toko rotiku buka lagi! Mampir kapan-kapan ya!' }],
       badge: 'Sahabat Toko Roti',
