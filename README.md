@@ -5,18 +5,24 @@ Aksa, pemadam kebakaran cilik, dan Ara, honey badger pemberani, menolong warga D
 
 ## Isi Wilayah 1: Desa Ceria
 
-| Misi | Cerita | Materi |
-|---|---|---|
-| 1. Kucing di Pohon | Menyambung tangga untuk Si Oren | Penjumlahan ≤ 10 |
-| 2. Lawan Api Jahil | Battle menyemprot Api Jahil | Penjumlahan ≤ 20 |
-| 3. Toko Roti Pak Budi | Menghitung sisa api | Pengurangan ≤ 20 |
-| 4. Isi Ember Air | Mengisi tangki truk | Tambah/kurang + **1 soal perkalian** (hasil ≤ 15) |
-| 5. Raja Api Jahil | Boss battle di balai desa | Campuran tambah & kurang |
+Dunia top-down ala Pokemon. Aksa berjalan ke 4 arah (tombol panah di layar atau ketuk tanah tujuan), Ara mengikuti di belakang. Warga yang butuh bantuan ditandai ❗, lalu tekan tombol **A** (atau ketuk warganya) untuk bicara. Semua soal dikerjakan dalam **battle**.
 
-- Tidak ada "kalah". Kalau jawaban salah, Ara menampilkan titik bantuan yang bisa diketuk satu per satu untuk menghitung. Kalau salah dua kali, jawaban yang benar akan berkedip.
-- Hadiah: lencana per misi + aksesori untuk Ara (helm, syal, kacamata, sepatu bot, jubah) yang bisa dipakai/dilepas di menu **Koleksi**.
-- Narasi suara Bahasa Indonesia memakai suara bawaan iPad. Bisa dimatikan di ⚙️ Pengaturan.
-- Progres tersimpan otomatis di perangkat.
+Empat masalah muncul bersamaan dan boleh diselesaikan dengan urutan bebas:
+
+| Masalah | Warga | Materi |
+|---|---|---|
+| Kucing di Pohon | Bu Ani | Penjumlahan ≤ 10 (menyambung tangga) |
+| Api di Tumpukan Daun | Api Jahil | Penjumlahan ≤ 20 |
+| Toko Roti Terbakar | Pak Budi | Pengurangan ≤ 20 |
+| Tangki Truk Kosong | Pak Joko | Tambah/kurang + **1 soal perkalian** (hasil ≤ 15) |
+
+Setelah keempatnya selesai, **Raja Api Jahil** muncul di depan Balai Desa sebagai boss terakhir (campuran tambah & kurang).
+
+- Tidak ada "kalah". Menu battle berisi 3 jawaban + **🦡 Bantuan Ara** (titik/ikon yang bisa diketuk satu per satu untuk menghitung). Kalau salah, bantuan terbuka otomatis. Kalau salah dua kali, jawaban yang benar akan berkedip.
+- Masalah yang sudah selesai bisa dimainkan lagi lewat **Latihan lagi** untuk mengejar 3 bintang.
+- Hadiah: lencana + aksesori Ara (helm, syal, kacamata, sepatu bot, jubah) yang bisa dipakai/dilepas di **Koleksi**.
+- Musik latar chiptune (lagu desa & lagu battle) dan efek suara, bisa dimatikan dari tombol 🎵 atau ⚙️ Pengaturan. Tidak ada narasi suara.
+- Progres dan posisi Aksa tersimpan otomatis di perangkat.
 
 ## Main di iPad
 
@@ -25,8 +31,7 @@ Aksa, pemadam kebakaran cilik, dan Ara, honey badger pemberani, menolong warga D
 3. Buka dari ikon "Aksa" di layar utama. Game tampil layar penuh seperti aplikasi.
 4. Pegang iPad dalam posisi **mendatar (landscape)**.
 
-Kalau narasi suara tidak terdengar: pastikan tombol senyap iPad mati dan volume menyala.
-Supaya suaranya lebih bagus, buka *Pengaturan iPad → Aksesibilitas → Konten Lisan → Suara → Bahasa Indonesia* dan unduh suara "Damayanti".
+Kalau musik tidak terdengar: pastikan mode senyap iPad mati dan volume menyala.
 
 ## Mengaktifkan GitHub Pages (sekali saja)
 
@@ -44,8 +49,10 @@ npx http-server .
 
 - `index.html`, `css/style.css`: halaman dan tampilan UI
 - `js/sprites.js`: pixel art (Aksa, Ara, warga, Api Jahil, ikon)
-- `js/world.js`: latar, bangunan, partikel, dan adegan tiap misi
-- `js/missions.js`: cerita, dialog, dan daftar soal tiap misi
+- `js/world.js`: partikel, gambar bangunan tampak samping, layar judul
+- `js/overworld.js`: peta Desa Ceria top-down, gerak 4 arah, Ara mengikuti, ketuk untuk berjalan
+- `js/battle.js`: layar battle ala Pokemon dan bantuan hitung
+- `js/missions.js`: cerita, dialog, dan daftar soal tiap masalah
 - `js/questions.js`: pembuat soal acak
-- `js/audio.js`: efek suara chiptune dan narasi suara
-- `js/game.js`: alur game (judul, peta, misi, hadiah, koleksi, pengaturan)
+- `js/audio.js`: efek suara dan musik latar chiptune
+- `js/game.js`: alur game (judul, dunia, dialog, hadiah, koleksi, pengaturan)

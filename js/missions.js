@@ -1,4 +1,5 @@
-// Data misi Wilayah 1: Desa Ceria (pilar berhitung).
+// Data masalah warga Desa Ceria (pilar berhitung). Empat masalah bisa diselesaikan
+// dengan urutan bebas; Raja Api Jahil muncul setelah keempatnya selesai.
 (function () {
   const G = (window.G = window.G || {});
   const { add, sub, mul } = G.Q;
@@ -12,15 +13,21 @@
     kades: { name: 'Pak Kepala Desa', color: '#8a5a2b' },
     api: { name: 'Api Jahil', color: '#e8451c' },
     raja: { name: 'Raja Api Jahil', color: '#b8240c' },
+    papan: { name: 'Papan', color: '#8a5a2b' },
   };
 
   G.INTRO = [
     { who: 'ara', text: 'Halo! Aku Ara, si honey badger pemberani!' },
     { who: 'ara', text: 'Ini sahabatku, Aksa. Pemadam kebakaran cilik dari Desa Ceria!' },
     { who: 'aksa', text: 'Halo semuanya! Aku siap menolong!' },
-    { who: 'ara', text: 'Gawat, Aksa! Api Jahil datang dan bikin masalah di desa!' },
-    { who: 'aksa', text: 'Ayo kita tolong warga! Caranya: jawab soal berhitung!' },
-    { who: 'ara', text: 'Setiap jawaban benar membuat kita makin kuat. Ayo berangkat!' },
+    { who: 'ara', text: 'Gawat, Aksa! Banyak warga yang butuh bantuan hari ini!' },
+    { who: 'ara', text: 'Cari warga yang ada tanda ❗ di atas kepalanya.' },
+    { who: 'ara', text: 'Jalan pakai tombol panah, atau ketuk tanah tujuanmu. Tekan tombol A untuk bicara!' },
+  ];
+
+  G.BOSS_APPEAR = [
+    { who: 'ara', text: 'Aksa, lihat! Ada api besar di depan Balai Desa!' },
+    { who: 'aksa', text: 'Itu pasti Raja Api Jahil! Ayo ke sana, Ara!' },
   ];
 
   G.ACCESSORIES = {
@@ -35,40 +42,52 @@
   const add20 = () => add(20);
   const sub20 = () => sub(20);
 
-  G.MISSIONS = [
+  // Urutan di sini = urutan lencana di koleksi.
+  G.PROBLEMS = [
     {
+      id: 'kucing',
       title: 'Kucing di Pohon',
       icon: 'cat',
-      goal: 'Si Oren terjebak di pohon. Jawab soal untuk menyambung tangga!',
-      scene: 'tree',
+      npc: 'ani',
+      enemy: 'pohon',
+      enemyName: 'Si Oren di Pohon',
+      bar: { label: 'Tangga', mode: 'fill', color: '#c98a45' },
       gens: [add10, add10, add10, add10, add10],
       prompt: () => 'Sambung tangganya!',
       visual: 'rung',
-      intro: [
+      start: 'Si Oren terjebak di atas pohon!',
+      win: 'Tangga sampai! Si Oren bisa turun!',
+      ask: [
         { who: 'ani', text: 'Tolong! Kucingku Si Oren naik pohon dan tidak bisa turun!' },
         { who: 'aksa', text: 'Tenang, Bu Ani! Kami akan menolong!' },
-        { who: 'ara', text: 'Kita perlu tangga. Setiap jawaban benar menambah satu bagian tangga!' },
+        { who: 'ara', text: 'Setiap jawaban benar menambah satu bagian tangga!' },
       ],
-      outro: [
+      thanks: [
         { who: 'ani', text: 'Si Oren selamat! Terima kasih, Aksa dan Ara!' },
         { who: 'aksa', text: 'Sama-sama, Bu Ani! Menolong itu menyenangkan!' },
       ],
+      after: [{ who: 'ani', text: 'Si Oren sudah aman bersamaku. Terima kasih ya!' }],
       badge: 'Penolong Kucing',
       acc: 'helm',
     },
     {
-      title: 'Lawan Api Jahil',
+      id: 'daun',
+      title: 'Api di Tumpukan Daun',
       icon: 'fire',
-      goal: 'Api Jahil mau membakar tumpukan daun. Semprot dia dengan air!',
-      scene: 'leaves',
+      npc: 'api',
+      enemy: 'api',
+      enemyName: 'Api Jahil',
+      bar: { label: 'Api', mode: 'drain', color: '#ff8c1a' },
       gens: [add20, add20, add20, add20, add20],
       prompt: () => 'Semprot Api Jahil!',
-      intro: [
+      start: 'Api Jahil mengajak bertanding!',
+      win: 'Api Jahil padam!',
+      ask: [
         { who: 'api', text: 'Hihihi! Aku mau membakar tumpukan daun ini!' },
         { who: 'aksa', text: 'Tidak boleh! Api bisa berbahaya!' },
-        { who: 'ara', text: 'Jawab soal dengan benar untuk menyemprotkan air, Aksa!' },
+        { who: 'ara', text: 'Jawab soal dengan benar untuk menyemprotkan air!' },
       ],
-      outro: [
+      thanks: [
         { who: 'api', text: 'Aduh, basah! Aku kabur saja!' },
         { who: 'ara', text: 'Hore! Apinya padam! Kamu hebat, Aksa!' },
       ],
@@ -76,70 +95,99 @@
       acc: 'syal',
     },
     {
+      id: 'roti',
       title: 'Toko Roti Pak Budi',
       icon: 'bread',
-      goal: 'Ada api kecil di toko roti. Hitung sisa apinya!',
-      scene: 'bakery',
+      npc: 'budi',
+      enemy: 'roti',
+      enemyName: 'Api Toko Roti',
+      bar: { label: 'Api', mode: 'drain', color: '#ff8c1a' },
       gens: [sub20, sub20, sub20, sub20, sub20],
       prompt: (q) => `Ada ${q.a} api. Padamkan ${q.b}. Sisa berapa?`,
       visual: 'flame',
-      intro: [
+      start: 'Api kecil menyala di toko roti!',
+      win: 'Semua api di toko roti padam!',
+      ask: [
         { who: 'budi', text: 'Toloong! Ada api kecil di toko rotiku!' },
         { who: 'aksa', text: 'Kami datang, Pak Budi!' },
         { who: 'ara', text: 'Api yang sudah padam kita coret. Hitung yang tersisa ya!' },
       ],
-      outro: [
+      thanks: [
         { who: 'budi', text: 'Rotiku selamat! Ini roti hangat untuk kalian.' },
         { who: 'ara', text: 'Nyam nyam! Terima kasih, Pak Budi!' },
       ],
+      after: [{ who: 'budi', text: 'Toko rotiku buka lagi! Mampir kapan-kapan ya!' }],
       badge: 'Sahabat Toko Roti',
       acc: 'kacamata',
     },
     {
-      title: 'Isi Ember Air',
+      id: 'truk',
+      title: 'Tangki Truk Kosong',
       icon: 'bucket',
-      goal: 'Tangki truk pemadam kosong. Isi airnya sampai penuh!',
-      scene: 'truck',
+      npc: 'joko',
+      enemy: 'truk',
+      enemyName: 'Tangki Kosong',
+      bar: { label: 'Air', mode: 'fill', color: '#4fb3ff' },
       gens: [add20, sub20, add20, mul, add20],
       prompt: (q) =>
         q.op === '+' ? `Ada ${q.a} liter air. Tambah ${q.b} liter!`
         : q.op === '−' ? `Ada ${q.a} liter. Tumpah ${q.b} liter!`
         : `Ada ${q.a} ember. Tiap ember ${q.b} liter!`,
       visual: (q) => (q.op === '×' ? 'drop' : null),
-      intro: [
+      start: 'Tangki air truk pemadam kosong!',
+      win: 'Tangki air penuh!',
+      ask: [
         { who: 'joko', text: 'Waduh, tangki air truk pemadam kosong!' },
         { who: 'aksa', text: 'Ayo kita isi dengan ember, Pak Joko!' },
         { who: 'ara', text: 'Hitung airnya ya, Aksa. Jangan sampai tumpah!' },
       ],
-      outro: [
+      thanks: [
         { who: 'joko', text: 'Tangki penuh! Truk siap berangkat! Wiu wiu!' },
-        { who: 'ara', text: 'Kita juga siap! Ada suara ribut di balai desa...' },
+        { who: 'aksa', text: 'Siap, Pak Joko!' },
       ],
+      after: [{ who: 'joko', text: 'Truk pemadam siap kapan saja!' }],
       badge: 'Ahli Air',
       acc: 'sepatu',
     },
-    {
-      title: 'Raja Api Jahil',
-      icon: 'crown',
-      goal: 'Raja Api Jahil ada di balai desa. Padamkan dia!',
-      scene: 'boss',
-      gens: [add20, sub20, add20, sub20, add20, sub20, add20],
-      prompt: () => 'Semprot Raja Api!',
-      intro: [
-        { who: 'raja', text: 'HOHOHO! Aku Raja Api Jahil! Balai desa ini milikku!' },
-        { who: 'ara', text: 'Dia besar sekali... tapi kita tidak takut!' },
-        { who: 'aksa', text: 'Kita pemberani! Ayo padamkan, Ara!' },
-      ],
-      outro: [
-        { who: 'raja', text: 'Tidaaak! Aku kalah... Maaf ya, aku tidak akan jahil lagi.' },
-        { who: 'aksa', text: 'Kami maafkan. Ayo jadi teman yang baik!' },
-        { who: 'kades', text: 'Aksa dan Ara, kalian adalah Pahlawan Desa Ceria!' },
-        { who: 'ara', text: 'Terima kasih sudah bermain! Sampai jumpa di petualangan berikutnya!' },
-      ],
-      badge: 'Pahlawan Desa Ceria',
-      acc: 'jubah',
-    },
   ];
+
+  G.BOSS = {
+    id: 'raja',
+    title: 'Raja Api Jahil',
+    icon: 'crown',
+    npc: 'raja',
+    enemy: 'raja',
+    enemyName: 'Raja Api Jahil',
+    bar: { label: 'Api', mode: 'drain', color: '#ff5a1a' },
+    gens: [add20, sub20, add20, sub20, add20, sub20, add20],
+    prompt: () => 'Semprot Raja Api!',
+    start: 'Raja Api Jahil menantang!',
+    win: 'Raja Api Jahil padam!',
+    ask: [
+      { who: 'raja', text: 'HOHOHO! Aku Raja Api Jahil! Balai desa ini milikku!' },
+      { who: 'ara', text: 'Dia besar sekali... tapi kita tidak takut!' },
+      { who: 'aksa', text: 'Kita pemberani! Ayo padamkan, Ara!' },
+    ],
+    thanks: [
+      { who: 'raja', text: 'Tidaaak! Aku kalah... Maaf ya, aku tidak akan jahil lagi.' },
+      { who: 'aksa', text: 'Kami maafkan. Ayo jadi teman yang baik!' },
+      { who: 'kades', text: 'Aksa dan Ara, kalian adalah Pahlawan Desa Ceria!' },
+      { who: 'ara', text: 'Terima kasih sudah bermain! Sampai jumpa di petualangan berikutnya!' },
+    ],
+    badge: 'Pahlawan Desa Ceria',
+    acc: 'jubah',
+  };
+  G.ALL = [...G.PROBLEMS, G.BOSS];
+
+  G.KADES = {
+    before: [
+      { who: 'kades', text: 'Halo, Aksa dan Ara! Warga desa sedang butuh bantuan.' },
+      { who: 'kades', text: 'Cari warga yang ada tanda ❗ ya. Bebas mau tolong yang mana dulu!' },
+    ],
+    boss: [{ who: 'kades', text: 'Tolong! Raja Api Jahil ada di depan Balai Desa!' }],
+    done: [{ who: 'kades', text: 'Desa Ceria aman berkat kalian, Pahlawan Desa!' }],
+  };
+  G.SIGN = [{ who: 'papan', text: '🏡 Selamat datang di Desa Ceria! Desa yang ramah dan ceria.' }];
 
   G.PRAISE = ['Hebat!', 'Pintar sekali!', 'Betul! Mantap!', 'Keren, Aksa!', 'Luar biasa!', 'Hore, benar!'];
   G.TRY = ['Hampir! Ayo coba lagi.', 'Tidak apa-apa, kita hitung bareng!', 'Belum tepat. Kamu pasti bisa!'];

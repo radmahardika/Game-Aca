@@ -56,8 +56,6 @@
       seen.add(key);
       q.choices = choices(q);
       q.eq = `${q.a} ${q.op} ${q.b} = ?`;
-      const opWord = { '+': 'tambah', '−': 'kurang', '×': 'kali' }[q.op];
-      q.spoken = `${G.kata(q.a)} ${opWord} ${G.kata(q.b)}, sama dengan berapa?`;
       out.push(q);
     }
     return out;

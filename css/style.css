@@ -456,3 +456,189 @@ img { image-rendering: pixelated; -webkit-user-drag: none; }
 .rot-icon { font-size: 20vw; animation: rot 2s ease-in-out infinite; }
 @keyframes rot { 50% { transform: rotate(90deg); } }
 body.portrait #rotate { display: flex; }
+
+/* =========================================================
+   Format top-down & battle
+   ========================================================= */
+#dlg { position: absolute; inset: 0; z-index: 4; display: none; }
+#dlg.show { display: block; }
+.dchoices { display: flex; gap: 2vh; justify-content: flex-end; }
+.dchoices:empty { display: none; }
+
+/* HUD dunia */
+.hud { position: absolute; inset: 0; pointer-events: none; }
+.hud.hidden { display: none; }
+.hud .topbar, .hud .dpad button, .hud .abtn { pointer-events: auto; }
+.hud .topbar .pill, .hud .topbar .spacer { pointer-events: none; }
+.quest {
+  position: absolute;
+  top: 2.4vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.2vh;
+  background: #fff3a8;
+  border: 0.55vh solid var(--ink);
+  border-radius: 5vh;
+  padding: 0.6vh 2.2vh;
+  font-weight: 700;
+  font-size: 2.8vh;
+  box-shadow: 0 0.6vh 0 var(--ink);
+  white-space: nowrap;
+}
+.quest img { width: 4.4vh; height: 4.4vh; object-fit: contain; }
+.quest .qi { position: relative; display: inline-flex; opacity: 1; }
+.quest .qi.ok img { filter: grayscale(0.2); opacity: 0.55; }
+.quest .qi b { position: absolute; right: -0.8vh; bottom: -0.8vh; color: #2f9e3a; font-size: 3.2vh; -webkit-text-stroke: 0.25vh #fff; paint-order: stroke fill; }
+
+.dpad { position: absolute; left: 3vh; bottom: 3vh; width: 33vh; height: 33vh; }
+.dpad button, .dpad .c {
+  position: absolute;
+  width: 11vh;
+  height: 11vh;
+  padding: 0;
+  font: inherit;
+  font-size: 4.6vh;
+  color: var(--ink);
+  background: rgba(255, 246, 224, 0.88);
+  border: 0.55vh solid var(--ink);
+  border-radius: 1.8vh;
+  box-shadow: 0 0.7vh 0 var(--ink);
+  touch-action: none;
+}
+.dpad .c { left: 11vh; top: 11vh; background: rgba(255, 246, 224, 0.6); box-shadow: none; border-radius: 0.6vh; }
+.dpad .u { left: 11vh; top: 0; }
+.dpad .d { left: 11vh; top: 22vh; }
+.dpad .l { left: 0; top: 11vh; }
+.dpad .r { left: 22vh; top: 11vh; }
+.dpad button.on { background: #ffe066; transform: translateY(0.5vh); box-shadow: 0 0.2vh 0 var(--ink); }
+.abtn {
+  position: absolute;
+  right: 4vh;
+  bottom: 6vh;
+  width: 18vh;
+  height: 18vh;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  border: 0.6vh solid var(--ink);
+  box-shadow: 0 0.9vh 0 var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-weight: 700;
+  font-size: 6.5vh;
+  line-height: 1;
+  text-shadow: 0 0.4vh 0 rgba(0, 0, 0, 0.35);
+  touch-action: none;
+}
+.abtn small { font-size: 2.6vh; margin-top: 0.5vh; }
+.abtn.on { transform: translateY(0.6vh); box-shadow: 0 0.3vh 0 var(--ink); }
+.teach .dpad, .teach .abtn { animation: teach 0.9s ease-in-out infinite; }
+@keyframes teach { 50% { filter: drop-shadow(0 0 2vh #fff36a) brightness(1.15); } }
+
+/* Battle */
+.battle { position: absolute; inset: 0; }
+.battle .ebox, .battle .pbox {
+  position: absolute;
+  background: var(--cream);
+  border: 0.6vh solid var(--ink);
+  border-radius: 2vh;
+  box-shadow: 0 0.8vh 0 var(--ink);
+  padding: 1.2vh 2.4vh;
+  min-width: 42vh;
+  animation: popin 0.3s ease-out;
+}
+.battle .ebox { left: 3vw; top: 4vh; }
+.battle .pbox { right: 3vw; top: 46vh; }
+.battle .nm { font-weight: 700; font-size: 3.6vh; display: flex; justify-content: space-between; align-items: center; gap: 2vh; }
+.battle .nm img { width: 4.6vh; height: 4.6vh; object-fit: contain; }
+.battle .bar { margin-top: 1vh; display: flex; align-items: center; gap: 1vh; font-weight: 700; font-size: 2.4vh; }
+.battle .track { flex: 1; height: 2.6vh; background: #5a5a5a; border: 0.4vh solid var(--ink); border-radius: 1.4vh; overflow: hidden; }
+.battle .fill { height: 100%; width: 100%; transition: width 0.6s ease-out; }
+.battle .pbox .qprog { margin-top: 1vh; }
+.battle .run { position: absolute; top: 4vh; right: 3vw; }
+.bmenu { position: absolute; left: 2vw; right: 2vw; bottom: 2vh; height: 34vh; display: flex; gap: 2vh; }
+.btext {
+  flex: 1.15;
+  position: relative;
+  background: var(--cream);
+  border: 0.7vh solid var(--ink);
+  border-radius: 2.6vh;
+  box-shadow: 0 1vh 0 var(--ink);
+  padding: 2vh 3vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.4vh;
+}
+.btext .say { font-size: 4vh; font-weight: 700; line-height: 1.2; }
+.btext.hasq .say { font-size: 3.4vh; }
+.btext .eq { font-size: 11vh; font-weight: 700; line-height: 1; letter-spacing: 0.4vh; }
+.btext .eq:empty { display: none; }
+.btext .eq b { color: var(--red); display: inline-block; animation: bob 0.9s infinite; }
+.btext .tapnext { position: absolute; right: 2.4vh; bottom: 1.6vh; font-size: 3.4vh; display: none; animation: blink 1s infinite; }
+.btext.waiting .tapnext { display: block; }
+.moves {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6vh;
+  background: var(--cream);
+  border: 0.7vh solid var(--ink);
+  border-radius: 2.6vh;
+  box-shadow: 0 1vh 0 var(--ink);
+  padding: 1.6vh;
+}
+.moves.off { opacity: 0.5; }
+.moves .ans { width: auto; height: auto; font-size: 7.5vh; }
+.moves .ans:nth-child(3) { background: #9a5ae0; }
+.moves .help {
+  font: inherit;
+  font-weight: 700;
+  font-size: 3vh;
+  line-height: 1.1;
+  background: #f4c430;
+  border: 0.6vh solid var(--ink);
+  border-radius: 2.4vh;
+  box-shadow: 0 1vh 0 var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1vh;
+  padding: 0;
+}
+.moves .help:active { transform: translateY(0.6vh); box-shadow: 0 0.3vh 0 var(--ink); }
+.moves .help:disabled { opacity: 0.4; }
+.moves .help span { text-align: left; }
+.helppop {
+  position: absolute;
+  left: 2vw;
+  right: 2vw;
+  bottom: 38vh;
+  margin: 0 auto;
+  width: max-content;
+  max-width: 92vw;
+  background: var(--cream);
+  border: 0.7vh solid var(--ink);
+  border-radius: 2.6vh;
+  box-shadow: 0 1vh 0 var(--ink);
+  padding: 1.4vh 2.4vh 2vh;
+  animation: popin 0.25s ease-out;
+}
+.hhead { display: flex; align-items: center; gap: 1.6vh; margin-bottom: 1.4vh; }
+.hara { width: 6.5vh; height: 6.5vh; border-radius: 1.4vh; border: 0.4vh solid var(--ink); background: #f3d9a8; overflow: hidden; flex: none; }
+.htext { flex: 1; font-weight: 700; font-size: 3.2vh; }
+.hvis { display: flex; justify-content: center; }
+
+/* Transisi battle */
+.wipe { position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; pointer-events: none; }
+.wipe i { flex: 1; background: #1a1210; transform: scaleX(0); transition: transform 0.45s ease-in; }
+.wipe i:nth-child(odd) { transform-origin: left; }
+.wipe i:nth-child(even) { transform-origin: right; }
+.wipe.in i { transform: scaleX(1); }
+.wipe.out i { transform: scaleX(0); transition: transform 0.45s ease-out; }
+.bd em { font-style: normal; color: var(--yellow); -webkit-text-stroke: 0.2vh var(--ink); paint-order: stroke fill; font-size: 2.6vh; }

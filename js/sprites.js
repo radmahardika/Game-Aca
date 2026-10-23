@@ -386,7 +386,81 @@
     return c.toDataURL();
   }
 
+  // ---------- Sprite 4 arah untuk dunia top-down ----------
+  const AKSA_BACK = [
+    '....kkkkkkkk....', '...krrrrrrrrk...', '..krrrrrrrrrrk..', '..krrrrrrrrrrk..', '.kRRRRRRRRRRRRk.',
+    '..kHHhHHHhHHHk..', '..kHHHHhHHHHHk..', '..sHhHHHHHhHHs..', '..kHHHHHHhHHHk..', '...kssssssssk...',
+    '..kkrrrrrrrrkk..', '.krrrrrrrrrrrrk.', 'krrrrrrrrrrrrrrk', 'kryyyyyyyyyyyyrk', 'krrrrrrrrrrrrrrk',
+    'ksryyyyyyyyyyrsk', 'kkrrrrrrrrrrrrkk', '.kRRRRRRRRRRRRk.', '.kRRRRRkkRRRRRk.', '.kyyyyykkyyyyyk.', '.kbbbbk..kbbbbk.', '.kkkkkk..kkkkkk.',
+  ];
+  const AKSA_SIDE = [
+    '....kkkkkkk.....', '...krrrrrrrk....', '..krrrrrryyrk...', '..krrrrrryyrk...', '..kRRRRRRRRRRRRk',
+    '..khhhhsssssk...', '..khhhssssesk...', '..khhsssssssk...', '...khssssmsk....', '....kssssssk....',
+    '...kkrrrrrrkk...', '..krrrrrrrrrk...', '..krrrrrrrrrk...', '..kyyyyyyyyyk...', '..krrrrssrrrk...',
+    '..krrrrssrrrk...', '..kkrrrrrrrkk...', '...kRRRRRRRk....', '...kRRkkRRRk....', '...kyyk.kyyk....', '...kbbk.kbbbk...', '...kkkk.kkkkk...',
+  ];
+  const ARA_FRONT = [
+    '................', '................', '................',
+    '....kkkkkkkk....', '...kGGGGGGGGk...', '..kGGGGGGGGGGk..', '.kGGGGGGGGGGGGk.', '.knGGGGGGGGGGnk.',
+    '.knnwennnnewnnk.', '.knnpnneennpnnk.', '..knnnnnnnnnnk..', '.knnnnnnnnnnnnk.', 'knnnnnnnnnnnnnnk',
+    'knnnnnnnnnnnnnnk', '.knnnnnnnnnnnnk.', '.knnkk....kknnk.', '.kqqk......kqqk.', '.kkkk......kkkk.',
+  ];
+  const ARA_BACK = [
+    '................', '................', '................',
+    '....kkkkkkkk....', '...kGGGGGGGGk...', '..kGGGGGGGGGGk..', '.knGGGGGGGGGGnk.', '.knnGGGGGGGGnnk.',
+    '.knnGGGGGGGGnnk.', '.knnnGGGGGGnnnk.', '..knnGGGGGGnnk..', '.knnnGGGGGGnnnk.', 'knnnnnGGGGnnnnnk',
+    'knnnnnGGGGnnnnnk', '.knnnnnGGnnnnnk.', '.knnkk.GG.kknnk.', '.kqqk..kk..kqqk.', '.kkkk......kkkk.',
+  ];
+  // Aksesori Ara untuk tampak depan/belakang (grid 16x18)
+  const ACC_FB = {
+    helm: (p) => {
+      for (let x = 6; x <= 9; x++) { p(x, 0, '#2b1d1a'); p(x, 1, '#d63c2f'); }
+      p(5, 1, '#2b1d1a'); p(10, 1, '#2b1d1a');
+      for (let x = 4; x <= 11; x++) p(x, 2, '#d63c2f');
+      p(3, 2, '#2b1d1a'); p(12, 2, '#2b1d1a');
+      for (let x = 2; x <= 13; x++) p(x, 3, '#9e2a22');
+    },
+    helmFront: (p) => { p(7, 1, '#f4c430'); p(8, 1, '#f4c430'); p(7, 2, '#f4c430'); p(8, 2, '#f4c430'); },
+    syal: (p) => { for (let x = 3; x <= 12; x++) p(x, 10, x % 2 ? '#f4c430' : '#e0a81e'); p(11, 11, '#f4c430'); p(11, 12, '#e0a81e'); },
+    kacamata: (p) => {
+      for (let x = 3; x <= 12; x++) p(x, 8, '#2b1d1a');
+      p(4, 8, '#7fd3ff'); p(5, 8, '#bfe8ff'); p(10, 8, '#7fd3ff'); p(11, 8, '#bfe8ff');
+    },
+    sepatu: (p) => { for (const x of [2, 3, 12, 13]) p(x, 16, '#d63c2f'); for (const x of [1, 2, 3, 4, 11, 12, 13, 14]) p(x, 17, '#9e2a22'); },
+    jubahFront: (p) => { p(7, 10, '#f4c430'); p(8, 10, '#f4c430'); for (let y = 11; y <= 14; y++) { p(0, y, '#8a4fd8'); p(15, y, '#8a4fd8'); } },
+    jubahBack: (p) => { for (let y = 10; y <= 15; y++) for (let x = 3; x <= 12; x++) p(x, y, y === 15 || x === 3 || x === 12 ? '#5b2a86' : '#8a4fd8'); },
+  };
+
+  // Frame langkah: geser kaki kiri atau kanan 1 piksel ke atas.
+  function stepFrame(src, side) {
+    const c = document.createElement('canvas');
+    c.width = src.width;
+    c.height = src.height;
+    const x = c.getContext('2d');
+    x.drawImage(src, 0, 0);
+    const half = Math.floor(src.width / 2);
+    const sx = side < 0 ? 0 : half;
+    const legH = 4;
+    const top = src.height - legH;
+    x.clearRect(sx, top - 1, half, legH + 1);
+    x.drawImage(src, sx, top - 1, half, 1, sx, top - 1, half, 1);
+    x.drawImage(src, sx, top, half, legH, sx, top - 1, half, legH);
+    return c;
+  }
+  function flip(src) {
+    const c = document.createElement('canvas');
+    c.width = src.width;
+    c.height = src.height;
+    const x = c.getContext('2d');
+    x.translate(src.width, 0);
+    x.scale(-1, 1);
+    x.drawImage(src, 0, 0);
+    return c;
+  }
+  const walkSet = (img) => [img, stepFrame(img, -1), img, stepFrame(img, 1)];
+
   G.drawFire = drawFire;
+  G.flipSprite = flip;
   G.iconURL = iconURL;
   G.ACC_DRAW = ACC_DRAW;
   G.buildSprites = function () {
@@ -431,6 +505,47 @@
       keys.forEach((k) => ACC_DRAW[k].px(p));
       return c;
     }
+
+    // Aksa & Ara 4 arah, masing-masing 4 frame (diam, langkah kiri, diam, langkah kanan)
+    const PALH = Object.assign({}, PAL, { H: '#4a3426' });
+    const aSide = toCanvas(AKSA_SIDE, PALH);
+    spr.aksaDir = {
+      down: walkSet(spr.aksa),
+      up: walkSet(toCanvas(AKSA_BACK, PALH)),
+      right: walkSet(aSide),
+      left: walkSet(flip(aSide)),
+    };
+    spr.aksaBack = toCanvas(AKSA_BACK, PALH);
+    const araDirCache = {};
+    spr.araDir = function (equip) {
+      const key = Object.keys(ACC_DRAW).filter((k) => equip && equip[k]).join(',');
+      if (araDirCache[key]) return araDirCache[key];
+      const paint = (rows, fns) => {
+        const c = toCanvas(rows);
+        const x = c.getContext('2d');
+        const p = (px, py, col) => { x.fillStyle = col; x.fillRect(px, py, 1, 1); };
+        fns.forEach((f) => f && f(p));
+        return c;
+      };
+      const e = equip || {};
+      const front = paint(ARA_FRONT, [e.jubah && ACC_FB.jubahFront, e.syal && ACC_FB.syal, e.kacamata && ACC_FB.kacamata, e.sepatu && ACC_FB.sepatu, e.helm && ACC_FB.helm, e.helm && ACC_FB.helmFront]);
+      const back = paint(ARA_BACK, [e.syal && ACC_FB.syal, e.jubah && ACC_FB.jubahBack, e.sepatu && ACC_FB.sepatu, e.helm && ACC_FB.helm]);
+      const side = spr.araWith(e);
+      const bob = (img) => {
+        const c = document.createElement('canvas');
+        c.width = img.width; c.height = img.height;
+        c.getContext('2d').drawImage(img, 0, -1);
+        return c;
+      };
+      const sideSet = (img) => [img, bob(img), img, bob(img)];
+      return (araDirCache[key] = {
+        down: walkSet(front),
+        up: walkSet(back),
+        right: sideSet(side),
+        left: sideSet(flip(side)),
+        back,
+      });
+    };
 
     const I = (G.icons = {});
     I.cat = iconURL(spr.cat);
