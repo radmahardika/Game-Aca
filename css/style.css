@@ -645,3 +645,17 @@ body.portrait #rotate { display: flex; }
 
 .title .ver { position: absolute; right: 2vh; bottom: 1.5vh; font-size: 2.4vh; font-weight: 700; color: #fff; opacity: 0.85; text-shadow: 0 0.2vh 0 rgba(0, 0, 0, 0.4); }
 .quest .qara img { width: 6vh; }
+
+/* Analog stik */
+.stick { position: absolute; width: 26vh; height: 26vh; border-radius: 50%; background: rgba(255, 246, 224, 0.35); border: 0.6vh solid rgba(43, 29, 26, 0.55); box-shadow: inset 0 0 0 1.2vh rgba(255, 255, 255, 0.25); transform: translate(-50%, -50%); pointer-events: none; z-index: 3; }
+.stick .knob { position: absolute; left: 50%; top: 50%; width: 11vh; height: 11vh; border-radius: 50%; background: #ffe066; border: 0.6vh solid var(--ink); box-shadow: 0 0.7vh 0 var(--ink); transform: translate(-50%, -50%); }
+.stick .ar { position: absolute; font-size: 3vh; color: rgba(43, 29, 26, 0.55); font-weight: 700; line-height: 1; }
+.stick .ar.u { left: 50%; top: 1.4vh; transform: translateX(-50%); }
+.stick .ar.d { left: 50%; bottom: 1.4vh; transform: translateX(-50%); }
+.stick .ar.l { left: 1.4vh; top: 50%; transform: translateY(-50%); }
+.stick .ar.r { right: 1.4vh; top: 50%; transform: translateY(-50%); }
+#ui { touch-action: none; }
+.abtn.ready { animation: ready 0.8s ease-in-out infinite; }
+@keyframes ready { 50% { transform: scale(1.1); box-shadow: 0 0 0 1.2vh #fff36a, 0 0.9vh 0 var(--ink); } }
+.teach::after { content: '☝️ geser di sini'; position: absolute; left: 8vh; bottom: 14vh; font-size: 4vh; font-weight: 700; color: #fff; -webkit-text-stroke: 0.4vh var(--ink); paint-order: stroke fill; animation: teachdrag 1.4s ease-in-out infinite; pointer-events: none; }
+@keyframes teachdrag { 50% { transform: translate(6vh, -3vh); } }

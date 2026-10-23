@@ -24,7 +24,8 @@
     { who: 'aksa', text: 'Halo semuanya! Aku siap menolong!' },
     { who: 'ara', text: 'Gawat, Aksa! Banyak warga yang butuh bantuan hari ini!' },
     { who: 'ara', text: 'Cari warga yang ada tanda ❗ di atas kepalanya.' },
-    { who: 'ara', text: 'Ketuk tanah untuk berjalan. Ketuk warga untuk bicara!' },
+    { who: 'ara', text: 'Taruh jari di kiri layar, lalu geser untuk berjalan ke mana saja!' },
+    { who: 'ara', text: 'Kalau sudah dekat warga, tombol A berkedip. Tekan A untuk bicara!' },
   ];
 
   G.BOSS_APPEAR = [

@@ -5,7 +5,7 @@
   const R = Math.round;
 
   // ---------- Simpan progres ----------
-  G.VERSION = 5;
+  G.VERSION = 6;
   const KEY = 'aksa-pemadam-v2';
   const fresh = () => ({ solved: {}, stars: {}, acc: {}, equip: {}, intro: false, tut: false, music: true, sfx: true, pos: null });
   function load() {
@@ -104,6 +104,7 @@
   function dialog(lines, done, choices) {
     let i = 0;
     G.world.mode = 'busy';
+    G.releaseStick && G.releaseStick();
     G.world.setHeld(null);
     hudVisible(false);
     dlg.innerHTML = '';
@@ -221,13 +222,43 @@
     G.persist();
   }
 
-  // Ketuk tanah untuk berjalan
+  // Analog stik: muncul di bawah jari pada bagian kiri layar, geser untuk berjalan.
+  let stick = null;
   ui.addEventListener('pointerdown', (e) => {
-    if (G.scene && G.scene.draw && G.world.mode === 'walk' && (e.target === ui || e.target === hud)) {
-      G.audioUnlock();
-      G.world.tapWorld(e.clientX, e.clientY);
-    }
+    if (stick || !G.scene || G.world.mode !== 'walk' || !(e.target === ui || e.target === hud)) return;
+    if (e.clientX > window.innerWidth * 0.6) return;
+    e.preventDefault();
+    G.audioUnlock();
+    const R0 = window.innerHeight * 0.11;
+    const el0 = el(`<div class="stick" style="left:${e.clientX}px;top:${e.clientY}px"><b class="ar u">▲</b><b class="ar d">▼</b><b class="ar l">◀</b><b class="ar r">▶</b><div class="knob"></div></div>`);
+    ui.appendChild(el0);
+    stick = { id: e.pointerId, x: e.clientX, y: e.clientY, R: R0, el: el0 };
+    try { ui.setPointerCapture(e.pointerId); } catch (err) {}
+    ui.classList.remove('teach');
   });
+  ui.addEventListener('pointermove', (e) => {
+    if (!stick || e.pointerId !== stick.id) return;
+    let dx = e.clientX - stick.x, dy = e.clientY - stick.y;
+    const d = Math.hypot(dx, dy);
+    if (d > stick.R) { dx *= stick.R / d; dy *= stick.R / d; }
+    $('.knob', stick.el).style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    G.world.setStick(dx / stick.R, dy / stick.R);
+  });
+  const stickUp = (e) => {
+    if (!stick || (e && e.pointerId !== stick.id)) return;
+    stick.el.remove();
+    stick = null;
+    G.world.setStick(0, 0);
+  };
+  ui.addEventListener('pointerup', stickUp);
+  ui.addEventListener('pointercancel', stickUp);
+  G.releaseStick = () => stickUp();
+
+  // Tombol A berkedip saat ada warga yang bisa diajak bicara
+  setInterval(() => {
+    const ab = hud && $('.abtn', hud);
+    if (ab) ab.classList.toggle('ready', G.world.mode === 'walk' && !!G.world.near);
+  }, 150);
 
   // Ara sebagai asisten: ingatkan berapa warga lagi yang perlu dibantu, dan siapa saja.
   const WHO = { ani: 'Bu Ani', api: 'Api Jahil di tumpukan daun', budi: 'Pak Budi', joko: 'Pak Joko', siti: 'Bu Siti', udin: 'Kakek Udin' };
@@ -354,6 +385,7 @@
   // ---------- Koleksi ----------
   function showCollection() {
     G.world.mode = 'busy';
+    G.releaseStick && G.releaseStick();
     G.world.setHeld(null);
     modal.innerHTML = '';
     const c = el(`<div class="card collection">
@@ -391,6 +423,7 @@
   // ---------- Pengaturan (orang tua) ----------
   function showSettings() {
     G.world.mode = 'busy';
+    G.releaseStick && G.releaseStick();
     G.world.setHeld(null);
     modal.innerHTML = '';
     const c = el(`<div class="card settings">
@@ -433,17 +466,23 @@
   }
 
   // ---------- Keyboard (untuk laptop) ----------
-  const KEYS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right' };
+  const KEYS = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] };
+  const down = new Set();
+  const keyStick = () => {
+    let x = 0, y = 0;
+    down.forEach((k) => { x += KEYS[k][0]; y += KEYS[k][1]; });
+    G.world.setStick(Math.sign(x), Math.sign(y));
+  };
   window.addEventListener('keydown', (e) => {
     G.audioUnlock();
-    if (KEYS[e.key]) { e.preventDefault(); if (G.world.held !== KEYS[e.key]) G.world.setHeld(KEYS[e.key]); }
+    if (KEYS[e.key]) { e.preventDefault(); down.add(e.key); keyStick(); }
     else if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       if (dlg.classList.contains('show')) dlg.click();
       else G.world.pressA();
     }
   });
-  window.addEventListener('keyup', (e) => { if (KEYS[e.key] && G.world.held === KEYS[e.key]) G.world.setHeld(null); });
+  window.addEventListener('keyup', (e) => { if (KEYS[e.key]) { down.delete(e.key); keyStick(); } });
 
   // Simpan posisi berkala & hentikan musik saat aplikasi di latar belakang
   setInterval(() => { if (G.world.mode === 'walk') { G.world.save(); G.persist(); } }, 4000);

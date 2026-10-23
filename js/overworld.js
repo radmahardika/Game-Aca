@@ -3,7 +3,6 @@
   const G = (window.G = window.G || {});
   const T = 16, MW = 32, MH = 22;
   const R = Math.round;
-  const STEP = 0.2; // detik per petak
   const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   const hash = (n) => {
     const s = Math.sin(n * 127.1) * 43758.5453;
@@ -60,11 +59,8 @@
   const W = {
     aksa: { tx: 15, ty: 12, x: 15 * T, y: 12 * T, dir: 'down', moving: false, t: 0, walk: 0 },
     ara: { tx: 16, ty: 12, x: 16 * T, y: 12 * T, dir: 'down', moving: false, t: 0, walk: 0 },
-    path: [],
-    pending: null,
-    held: null,
     mode: 'busy',
-    marker: null,
+    near: null,
     cam: { x: 0, y: 0 },
     shake: 0,
   };
@@ -90,7 +86,6 @@
   // Apa yang ada di petak ini (untuk tombol A / ketuk)?
   function thingAt(x, y) {
     const at = (p) => p[0] === x && p[1] === y;
-    if (W.ara.tx === x && W.ara.ty === y && !W.ara.moving) return 'ara';
     for (const [id, n] of Object.entries(NPCS)) if (n.x === x && n.y === y) return id;
     if (at(CAT_TREE)) return 'ani';
     if (at(PILE)) return 'api';
@@ -278,146 +273,127 @@
     }
   }
 
-  // ---------- Gerak ----------
-  function startMove(e, nx, ny) {
-    e.fx = e.tx; e.fy = e.ty;
-    e.tx = nx; e.ty = ny;
-    e.moving = true;
-    e.t = 0;
+  // ---------- Gerak bebas (analog stik) ----------
+  const SPEED = 80; // piksel per detik saat stik didorong penuh
+  const FOLLOW = 18; // jarak Ara di belakang Aksa (piksel jejak)
+  const REACH = 26; // jarak maksimal untuk bicara dengan tombol A
+
+  // Kotak kaki Aksa harus berada di petak yang bisa dilewati.
+  function canStand(x, y) {
+    const pts = [[x + 3, y + 10], [x + 12, y + 10], [x + 3, y + 15], [x + 12, y + 15]];
+    return pts.every(([px, py]) => !blocked(Math.floor(px / T), Math.floor(py / T)));
   }
-  function dirTo(ax, ay, bx, by) {
-    if (bx > ax) return 'right';
-    if (bx < ax) return 'left';
-    if (by > ay) return 'down';
-    if (by < ay) return 'up';
-    return null;
+  const tileOf = (e) => [Math.floor((e.x + 8) / T), Math.floor((e.y + 12) / T)];
+  function faceFrom(vx, vy, cur) {
+    if (Math.abs(vx) < 0.01 && Math.abs(vy) < 0.01) return cur;
+    // gerak serong dihitung menghadap kiri/kanan
+    if (Math.abs(vx) >= Math.abs(vy) * 0.45) return vx > 0 ? 'right' : 'left';
+    return vy > 0 ? 'down' : 'up';
   }
+  const dirTo = (ax, ay, bx, by) => faceFrom(bx - ax, by - ay, 'down');
+
+  W.stick = { x: 0, y: 0 }; // -1..1
+  W.setStick = function (x, y) { W.stick.x = x; W.stick.y = y; };
+  W.setHeld = function (dir) {
+    const d = dir ? DIRS[dir] : [0, 0];
+    W.setStick(d[0], d[1]);
+  };
+
+  let trail = [];
+  function resetTrail() {
+    trail = [{ x: W.ara.x, y: W.ara.y }, { x: W.aksa.x, y: W.aksa.y }];
+  }
+
   let bumpT = 0;
-  function tryStep(dir) {
-    const P = W.aksa, A = W.ara;
-    P.dir = dir;
-    const [dx, dy] = DIRS[dir];
-    const nx = P.tx + dx, ny = P.ty + dy;
-    if (blocked(nx, ny)) {
-      if (G.time - bumpT > 0.35) { G.sfx.bump(); bumpT = G.time; }
-      return false;
-    }
-    const ox = P.tx, oy = P.ty;
-    startMove(P, nx, ny);
-    if (!(A.tx === ox && A.ty === oy)) {
-      A.dir = dirTo(A.tx, A.ty, ox, oy) || A.dir;
-      startMove(A, ox, oy);
-    }
-    return true;
-  }
-
-  function bfs(sx, sy, goal) {
-    const key = (x, y) => y * MW + x;
-    const prev = new Map([[key(sx, sy), null]]);
-    const q = [[sx, sy]];
-    while (q.length) {
-      const [x, y] = q.shift();
-      if (goal(x, y) && !(x === sx && y === sy)) {
-        const out = [];
-        let k = key(x, y);
-        while (k !== key(sx, sy)) {
-          out.unshift([k % MW, Math.floor(k / MW)]);
-          k = prev.get(k);
-        }
-        return out;
-      }
-      for (const [dx, dy] of Object.values(DIRS)) {
-        const nx = x + dx, ny = y + dy;
-        const k = key(nx, ny);
-        if (prev.has(k) || blocked(nx, ny)) continue;
-        prev.set(k, key(x, y));
-        q.push([nx, ny]);
-      }
-    }
-    return null;
-  }
-
-  function interactFacing() {
+  function moveAksa(dt) {
     const P = W.aksa;
+    let { x: sx, y: sy } = W.stick;
+    const mag = Math.min(1, Math.hypot(sx, sy));
+    if (W.mode !== 'walk' || mag < 0.18) { P.moving = false; P.walk = 0; return; }
+    const speed = SPEED * (0.35 + 0.65 * (mag - 0.18) / 0.82);
+    const vx = (sx / Math.hypot(sx, sy)) * speed, vy = (sy / Math.hypot(sx, sy)) * speed;
+    P.dir = faceFrom(vx, vy, P.dir);
+    const ox = P.x, oy = P.y;
+    const nx = P.x + vx * dt, ny = P.y + vy * dt;
+    if (canStand(nx, P.y)) P.x = nx;
+    if (canStand(P.x, ny)) P.y = ny;
+    const moved = Math.hypot(P.x - ox, P.y - oy);
+    if (moved < 0.05 && G.time - bumpT > 0.5) { G.sfx.bump(); bumpT = G.time; }
+    P.moving = moved > 0.05;
+    P.walk = P.moving ? P.walk + moved / T : 0;
+    [P.tx, P.ty] = tileOf(P);
+    if (P.moving) {
+      const last = trail[trail.length - 1];
+      if (Math.hypot(P.x - last.x, P.y - last.y) >= 1) trail.push({ x: P.x, y: P.y });
+      if (trail.length > 80) trail.shift();
+    }
+  }
+
+  // Ara mengikuti jejak Aksa sejauh FOLLOW piksel.
+  function moveAra() {
+    const A = W.ara;
+    let need = FOLLOW, target = trail[0];
+    for (let i = trail.length - 1; i > 0; i--) {
+      const a = trail[i], b = trail[i - 1];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d >= need) {
+        const k = need / d;
+        target = { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k };
+        need = 0;
+        break;
+      }
+      need -= d;
+    }
+    const ox = A.x, oy = A.y;
+    if (need === 0 || Math.hypot(target.x - A.x, target.y - A.y) > 0.5) { A.x = target.x; A.y = target.y; }
+    const moved = Math.hypot(A.x - ox, A.y - oy);
+    A.dir = faceFrom(A.x - ox, A.y - oy, A.dir);
+    A.moving = moved > 0.05;
+    A.walk = A.moving ? A.walk + moved / T : 0;
+    [A.tx, A.ty] = tileOf(A);
+  }
+
+  // Cari hal terdekat yang bisa diajak bicara (warga, papan, Ara).
+  function nearest() {
+    const P = W.aksa;
+    const fx = P.x + 8, fy = P.y + 12;
     const [dx, dy] = DIRS[P.dir];
-    const id = thingAt(P.tx + dx, P.ty + dy);
-    if (id && W.onInteract) W.onInteract(id);
+    let best = null, bestD = Infinity;
+    const [tx0, ty0] = tileOf(P);
+    for (let ty = ty0 - 2; ty <= ty0 + 2; ty++)
+      for (let tx = tx0 - 2; tx <= tx0 + 2; tx++) {
+        if (tx === tx0 && ty === ty0) continue;
+        const id = thingAt(tx, ty);
+        if (!id) continue;
+        const cx = tx * T + 8, cy = ty * T + 8;
+        const d = Math.hypot(cx - fx, cy - fy);
+        if (d > REACH) continue;
+        const facing = (cx - fx) * dx + (cy - fy) * dy > 0 ? 0 : 6; // utamakan yang di depan
+        if (d + facing < bestD) { bestD = d + facing; best = { id, cx, cy }; }
+      }
+    if (!best) {
+      const A = W.ara;
+      const d = Math.hypot(A.x + 8 - fx, A.y + 12 - fy);
+      if (d <= REACH) best = { id: 'ara', cx: A.x + 8, cy: A.y + 12 };
+    }
+    return best;
   }
 
   W.pressA = function () {
-    if (W.mode !== 'walk' || W.aksa.moving) return;
-    W.path = [];
-    W.pending = null;
-    interactFacing();
-  };
-  W.setHeld = function (dir) {
-    W.held = dir;
-    if (dir) { W.path = []; W.pending = null; W.marker = null; }
-  };
-
-  W.tapWorld = function (sx, sy) {
     if (W.mode !== 'walk') return;
-    const { S } = G.view;
-    const wx = sx / S + W.cam.x, wy = sy / S + W.cam.y;
-    const tx = Math.floor(wx / T), ty = Math.floor(wy / T);
+    const n = nearest();
+    if (!n) return;
     const P = W.aksa;
-    // ketuk pada bagian atas sprite NPC juga dihitung
-    let id = thingAt(tx, ty);
-    let target = [tx, ty];
-    if (!id && thingAt(tx, ty + 1) && ['ani', 'budi', 'joko', 'kades', 'raja', 'siti', 'udin', 'ara'].includes(thingAt(tx, ty + 1))) {
-      id = thingAt(tx, ty + 1);
-      target = [tx, ty + 1];
-    }
-    if (id) {
-      const [gx, gy] = target;
-      if (Math.abs(gx - P.tx) + Math.abs(gy - P.ty) === 1 && !P.moving) {
-        P.dir = dirTo(P.tx, P.ty, gx, gy);
-        W.onInteract && W.onInteract(id);
-        return;
-      }
-      const p = bfs(P.tx, P.ty, (x, y) => Math.abs(x - gx) + Math.abs(y - gy) === 1);
-      if (p) { W.path = p; W.pending = { x: gx, y: gy, id }; W.marker = { x: gx, y: gy, t: G.time }; }
-      return;
-    }
-    if (blocked(tx, ty) || (tx === P.tx && ty === P.ty)) return;
-    const p = bfs(P.tx, P.ty, (x, y) => x === tx && y === ty);
-    if (p) { W.path = p; W.pending = null; W.marker = { x: tx, y: ty, t: G.time }; }
+    P.dir = dirTo(P.x + 8, P.y + 12, n.cx, n.cy);
+    W.setStick(0, 0);
+    W.onInteract && W.onInteract(n.id);
   };
 
   function update(dt) {
-    const P = W.aksa, A = W.ara;
-    for (const e of [P, A]) {
-      if (!e.moving) continue;
-      e.t += dt / STEP;
-      e.walk += dt / STEP;
-      if (e.t >= 1) {
-        e.t = 1;
-        e.moving = false;
-      }
-      e.x = (e.fx + (e.tx - e.fx) * e.t) * T;
-      e.y = (e.fy + (e.ty - e.fy) * e.t) * T;
-    }
-    if (!P.moving) {
-      if (!A.moving) A.walk = 0;
-      if (W.mode !== 'walk') { P.walk = 0; return; }
-      if (W.held) {
-        if (!tryStep(W.held)) P.walk = 0;
-      } else if (W.path.length) {
-        const [nx, ny] = W.path[0];
-        const d = dirTo(P.tx, P.ty, nx, ny);
-        if (d && tryStep(d)) W.path.shift();
-        else { W.path = []; W.pending = null; }
-      } else {
-        P.walk = 0;
-        if (W.pending) {
-          const pd = W.pending;
-          W.pending = null;
-          W.marker = null;
-          P.dir = dirTo(P.tx, P.ty, pd.x, pd.y) || P.dir;
-          W.onInteract && W.onInteract(pd.id);
-        } else if (W.marker && W.marker.x === P.tx && W.marker.y === P.ty) W.marker = null;
-      }
-    }
+    moveAksa(dt);
+    moveAra();
+    const n = W.mode === 'walk' ? nearest() : null;
+    W.near = n && n.id !== 'ara' ? n.id : null; // Ara tidak membuat tombol A berkedip
   }
 
   // ---------- Gambar dunia ----------
@@ -439,14 +415,6 @@
     ctx.save();
     ctx.translate(-cx, -cy);
     ctx.drawImage(layer, 0, 0);
-    if (W.marker) {
-      const k = (t - W.marker.t) * 4;
-      ctx.globalAlpha = 0.6 + 0.3 * Math.sin(k);
-      const mx = W.marker.x * T, my = W.marker.y * T;
-      px(ctx, mx + 2, my + 2, 12, 2, '#ffffff'); px(ctx, mx + 2, my + 12, 12, 2, '#ffffff');
-      px(ctx, mx + 2, my + 2, 2, 12, '#ffffff'); px(ctx, mx + 12, my + 2, 2, 12, '#ffffff');
-      ctx.globalAlpha = 1;
-    }
 
     const items = [];
     const inView = (x, y) => x > cx - 40 && x < cx + VW + 40 && y > cy - 10 && y < cy + VH + 60;
@@ -567,6 +535,12 @@
     Object.assign(W.aksa, { tx: p.x, ty: p.y, x: p.x * T, y: p.y * T, dir: p.dir || 'down', moving: false });
     const ax = blocked(p.ax, p.ay) ? p.x : p.ax, ay = blocked(p.ax, p.ay) ? p.y - 1 : p.ay;
     Object.assign(W.ara, { tx: ax, ty: ay, x: ax * T, y: ay * T, moving: false });
+    resetTrail();
+  };
+  W.place = function (x, y, dir) {
+    Object.assign(W.aksa, { x, y, dir: dir || W.aksa.dir });
+    Object.assign(W.ara, { x: x - 14, y });
+    resetTrail();
   };
 
   W.init = function () {
@@ -575,6 +549,7 @@
     treeImg = makeTree(11);
     bigTreeImg = makeTree(15);
     W.restore();
+    resetTrail();
   };
   G.scenes.world = function () {
     return { draw, ownsFx: true };
