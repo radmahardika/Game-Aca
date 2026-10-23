@@ -15,7 +15,11 @@
 
   const Q = () => G.JUZAMMA.surahs;
   const name = (s) => Q()[s].name;
-  const ayat = (s) => Q()[s].ayat;
+  // Teks Kemenag menandai bacaan sambung dalam kurung, mis. "aḥad(un)." Untuk anak
+  // ditampilkan bacaan saat berhenti (waqaf): "aḥad".
+  const clean = (t) => t.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').replace(/[.,;:]+$/, '').trim();
+  const cache = {};
+  const ayat = (s) => cache[s] || (cache[s] = Q()[s].ayat.map(clean));
 
   // ---------- Audio bacaan (Syaikh Al-Husary Mu'allim) ----------
   const player = new Audio();

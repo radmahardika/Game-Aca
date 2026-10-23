@@ -27,6 +27,23 @@ Setelah keenamnya selesai, **Raja Api Jahil** muncul di depan Balai Desa sebagai
 - Musik latar chiptune (lagu desa & lagu battle) dan efek suara, bisa dimatikan dari tombol 🎵 atau ⚙️ Pengaturan. Tidak ada narasi suara.
 - Progres dan posisi Aksa tersimpan otomatis di perangkat.
 
+## Wilayah 2: Kampung Hijau — "Perjalanan Menuju Porseni" (Juz Amma)
+
+Dipilih dari layar judul kapan saja. Aksa dan Ara menjemput teman-teman TPA yang kesulitan, murajaah bersama, lalu semuanya tampil di panggung Porseni.
+
+| Teman | Masalah | Surat untuk murajaah |
+|---|---|---|
+| Dika | Ban sepeda kempes di sawah | An-Nas, Al-Falaq, Al-Ikhlas, Al-Lahab, An-Nashr |
+| Salma | Kehujanan, payung rusak di pasar | Al-Kafirun, Al-Kautsar, Al-Ma'un, Quraisy, Al-Fil |
+| Umar | Takut menyeberang jembatan | Al-Humazah, Al-'Ashr, At-Takatsur, Al-Qari'ah, Al-'Adiyat |
+| Aisyah | Membantu Nenek menjemur padi | Az-Zalzalah, Al-Bayyinah, Al-Qadr, At-Tin, Al-Insyirah |
+
+- Bersama teman: **Sambung Ayat** (dengar ayat, pilih ayat berikutnya) dan **Tebak Surat** (dengar awal surat, pilih namanya). Setiap pilihan bisa didengar dengan tombol 🔊.
+- Di panggung Porseni (Ustadz Hasan, setelah keempat teman ikut): **Susun Ayat** (Al-Fatihah & satu surat pendek) dan **Kata yang Hilang**.
+- Teman yang sudah dijemput ikut berjalan di belakang rombongan.
+- Teks Latin dari **equran.id (Kemenag RI)**, ditampilkan sebagai bacaan waqaf (tanpa akhiran dalam kurung). Audio: **Syaikh Mahmud Khalil Al-Husary (Mu'allim)** dari everyayah.com, disimpan di `audio/husary-muallim/`.
+- Data dibuat dengan `node tools/ambil-juzamma.mjs` (di lingkungan dengan proxy: `NODE_USE_ENV_PROXY=1 node tools/ambil-juzamma.mjs`). Mohon teks dicek ulang oleh orang tua/guru.
+
 ## Main di iPad
 
 1. Buka link GitHub Pages: `https://radmahardika.github.io/Game-Aca/` di **Safari**.
@@ -59,3 +76,6 @@ npx http-server .
 - `js/questions.js`: pembuat soal acak
 - `js/audio.js`: efek suara dan musik latar chiptune
 - `js/game.js`: alur game (judul, dunia, dialog, hadiah, koleksi, pengaturan)
+- `js/kampung.js`: peta & cerita Kampung Hijau
+- `js/murajaah.js`: layar murajaah dan panggung Porseni
+- `data/juzamma.js`, `audio/husary-muallim/`: teks Latin & audio (dibuat oleh `tools/ambil-juzamma.mjs`)
