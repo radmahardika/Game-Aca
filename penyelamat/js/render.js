@@ -44,6 +44,17 @@
           const q = (wx - L.x) ** 2 + (wy - L.y) ** 2;
           if (q < L.r * L.r) { const f = (1 - Math.sqrt(q) / L.r) ** 2 * L.i; r += f * 0.95; g += f * 1.05; b += f * 0.45; }
         }
+        // lampu sorot Tutu: cahaya hangat di sekitar Tutu, hanya terlihat di layar Tutu
+        if (owl) {
+          const q = (wx - p.x) ** 2 + (wy - p.y) ** 2;
+          if (q < 81) {
+            const dd = Math.sqrt(q) || 0.001;
+            let f = dd < 3.5 ? (1 - dd / 3.5) ** 2 * 0.45 : 0; // cahaya di sekitar Tutu
+            const c = ((wx - p.x) * dirX + (wy - p.y) * dirY) / dd; // sorot ke depan, sampai ±9 langkah
+            if (c > 0.88) f += (1 - dd / 9) * Math.min(1, (c - 0.88) / 0.08) * 0.85;
+            r += f; g += f * 0.9; b += f * 0.6;
+          }
+        }
         sh[0] = r; sh[1] = g; sh[2] = b;
       };
 

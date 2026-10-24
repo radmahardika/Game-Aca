@@ -39,6 +39,8 @@ button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 .bubble.hear { background: #dcecff; color: #0e1d33; }
 .banner { position: absolute; top: calc(118px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: #5a2a24; border: 1px solid #a0483c; border-radius: 12px; padding: 8px 14px; font-weight: 800; font-size: 15px; }
 .toast { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); width: min(520px, 86vw); background: var(--panel); border: 2px solid var(--firefly); border-radius: 18px; padding: 16px 20px; text-align: center; pointer-events: none; }
+.toast.stay { pointer-events: auto; }
+.toast .ok { margin-top: 12px; padding: 10px 26px; font-size: 18px; }
 .toast h3 { font-family: var(--display); color: var(--firefly); font-size: 26px; margin: 0 0 6px; }
 .toast p { margin: 0; font-size: 17px; line-height: 1.45; }
 .stick { position: absolute; width: 130px; height: 130px; margin: -65px 0 0 -65px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .05); pointer-events: none; }
@@ -71,6 +73,18 @@ button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 .keys button { height: 72px; border-radius: 14px; background: #2a3150; border: 1px solid var(--line); font-size: 38px; }
 .status { text-align: center; font-weight: 800; color: var(--ink) !important; min-height: 1.5em; }
 .status.err { color: #ffb0a0 !important; }
+/* panel alat di sisi kanan: tidak menutupi jalan, Benhat tetap bisa melihat & berjalan */
+.toolpanel { position: absolute; top: calc(62px + env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: min(320px, 40vw); max-height: calc(100% - 200px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); overflow: auto; background: var(--panel); border: 2px solid var(--bark); border-radius: 16px; padding: 10px 12px; }
+.toolpanel h2 { font-family: var(--display); font-size: 20px; margin: 0; color: var(--amber); }
+.toolpanel p { margin: 2px 0 8px; font-size: 14px; color: var(--muted); }
+.toolpanel .tools { grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 8px; }
+.toolpanel .tool { font-size: 24px; padding: 5px 2px; }
+.toolpanel .tool span { font-size: 11px; }
+.toolpanel .row { align-items: center; }
+.toolpanel .bag.static { margin: 0; padding: 4px 6px; gap: 4px; }
+.toolpanel .slot { width: 34px; height: 34px; font-size: 18px; }
+.toolpanel .slot.w2 { width: 72px; }
+.go.small { padding: 10px 14px; font-size: 16px; }
 .tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; margin: 10px 0 12px; }
 .tool { background: #241f18; border: 2px solid #4d4434; border-radius: 12px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 30px; position: relative; }
 .tool span { font-size: 13px; font-weight: 800; color: #e6dccb; }

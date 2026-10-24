@@ -84,8 +84,8 @@
     if (S.world.saved == T.VICTIMS.length) showEnd();
   }
   function roleToast() {
-    if (S.role == 'owl') showToast('🦉 Kamu Tutu', 'Cari hewan yang butuh pertolongan, lalu tandai dengan ⭐ supaya Benhat tahu arahnya.', 3200);
-    else showToast('🐻 Kamu Benhat', 'Gelap sekali! Ikuti mata kuning Tutu dan bintang ⭐. Dengarkan suara minta tolong 🔊.', 3200);
+    if (S.role == 'owl') showToast('🦉 Kamu Tutu', 'Cari hewan yang butuh pertolongan, lalu tandai dengan ⭐ supaya Benhat tahu arahnya.');
+    else showToast('🐻 Kamu Benhat', 'Gelap sekali! Ikuti mata kuning Tutu dan bintang ⭐. Dengarkan suara minta tolong 🔊.');
   }
 
   // ---------- ruangan ----------
@@ -247,7 +247,6 @@
     }
   }
 
-  let endTimer = 0;
   function handleEvent(ev) {
     updateHUD();
     if (ev.k == 'marked') {
@@ -256,12 +255,13 @@
       else showToast('⭐ Tutu menandai sesuatu!', 'Cari bintang kuning, lalu ikuti arahnya.', 2200);
     } else if (ev.k == 'wrong') {
       T.audio.sfx('wrong');
-      showToast('Alatnya belum cocok', 'Tanya Tutu: hewan ini kenapa? Lalu ambil alat di Pohon Sarang.', 2800);
+      showToast('Alatnya belum cocok', 'Tanya Tutu: hewan ini kenapa? Lalu ambil alat di Pohon Sarang.');
     } else if (ev.k == 'rescued') {
       const meta = T.vicById[ev.id];
       T.audio.sfx('rescue');
-      showToast(meta.nama + ' selamat!', meta.lesson, 4600);
-      if (S.world.saved >= T.VICTIMS.length) { clearTimeout(endTimer); endTimer = setTimeout(showEnd, 4800); }
+      // pesan dunia nyata tetap tampil sampai anak menekan Oke
+      const last = S.world.saved >= T.VICTIMS.length;
+      showToast(meta.nama + ' selamat!', meta.lesson, 0, last ? showEnd : null);
     }
   }
   function showEnd() {
@@ -282,7 +282,7 @@
     if (k == 'm') openMap();
   });
   addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = 0; });
-  const modalOpen = () => !$('toolModal').hidden || !$('mapModal').hidden || !$('menu').hidden || !$('endModal').hidden;
+  const modalOpen = () => !$('mapModal').hidden || !$('menu').hidden || !$('endModal').hidden;
 
   const stick = { id: null, ox: 0, oy: 0, dx: 0, dy: 0 };
   function resetStick() { stick.id = null; stick.dx = stick.dy = 0; const s = document.getElementById('stick'); if (s) s.hidden = true; }
@@ -382,6 +382,7 @@
   }
   function swap() {
     S.role = other(S.role);
+    $('toolModal').hidden = true;
     updateHUD(); roleToast();
   }
 
@@ -451,13 +452,28 @@
     $('mapModal').hidden = false;
   }
 
-  let toastT = 0;
-  function showToast(h, p, ms) {
+  // ms = 0: tetap tampil sampai tombol Oke ditekan. Tanpa ms: lama tampil mengikuti panjang tulisan (anak membaca pelan).
+  let toastT = 0, toastDone = null;
+  function showToast(h, p, ms, onClose) {
     const t = $('toast');
-    t.innerHTML = `<h3>${h}</h3><p>${p}</p>`;
-    t.hidden = false;
+    if (!t.hidden && t.classList.contains('stay') && ms !== 0) return; // jangan timpa pesan yang sedang dibaca
+    if (toastDone) { const f = toastDone; toastDone = null; f(); }
     clearTimeout(toastT);
-    toastT = setTimeout(() => (t.hidden = true), ms);
+    t.innerHTML = `<h3>${h}</h3><p>${p}</p>`;
+    t.classList.toggle('stay', ms === 0);
+    t.hidden = false;
+    toastDone = onClose || null;
+    if (ms === 0) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'go ok'; b.textContent = 'Oke 👍';
+      b.onclick = () => { T.audio.sfx('tap'); closeToast(); };
+      t.appendChild(b);
+    } else toastT = setTimeout(closeToast, ms || Math.max(3000, 1500 + p.length * 75));
+  }
+  function closeToast() {
+    clearTimeout(toastT);
+    $('toast').hidden = true;
+    if (toastDone) { const f = toastDone; toastDone = null; f(); }
   }
   function hudTick() {
     const b = $('bubble');
@@ -474,7 +490,9 @@
       }
     } else {
       if (nearVictim('bear', 3.2)) { txt = '🔊 Ada suara minta tolong di dekat sini!'; cls = 'bubble hear'; }
-      else if (atSarang()) txt = '🌳 Pohon Sarang. Tekan A untuk mengambil alat.';
+      else if (atSarang() && $('toolModal').hidden) txt = '🌳 Pohon Sarang. Tekan A untuk mengambil alat.';
+      // panel alat tertutup sendiri saat Benhat berjalan menjauh dari Pohon Sarang
+      if (!$('toolModal').hidden && !atSarang()) $('toolModal').hidden = true;
     }
     // petunjuk kecil alat hanya untuk Tutu, di baris kedua
     const key = txt + '|' + hint;

@@ -82,6 +82,11 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   **Duo Penyelamat versi 5** di `penyelamat/`: judul baru "Duo Penyelamat"; petunjuk kecil 💡 alat untuk Tutu
   (`hint` di `T.VICTIMS`, tidak menyebut nama alat; Benhat tidak dapat); Tutu terbang & lebih cepat (v4);
   perbaikan rotasi iPad (v3). Belum diuji di dua iPad sungguhan — tunggu laporan pengguna.
+- Laporan pengguna: **main berdua di dua iPad sudah berhasil**.
+- Branch `pratinjau-v13`: (1) pesan "X selamat!" tetap tampil sampai tombol **Oke 👍** ditekan (pesan lain tampil sesuai
+  panjang tulisan, tidak menimpa pesan yang sedang dibaca; layar akhir muncul setelah Oke terakhir); (2) alat di Pohon Sarang
+  jadi **panel kecil di kanan** (tanpa latar gelap, Benhat tetap bisa berjalan, panel tertutup sendiri saat menjauh);
+  (3) **lampu sorot Tutu**: cahaya hangat di sekitar + sorot ke depan ±9 langkah, hanya di layar Tutu.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:
