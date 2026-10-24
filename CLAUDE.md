@@ -78,8 +78,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 7** (Desa Ceria + Kampung Hijau).
-- Branch `pratinjau-v8`: Tim Penyelamat Malam versi 1 (belum diuji di dua iPad sungguhan).
+- Rilis terakhir di `main`: **versi 8** (Desa Ceria + Kampung Hijau; game Aksa sama dengan versi 7) +
+  **Tim Penyelamat Malam versi 1** di `penyelamat/` (belum diuji di dua iPad sungguhan — tunggu laporan pengguna).
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:
