@@ -334,7 +334,7 @@
     if (Math.abs(tr) < 0.15) tr = 0;
     fw *= Math.abs(fw); tr *= Math.abs(tr);
     p.a += tr * 1.4 * dt;
-    let sp = S.role == 'owl' ? 2.1 : 1.3;
+    let sp = S.role == 'owl' ? 2.7 : 1.3; // Tutu terbang lebih cepat dari Siberat
     if (S.role == 'bear' && T.FLOOR[T.I(p.x | 0, p.y | 0)] == 2) sp *= 0.55;
     const vx = Math.cos(p.a) * fw * sp * dt, vy = Math.sin(p.a) * fw * sp * dt;
     if (free(S.role, p.x + vx, p.y)) p.x += vx;

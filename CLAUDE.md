@@ -82,6 +82,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   **Tim Penyelamat Malam versi 3** di `penyelamat/` (nama Tutu & Siberat; perbaikan layar macet & analog mati
   setelah iPad diputar — ukur ulang kanvas tiap frame, analog direset saat rotasi/jari hilang, loop dijaga try/catch).
   Belum diuji di dua iPad sungguhan — tunggu laporan pengguna.
+- Branch `pratinjau-v11`: Tutu terbang — kamera lebih tinggi (mata 1,15 vs 0,5; horizon 40% layar, sedikit menunduk,
+  naik-turun pelan) dan lebih cepat (Tutu 2,7 vs Siberat 1,3). Di layar Siberat, Tutu tampak melayang.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

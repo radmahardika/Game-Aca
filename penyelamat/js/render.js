@@ -31,7 +31,9 @@
     // view: {role:'owl'|'bear', p:{x,y,a}, other:{x,y,a}|null, world, t}
     function draw(view) {
       const owl = view.role == 'owl', p = view.p, t = view.t, world = view.world;
-      const dirX = Math.cos(p.a), dirY = Math.sin(p.a), plX = -dirY * 0.66, plY = dirX * 0.66, hz = H >> 1;
+      const dirX = Math.cos(p.a), dirY = Math.sin(p.a), plX = -dirY * 0.66, plY = dirX * 0.66;
+      // Tutu terbang: mata lebih tinggi (di bawah puncak pohon) dan sedikit menunduk; Siberat setinggi mata beruang.
+      const camZ = owl ? 1.15 + 0.035 * Math.sin(t * 2.5) : 0.5, hz = owl ? Math.round(H * 0.4) : H >> 1;
       const lights = T.lights(world);
       const sh = [0, 0, 0];
       const shade = (wx, wy, d) => {
@@ -72,7 +74,7 @@
       // lantai
       const rx0 = dirX - plX, ry0 = dirY - plY, rx1 = dirX + plX, ry1 = dirY + plY;
       for (let y = hz + 1; y < H; y++) {
-        const rd = (0.5 * H) / (y - hz), sx = (rd * (rx1 - rx0)) / W, sy = (rd * (ry1 - ry0)) / W;
+        const rd = (camZ * H) / (y - hz), sx = (rd * (rx1 - rx0)) / W, sy = (rd * (ry1 - ry0)) / W;
         let fx = p.x + rd * rx0, fy = p.y + rd * ry0;
         for (let x = 0; x < W; x++, fx += sx, fy += sy) {
           const xi = fx | 0, yi = fy | 0;
@@ -110,7 +112,7 @@
         const hx = p.x + d * rx, hy = p.y + d * ry;
         const wx = side == 0 ? hy - Math.floor(hy) : hx - Math.floor(hx);
         const tx = Math.min(15, (wx * 16) | 0);
-        const hh = H / d, top = Math.round(hz - hh * (T.HEIGHT[w] - 0.5)), bot = Math.round(hz + hh * 0.5);
+        const hh = H / d, top = Math.round(hz - hh * (T.HEIGHT[w] - camZ)), bot = Math.round(hz + hh * camZ);
         const TX = T.TEX[w];
         shade(hx, hy, d);
         const sd = side ? 0.78 : 1;
@@ -142,7 +144,7 @@
       const o = view.other;
       if (o) {
         if (owl) add({ x: o.x, y: o.y, s: SPR.bear, h: 0.95, z: 0 });
-        else { add({ x: o.x, y: o.y, s: SPR.owl, h: 0.55, z: 0.15 }); add({ x: o.x, y: o.y, s: SPR.eyes, h: 0.55, z: 0.15, emit: 1, off: 0.01 }); }
+        else { const fz = 0.6 + 0.05 * Math.sin(t * 2.5); add({ x: o.x, y: o.y, s: SPR.owl, h: 0.55, z: fz }); add({ x: o.x, y: o.y, s: SPR.eyes, h: 0.55, z: fz, emit: 1, off: 0.01 }); }
       }
       for (const s of world.stars) {
         const d = Math.hypot(s.x - p.x, s.y - p.y);
@@ -159,7 +161,7 @@
         const tX = inv * (dirY * dx - dirX * dy), tY = inv * (-plY * dx + plX * dy) - (o.off || 0);
         if (tY < 0.15) continue;
         const scx = (W / 2) * (1 + tX / tY), u = H / tY, hpx = u * o.h, Sp = o.s, wpx = (hpx * Sp.w) / Sp.h;
-        const bot = hz + u * (0.5 - o.z), top = bot - hpx, left = scx - wpx / 2;
+        const bot = hz + u * (camZ - o.z), top = bot - hpx, left = scx - wpx / 2;
         shade(o.x, o.y, Math.sqrt(o.d));
         for (let x = Math.max(0, left | 0); x < Math.min(W, left + wpx); x++) {
           if (!o.noz && zbuf[x] < tY) continue;
