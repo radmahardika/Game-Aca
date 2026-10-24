@@ -44,6 +44,16 @@ Dipilih dari layar judul kapan saja. Aksa dan Ara menjemput teman-teman TPA yang
 - Teks Latin dari **equran.id (Kemenag RI)**, ditampilkan sebagai bacaan waqaf (tanpa akhiran dalam kurung). Audio: **Syaikh Mahmud Khalil Al-Husary (Mu'allim)** dari everyayah.com, disimpan di `audio/husary-muallim/`.
 - Data dibuat dengan `node tools/ambil-juzamma.mjs` (di lingkungan dengan proxy: `NODE_USE_ENV_PROXY=1 node tools/ambil-juzamma.mjs`). Mohon teks dicek ulang oleh orang tua/guru.
 
+## Game kedua: Tim Penyelamat Malam 🦉🐻
+
+Folder `penyelamat/` → `https://radmahardika.github.io/Game-Aca/penyelamat/`
+
+Game penyelamatan first person 3D pixel di hutan malam untuk **anak + orang tua di dua iPad**. **Sinar** si burung hantu bisa melihat dalam gelap dan menandai hewan dengan ⭐. **Tangguh** si beruang hampir tidak bisa melihat. Ia membawa alat dari **Pohon Sarang** (tas hanya muat 3 kotak) dan menolong 7 hewan yang posisinya diacak setiap main. Keduanya harus saling bicara.
+
+- **Main berdua:** iPad pertama memilih *Buat ruangan* dan perannya, lalu muncul kode 4 gambar. iPad kedua memilih *Gabung ruangan* dan mengetuk gambar yang sama. Keduanya perlu internet.
+- **Main di satu iPad:** gantian peran dengan tombol ⇄.
+- Progres tersimpan di iPad pembuat ruangan.
+
 ## Main di iPad
 
 1. Buka link GitHub Pages: `https://radmahardika.github.io/Game-Aca/` di **Safari**.

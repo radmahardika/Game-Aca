@@ -50,9 +50,36 @@ https://radmahardika.github.io/Game-Aca/
   Ustadz Hasan: Susun Ayat (ketuk berurutan) & Kata yang Hilang. Audio: **Syaikh Al-Husary Mu'allim**.
   Teks ditampilkan sebagai bacaan waqaf (akhiran dalam kurung dibuang).
 
+## Game kedua: Tim Penyelamat Malam (`penyelamat/`)
+
+Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game-Aca/penyelamat/), versi sendiri
+(`TPM.VERSION` di `penyelamat/js/data.js` + `?v=N` di `penyelamat/index.html`). Tujuan: survival & problem solving,
+**dimainkan anak + orang tua di dua iPad** (atau satu iPad bergantian).
+
+- First person **3D pixel** (raycasting), malam gelap tapi tidak horor. Kontrol: analog melayang di 60% kiri layar
+  (atas/bawah = maju/mundur, kiri/kanan = belok; kecepatan sudah diturunkan atas permintaan pengguna).
+- **Sinar** (burung hantu, kecil & gesit): melihat dalam gelap (lingkaran redup kehijauan), terbang melintasi sungai,
+  tombol ⭐ Tandai (terlihat di layar Tangguh). Tidak bisa membawa alat.
+- **Tangguh** (beruang, kuat, helm kuning): layar hampir gelap total; hanya melihat mata kuning Sinar, bintang tanda,
+  gelombang suara 🔊 korban. Tidak bisa masuk sungai (lewat jembatan), lambat di lumpur. Tombol A.
+- **Dunia terbuka**, urutan bebas, posisi 7 korban **diacak** tiap main (titik tetap per zona). Semua korban hewan:
+  kelinci (sungai: pelampung+tali), rusa (perban), landak (tongkat), kambing (selimut+peluit), rubah (gua berasap: kain
+  basah), anak kerbau (lumpur: papan), anak kucing (pohon: tangga). Tiap selesai muncul pesan dunia nyata.
+- Pusat: **Pohon Sarang** (beringin berlubang + kunang-kunang; BUKAN perkemahan manusia). Alat diambil di sana.
+  **Tas 3 kotak**, papan & tangga = 2 kotak → harus memilih. Salah alat tidak kalah. Hewan selamat pindah ke sarang,
+  lokasinya jadi terang kunang-kunang.
+- Multiplayer: PeerJS (`penyelamat/vendor/peerjs.min.js` 1.5.5, server sinyal publik 0.peerjs.com). Pembuat ruangan =
+  tuan rumah yang memegang dunia & menyimpan progres (`localStorage` kunci `penyelamat-malam-v1`); kode ruangan 4 gambar.
+  Tamu mengirim aksi (`mark`, `bag`, `rescue`), tuan rumah membalas `world`/`ev`. Detak 4 detik → banner terputus,
+  tamu menyambung ulang otomatis.
+- Uji multiplayer lokal: jalankan server PeerJS (`npm i peer`, `PeerServer({port:9000,host:'127.0.0.1',path:'/'})`)
+  lalu buka `penyelamat/?peer=127.0.0.1:9000` di dua konteks Playwright. `TPM.debug` (place, act, swap, doA, doMark, ...),
+  `TPM.S` = keadaan.
+
 ## Status & yang sedang dibahas
 
 - Rilis terakhir di `main`: **versi 7** (Desa Ceria + Kampung Hijau).
+- Branch `pratinjau-v8`: Tim Penyelamat Malam versi 1 (belum diuji di dua iPad sungguhan).
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

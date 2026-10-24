@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Penyelamat">
+<meta name="theme-color" content="#070a16">
+<title>Tim Penyelamat Malam</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+<div id="game">
+  <canvas id="view"></canvas>
+
+  <!-- HUD permainan -->
+  <div id="hud" hidden>
+    <div class="hud tl"><div class="chip" id="roleChip">🦉 Sinar</div><div class="chip">Selamat <b id="count">0/7</b></div><div class="chip net" id="netChip" hidden>🔗</div></div>
+    <div class="hud tr">
+      <button class="hbtn" id="soundBtn" type="button" aria-label="Suara">🎵</button>
+      <button class="hbtn" id="mapBtn" type="button">🗺️ Peta</button>
+      <button class="hbtn" id="swapBtn" type="button" hidden>⇄ Ganti peran</button>
+      <button class="hbtn" id="menuBtn" type="button" aria-label="Menu">☰</button>
+    </div>
+    <div class="banner" id="banner" hidden></div>
+    <div class="bubble" id="bubble" hidden></div>
+    <div class="bag" id="bag" hidden></div>
+    <div class="actions">
+      <button class="round mark" id="markBtn" type="button">⭐<small>Tandai</small></button>
+      <button class="round" id="aBtn" type="button">A<small id="aLbl">&nbsp;</small></button>
+    </div>
+    <div class="stick" id="stick" hidden><div class="knob" id="knob"></div></div>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+
+  <!-- Layar judul -->
+  <div class="modal" id="title"><div class="card title">
+    <h1>Tim Penyelamat Malam</h1>
+    <p class="lead">🦉 Sinar & 🐻 Tangguh menolong 7 hewan di hutan yang gelap.</p>
+    <p class="save" id="saveInfo" hidden></p>
+    <div class="col">
+      <button class="go" id="twoBtn" type="button">👫 Main berdua (2 iPad)</button>
+      <button class="go alt" id="soloBtn" type="button">📱 Main di satu iPad</button>
+      <button class="link" id="resetBtn" type="button" hidden>Mulai dari awal (posisi hewan diacak lagi)</button>
+    </div>
+    <p class="ver" id="ver">versi 1</p>
+  </div></div>
+
+  <!-- Main berdua -->
+  <div class="modal" id="two" hidden><div class="card">
+    <h2>Main berdua</h2>
+    <p>Satu iPad membuat ruangan, iPad satunya bergabung. Pastikan keduanya tersambung internet.</p>
+    <div class="col">
+      <button class="go" id="hostBtn" type="button">🏠 Buat ruangan</button>
+      <button class="go alt" id="joinBtn" type="button">🚪 Gabung ruangan</button>
+      <button class="link back" type="button">← Kembali</button>
+    </div>
+  </div></div>
+
+  <!-- Pilih peran (pembuat ruangan) -->
+  <div class="modal" id="rolePick" hidden><div class="card">
+    <h2>iPad ini jadi siapa?</h2>
+    <div class="who">
+      <button type="button" class="pick" data-role="owl"><b>🦉 Sinar</b><i>si burung hantu</i>Bisa melihat dalam gelap dan terbang melintasi sungai. Menemukan hewan dan menandai dengan ⭐.</button>
+      <button type="button" class="pick" data-role="bear"><b>🐻 Tangguh</b><i>si beruang</i>Hampir tidak bisa melihat. Membawa alat dari Pohon Sarang dan menolong hewan.</button>
+    </div>
+    <button class="link back" type="button">← Kembali</button>
+  </div></div>
+
+  <!-- Kode ruangan -->
+  <div class="modal" id="hostWait" hidden><div class="card">
+    <h2>Kode ruangan</h2>
+    <p>Di iPad satunya, pilih <b>Main berdua → Gabung ruangan</b>, lalu ketuk gambar ini berurutan:</p>
+    <div class="code" id="codeShow"></div>
+    <p class="status" id="hostStatus">Membuka ruangan…</p>
+    <div class="row"><button class="link back" type="button">← Batal</button><button class="link" id="startEarly" type="button" hidden>Mulai duluan, teman menyusul →</button></div>
+  </div></div>
+
+  <!-- Gabung ruangan -->
+  <div class="modal" id="joinPick" hidden><div class="card">
+    <h2>Gabung ruangan</h2>
+    <p>Ketuk 4 gambar sesuai urutan di iPad teman.</p>
+    <div class="code" id="codeIn"></div>
+    <div class="keys" id="codeKeys"></div>
+    <p class="status" id="joinStatus">&nbsp;</p>
+    <div class="row"><button class="link" id="codeDel" type="button">⌫ Hapus</button><button class="link back" type="button">← Kembali</button></div>
+  </div></div>
+
+  <!-- Alat di Pohon Sarang -->
+  <div class="modal" id="toolModal" hidden><div class="card">
+    <h2>Pohon Sarang</h2>
+    <p>Tas cuma muat 3 kotak. Papan dan tangga besar, makan 2 kotak. Tanya dulu Sinar: hewannya kenapa?</p>
+    <div class="tools" id="toolGrid"></div>
+    <div class="bag static" id="bagModal"></div>
+    <div><button class="go" id="toolDone" type="button">Selesai</button></div>
+  </div></div>
+
+  <!-- Peta -->
+  <div class="modal" id="mapModal" hidden><div class="card">
+    <h2>Peta</h2><p>Hanya bagian hutan yang sudah dilihat.</p>
+    <div class="mapwrap"><canvas id="mapc" width="160" height="160"></canvas></div>
+    <div class="legend"><span style="--c:#e6ff8a">Pohon Sarang</span><span style="--c:#ffd84a">Sinar</span><span style="--c:#b07a4a">Tangguh</span><span style="--c:#ffcf4a">⭐ Tanda</span><span style="--c:#3f7aa6">Sungai</span></div>
+    <div class="center"><button class="go" id="mapClose" type="button">Tutup</button></div>
+  </div></div>
+
+  <!-- Menu -->
+  <div class="modal" id="menu" hidden><div class="card">
+    <h2>Istirahat dulu</h2>
+    <p id="menuInfo">Progres tersimpan otomatis.</p>
+    <div class="col">
+      <button class="go" id="resumeBtn" type="button">▶ Lanjut main</button>
+      <button class="go alt" id="quitBtn" type="button">🏠 Ke layar judul</button>
+    </div>
+  </div></div>
+
+  <!-- Selesai -->
+  <div class="modal" id="endModal" hidden><div class="card">
+    <h2>Ketujuh hewan selamat!</h2>
+    <p>Pohon Sarang jadi ramai dan hutan terang oleh kunang-kunang. Hebat, Sinar dan Tangguh!</p>
+    <p id="endWait" hidden>Menunggu teman memulai petualangan baru…</p>
+    <div class="col">
+      <button class="go" id="againBtn" type="button">🌙 Main lagi (posisi hewan baru)</button>
+      <button class="go alt" id="endHome" type="button">🏠 Ke layar judul</button>
+    </div>
+  </div></div>
+</div>
+
+<script src="vendor/peerjs.min.js?v=1"></script>
+<script src="js/data.js?v=1"></script>
+<script src="js/render.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/net.js?v=1"></script>
+<script src="js/main.js?v=1"></script>
+</body>
+</html>
