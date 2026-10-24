@@ -13,6 +13,9 @@
   const riverX = (T.riverX = (y) => Math.round(27 + 3 * Math.sin(y / 5)));
   const SX = 17, SY = 19;
   T.SARANG = { x: SX + 1, y: SY + 1 };
+  T.BRIDGE_ROWS = [19, 33, 8];
+  // kunang-kunang di kedua ujung tiap jembatan supaya Benhat bisa menemukan jalan menyeberang
+  T.BRIDGE_LIGHTS = T.BRIDGE_ROWS.flatMap((by) => [-2, 2].map((dx) => ({ x: riverX(by) + dx + 0.5, y: by + 0.5, r: 2.4, i: 0.4 })));
 
   T.buildMap = function () {
     WALL.fill(0); FLOOR.fill(0);
@@ -32,7 +35,7 @@
       if (!edge && rnd() < 0.1) WALL[I(x, y)] = 2;
     });
     WALL[I(31, 30)] = 0; WALL[I(31, 31)] = 0;
-    for (const by of [19, 33, 8]) { const c = riverX(by); for (let x = c - 2; x <= c + 2; x++) { FLOOR[I(x, by)] = 5; WALL[I(x, by)] = 0; } }
+    for (const by of T.BRIDGE_ROWS) { const c = riverX(by); for (let x = c - 2; x <= c + 2; x++) { FLOOR[I(x, by)] = 5; WALL[I(x, by)] = 0; } }
     rect(SX - 4, SY - 4, SX + 5, SY + 5, (x, y) => { WALL[I(x, y)] = 0; if (FLOOR[I(x, y)] != 1) FLOOR[I(x, y)] = 0; });
     rect(SX, SY, SX + 1, SY + 1, (x, y) => (WALL[I(x, y)] = 3));
     for (let x = SX + 2; x < riverX(19) - 1; x++) { WALL[I(x, 19)] = 0; WALL[I(x, 20)] = 0; }
@@ -117,7 +120,7 @@
   };
 
   T.lights = function (world) {
-    const L = [{ x: T.SARANG.x, y: T.SARANG.y, r: 5, i: 0.75 }];
+    const L = [{ x: T.SARANG.x, y: T.SARANG.y, r: 5, i: 0.75 }, ...T.BRIDGE_LIGHTS];
     for (const v of world.vics) if (v.rescued) L.push({ x: v.ox, y: v.oy, r: 2.6, i: 0.5 });
     return L;
   };

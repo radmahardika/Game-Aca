@@ -38,7 +38,7 @@
       const sh = [0, 0, 0];
       const shade = (wx, wy, d) => {
         let v;
-        if (owl) { v = Math.max(0, 1 - d / 7); v = Math.pow(v, 1.5) * 0.7 + 0.035; } else { v = Math.max(0, 1 - d / 2) * 0.24 + 0.025; }
+        if (owl) { v = Math.max(0, 1 - d / 7); v = Math.pow(v, 1.5) * 0.7 + 0.035; } else { v = Math.pow(Math.max(0, 1 - d / 3.5), 1.2) * 0.34 + 0.04; } // Benhat: cahaya samar di dekatnya
         let r = v * (owl ? 0.55 : 1), g = v, b = v * (owl ? 0.85 : 1);
         for (const L of lights) {
           const q = (wx - L.x) ** 2 + (wy - L.y) ** 2;
