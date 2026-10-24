@@ -78,8 +78,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 13** (game Aksa sama dengan versi 7) +
-  **Duo Penyelamat versi 6** di `penyelamat/`. Riwayat: v6 pesan selamat sampai Oke, panel alat kecil di kanan,
+- Rilis terakhir di `main`: **versi 14** (game Aksa sama dengan versi 7) +
+  **Duo Penyelamat versi 7** di `penyelamat/`. Riwayat: v7 cahaya samar Benhat + kunang-kunang di ujung jembatan; v6 pesan selamat sampai Oke, panel alat kecil di kanan,
   lampu sorot Tutu; v5 judul "Duo Penyelamat" + petunjuk 💡 alat untuk Tutu (`hint` di `T.VICTIMS`, tidak menyebut
   nama alat); v4 Tutu terbang & lebih cepat, nama Benhat; v3 perbaikan rotasi iPad.
 - Laporan pengguna: **main berdua di dua iPad sudah berhasil**.
@@ -87,7 +87,7 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   panjang tulisan, tidak menimpa pesan yang sedang dibaca; layar akhir muncul setelah Oke terakhir); (2) alat di Pohon Sarang
   jadi **panel kecil di kanan** (tanpa latar gelap, Benhat tetap bisa berjalan, panel tertutup sendiri saat menjauh);
   (3) **lampu sorot Tutu**: cahaya hangat di sekitar + sorot ke depan ±9 langkah, hanya di layar Tutu.
-- Branch `pratinjau-v14`: cahaya samar untuk Benhat (radius 3,5, masih gelap) + kunang-kunang di kedua ujung tiap
+- Isi v7: cahaya samar untuk Benhat (radius 3,5, masih gelap) + kunang-kunang di kedua ujung tiap
   jembatan (`T.BRIDGE_LIGHTS`, terlihat kedua peran) supaya mudah menyeberang.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
