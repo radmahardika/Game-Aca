@@ -50,7 +50,7 @@ https://radmahardika.github.io/Game-Aca/
   Ustadz Hasan: Susun Ayat (ketuk berurutan) & Kata yang Hilang. Audio: **Syaikh Al-Husary Mu'allim**.
   Teks ditampilkan sebagai bacaan waqaf (akhiran dalam kurung dibuang).
 
-## Game kedua: Tim Penyelamat Malam (`penyelamat/`)
+## Game kedua: Duo Penyelamat (`penyelamat/`, dulu "Tim Penyelamat Malam")
 
 Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game-Aca/penyelamat/), versi sendiri
 (`TPM.VERSION` di `penyelamat/js/data.js` + `?v=N` di `penyelamat/index.html`). Tujuan: survival & problem solving,
@@ -78,12 +78,10 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 11** (game Aksa sama dengan versi 7) +
-  **Tim Penyelamat Malam versi 4** di `penyelamat/`: nama Tutu & Benhat; Tutu terbang (kamera mata 1,15 vs 0,5,
-  horizon 40% layar, naik-turun pelan) dan lebih cepat (Tutu 2,7 vs Benhat 1,3); perbaikan rotasi iPad (v3).
-  Belum diuji di dua iPad sungguhan — tunggu laporan pengguna.
-- Branch `pratinjau-v12`: petunjuk kecil alat untuk Tutu (baris 💡 di bawah keterangan korban, `hint` di `T.VICTIMS`),
-  tidak menyebut nama alat langsung; Benhat tidak mendapat petunjuk.
+- Rilis terakhir di `main`: **versi 12** (game Aksa sama dengan versi 7) +
+  **Duo Penyelamat versi 5** di `penyelamat/`: judul baru "Duo Penyelamat"; petunjuk kecil 💡 alat untuk Tutu
+  (`hint` di `T.VICTIMS`, tidak menyebut nama alat; Benhat tidak dapat); Tutu terbang & lebih cepat (v4);
+  perbaikan rotasi iPad (v3). Belum diuji di dua iPad sungguhan — tunggu laporan pengguna.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

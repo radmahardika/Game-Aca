@@ -1,4 +1,4 @@
-// Tim Penyelamat Malam — mesin first person pixel (raycasting) dengan cahaya malam.
+// Duo Penyelamat — mesin first person pixel (raycasting) dengan cahaya malam.
 (function () {
   const T = window.TPM;
   const { N, WALL, FLOOR, I, hash } = T;

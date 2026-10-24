@@ -1,4 +1,4 @@
-// Tim Penyelamat Malam — alur utama: layar judul, ruangan dua iPad, kontrol analog, aturan penyelamatan, simpan progres.
+// Duo Penyelamat — alur utama: layar judul, ruangan dua iPad, kontrol analog, aturan penyelamatan, simpan progres.
 (function () {
   const T = window.TPM;
   const $ = (id) => document.getElementById(id);

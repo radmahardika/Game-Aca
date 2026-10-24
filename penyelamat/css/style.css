@@ -1,4 +1,4 @@
-/* Tim Penyelamat Malam — satu layar penuh: kanvas 3D pixel di belakang, HUD di tepi, kartu di tengah */
+/* Duo Penyelamat — satu layar penuh: kanvas 3D pixel di belakang, HUD di tepi, kartu di tengah */
 :root {
   --night: #070a16; --panel: rgba(10, 14, 30, .86); --card: #14182c; --line: #2c3558;
   --ink: #eef1ff; --muted: #a9b2d6; --firefly: #e6ff8a; --amber: #ffcf4a; --bark: #6b4a2e;

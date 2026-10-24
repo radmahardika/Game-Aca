@@ -1,7 +1,7 @@
-// Tim Penyelamat Malam — data dunia: peta, hewan, alat, sprite & tekstur pixel.
+// Duo Penyelamat — data dunia: peta, hewan, alat, sprite & tekstur pixel.
 (function () {
   const T = (window.TPM = window.TPM || {});
-  T.VERSION = 4;
+  T.VERSION = 5;
 
   // ---------- peta 40x40 ----------
   // WALL: 0 kosong, 1 pohon, 2 batu, 3 Pohon Sarang
