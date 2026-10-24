@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 <div id="game">
@@ -42,12 +42,11 @@
   <!-- Layar judul -->
   <div class="modal" id="title"><div class="card title">
     <h1>Duo Penyelamat</h1>
-    <p class="lead">🦉 Tutu & 🐻 Benhat menolong 10 hewan di hutan yang gelap.</p>
+    <p class="lead">🦉 Tutu & 🐻 Benhat menolong hewan di hutan yang gelap. Ada 3 level!</p>
     <p class="save" id="saveInfo" hidden></p>
     <div class="col">
       <button class="go" id="twoBtn" type="button">👫 Main berdua (2 iPad)</button>
       <button class="go alt" id="soloBtn" type="button">📱 Main di satu iPad</button>
-      <button class="link" id="resetBtn" type="button" hidden>Mulai dari awal (posisi hewan diacak lagi)</button>
     </div>
     <p class="ver" id="ver">versi 1</p>
   </div></div>
@@ -70,6 +69,13 @@
       <button type="button" class="pick" data-role="owl"><b>🦉 Tutu</b><i>Burung Hantu yang suka membantu</i>Bisa melihat dalam gelap dan terbang melintasi sungai. Menemukan hewan dan menandai dengan ⭐.</button>
       <button type="button" class="pick" data-role="bear"><b>🐻 Benhat</b><i>Si Beruang Hebat</i>Hampir tidak bisa melihat. Membawa alat dari Pohon Sarang dan menolong hewan.</button>
     </div>
+    <button class="link back" type="button">← Kembali</button>
+  </div></div>
+
+  <!-- Pilih level -->
+  <div class="modal" id="levelPick" hidden><div class="card wide">
+    <h2>Pilih level</h2>
+    <div class="lvs" id="lvList"></div>
     <button class="link back" type="button">← Kembali</button>
   </div></div>
 
@@ -104,7 +110,7 @@
   <div class="modal" id="mapModal" hidden><div class="card">
     <h2>Peta</h2><p>Hanya bagian hutan yang sudah dilihat.</p>
     <div class="mapwrap"><canvas id="mapc" width="160" height="160"></canvas></div>
-    <div class="legend"><span style="--c:#e6ff8a">Pohon Sarang</span><span style="--c:#ffd84a">Tutu</span><span style="--c:#b07a4a">Benhat</span><span style="--c:#ffcf4a">⭐ Tanda</span><span style="--c:#3f7aa6">Sungai</span></div>
+    <div class="legend"><span style="--c:#e6ff8a">Pohon Sarang</span><span style="--c:#ffd84a">Tutu</span><span style="--c:#b07a4a">Benhat</span><span style="--c:#ffcf4a">⭐ Tanda</span><span style="--c:#3f7aa6">Sungai</span><span style="--c:#c04a3a">Jembatan putus</span></div>
     <div class="center"><button class="go" id="mapClose" type="button">Tutup</button></div>
   </div></div>
 
@@ -115,6 +121,7 @@
     <div class="col">
       <button class="go" id="resumeBtn" type="button">▶ Lanjut main</button>
       <button class="go alt" id="quitBtn" type="button">🏠 Ke layar judul</button>
+      <button class="link" id="redoBtn" type="button">🔀 Ulang level ini dari awal (posisi hewan diacak)</button>
     </div>
   </div></div>
 
@@ -123,8 +130,8 @@
   <div class="ending" id="endModal" hidden>
     <canvas id="endc"></canvas>
     <div class="endtext" id="endText">
-      <h2>Kamu jago sekali, terus menolong sesama ya!</h2>
-      <p>Kesepuluh hewan selamat, dan pagi pun tiba di Pohon Sarang.</p>
+      <h2 id="endTitle">Kamu jago sekali, terus menolong sesama ya!</h2>
+      <p id="endSub">Kesepuluh hewan selamat, dan pagi pun tiba di Pohon Sarang.</p>
     </div>
     <div class="endbtns" id="endBtns">
       <p id="endWait" hidden>Menunggu teman memulai petualangan baru…</p>
@@ -134,12 +141,12 @@
   </div>
 </div>
 
-<script src="vendor/peerjs.min.js?v=8"></script>
-<script src="js/data.js?v=8"></script>
-<script src="js/render.js?v=8"></script>
-<script src="js/ending.js?v=8"></script>
-<script src="js/audio.js?v=8"></script>
-<script src="js/net.js?v=8"></script>
-<script src="js/main.js?v=8"></script>
+<script src="vendor/peerjs.min.js?v=9"></script>
+<script src="js/data.js?v=9"></script>
+<script src="js/render.js?v=9"></script>
+<script src="js/ending.js?v=9"></script>
+<script src="js/audio.js?v=9"></script>
+<script src="js/net.js?v=9"></script>
+<script src="js/main.js?v=9"></script>
 </body>
 </html>

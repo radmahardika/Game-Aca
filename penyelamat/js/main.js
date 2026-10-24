@@ -2,7 +2,7 @@
 (function () {
   const T = window.TPM;
   const $ = (id) => document.getElementById(id);
-  const N = T.N, SAVE_KEY = 'penyelamat-malam-v1';
+  const N = T.N, SAVE_KEY = 'penyelamat-v2', OLD_KEY = 'penyelamat-malam-v1';
   const renderer = T.Renderer($('view'));
   const remeasure = () => { renderer.resize(); resetStick(); };
   addEventListener('resize', remeasure);
@@ -14,8 +14,10 @@
   const S = (T.S = {
     scene: 'title', mode: null, role: 'owl',
     world: null, players: null, seen: new Uint8Array(N * N), newSeen: [],
-    remote: null, heard: {}, t: 0, lastMsg: 0, netOk: null,
+    remote: null, heard: {}, look: {}, t: 0, lastMsg: 0, netOk: null,
   });
+  const total = () => S.world.vics.length;
+  const norm = (w) => { w.level = w.level || 2; w.fixed = w.fixed || []; return w; }; // dunia dari versi lama
   const other = (r) => (r == 'owl' ? 'bear' : 'owl');
   const multi = () => S.mode == 'host' || S.mode == 'guest';
   const owns = () => S.mode != 'guest'; // tuan rumah & main sendiri memegang keadaan dunia
@@ -23,43 +25,81 @@
   // ---------- simpan ----------
   const seenStr = () => Array.from(S.seen).join('');
   const seenFrom = (s) => { const a = new Uint8Array(N * N); if (s) for (let i = 0; i < a.length; i++) a[i] = s.charCodeAt(i) == 49 ? 1 : 0; return a; };
-  function load() {
-    try { const d = JSON.parse(localStorage.getItem(SAVE_KEY)); if (d && d.world && d.world.vics && d.world.vics.length) { T.addMissing(d.world); return d; } } catch (e) {}
-    return null;
+  // Simpanan per level: { unlocked, done: {n:1}, lv: {n: {world, players, seen}} }.
+  // Simpanan lama (sebelum ada level) menjadi Level 2, jadi Level 1 & 2 langsung terbuka.
+  function loadStore() {
+    let st = null;
+    try { st = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) {}
+    if (!st || !st.lv) {
+      st = { unlocked: 1, done: {}, lv: {} };
+      try {
+        const d = JSON.parse(localStorage.getItem(OLD_KEY));
+        if (d && d.world && d.world.vics && d.world.vics.length) {
+          d.world.level = 2; st.lv[2] = d; st.unlocked = 2;
+          if (d.world.saved >= d.world.vics.length) { st.unlocked = 3; st.done[2] = 1; }
+        }
+      } catch (e) {}
+    }
+    st.done = st.done || {};
+    for (const k in st.lv) { const d = st.lv[k]; if (d && d.world && d.world.vics) T.addMissing(d.world); else delete st.lv[k]; }
+    return st;
   }
+  const store = loadStore();
   function save() {
     if (!owns() || !S.world || S.scene != 'play') return; // dunia latar layar judul bukan progres
-    try { localStorage.setItem(SAVE_KEY, JSON.stringify({ world: S.world, players: S.players, seen: seenStr() })); } catch (e) {}
+    const lv = S.world.level;
+    store.lv[lv] = { world: S.world, players: S.players, seen: seenStr() };
+    if (S.world.saved >= total()) { store.done[lv] = 1; store.unlocked = Math.max(store.unlocked, Math.min(3, lv + 1)); }
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(store)); } catch (e) {}
   }
-  function freshWorld() {
-    S.world = T.newWorld();
+  function freshWorld(lv) {
+    S.world = T.newWorld(lv);
     S.players = JSON.parse(JSON.stringify(T.START));
     S.seen = new Uint8Array(N * N);
     T.prepareMap(S.world);
   }
-  function beginOwn() {
-    const d = load();
-    if (d && d.world.saved < T.VICTIMS.length) { S.world = d.world; S.players = d.players; S.seen = seenFrom(d.seen); T.prepareMap(S.world); }
-    else freshWorld();
-    save();
+  function beginOwn(lv) {
+    const d = store.lv[lv];
+    if (d && d.world.saved < d.world.vics.length) { S.world = d.world; S.players = d.players; S.seen = seenFrom(d.seen); T.prepareMap(S.world); }
+    else freshWorld(lv);
+    S.heard = {}; S.look = {};
   }
 
   // ---------- layar ----------
-  const screens = ['title', 'two', 'rolePick', 'hostWait', 'joinPick'];
+  const screens = ['title', 'two', 'rolePick', 'levelPick', 'hostWait', 'joinPick'];
   function show(id) { for (const s of screens) $(s).hidden = s != id; }
   function titleScreen() {
     T.net.stop();
     S.scene = 'title'; S.mode = null;
     for (const m of ['toolModal', 'mapModal', 'menu', 'endModal']) $(m).hidden = true;
     $('hud').hidden = true;
-    const d = load();
-    if (!S.world) { if (d) { S.world = d.world; T.prepareMap(S.world); } else freshWorld(); }
+    freshWorld(2); // dunia latar layar judul (tidak disimpan)
     const info = $('saveInfo');
-    if (d && d.world.saved > 0 && d.world.saved < T.VICTIMS.length) { info.textContent = `Petualangan tersimpan: ${d.world.saved} dari ${T.VICTIMS.length} hewan sudah selamat.`; info.hidden = false; }
-    else info.hidden = true;
-    $('resetBtn').hidden = !d;
+    info.textContent = store.unlocked > 1 ? `Level terbuka: 1 sampai ${store.unlocked}.` : '';
+    info.hidden = store.unlocked < 2;
     show('title');
     T.audio.music(false);
+  }
+
+  // pilih level (main sendiri & pembuat ruangan)
+  function showLevels() {
+    const box = $('lvList');
+    box.innerHTML = '';
+    for (let n = 1; n <= 3; n++) {
+      const L = T.LEVELS[n], lock = n > store.unlocked, d = store.lv[n];
+      const busy = d && d.world.saved > 0 && d.world.saved < d.world.vics.length;
+      const st = lock ? '🔒 Selesaikan Level ' + (n - 1) : busy ? `▶ Lanjut · ${d.world.saved}/${d.world.vics.length}` : store.done[n] ? '⭐ Selesai · main lagi' : '▶ Main';
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = `lv l${n}${lock ? ' lock' : ''}`; b.dataset.lv = n;
+      b.innerHTML = `<div class="sky"><div class="moon"></div></div><b>Level ${n}</b><i>${L.nama}</i><span>🐾 ${L.info}</span><em>${st}</em>`;
+      b.onclick = () => {
+        if (lock) { T.audio.unlock(); T.audio.sfx('wrong'); return; }
+        tap(); beginOwn(n);
+        if (S.mode == 'host') openRoom(); else enterPlay();
+      };
+      box.appendChild(b);
+    }
+    show('levelPick');
   }
 
   let wakeLock = null;
@@ -81,11 +121,12 @@
     T.audio.music(true);
     keepAwake();
     roleToast();
-    if (S.world.saved == T.VICTIMS.length) showEnd();
+    if (S.world.saved >= total()) showEnd();
   }
   function roleToast() {
-    if (S.role == 'owl') showToast('🦉 Kamu Tutu', 'Cari hewan yang butuh pertolongan, lalu tandai dengan ⭐ supaya Benhat tahu arahnya.');
-    else showToast('🐻 Kamu Benhat', 'Gelap sekali! Ikuti mata kuning Tutu dan bintang ⭐. Dengarkan suara minta tolong 🔊.');
+    const lv = S.world.level, tag = ` · Level ${lv}`;
+    if (S.role == 'owl') showToast('🦉 Kamu Tutu' + tag, 'Cari hewan yang butuh pertolongan, lalu tandai dengan ⭐ supaya Benhat tahu arahnya.' + (lv == 3 ? ' Malam ini berkabut, pandanganmu lebih pendek.' : ''));
+    else showToast('🐻 Kamu Benhat' + tag, 'Gelap sekali! Ikuti mata kuning Tutu dan bintang ⭐. Dengarkan suara minta tolong 🔊.' + (lv == 3 ? ' Hati-hati, ada jembatan yang putus.' : ''));
   }
 
   // ---------- ruangan ----------
@@ -163,6 +204,11 @@
     switch (m.t) {
       case 'hello':
         if (S.mode != 'host') return;
+        if (!(m.v >= 9)) { // iPad teman belum memuat versi berlevel
+          const msg = 'iPad teman masih versi lama. Di iPad teman: tutup game sepenuhnya, lalu buka lagi.';
+          if (S.scene == 'play') showToast('📶 Versi berbeda', msg, 0); else { $('hostStatus').className = 'status err'; $('hostStatus').textContent = msg; }
+          return;
+        }
         T.net.send({ t: 'welcome', role: other(S.role), world: S.world, players: S.players, seen: seenStr() });
         T.audio.sfx('join');
         if (S.scene != 'play') enterPlay();
@@ -170,7 +216,7 @@
         break;
       case 'welcome': {
         if (S.mode != 'guest') return;
-        S.role = m.role; S.world = m.world; S.players = m.players;
+        S.role = m.role; S.world = norm(m.world); S.players = m.players; S.heard = {}; S.look = {};
         const s = seenFrom(m.seen); for (let i = 0; i < s.length; i++) if (s[i]) S.seen[i] = 1;
         T.prepareMap(S.world);
         S.remote = null;
@@ -188,14 +234,14 @@
         if (S.mode == 'host') applyAct(m, 'remote');
         break;
       case 'world':
-        if (S.mode == 'guest') { S.world = m.world; updateHUD(); if (!$('toolModal').hidden) refreshTools(); }
+        if (S.mode == 'guest') { S.world = norm(m.world); T.syncBridges(S.world); updateHUD(); if (!$('toolModal').hidden) refreshTools(); }
         break;
       case 'ev':
         handleEvent(m);
         break;
       case 'reset':
         if (S.mode != 'guest') return;
-        S.world = m.world; S.players = m.players; S.seen = new Uint8Array(N * N); S.remote = null;
+        S.world = norm(m.world); S.players = m.players; S.seen = seenFrom(m.seen); S.remote = null; S.heard = {}; S.look = {};
         T.prepareMap(S.world);
         $('endModal').hidden = true;
         T.audio.music(true);
@@ -217,8 +263,11 @@
       if (W.stars.some((q) => Math.hypot(q.x - a.x, q.y - a.y) < 0.6)) return;
       W.stars.push({ x: a.x, y: a.y });
       if (W.stars.length > 5) W.stars.shift();
+      // tanda di dekat anak ayam yang berlari membuatnya berhenti
+      const run = W.vics.find((v) => T.running(v) && Math.hypot(a.x - v.ox, a.y - v.oy) < 3);
+      if (run) { const q = T.runPos(run); run.calm = 1; run.x = q.x; run.y = q.y; }
       broadcastWorld(); save();
-      emit({ k: 'marked' }, 'all');
+      emit({ k: run ? 'calm' : 'marked' }, 'all');
     } else if (a.k == 'bag') {
       const bag = [];
       let used = 0;
@@ -227,16 +276,25 @@
       broadcastWorld(); save();
     } else if (a.k == 'rescue') {
       const v = W.vics.find((q) => q.id == a.id);
-      if (!v || v.rescued) return;
+      if (!v || v.rescued || T.running(v)) return;
       const meta = T.vicById[v.id];
       if (!meta.need.every((n) => W.bag.includes(n))) { emit({ k: 'wrong', id: v.id }, from); return; }
       W.bag = W.bag.filter((b) => !meta.need.includes(b));
       v.rescued = true; W.saved++;
       const ang = W.saved * 0.9;
       v.x = T.SARANG.x + Math.cos(ang) * 2.3; v.y = T.SARANG.y + Math.sin(ang) * 2.3;
-      W.stars = W.stars.filter((s) => Math.hypot(s.x - v.ox, s.y - v.oy) > 1);
+      W.stars = W.stars.filter((s) => Math.hypot(s.x - v.ox, s.y - v.oy) > (meta.run ? 3 : 1));
       broadcastWorld(); save();
       emit({ k: 'rescued', id: v.id }, 'all');
+    } else if (a.k == 'fix') {
+      // Benhat memperbaiki jembatan putus dengan papan
+      if (W.level != 3 || !T.BROKEN_ROWS.includes(a.row) || W.fixed.includes(a.row)) return;
+      if (!W.bag.includes('papan')) return;
+      W.bag = W.bag.filter((b) => b != 'papan');
+      W.fixed.push(a.row);
+      T.syncBridges(W);
+      broadcastWorld(); save();
+      emit({ k: 'fixed' }, 'all');
     }
   }
   // Aksi dari iPad ini: pemegang dunia langsung menjalankan, tamu mengirim ke tuan rumah.
@@ -257,11 +315,18 @@
     } else if (ev.k == 'wrong') {
       T.audio.sfx('wrong');
       showToast('Alatnya belum cocok', 'Tanya Tutu: hewan ini kenapa? Lalu ambil alat di Pohon Sarang.');
+    } else if (ev.k == 'calm') {
+      T.audio.sfx('mark');
+      showToast('⭐ Anak ayam berhenti berlari', 'Sekarang Benhat bisa mendekat dengan pelan.', 3500);
+    } else if (ev.k == 'fixed') {
+      T.syncBridges(S.world);
+      T.audio.sfx('fix');
+      showToast('🪵 Jembatan sudah diperbaiki!', 'Benhat sekarang bisa menyeberang di sini.', 3500);
     } else if (ev.k == 'rescued') {
       const meta = T.vicById[ev.id];
       T.audio.sfx('rescue');
       // pesan dunia nyata tetap tampil sampai anak menekan Oke
-      const last = S.world.saved >= T.VICTIMS.length;
+      const last = S.world.saved >= total();
       showToast(meta.nama + ' selamat!', meta.lesson, 0, last ? showEnd : null);
     }
   }
@@ -269,9 +334,12 @@
   const ending = T.Ending($('endc'));
   let endTimers = [];
   function showEnd() {
-    const e = $('endModal');
+    const e = $('endModal'), lv = S.world.level;
     endTimers.forEach(clearTimeout);
-    ending.reset();
+    ending.reset(S.world.vics.map((v) => T.vicById[v.id].sp), lv == 3);
+    $('endTitle').textContent = lv == 3 ? 'Kamu jago sekali, terus menolong sesama ya!' : `Hebat! ${lv == 1 ? 'Kelima' : 'Kesepuluh'} hewan selamat!`;
+    $('endSub').textContent = lv == 3 ? 'Kelima belas hewan selamat, dan pelangi muncul di Pohon Sarang.' : `Level ${lv + 1} terbuka: ${T.LEVELS[lv + 1].nama}.`;
+    $('againBtn').textContent = lv < 3 ? `▶ Lanjut ke Level ${lv + 1}` : '🌙 Main lagi (posisi hewan baru)';
     e.classList.remove('show-text', 'show-btns');
     e.hidden = false;
     $('againBtn').hidden = !owns();
@@ -328,7 +396,7 @@
     const i = T.I(xi, yi);
     if (T.WALL[i]) return false;
     const f = T.FLOOR[i];
-    return !(who == 'bear' && (f == 1 || f == 6)); // Benhat tidak bisa masuk sungai, hanya lewat jembatan
+    return !(who == 'bear' && (f == 1 || f == 6 || f == 7)); // Benhat tidak bisa masuk sungai, hanya lewat jembatan yang utuh
   }
   function free(who, x, y) {
     const r = 0.22;
@@ -350,9 +418,9 @@
     const vx = Math.cos(p.a) * fw * sp * dt, vy = Math.sin(p.a) * fw * sp * dt;
     if (free(S.role, p.x + vx, p.y)) p.x += vx;
     if (free(S.role, p.x, p.y + vy)) p.y += vy;
-    const R = S.role == 'owl' ? 5 : 2;
-    for (let y = Math.max(0, (p.y | 0) - R); y <= Math.min(N - 1, (p.y | 0) + R); y++)
-      for (let x = Math.max(0, (p.x | 0) - R); x <= Math.min(N - 1, (p.x | 0) + R); x++) {
+    const R = S.role == 'owl' ? (S.world.level == 3 ? 3.5 : 5) : 2; // kabut: Tutu melihat lebih dekat
+    for (let y = Math.max(0, (p.y | 0) - 5); y <= Math.min(N - 1, (p.y | 0) + 5); y++)
+      for (let x = Math.max(0, (p.x | 0) - 5); x <= Math.min(N - 1, (p.x | 0) + 5); x++) {
         const i = T.I(x, y);
         if (!S.seen[i] && (x + 0.5 - p.x) ** 2 + (y + 0.5 - p.y) ** 2 < R * R) { S.seen[i] = 1; S.newSeen.push(i); }
       }
@@ -380,8 +448,10 @@
     if (S.role != 'bear') return null;
     if (atSarang()) return { lbl: 'Ambil alat', f: openTools };
     const b = S.players.bear;
-    const v = S.world.vics.find((q) => !q.rescued && Math.hypot(q.x - b.x, q.y - b.y) < T.vicById[q.id].reach);
-    if (v) return { lbl: 'Tolong', f: () => act({ k: 'rescue', id: v.id }) };
+    const row = T.brokenNear(S.world, b.x, b.y, 1.7);
+    if (row != null && S.world.bag.includes('papan')) return { lbl: 'Perbaiki', f: () => act({ k: 'fix', row }) };
+    const v = S.world.vics.find((q) => !q.rescued && !T.running(q) && Math.hypot(q.x - b.x, q.y - b.y) < T.vicById[q.id].reach);
+    if (v) return { lbl: T.vicById[v.id].need.length ? 'Tolong' : 'Tolong 💪', f: () => act({ k: 'rescue', id: v.id }) };
     return null;
   }
   function doA() { const c = context(); if (c) { T.audio.sfx('tap'); c.f(); } }
@@ -402,7 +472,7 @@
     if (!S.world) return;
     const owl = S.role == 'owl';
     $('roleChip').textContent = owl ? '🦉 Tutu' : '🐻 Benhat';
-    $('count').textContent = S.world.saved + '/' + T.VICTIMS.length;
+    $('count').textContent = S.world.saved + '/' + total();
     $('markBtn').hidden = !owl;
     $('aBtn').hidden = owl;
     $('bag').hidden = owl;
@@ -418,7 +488,7 @@
   function openTools() {
     const g = $('toolGrid');
     g.innerHTML = '';
-    for (const t of T.TOOLS) {
+    for (const t of T.levelTools(S.world.level)) {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'tool'; b.dataset.id = t.id;
       b.innerHTML = `${t.w == 2 ? '<i>besar</i>' : ''}${t.e}<span>${t.n}</span>`;
@@ -486,7 +556,7 @@
     $('toast').hidden = true;
     if (toastDone) { const f = toastDone; toastDone = null; f(); }
   }
-  function hudTick() {
+  function hudTick(dt) {
     const b = $('bubble');
     let txt = '', hint = '', cls = 'bubble';
     if (S.role == 'owl') {
@@ -500,11 +570,18 @@
         if (dist < bd && Math.abs(d) < 0.7) { bd = dist; v = q; }
       }
       if (v) {
-        txt = '🦉 ' + T.vicById[v.id].say; hint = T.vicById[v.id].hint;
+        const m = T.vicById[v.id];
+        txt = '🦉 ' + (m.run && v.calm ? 'Anak ayam sudah berhenti. Dia lelah dan ketakutan.' : m.say);
+        // Level 3: petunjuk baru muncul setelah Tutu memperhatikan hewan ±5 detik, supaya anak berpikir dulu
+        S.look[v.id] = (S.look[v.id] || 0) + dt;
+        if (S.world.level < 3 || S.look[v.id] > 5) hint = m.hint;
         if (!S.heard[v.id]) { S.heard[v.id] = 1; T.audio.sfx('hoot'); }
-      }
+      } else if (T.brokenNear(S.world, p.x, p.y, 3.5) != null) txt = '🦉 Jembatan putus! Benhat butuh 🪵 papan untuk memperbaikinya.';
     } else {
-      if (nearVictim('bear', 3.2)) { txt = '🔊 Ada suara minta tolong di dekat sini!'; cls = 'bubble hear'; }
+      const bp = S.players.bear, row = T.brokenNear(S.world, bp.x, bp.y, 2.5), nv = nearVictim('bear', 3.2);
+      if (row != null) txt = S.world.bag.includes('papan') ? '🪵 Jembatan putus! Tekan A untuk memperbaikinya.' : '🪵 Jembatan putus! Ambil papan di Pohon Sarang untuk memperbaikinya.';
+      else if (nv && T.running(nv)) { txt = '🔊 Anak ayam terus berlari! Minta Tutu menandainya dengan ⭐.'; cls = 'bubble hear'; }
+      else if (nv) { txt = '🔊 Ada suara minta tolong di dekat sini!'; cls = 'bubble hear'; }
       else if (atSarang() && $('toolModal').hidden) txt = '🌳 Pohon Sarang. Tekan A untuk mengambil alat.';
       // panel alat tertutup sendiri saat Benhat berjalan menjauh dari Pohon Sarang
       if (!$('toolModal').hidden && !atSarang()) $('toolModal').hidden = true;
@@ -524,11 +601,10 @@
   // ---------- tombol ----------
   const tap = () => { T.audio.unlock(); T.audio.sfx('tap'); };
   $('twoBtn').onclick = () => { tap(); show('two'); };
-  $('soloBtn').onclick = () => { tap(); S.mode = 'solo'; S.role = 'owl'; beginOwn(); enterPlay(); };
-  $('resetBtn').onclick = () => { tap(); try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S.world = null; titleScreen(); };
+  $('soloBtn').onclick = () => { tap(); S.mode = 'solo'; S.role = 'owl'; showLevels(); };
   $('hostBtn').onclick = () => { tap(); show('rolePick'); };
   $('joinBtn').onclick = () => { tap(); S.mode = 'guest'; codeIn = []; drawCodeIn(); $('joinStatus').className = 'status'; $('joinStatus').innerHTML = '&nbsp;'; show('joinPick'); };
-  for (const b of document.querySelectorAll('.pick')) b.onclick = () => { tap(); S.mode = 'host'; S.role = b.dataset.role; beginOwn(); openRoom(); };
+  for (const b of document.querySelectorAll('.pick')) b.onclick = () => { tap(); S.mode = 'host'; S.role = b.dataset.role; showLevels(); };
   $('startEarly').onclick = () => { tap(); enterPlay(); };
   const keyBox = $('codeKeys');
   T.CODE_ICONS.forEach((ic, i) => {
@@ -543,6 +619,7 @@
     const cur = screens.find((s) => !$(s).hidden);
     if (cur == 'two') titleScreen();
     else if (cur == 'rolePick') show('two');
+    else if (cur == 'levelPick') { if (S.mode == 'host') show('rolePick'); else titleScreen(); }
     else if (cur == 'hostWait') { T.net.stop(); show('two'); }
     else if (cur == 'joinPick') { T.net.stop(); show('two'); }
   };
@@ -556,21 +633,24 @@
   $('toolDone').onclick = () => { tap(); $('toolModal').hidden = true; };
   $('menuBtn').onclick = () => {
     tap();
-    $('menuInfo').textContent = S.mode == 'guest' ? 'Progres disimpan di iPad teman (pembuat ruangan).' : 'Progres tersimpan otomatis di iPad ini.';
+    $('menuInfo').textContent = `Level ${S.world.level}: ${T.LEVELS[S.world.level].nama}. ` + (S.mode == 'guest' ? 'Progres disimpan di iPad teman (pembuat ruangan).' : 'Progres tersimpan otomatis di iPad ini.');
+    $('redoBtn').hidden = !owns();
     $('menu').hidden = false;
   };
   $('resumeBtn').onclick = () => { tap(); $('menu').hidden = true; };
   $('quitBtn').onclick = () => { tap(); save(); titleScreen(); };
   $('endHome').onclick = () => { tap(); save(); titleScreen(); };
-  $('againBtn').onclick = () => {
-    tap();
-    freshWorld(); save();
-    S.heard = {};
-    if (S.mode == 'host') T.net.send({ t: 'reset', world: S.world, players: S.players });
-    $('endModal').hidden = true;
+  // mulai (atau lanjutkan) level lain tanpa keluar ruangan; teman ikut pindah
+  function switchWorld(lv, fresh) {
+    if (fresh) { freshWorld(lv); S.heard = {}; S.look = {}; } else beginOwn(lv);
+    save();
+    if (S.mode == 'host') T.net.send({ t: 'reset', world: S.world, players: S.players, seen: seenStr() });
+    for (const m of ['endModal', 'menu', 'toolModal']) $(m).hidden = true;
     T.audio.music(true);
     updateHUD(); roleToast();
-  };
+  }
+  $('againBtn').onclick = () => { tap(); const lv = S.world.level; if (lv < 3) switchWorld(lv + 1, false); else switchWorld(3, true); };
+  $('redoBtn').onclick = () => { tap(); switchWorld(S.world.level, true); };
 
   // ---------- putaran utama ----------
   let last = performance.now(), sendT = 0, seenT = 0, saveT = 0;
@@ -585,9 +665,10 @@
     if (S.scene == 'play') {
       if (!$('endModal').hidden) ending.draw(now); // adegan penutup menggantikan pandangan hutan
       else {
+        for (const v of S.world.vics) if (T.running(v)) Object.assign(v, T.runPos(v));
         if (!modalOpen()) step(dt);
         renderer.draw({ role: S.role, p: S.players[S.role], other: S.players[other(S.role)], world: S.world, t: S.t });
-        hudTick();
+        hudTick(dt);
       }
       if (multi() && T.net.connected()) {
         sendT += dt; seenT += dt;
@@ -610,7 +691,7 @@
 
   T.debug = {
     place(x, y, a) { const p = S.players[S.role]; p.x = x; p.y = y; if (a != null) p.a = a; },
-    act, applyAct, swap, openMap, openTools, doA, doMark,
+    act, applyAct, swap, openMap, openTools, doA, doMark, showLevels, store: () => store,
   };
 
   titleScreen();

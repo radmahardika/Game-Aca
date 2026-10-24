@@ -1,4 +1,5 @@
 // Duo Penyelamat — adegan penutup: pagi tiba di Pohon Sarang, semua hewan melompat gembira bersama Tutu & Benhat.
+// Hewan berbaris 1-3 baris (5/10/15 hewan); Level 3 ditambah pelangi.
 (function () {
   const T = window.TPM;
   const W = 256, H0 = 144; // adegan digambar 256x144, lalu langit diperpanjang ke atas mengikuti bentuk layar
@@ -13,7 +14,7 @@
       ctx.imageSmoothingEnabled = false;
     }
     const hearts = [];
-    let start = 0;
+    let start = 0, animals = [], rainbow = false;
 
     const spr = (id) => (T.SPR_FREE[id] || T.SPR[id]).canvas;
     const lerp = (a, b, k) => Math.round(a + (b - a) * k);
@@ -43,6 +44,15 @@
       // matahari terbit
       ctx.fillStyle = `rgba(255,224,130,${dawn})`;
       ctx.beginPath(); ctx.arc(200, 100 - dawn * 22, 14, 0, 7); ctx.fill();
+      // pelangi (Level 3)
+      if (rainbow && dawn > 0.3) {
+        ctx.globalAlpha = Math.min(1, (t - 1) / 2) * 0.75;
+        ['#ff6b6b', '#ffa94d', '#ffe066', '#8ce99a', '#74c0fc', '#b197fc'].forEach((c, i) => {
+          ctx.strokeStyle = c; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(128, 104, 104 - i * 3, Math.PI, 0); ctx.stroke();
+        });
+        ctx.globalAlpha = 1;
+      }
+
       // bukit & tanah
       ctx.fillStyle = mix([18, 40, 26], [70, 140, 70], dawn);
       ctx.beginPath(); ctx.ellipse(40, 104, 80, 18, 0, 0, 7); ctx.ellipse(220, 106, 90, 16, 0, 0, 7); ctx.fill();
@@ -61,15 +71,14 @@
         ctx.fillStyle = `rgba(240,255,170,${0.5 + 0.5 * Math.sin(t * 3 + i)})`; ctx.fillRect(x | 0, y | 0, 2, 2);
       }
 
-      // hewan berbaris dan melompat
-      const back = ['rusa', 'kambing', 'kerbau', 'monyet', 'rubah'];
-      const front = ['kelinci', 'landak', 'kucing', 'pipit', 'tupai'];
+      // hewan berbaris dan melompat: tiap baris 5 hewan (2 di kiri, 3 di kanan Benhat), baris belakang lebih kecil
       const hop = (i) => -Math.abs(Math.sin(t * 4 + i * 0.9)) * 5;
-      back.forEach((id, i) => { const x = i < 2 ? 14 + i * 26 : 160 + (i - 2) * 26; ctx.drawImage(spr(id), x, 86 + hop(i), 22, 22); });
-      front.forEach((id, i) => {
-        const big = id == 'kucing' || id == 'pipit' ? 16 : 22;
-        const x = i < 2 ? 22 + i * 30 : 156 + (i - 2) * 30;
-        ctx.drawImage(spr(id), x, 126 - big + hop(i + 5), big, big);
+      const rows = Math.ceil(animals.length / 5), BOT = [[126], [108, 126], [100, 113, 128]][rows - 1] || [126];
+      animals.forEach((id, i) => {
+        const r = Math.floor(i / 5), j = i % 5, sz = 22 - (rows - 1 - r) * 2;
+        const big = ['kucing', 'pipit', 'ayam'].includes(id) ? Math.round(sz * 0.72) : sz;
+        const x = (j < 2 ? 14 + j * 28 : 158 + (j - 2) * 28) + (r % 2) * 8;
+        ctx.drawImage(spr(id), x, BOT[r] - big + hop(i), big, big);
       });
       // Benhat di tengah depan, Tutu terbang berputar di atas
       ctx.drawImage(T.SPR.bear.canvas, 104, 92 + hop(11) * 0.6, 40, 47);
@@ -85,6 +94,7 @@
       }
       ctx.restore();
     }
-    return { draw, reset() { start = 0; hearts.length = 0; } };
+    // ids: jenis hewan yang diselamatkan; rb: pelangi
+    return { draw, reset(ids, rb) { start = 0; hearts.length = 0; animals = ids || []; rainbow = !!rb; } };
   };
 })();

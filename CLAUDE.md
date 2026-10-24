@@ -62,7 +62,17 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   tombol ⭐ Tandai (terlihat di layar Benhat). Tidak bisa membawa alat.
 - **Benhat** — "Si Beruang Hebat" (kuat, helm kuning; dulu bernama Tangguh, lalu Siberat): layar hampir gelap total; hanya melihat mata kuning Tutu, bintang tanda,
   gelombang suara 🔊 korban. Tidak bisa masuk sungai (lewat jembatan), lambat di lumpur. Tombol A.
-- **Dunia terbuka**, urutan bebas, posisi 10 korban **diacak** tiap main (titik tetap per zona). Semua korban hewan:
+- **3 level** (v9): pilih level setelah "Main sendiri" / pilih peran (tuan rumah); level berikutnya terbuka setelah
+  level sebelumnya selesai. Hewan boleh muncul lagi di level lain tapi **kasusnya selalu berbeda** (`T.VICTIMS`: `id` =
+  kasus, `sp` = jenis hewan/sprite, `lv` = level). Level 1 "Malam Bulan Purnama": 5 hewan, 1 alat, tanpa jembatan,
+  Benhat sedikit lebih terang. Level 2 "Malam Bulan Separuh" = isi lama (10 hewan, id lama). Level 3 "Malam Gerimis
+  Berkabut": 15 hewan (10 kasus baru + bebek, penyu, burung hantu kecil, anak ayam hutan, kancil), kabut & gerimis
+  (pandangan Tutu pendek), jembatan baris 19 & 33 putus (FLOOR 7) → Benhat perbaiki dengan 🪵 papan (aksi `fix`),
+  alat baru ✂️ gunting tumpul & 🧺 keranjang, `need: []` = cukup tenaga Benhat (💪), anak ayam berlari (`run`, posisi
+  dari jam dinding `T.runPos`) sampai ditandai ⭐, petunjuk 💡 baru muncul setelah ±5 detik. Simpanan per level di kunci
+  `penyelamat-v2` (`{unlocked, done, lv:{n:{world,players,seen}}}`); simpanan lama `penyelamat-malam-v1` jadi Level 2.
+  Tamu versi lama ditolak dengan pesan "tutup game di iPad teman lalu buka lagi".
+- **Dunia terbuka**, urutan bebas, posisi korban **diacak** tiap main (titik tetap per zona). Kasus Level 2:
   kelinci (sungai: pelampung+tali), rusa (perban), landak (tongkat), kambing (selimut+peluit), rubah (gua berasap: kain
   basah), anak kerbau (lumpur: papan), anak kucing (pohon: tangga), + v8: anak monyet (lubang: tali), anak burung pipit
   (jatuh dari sarang: tangga), tupai kecil (demam: kain basah untuk kompres). Simpanan lama otomatis ditambah hewan baru
@@ -71,7 +81,7 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   **Tas 3 kotak**, papan & tangga = 2 kotak → harus memilih. Salah alat tidak kalah. Hewan selamat pindah ke sarang,
   lokasinya jadi terang kunang-kunang.
 - Multiplayer: PeerJS (`penyelamat/vendor/peerjs.min.js` 1.5.5, server sinyal publik 0.peerjs.com). Pembuat ruangan =
-  tuan rumah yang memegang dunia & menyimpan progres (`localStorage` kunci `penyelamat-malam-v1`); kode ruangan 4 gambar.
+  tuan rumah yang memegang dunia & menyimpan progres (`localStorage` kunci `penyelamat-v2`); kode ruangan 4 gambar.
   Tamu mengirim aksi (`mark`, `bag`, `rescue`), tuan rumah membalas `world`/`ev`. Detak 4 detik → banner terputus,
   tamu menyambung ulang otomatis.
 - Uji multiplayer lokal: jalankan server PeerJS (`npm i peer`, `PeerServer({port:9000,host:'127.0.0.1',path:'/'})`)
@@ -81,7 +91,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 ## Status & yang sedang dibahas
 
 - Rilis terakhir di `main`: **versi 15** (game Aksa sama dengan versi 7) +
-  **Duo Penyelamat versi 8** di `penyelamat/`. Riwayat: v8 3 hewan baru (total 10), Benhat lebih besar, adegan penutup; v7 cahaya samar Benhat + kunang-kunang di ujung jembatan; v6 pesan selamat sampai Oke, panel alat kecil di kanan,
+  **Duo Penyelamat versi 8** di `penyelamat/`. Di branch `pratinjau-v16`: **Duo Penyelamat versi 9 = 3 level** (lihat atas),
+  plus perbaikan garis hitam kecil di tepi sprite jauh (indeks sprite negatif). Riwayat: v8 3 hewan baru (total 10), Benhat lebih besar, adegan penutup; v7 cahaya samar Benhat + kunang-kunang di ujung jembatan; v6 pesan selamat sampai Oke, panel alat kecil di kanan,
   lampu sorot Tutu; v5 judul "Duo Penyelamat" + petunjuk 💡 alat untuk Tutu (`hint` di `T.VICTIMS`, tidak menyebut
   nama alat); v4 Tutu terbang & lebih cepat, nama Benhat; v3 perbaikan rotasi iPad.
 - Laporan pengguna: **main berdua di dua iPad sudah berhasil**.

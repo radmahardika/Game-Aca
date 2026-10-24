@@ -48,8 +48,9 @@ Dipilih dari layar judul kapan saja. Aksa dan Ara menjemput teman-teman TPA yang
 
 Folder `penyelamat/` → `https://radmahardika.github.io/Game-Aca/penyelamat/`
 
-Game penyelamatan first person 3D pixel di hutan malam untuk **anak + orang tua di dua iPad**. **Tutu**, Burung Hantu yang suka membantu, bisa melihat dalam gelap dan menandai hewan dengan ⭐. **Benhat**, Si Beruang Hebat, hampir tidak bisa melihat. Ia membawa alat dari **Pohon Sarang** (tas hanya muat 3 kotak) dan menolong 10 hewan yang posisinya diacak setiap main. Keduanya harus saling bicara.
+Game penyelamatan first person 3D pixel di hutan malam untuk **anak + orang tua di dua iPad**. **Tutu**, Burung Hantu yang suka membantu, bisa melihat dalam gelap dan menandai hewan dengan ⭐. **Benhat**, Si Beruang Hebat, hampir tidak bisa melihat. Ia membawa alat dari **Pohon Sarang** (tas hanya muat 3 kotak) dan menolong hewan yang posisinya diacak setiap main. Keduanya harus saling bicara.
 
+- **3 level:** Level 1 *Malam Bulan Purnama* (5 hewan, cukup satu alat, tanpa menyeberang sungai), Level 2 *Malam Bulan Separuh* (10 hewan, ada yang butuh 2 alat), Level 3 *Malam Gerimis Berkabut* (15 hewan: kabut, jembatan putus yang harus diperbaiki dengan papan, alat baru gunting tumpul & keranjang, anak ayam yang berlari). Level berikutnya terbuka setelah level sebelumnya selesai.
 - **Main berdua:** iPad pertama memilih *Buat ruangan* dan perannya, lalu muncul kode 4 gambar. iPad kedua memilih *Gabung ruangan* dan mengetuk gambar yang sama. Keduanya perlu internet.
 - **Main di satu iPad:** gantian peran dengan tombol ⇄.
 - Progres tersimpan di iPad pembuat ruangan.
