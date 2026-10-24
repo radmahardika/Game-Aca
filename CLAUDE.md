@@ -82,6 +82,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   **Tim Penyelamat Malam versi 4** di `penyelamat/`: nama Tutu & Benhat; Tutu terbang (kamera mata 1,15 vs 0,5,
   horizon 40% layar, naik-turun pelan) dan lebih cepat (Tutu 2,7 vs Benhat 1,3); perbaikan rotasi iPad (v3).
   Belum diuji di dua iPad sungguhan — tunggu laporan pengguna.
+- Branch `pratinjau-v12`: petunjuk kecil alat untuk Tutu (baris 💡 di bawah keterangan korban, `hint` di `T.VICTIMS`),
+  tidak menyebut nama alat langsung; Benhat tidak mendapat petunjuk.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

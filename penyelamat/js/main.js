@@ -461,14 +461,14 @@
   }
   function hudTick() {
     const b = $('bubble');
-    let txt = '', cls = 'bubble';
+    let txt = '', hint = '', cls = 'bubble';
     if (S.role == 'owl') {
       const v = nearVictim('owl', 4.2);
       if (v) {
         const p = S.players.owl;
         let d = Math.atan2(v.y - p.y, v.x - p.x) - p.a; d = Math.atan2(Math.sin(d), Math.cos(d));
         if (Math.abs(d) < 0.7) {
-          txt = '🦉 ' + T.vicById[v.id].say;
+          txt = '🦉 ' + T.vicById[v.id].say; hint = T.vicById[v.id].hint;
           if (!S.heard[v.id]) { S.heard[v.id] = 1; T.audio.sfx('hoot'); }
         }
       }
@@ -476,7 +476,12 @@
       if (nearVictim('bear', 3.2)) { txt = '🔊 Ada suara minta tolong di dekat sini!'; cls = 'bubble hear'; }
       else if (atSarang()) txt = '🌳 Pohon Sarang. Tekan A untuk mengambil alat.';
     }
-    if (b.textContent !== txt) { b.textContent = txt; b.className = cls; b.hidden = !txt; }
+    // petunjuk kecil alat hanya untuk Tutu, di baris kedua
+    const key = txt + '|' + hint;
+    if (b.dataset.key !== key) {
+      b.dataset.key = key; b.className = cls; b.hidden = !txt; b.textContent = txt;
+      if (hint) { const h = document.createElement('small'); h.textContent = '💡 ' + hint; b.appendChild(h); }
+    }
     const c = context(), a = $('aBtn');
     a.classList.toggle('glow', !!c);
     const l = c ? c.lbl : ' ';
