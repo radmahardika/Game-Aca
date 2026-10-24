@@ -80,8 +80,8 @@
     if (S.world.saved == T.VICTIMS.length) showEnd();
   }
   function roleToast() {
-    if (S.role == 'owl') showToast('🦉 Kamu Sinar', 'Cari hewan yang butuh pertolongan, lalu tandai dengan ⭐ supaya Tangguh tahu arahnya.', 3200);
-    else showToast('🐻 Kamu Tangguh', 'Gelap sekali! Ikuti mata kuning Sinar dan bintang ⭐. Dengarkan suara minta tolong 🔊.', 3200);
+    if (S.role == 'owl') showToast('🦉 Kamu Tutu', 'Cari hewan yang butuh pertolongan, lalu tandai dengan ⭐ supaya Siberat tahu arahnya.', 3200);
+    else showToast('🐻 Kamu Siberat', 'Gelap sekali! Ikuti mata kuning Tutu dan bintang ⭐. Dengarkan suara minta tolong 🔊.', 3200);
   }
 
   // ---------- ruangan ----------
@@ -162,7 +162,7 @@
         T.net.send({ t: 'welcome', role: other(S.role), world: S.world, players: S.players, seen: seenStr() });
         T.audio.sfx('join');
         if (S.scene != 'play') enterPlay();
-        else { updateNet(true); showToast('🔗 Teman bergabung!', S.role == 'owl' ? 'Tangguh sudah siap di hutan.' : 'Sinar sudah siap di hutan.', 2200); }
+        else { updateNet(true); showToast('🔗 Teman bergabung!', S.role == 'owl' ? 'Siberat sudah siap di hutan.' : 'Tutu sudah siap di hutan.', 2200); }
         break;
       case 'welcome': {
         if (S.mode != 'guest') return;
@@ -248,11 +248,11 @@
     updateHUD();
     if (ev.k == 'marked') {
       T.audio.sfx('mark');
-      if (S.role == 'owl') showToast('⭐ Ditandai', 'Tangguh sekarang bisa melihat bintang ini dari jauh.', 1800);
-      else showToast('⭐ Sinar menandai sesuatu!', 'Cari bintang kuning, lalu ikuti arahnya.', 2200);
+      if (S.role == 'owl') showToast('⭐ Ditandai', 'Siberat sekarang bisa melihat bintang ini dari jauh.', 1800);
+      else showToast('⭐ Tutu menandai sesuatu!', 'Cari bintang kuning, lalu ikuti arahnya.', 2200);
     } else if (ev.k == 'wrong') {
       T.audio.sfx('wrong');
-      showToast('Alatnya belum cocok', 'Tanya Sinar: hewan ini kenapa? Lalu ambil alat di Pohon Sarang.', 2800);
+      showToast('Alatnya belum cocok', 'Tanya Tutu: hewan ini kenapa? Lalu ambil alat di Pohon Sarang.', 2800);
     } else if (ev.k == 'rescued') {
       const meta = T.vicById[ev.id];
       T.audio.sfx('rescue');
@@ -310,7 +310,7 @@
     const i = T.I(xi, yi);
     if (T.WALL[i]) return false;
     const f = T.FLOOR[i];
-    return !(who == 'bear' && (f == 1 || f == 6)); // Tangguh tidak bisa masuk sungai, hanya lewat jembatan
+    return !(who == 'bear' && (f == 1 || f == 6)); // Siberat tidak bisa masuk sungai, hanya lewat jembatan
   }
   function free(who, x, y) {
     const r = 0.22;
@@ -382,7 +382,7 @@
   function updateHUD() {
     if (!S.world) return;
     const owl = S.role == 'owl';
-    $('roleChip').textContent = owl ? '🦉 Sinar' : '🐻 Tangguh';
+    $('roleChip').textContent = owl ? '🦉 Tutu' : '🐻 Siberat';
     $('count').textContent = S.world.saved + '/' + T.VICTIMS.length;
     $('markBtn').hidden = !owl;
     $('aBtn').hidden = owl;

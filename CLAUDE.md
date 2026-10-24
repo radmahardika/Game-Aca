@@ -58,9 +58,9 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 
 - First person **3D pixel** (raycasting), malam gelap tapi tidak horor. Kontrol: analog melayang di 60% kiri layar
   (atas/bawah = maju/mundur, kiri/kanan = belok; kecepatan sudah diturunkan atas permintaan pengguna).
-- **Sinar** (burung hantu, kecil & gesit): melihat dalam gelap (lingkaran redup kehijauan), terbang melintasi sungai,
-  tombol ⭐ Tandai (terlihat di layar Tangguh). Tidak bisa membawa alat.
-- **Tangguh** (beruang, kuat, helm kuning): layar hampir gelap total; hanya melihat mata kuning Sinar, bintang tanda,
+- **Tutu** — "Burung Hantu yang suka membantu" (kecil & gesit; dulu bernama Sinar): melihat dalam gelap (lingkaran redup kehijauan), terbang melintasi sungai,
+  tombol ⭐ Tandai (terlihat di layar Siberat). Tidak bisa membawa alat.
+- **Siberat** — "Si Beruang Hebat" (kuat, helm kuning; dulu bernama Tangguh): layar hampir gelap total; hanya melihat mata kuning Tutu, bintang tanda,
   gelombang suara 🔊 korban. Tidak bisa masuk sungai (lewat jembatan), lambat di lumpur. Tombol A.
 - **Dunia terbuka**, urutan bebas, posisi 7 korban **diacak** tiap main (titik tetap per zona). Semua korban hewan:
   kelinci (sungai: pelampung+tali), rusa (perban), landak (tongkat), kambing (selimut+peluit), rubah (gua berasap: kain
@@ -80,6 +80,7 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 
 - Rilis terakhir di `main`: **versi 8** (Desa Ceria + Kampung Hijau; game Aksa sama dengan versi 7) +
   **Tim Penyelamat Malam versi 1** di `penyelamat/` (belum diuji di dua iPad sungguhan — tunggu laporan pengguna).
+- Branch `pratinjau-v9`: ganti nama Sinar → **Tutu**, Tangguh → **Siberat** (Tim Penyelamat Malam versi 2).
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

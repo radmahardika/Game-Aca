@@ -21,7 +21,7 @@
 
   <!-- HUD permainan -->
   <div id="hud" hidden>
-    <div class="hud tl"><div class="chip" id="roleChip">🦉 Sinar</div><div class="chip">Selamat <b id="count">0/7</b></div><div class="chip net" id="netChip" hidden>🔗</div></div>
+    <div class="hud tl"><div class="chip" id="roleChip">🦉 Tutu</div><div class="chip">Selamat <b id="count">0/7</b></div><div class="chip net" id="netChip" hidden>🔗</div></div>
     <div class="hud tr">
       <button class="hbtn" id="soundBtn" type="button" aria-label="Suara">🎵</button>
       <button class="hbtn" id="mapBtn" type="button">🗺️ Peta</button>
@@ -42,7 +42,7 @@
   <!-- Layar judul -->
   <div class="modal" id="title"><div class="card title">
     <h1>Tim Penyelamat Malam</h1>
-    <p class="lead">🦉 Sinar & 🐻 Tangguh menolong 7 hewan di hutan yang gelap.</p>
+    <p class="lead">🦉 Tutu & 🐻 Siberat menolong 7 hewan di hutan yang gelap.</p>
     <p class="save" id="saveInfo" hidden></p>
     <div class="col">
       <button class="go" id="twoBtn" type="button">👫 Main berdua (2 iPad)</button>
@@ -67,8 +67,8 @@
   <div class="modal" id="rolePick" hidden><div class="card">
     <h2>iPad ini jadi siapa?</h2>
     <div class="who">
-      <button type="button" class="pick" data-role="owl"><b>🦉 Sinar</b><i>si burung hantu</i>Bisa melihat dalam gelap dan terbang melintasi sungai. Menemukan hewan dan menandai dengan ⭐.</button>
-      <button type="button" class="pick" data-role="bear"><b>🐻 Tangguh</b><i>si beruang</i>Hampir tidak bisa melihat. Membawa alat dari Pohon Sarang dan menolong hewan.</button>
+      <button type="button" class="pick" data-role="owl"><b>🦉 Tutu</b><i>Burung Hantu yang suka membantu</i>Bisa melihat dalam gelap dan terbang melintasi sungai. Menemukan hewan dan menandai dengan ⭐.</button>
+      <button type="button" class="pick" data-role="bear"><b>🐻 Siberat</b><i>Si Beruang Hebat</i>Hampir tidak bisa melihat. Membawa alat dari Pohon Sarang dan menolong hewan.</button>
     </div>
     <button class="link back" type="button">← Kembali</button>
   </div></div>
@@ -95,7 +95,7 @@
   <!-- Alat di Pohon Sarang -->
   <div class="modal" id="toolModal" hidden><div class="card">
     <h2>Pohon Sarang</h2>
-    <p>Tas cuma muat 3 kotak. Papan dan tangga besar, makan 2 kotak. Tanya dulu Sinar: hewannya kenapa?</p>
+    <p>Tas cuma muat 3 kotak. Papan dan tangga besar, makan 2 kotak. Tanya dulu Tutu: hewannya kenapa?</p>
     <div class="tools" id="toolGrid"></div>
     <div class="bag static" id="bagModal"></div>
     <div><button class="go" id="toolDone" type="button">Selesai</button></div>
@@ -105,7 +105,7 @@
   <div class="modal" id="mapModal" hidden><div class="card">
     <h2>Peta</h2><p>Hanya bagian hutan yang sudah dilihat.</p>
     <div class="mapwrap"><canvas id="mapc" width="160" height="160"></canvas></div>
-    <div class="legend"><span style="--c:#e6ff8a">Pohon Sarang</span><span style="--c:#ffd84a">Sinar</span><span style="--c:#b07a4a">Tangguh</span><span style="--c:#ffcf4a">⭐ Tanda</span><span style="--c:#3f7aa6">Sungai</span></div>
+    <div class="legend"><span style="--c:#e6ff8a">Pohon Sarang</span><span style="--c:#ffd84a">Tutu</span><span style="--c:#b07a4a">Siberat</span><span style="--c:#ffcf4a">⭐ Tanda</span><span style="--c:#3f7aa6">Sungai</span></div>
     <div class="center"><button class="go" id="mapClose" type="button">Tutup</button></div>
   </div></div>
 
@@ -122,7 +122,7 @@
   <!-- Selesai -->
   <div class="modal" id="endModal" hidden><div class="card">
     <h2>Ketujuh hewan selamat!</h2>
-    <p>Pohon Sarang jadi ramai dan hutan terang oleh kunang-kunang. Hebat, Sinar dan Tangguh!</p>
+    <p>Pohon Sarang jadi ramai dan hutan terang oleh kunang-kunang. Hebat, Tutu dan Siberat!</p>
     <p id="endWait" hidden>Menunggu teman memulai petualangan baru…</p>
     <div class="col">
       <button class="go" id="againBtn" type="button">🌙 Main lagi (posisi hewan baru)</button>
