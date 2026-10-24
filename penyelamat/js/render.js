@@ -32,7 +32,7 @@
     function draw(view) {
       const owl = view.role == 'owl', p = view.p, t = view.t, world = view.world;
       const dirX = Math.cos(p.a), dirY = Math.sin(p.a), plX = -dirY * 0.66, plY = dirX * 0.66;
-      // Tutu terbang: mata lebih tinggi (di bawah puncak pohon) dan sedikit menunduk; Siberat setinggi mata beruang.
+      // Tutu terbang: mata lebih tinggi (di bawah puncak pohon) dan sedikit menunduk; Benhat setinggi mata beruang.
       const camZ = owl ? 1.15 + 0.035 * Math.sin(t * 2.5) : 0.5, hz = owl ? Math.round(H * 0.4) : H >> 1;
       const lights = T.lights(world);
       const sh = [0, 0, 0];

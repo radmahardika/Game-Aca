@@ -59,8 +59,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 - First person **3D pixel** (raycasting), malam gelap tapi tidak horor. Kontrol: analog melayang di 60% kiri layar
   (atas/bawah = maju/mundur, kiri/kanan = belok; kecepatan sudah diturunkan atas permintaan pengguna).
 - **Tutu** — "Burung Hantu yang suka membantu" (kecil & gesit; dulu bernama Sinar): melihat dalam gelap (lingkaran redup kehijauan), terbang melintasi sungai,
-  tombol ⭐ Tandai (terlihat di layar Siberat). Tidak bisa membawa alat.
-- **Siberat** — "Si Beruang Hebat" (kuat, helm kuning; dulu bernama Tangguh): layar hampir gelap total; hanya melihat mata kuning Tutu, bintang tanda,
+  tombol ⭐ Tandai (terlihat di layar Benhat). Tidak bisa membawa alat.
+- **Benhat** — "Si Beruang Hebat" (kuat, helm kuning; dulu bernama Tangguh, lalu Siberat): layar hampir gelap total; hanya melihat mata kuning Tutu, bintang tanda,
   gelombang suara 🔊 korban. Tidak bisa masuk sungai (lewat jembatan), lambat di lumpur. Tombol A.
 - **Dunia terbuka**, urutan bebas, posisi 7 korban **diacak** tiap main (titik tetap per zona). Semua korban hewan:
   kelinci (sungai: pelampung+tali), rusa (perban), landak (tongkat), kambing (selimut+peluit), rubah (gua berasap: kain
@@ -79,11 +79,11 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 ## Status & yang sedang dibahas
 
 - Rilis terakhir di `main`: **versi 10** (game Aksa sama dengan versi 7) +
-  **Tim Penyelamat Malam versi 3** di `penyelamat/` (nama Tutu & Siberat; perbaikan layar macet & analog mati
+  **Tim Penyelamat Malam versi 3** di `penyelamat/` (nama Tutu & Benhat; perbaikan layar macet & analog mati
   setelah iPad diputar — ukur ulang kanvas tiap frame, analog direset saat rotasi/jari hilang, loop dijaga try/catch).
   Belum diuji di dua iPad sungguhan — tunggu laporan pengguna.
 - Branch `pratinjau-v11`: Tutu terbang — kamera lebih tinggi (mata 1,15 vs 0,5; horizon 40% layar, sedikit menunduk,
-  naik-turun pelan) dan lebih cepat (Tutu 2,7 vs Siberat 1,3). Di layar Siberat, Tutu tampak melayang.
+  naik-turun pelan) dan lebih cepat (Tutu 2,7 vs Benhat 1,3). Di layar Benhat, Tutu tampak melayang.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

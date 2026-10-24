@@ -84,8 +84,8 @@
     if (S.world.saved == T.VICTIMS.length) showEnd();
   }
   function roleToast() {
-    if (S.role == 'owl') showToast('🦉 Kamu Tutu', 'Cari hewan yang butuh pertolongan, lalu tandai dengan ⭐ supaya Siberat tahu arahnya.', 3200);
-    else showToast('🐻 Kamu Siberat', 'Gelap sekali! Ikuti mata kuning Tutu dan bintang ⭐. Dengarkan suara minta tolong 🔊.', 3200);
+    if (S.role == 'owl') showToast('🦉 Kamu Tutu', 'Cari hewan yang butuh pertolongan, lalu tandai dengan ⭐ supaya Benhat tahu arahnya.', 3200);
+    else showToast('🐻 Kamu Benhat', 'Gelap sekali! Ikuti mata kuning Tutu dan bintang ⭐. Dengarkan suara minta tolong 🔊.', 3200);
   }
 
   // ---------- ruangan ----------
@@ -166,7 +166,7 @@
         T.net.send({ t: 'welcome', role: other(S.role), world: S.world, players: S.players, seen: seenStr() });
         T.audio.sfx('join');
         if (S.scene != 'play') enterPlay();
-        else { updateNet(true); showToast('🔗 Teman bergabung!', S.role == 'owl' ? 'Siberat sudah siap di hutan.' : 'Tutu sudah siap di hutan.', 2200); }
+        else { updateNet(true); showToast('🔗 Teman bergabung!', S.role == 'owl' ? 'Benhat sudah siap di hutan.' : 'Tutu sudah siap di hutan.', 2200); }
         break;
       case 'welcome': {
         if (S.mode != 'guest') return;
@@ -252,7 +252,7 @@
     updateHUD();
     if (ev.k == 'marked') {
       T.audio.sfx('mark');
-      if (S.role == 'owl') showToast('⭐ Ditandai', 'Siberat sekarang bisa melihat bintang ini dari jauh.', 1800);
+      if (S.role == 'owl') showToast('⭐ Ditandai', 'Benhat sekarang bisa melihat bintang ini dari jauh.', 1800);
       else showToast('⭐ Tutu menandai sesuatu!', 'Cari bintang kuning, lalu ikuti arahnya.', 2200);
     } else if (ev.k == 'wrong') {
       T.audio.sfx('wrong');
@@ -317,7 +317,7 @@
     const i = T.I(xi, yi);
     if (T.WALL[i]) return false;
     const f = T.FLOOR[i];
-    return !(who == 'bear' && (f == 1 || f == 6)); // Siberat tidak bisa masuk sungai, hanya lewat jembatan
+    return !(who == 'bear' && (f == 1 || f == 6)); // Benhat tidak bisa masuk sungai, hanya lewat jembatan
   }
   function free(who, x, y) {
     const r = 0.22;
@@ -334,7 +334,7 @@
     if (Math.abs(tr) < 0.15) tr = 0;
     fw *= Math.abs(fw); tr *= Math.abs(tr);
     p.a += tr * 1.4 * dt;
-    let sp = S.role == 'owl' ? 2.7 : 1.3; // Tutu terbang lebih cepat dari Siberat
+    let sp = S.role == 'owl' ? 2.7 : 1.3; // Tutu terbang lebih cepat dari Benhat
     if (S.role == 'bear' && T.FLOOR[T.I(p.x | 0, p.y | 0)] == 2) sp *= 0.55;
     const vx = Math.cos(p.a) * fw * sp * dt, vy = Math.sin(p.a) * fw * sp * dt;
     if (free(S.role, p.x + vx, p.y)) p.x += vx;
@@ -389,7 +389,7 @@
   function updateHUD() {
     if (!S.world) return;
     const owl = S.role == 'owl';
-    $('roleChip').textContent = owl ? '🦉 Tutu' : '🐻 Siberat';
+    $('roleChip').textContent = owl ? '🦉 Tutu' : '🐻 Benhat';
     $('count').textContent = S.world.saved + '/' + T.VICTIMS.length;
     $('markBtn').hidden = !owl;
     $('aBtn').hidden = owl;
