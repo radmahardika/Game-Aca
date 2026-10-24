@@ -75,6 +75,18 @@
       hint: 'Butuh sesuatu untuk naik ke tempat tinggi.',
       say: 'Anak kucing di atas pohon tinggi. Tidak bisa turun!',
       lesson: 'Naik ke tempat tinggi pakai tangga, dan selalu bersama orang dewasa.' },
+    { id: 'monyet', nama: 'Anak monyet', need: ['tali'], reach: 1.7, c: [[37, 7], [32, 10], [36, 14]],
+      hint: 'Butuh sesuatu yang bisa diulurkan lalu ditarik ke atas.',
+      say: 'Anak monyet terperosok ke lubang yang dalam. Tidak bisa naik!',
+      lesson: 'Ada yang jatuh ke lubang? Jangan ikut masuk. Ulurkan tali dari atas, lalu panggil orang dewasa.' },
+    { id: 'pipit', nama: 'Anak burung pipit', need: ['tangga'], reach: 1.7, c: [[8, 4], [12, 12], [3, 8]],
+      hint: 'Butuh sesuatu untuk naik dan mengembalikannya ke sarang.',
+      say: 'Anak burung jatuh dari sarangnya di atas pohon.',
+      lesson: 'Anak burung jatuh? Jangan dibawa pulang. Minta orang dewasa mengembalikannya ke sarang.' },
+    { id: 'tupai', nama: 'Tupai kecil', need: ['kain'], reach: 1.7, c: [[15, 31], [19, 37], [23, 34]],
+      hint: 'Butuh sesuatu yang dingin untuk mengompres.',
+      say: 'Tupai kecil badannya panas sekali. Dia demam.',
+      lesson: 'Kalau badan panas: kompres dengan kain basah, istirahat, dan beri tahu orang dewasa.' },
   ];
   T.vicById = Object.fromEntries(T.VICTIMS.map((v) => [v.id, v]));
 
@@ -95,14 +107,17 @@
   T.START = { owl: { x: 16.5, y: 24.5, a: -Math.PI / 2 }, bear: { x: 18.5, y: 24.5, a: -Math.PI / 2 } };
 
   // Dunia baru: tiap hewan diacak ke salah satu titik yang cocok untuk kasusnya.
+  const place = (v) => {
+    const [x, y] = v.c[Math.floor(Math.random() * v.c.length)];
+    return { id: v.id, ox: x + 0.5, oy: y + 0.5, x: x + 0.5, y: y + 0.5, rescued: false };
+  };
   T.newWorld = function () {
-    return {
-      vics: T.VICTIMS.map((v) => {
-        const [x, y] = v.c[Math.floor(Math.random() * v.c.length)];
-        return { id: v.id, ox: x + 0.5, oy: y + 0.5, x: x + 0.5, y: y + 0.5, rescued: false };
-      }),
-      stars: [], bag: [], saved: 0,
-    };
+    return { vics: T.VICTIMS.map(place), stars: [], bag: [], saved: 0 };
+  };
+  // Simpanan lama (sebelum ada hewan baru): tambahkan hewan yang belum ada, progres lama tetap.
+  T.addMissing = function (world) {
+    for (const v of T.VICTIMS) if (!world.vics.some((q) => q.id == v.id)) world.vics.push(place(v));
+    return world;
   };
 
   // Bangun ulang peta lalu siapkan tempat tiap hewan (batu di sungai, buka pohon di sekitarnya).
@@ -141,6 +156,10 @@
     asap: mk(24, 24, (P) => { P(2, 2, 8, 5, 'rgba(190,190,200,.55)'); P(12, 0, 10, 6, 'rgba(190,190,200,.45)'); P(6, 6, 12, 5, 'rgba(190,190,200,.4)'); }),
     kerbau: mk(24, 24, (P) => { P(5, 7, 3, 2, '#ddd'); P(16, 7, 3, 2, '#ddd'); P(8, 8, 8, 6, '#5e6670'); P(10, 10, 1, 1, '#111'); P(13, 10, 1, 1, '#111'); P(10, 12, 4, 2, '#7e8690'); P(5, 14, 14, 5, '#5e6670'); P(1, 18, 22, 6, '#5a3e22'); P(3, 17, 4, 1, '#6e5030'); }),
     kucing: mk(16, 16, (P) => { P(4, 3, 2, 2, '#f0a040'); P(9, 3, 2, 2, '#f0a040'); P(4, 4, 7, 5, '#f0a040'); P(5, 6, 1, 1, '#222'); P(9, 6, 1, 1, '#222'); P(4, 9, 7, 4, '#f0a040'); P(11, 8, 1, 5, '#f0a040'); }),
+    monyet: mk(24, 24, (P, x) => { x.fillStyle = '#05060c'; x.beginPath(); x.ellipse(12, 19, 11, 4, 0, 0, 7); x.fill(); P(2, 18, 20, 1, '#3a2a1a'); P(8, 10, 8, 7, '#8a5a32'); P(6, 11, 3, 3, '#8a5a32'); P(15, 11, 3, 3, '#8a5a32'); P(9, 12, 6, 4, '#e3b98a'); P(10, 13, 1, 1, '#222'); P(13, 13, 1, 1, '#222'); P(11, 15, 2, 1, '#a0522d'); P(5, 14, 2, 4, '#8a5a32'); P(17, 14, 2, 4, '#8a5a32'); }),
+    pipit: mk(16, 16, (P) => { P(5, 8, 7, 5, '#9a7350'); P(3, 6, 4, 4, '#9a7350'); P(4, 7, 1, 1, '#111'); P(2, 8, 1, 1, '#e0a030'); P(7, 11, 5, 1, '#c8a888'); P(11, 9, 3, 2, '#7a5a3a'); P(6, 13, 1, 2, '#e0a030'); P(9, 13, 1, 2, '#e0a030'); }),
+    pohonSarang: mk(24, 48, (P) => { P(10, 20, 4, 28, '#5a3a1e'); P(4, 10, 16, 14, '#1f5a2a'); P(6, 4, 12, 8, '#246a30'); P(9, 0, 6, 5, '#2b7a36'); P(14, 21, 7, 3, '#8a6a3a'); P(15, 20, 5, 1, '#a0804a'); }),
+    tupai: mk(24, 24, (P) => { P(15, 7, 5, 12, '#b0662a'); P(17, 5, 4, 4, '#b0662a'); P(6, 10, 8, 7, '#c47a36'); P(6, 8, 2, 2, '#c47a36'); P(11, 8, 2, 2, '#c47a36'); P(7, 12, 1, 1, '#222'); P(11, 12, 1, 1, '#222'); P(7, 14, 2, 1, '#ff6a5a'); P(11, 14, 2, 1, '#ff6a5a'); P(5, 17, 10, 6, '#c47a36'); P(7, 18, 6, 4, '#e8c8a0'); P(3, 7, 1, 2, '#9fd8ff'); P(2, 10, 1, 2, '#9fd8ff'); }),
     pohon: mk(24, 48, (P) => { P(10, 20, 4, 28, '#5a3a1e'); P(4, 10, 16, 14, '#1f5a2a'); P(6, 4, 12, 8, '#246a30'); P(9, 0, 6, 5, '#2b7a36'); P(14, 22, 8, 2, '#5a3a1e'); }),
     owl: mk(24, 24, (P) => { P(6, 6, 12, 16, '#7a5536'); P(5, 4, 3, 4, '#7a5536'); P(16, 4, 3, 4, '#7a5536'); P(7, 8, 4, 4, '#f4e6c8'); P(13, 8, 4, 4, '#f4e6c8'); P(11, 11, 2, 2, '#e09a2a'); P(7, 14, 10, 2, '#f07a2a'); P(8, 16, 8, 5, '#c9a27a'); P(4, 13, 3, 8, '#5e4029'); P(17, 13, 3, 8, '#5e4029'); P(8, 22, 2, 2, '#e09a2a'); P(14, 22, 2, 2, '#e09a2a'); }),
     eyes: mk(24, 24, (P) => { P(8, 9, 2, 2, '#ffd84a'); P(14, 9, 2, 2, '#ffd84a'); }),

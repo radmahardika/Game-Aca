@@ -62,9 +62,11 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   tombol ⭐ Tandai (terlihat di layar Benhat). Tidak bisa membawa alat.
 - **Benhat** — "Si Beruang Hebat" (kuat, helm kuning; dulu bernama Tangguh, lalu Siberat): layar hampir gelap total; hanya melihat mata kuning Tutu, bintang tanda,
   gelombang suara 🔊 korban. Tidak bisa masuk sungai (lewat jembatan), lambat di lumpur. Tombol A.
-- **Dunia terbuka**, urutan bebas, posisi 7 korban **diacak** tiap main (titik tetap per zona). Semua korban hewan:
+- **Dunia terbuka**, urutan bebas, posisi 10 korban **diacak** tiap main (titik tetap per zona). Semua korban hewan:
   kelinci (sungai: pelampung+tali), rusa (perban), landak (tongkat), kambing (selimut+peluit), rubah (gua berasap: kain
-  basah), anak kerbau (lumpur: papan), anak kucing (pohon: tangga). Tiap selesai muncul pesan dunia nyata.
+  basah), anak kerbau (lumpur: papan), anak kucing (pohon: tangga), + v8: anak monyet (lubang: tali), anak burung pipit
+  (jatuh dari sarang: tangga), tupai kecil (demam: kain basah untuk kompres). Simpanan lama otomatis ditambah hewan baru
+  (`T.addMissing`). Tiap selesai muncul pesan dunia nyata.
 - Pusat: **Pohon Sarang** (beringin berlubang + kunang-kunang; BUKAN perkemahan manusia). Alat diambil di sana.
   **Tas 3 kotak**, papan & tangga = 2 kotak → harus memilih. Salah alat tidak kalah. Hewan selamat pindah ke sarang,
   lokasinya jadi terang kunang-kunang.
@@ -89,6 +91,9 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   (3) **lampu sorot Tutu**: cahaya hangat di sekitar + sorot ke depan ±9 langkah, hanya di layar Tutu.
 - Isi v7: cahaya samar untuk Benhat (radius 3,5, masih gelap) + kunang-kunang di kedua ujung tiap
   jembatan (`T.BRIDGE_LIGHTS`, terlihat kedua peran) supaya mudah menyeberang.
+- Branch `pratinjau-v15`: 3 hewan baru (total 10) + Benhat lebih besar di layar Tutu (tinggi 1,25 dari 0,95);
+  keterangan Tutu memilih hewan terdekat yang sedang dilihat; layar judul tidak lagi menyimpan dunia latar sebagai progres;
+  cahaya dibatasi supaya pohon dekat tidak silau.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

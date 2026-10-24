@@ -24,11 +24,11 @@
   const seenStr = () => Array.from(S.seen).join('');
   const seenFrom = (s) => { const a = new Uint8Array(N * N); if (s) for (let i = 0; i < a.length; i++) a[i] = s.charCodeAt(i) == 49 ? 1 : 0; return a; };
   function load() {
-    try { const d = JSON.parse(localStorage.getItem(SAVE_KEY)); if (d && d.world && d.world.vics && d.world.vics.length == T.VICTIMS.length) return d; } catch (e) {}
+    try { const d = JSON.parse(localStorage.getItem(SAVE_KEY)); if (d && d.world && d.world.vics && d.world.vics.length) { T.addMissing(d.world); return d; } } catch (e) {}
     return null;
   }
   function save() {
-    if (!owns() || !S.world) return;
+    if (!owns() || !S.world || S.scene != 'play') return; // dunia latar layar judul bukan progres
     try { localStorage.setItem(SAVE_KEY, JSON.stringify({ world: S.world, players: S.players, seen: seenStr() })); } catch (e) {}
   }
   function freshWorld() {
@@ -55,7 +55,7 @@
     const d = load();
     if (!S.world) { if (d) { S.world = d.world; T.prepareMap(S.world); } else freshWorld(); }
     const info = $('saveInfo');
-    if (d && d.world.saved > 0 && d.world.saved < T.VICTIMS.length) { info.textContent = `Petualangan tersimpan: ${d.world.saved} dari 7 hewan sudah selamat.`; info.hidden = false; }
+    if (d && d.world.saved > 0 && d.world.saved < T.VICTIMS.length) { info.textContent = `Petualangan tersimpan: ${d.world.saved} dari ${T.VICTIMS.length} hewan sudah selamat.`; info.hidden = false; }
     else info.hidden = true;
     $('resetBtn').hidden = !d;
     show('title');
@@ -479,14 +479,18 @@
     const b = $('bubble');
     let txt = '', hint = '', cls = 'bubble';
     if (S.role == 'owl') {
-      const v = nearVictim('owl', 4.2);
+      // hewan terdekat yang sedang dilihat Tutu (di depan, bukan di belakang)
+      const p = S.players.owl;
+      let v = null, bd = 4.2;
+      for (const q of S.world.vics) {
+        if (q.rescued) continue;
+        const dist = Math.hypot(q.x - p.x, q.y - p.y);
+        let d = Math.atan2(q.y - p.y, q.x - p.x) - p.a; d = Math.atan2(Math.sin(d), Math.cos(d));
+        if (dist < bd && Math.abs(d) < 0.7) { bd = dist; v = q; }
+      }
       if (v) {
-        const p = S.players.owl;
-        let d = Math.atan2(v.y - p.y, v.x - p.x) - p.a; d = Math.atan2(Math.sin(d), Math.cos(d));
-        if (Math.abs(d) < 0.7) {
-          txt = '🦉 ' + T.vicById[v.id].say; hint = T.vicById[v.id].hint;
-          if (!S.heard[v.id]) { S.heard[v.id] = 1; T.audio.sfx('hoot'); }
-        }
+        txt = '🦉 ' + T.vicById[v.id].say; hint = T.vicById[v.id].hint;
+        if (!S.heard[v.id]) { S.heard[v.id] = 1; T.audio.sfx('hoot'); }
       }
     } else {
       if (nearVictim('bear', 3.2)) { txt = '🔊 Ada suara minta tolong di dekat sini!'; cls = 'bubble hear'; }

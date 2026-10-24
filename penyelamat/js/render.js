@@ -55,7 +55,7 @@
             r += f; g += f * 0.9; b += f * 0.6;
           }
         }
-        sh[0] = r; sh[1] = g; sh[2] = b;
+        sh[0] = Math.min(r, 1.15); sh[1] = Math.min(g, 1.15); sh[2] = Math.min(b, 1.15); // jangan sampai silau di dekat pohon
       };
 
       // langit, bintang, bulan
@@ -145,6 +145,8 @@
       const add = (o) => { o.d = (o.x - p.x) ** 2 + (o.y - p.y) ** 2; list.push(o); };
       for (const v of world.vics) {
         if (v.id == 'kucing' && !v.rescued) { add({ x: v.x, y: v.y, s: SPR.pohon, h: 2.2, z: 0 }); add({ x: v.x, y: v.y, s: SPR.kucing, h: 0.32, z: 1.45, off: 0.01 }); }
+        else if (v.id == 'pipit' && !v.rescued) { add({ x: v.x, y: v.y, s: SPR.pohonSarang, h: 2.2, z: 0 }); add({ x: v.x, y: v.y, s: SPR.pipit, h: 0.3, z: 0, off: 0.05 }); }
+        else if (v.id == 'pipit') add({ x: v.x, y: v.y, s: SPR.pipit, h: 0.3, z: 0 });
         else add({ x: v.x, y: v.y, s: SPR[v.id], h: v.id == 'kerbau' ? 0.6 : 0.5, z: 0 });
         if (v.id == 'rubah' && !v.rescued) add({ x: v.x, y: v.y, s: SPR.asap, h: 0.6, z: 0.45, off: 0.02 });
         if (!owl && !v.rescued) {
@@ -154,7 +156,7 @@
       }
       const o = view.other;
       if (o) {
-        if (owl) add({ x: o.x, y: o.y, s: SPR.bear, h: 0.95, z: 0 });
+        if (owl) add({ x: o.x, y: o.y, s: SPR.bear, h: 1.25, z: 0 }); // Benhat besar & kuat
         else { const fz = 0.6 + 0.05 * Math.sin(t * 2.5); add({ x: o.x, y: o.y, s: SPR.owl, h: 0.55, z: fz }); add({ x: o.x, y: o.y, s: SPR.eyes, h: 0.55, z: fz, emit: 1, off: 0.01 }); }
       }
       for (const s of world.stars) {
