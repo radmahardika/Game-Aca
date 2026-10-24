@@ -80,8 +80,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 14** (game Aksa sama dengan versi 7) +
-  **Duo Penyelamat versi 7** di `penyelamat/`. Riwayat: v7 cahaya samar Benhat + kunang-kunang di ujung jembatan; v6 pesan selamat sampai Oke, panel alat kecil di kanan,
+- Rilis terakhir di `main`: **versi 15** (game Aksa sama dengan versi 7) +
+  **Duo Penyelamat versi 8** di `penyelamat/`. Riwayat: v8 3 hewan baru (total 10), Benhat lebih besar, adegan penutup; v7 cahaya samar Benhat + kunang-kunang di ujung jembatan; v6 pesan selamat sampai Oke, panel alat kecil di kanan,
   lampu sorot Tutu; v5 judul "Duo Penyelamat" + petunjuk 💡 alat untuk Tutu (`hint` di `T.VICTIMS`, tidak menyebut
   nama alat); v4 Tutu terbang & lebih cepat, nama Benhat; v3 perbaikan rotasi iPad.
 - Laporan pengguna: **main berdua di dua iPad sudah berhasil**.
@@ -91,10 +91,10 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   (3) **lampu sorot Tutu**: cahaya hangat di sekitar + sorot ke depan ±9 langkah, hanya di layar Tutu.
 - Isi v7: cahaya samar untuk Benhat (radius 3,5, masih gelap) + kunang-kunang di kedua ujung tiap
   jembatan (`T.BRIDGE_LIGHTS`, terlihat kedua peran) supaya mudah menyeberang.
-- Branch `pratinjau-v15`: 3 hewan baru (total 10) + Benhat lebih besar di layar Tutu (tinggi 1,25 dari 0,95);
+- Isi v8: 3 hewan baru (total 10) + Benhat lebih besar di layar Tutu (tinggi 1,25 dari 0,95);
   keterangan Tutu memilih hewan terdekat yang sedang dilihat; layar judul tidak lagi menyimpan dunia latar sebagai progres;
   cahaya dibatasi supaya pohon dekat tidak silau.
-- Juga di `pratinjau-v15`: **adegan penutup** setelah 10 hewan selamat (`penyelamat/js/ending.js`): malam → pagi di
+- Juga v8: **adegan penutup** setelah 10 hewan selamat (`penyelamat/js/ending.js`): malam → pagi di
   Pohon Sarang, semua hewan (versi sudah sembuh `T.SPR_FREE`) melompat, hati beterbangan, Tutu terbang berputar, Benhat
   di tengah; kalimat "Kamu jago sekali, terus menolong sesama ya!" muncul detik ke-2,5, tombol detik ke-5.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
