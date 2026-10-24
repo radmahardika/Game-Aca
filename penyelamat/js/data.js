@@ -1,7 +1,7 @@
 // Tim Penyelamat Malam — data dunia: peta, hewan, alat, sprite & tekstur pixel.
 (function () {
   const T = (window.TPM = window.TPM || {});
-  T.VERSION = 3;
+  T.VERSION = 4;
 
   // ---------- peta 40x40 ----------
   // WALL: 0 kosong, 1 pohon, 2 batu, 3 Pohon Sarang
