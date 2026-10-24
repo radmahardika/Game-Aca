@@ -78,12 +78,12 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 12** (game Aksa sama dengan versi 7) +
-  **Duo Penyelamat versi 5** di `penyelamat/`: judul baru "Duo Penyelamat"; petunjuk kecil 💡 alat untuk Tutu
-  (`hint` di `T.VICTIMS`, tidak menyebut nama alat; Benhat tidak dapat); Tutu terbang & lebih cepat (v4);
-  perbaikan rotasi iPad (v3). Belum diuji di dua iPad sungguhan — tunggu laporan pengguna.
+- Rilis terakhir di `main`: **versi 13** (game Aksa sama dengan versi 7) +
+  **Duo Penyelamat versi 6** di `penyelamat/`. Riwayat: v6 pesan selamat sampai Oke, panel alat kecil di kanan,
+  lampu sorot Tutu; v5 judul "Duo Penyelamat" + petunjuk 💡 alat untuk Tutu (`hint` di `T.VICTIMS`, tidak menyebut
+  nama alat); v4 Tutu terbang & lebih cepat, nama Benhat; v3 perbaikan rotasi iPad.
 - Laporan pengguna: **main berdua di dua iPad sudah berhasil**.
-- Branch `pratinjau-v13`: (1) pesan "X selamat!" tetap tampil sampai tombol **Oke 👍** ditekan (pesan lain tampil sesuai
+- Isi v6: (1) pesan "X selamat!" tetap tampil sampai tombol **Oke 👍** ditekan (pesan lain tampil sesuai
   panjang tulisan, tidak menimpa pesan yang sedang dibaca; layar akhir muncul setelah Oke terakhir); (2) alat di Pohon Sarang
   jadi **panel kecil di kanan** (tanpa latar gelap, Benhat tetap bisa berjalan, panel tertutup sendiri saat menjauh);
   (3) **lampu sorot Tutu**: cahaya hangat di sekitar + sorot ke depan ±9 langkah, hanya di layar Tutu.
