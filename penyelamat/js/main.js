@@ -4,7 +4,10 @@
   const $ = (id) => document.getElementById(id);
   const N = T.N, SAVE_KEY = 'penyelamat-malam-v1';
   const renderer = T.Renderer($('view'));
-  addEventListener('resize', () => renderer.resize());
+  const remeasure = () => { renderer.resize(); resetStick(); };
+  addEventListener('resize', remeasure);
+  addEventListener('orientationchange', () => { resetStick(); for (const ms of [100, 300, 700]) setTimeout(remeasure, ms); });
+  if (window.visualViewport) visualViewport.addEventListener('resize', remeasure);
   $('ver').textContent = 'versi ' + T.VERSION;
 
   // ---------- keadaan ----------
@@ -63,7 +66,8 @@
   async function keepAwake() {
     try { if (navigator.wakeLock && document.visibilityState == 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
   }
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState == 'visible' && S.scene == 'play') keepAwake(); else save(); });
+  document.addEventListener('visibilitychange', () => { resetStick(); if (document.visibilityState == 'visible' && S.scene == 'play') keepAwake(); else save(); });
+  addEventListener('blur', () => resetStick());
 
   function enterPlay() {
     show(null);
@@ -281,9 +285,11 @@
   const modalOpen = () => !$('toolModal').hidden || !$('mapModal').hidden || !$('menu').hidden || !$('endModal').hidden;
 
   const stick = { id: null, ox: 0, oy: 0, dx: 0, dy: 0 };
+  function resetStick() { stick.id = null; stick.dx = stick.dy = 0; const s = document.getElementById('stick'); if (s) s.hidden = true; }
   const cv = $('view');
+  // Sentuhan baru di sisi kiri selalu jadi analog, walau jari lama "hilang" tanpa pointerup (bisa terjadi saat iPad diputar).
   $('game').addEventListener('pointerdown', (e) => {
-    if (S.scene != 'play' || modalOpen() || e.target !== cv || stick.id !== null) return;
+    if (S.scene != 'play' || modalOpen() || e.target !== cv) return;
     if (e.clientX > innerWidth * 0.6) return;
     T.audio.unlock();
     stick.id = e.pointerId; stick.ox = e.clientX; stick.oy = e.clientY; stick.dx = stick.dy = 0;
@@ -299,9 +305,10 @@
     stick.dx = dx / R; stick.dy = dy / R;
     $('knob').style.transform = `translate(${dx}px,${dy}px)`;
   });
-  const endStick = (e) => { if (e.pointerId !== stick.id) return; stick.id = null; stick.dx = stick.dy = 0; $('stick').hidden = true; };
+  const endStick = (e) => { if (e.pointerId === stick.id) resetStick(); };
   $('game').addEventListener('pointerup', endStick);
   $('game').addEventListener('pointercancel', endStick);
+  cv.addEventListener('lostpointercapture', endStick);
 
   // ---------- gerak ----------
   function walkable(who, x, y) {
@@ -529,8 +536,13 @@
   // ---------- putaran utama ----------
   let last = performance.now(), sendT = 0, seenT = 0, saveT = 0;
   function loop(now) {
-    const dt = Math.min(0.05, (now - last) / 1000);
+    requestAnimationFrame(loop); // dijadwalkan duluan supaya game tidak pernah berhenti walau satu frame gagal
+    try { frame(now); } catch (e) { console.error(e); }
+  }
+  function frame(now) {
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
     last = now; S.t += dt;
+    renderer.check();
     if (S.scene == 'play') {
       if (!modalOpen()) step(dt);
       renderer.draw({ role: S.role, p: S.players[S.role], other: S.players[other(S.role)], world: S.world, t: S.t });
@@ -552,7 +564,6 @@
       // layar judul: kamera berputar pelan di depan Pohon Sarang
       renderer.draw({ role: 'owl', p: { x: 18, y: 25.5, a: -Math.PI / 2 + Math.sin(S.t * 0.15) * 0.9 }, other: null, world: S.world, t: S.t });
     }
-    requestAnimationFrame(loop);
   }
 
   T.debug = {

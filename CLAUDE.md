@@ -81,6 +81,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 - Rilis terakhir di `main`: **versi 9** (game Aksa sama dengan versi 7) +
   **Tim Penyelamat Malam versi 2** di `penyelamat/` (nama Tutu & Siberat; belum diuji di dua iPad sungguhan —
   tunggu laporan pengguna).
+- Branch `pratinjau-v10`: perbaikan penyelamat — layar macet & analog mati setelah iPad diputar potret→landscape
+  (ukur ulang kanvas tiap frame, analog direset saat rotasi/jari hilang, loop dijaga try/catch).
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

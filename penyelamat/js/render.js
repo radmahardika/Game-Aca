@@ -8,13 +8,21 @@
 
   T.Renderer = function (cv) {
     const ctx = cv.getContext('2d');
-    let W = 256, H = 160, img, buf, zbuf;
+    let W = 256, H = 160, img, buf, zbuf, lastW = 0, lastH = 0;
     function resize() {
-      const r = cv.getBoundingClientRect();
+      // ukuran tampilan kanvas (ikut ukuran jendela); saat iPad diputar nilainya bisa 0 sesaat
+      const cw = cv.clientWidth || innerWidth, ch = cv.clientHeight || innerHeight;
+      if (!cw || !ch) return;
+      lastW = cw; lastH = ch;
       W = 256;
-      H = Math.max(110, Math.min(220, Math.round((W * r.height) / Math.max(1, r.width))));
+      H = Math.max(110, Math.min(220, Math.round((W * ch) / cw)));
       cv.width = W; cv.height = H;
       img = ctx.createImageData(W, H); buf = new Uint32Array(img.data.buffer); zbuf = new Float32Array(W);
+    }
+    // dipanggil tiap frame: ukur ulang kalau ukuran layar berubah (rotasi iPad tidak selalu memicu event resize tepat waktu)
+    function check() {
+      const cw = cv.clientWidth, ch = cv.clientHeight;
+      if (cw && ch && (cw != lastW || ch != lastH)) resize();
     }
     resize();
 
@@ -175,6 +183,6 @@
       }
       ctx.putImageData(img, 0, 0);
     }
-    return { draw, resize };
+    return { draw, resize, check };
   };
 })();
