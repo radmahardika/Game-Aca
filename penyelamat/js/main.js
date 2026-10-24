@@ -198,6 +198,7 @@
         S.world = m.world; S.players = m.players; S.seen = new Uint8Array(N * N); S.remote = null;
         T.prepareMap(S.world);
         $('endModal').hidden = true;
+        T.audio.music(true);
         updateHUD(); roleToast();
         break;
     }
@@ -264,10 +265,20 @@
       showToast(meta.nama + ' selamat!', meta.lesson, 0, last ? showEnd : null);
     }
   }
+  // adegan penutup: pagi tiba, semua hewan melompat gembira; kalimat penutup lalu tombol muncul bertahap
+  const ending = T.Ending($('endc'));
+  let endTimers = [];
   function showEnd() {
-    $('endModal').hidden = false;
+    const e = $('endModal');
+    endTimers.forEach(clearTimeout);
+    ending.reset();
+    e.classList.remove('show-text', 'show-btns');
+    e.hidden = false;
     $('againBtn').hidden = !owns();
     $('endWait').hidden = owns();
+    T.audio.music(false);
+    T.audio.sfx('ending');
+    endTimers = [setTimeout(() => e.classList.add('show-text'), 2500), setTimeout(() => e.classList.add('show-btns'), 5000)];
   }
 
   // ---------- input ----------
@@ -557,6 +568,7 @@
     S.heard = {};
     if (S.mode == 'host') T.net.send({ t: 'reset', world: S.world, players: S.players });
     $('endModal').hidden = true;
+    T.audio.music(true);
     updateHUD(); roleToast();
   };
 
@@ -571,9 +583,12 @@
     last = now; S.t += dt;
     renderer.check();
     if (S.scene == 'play') {
-      if (!modalOpen()) step(dt);
-      renderer.draw({ role: S.role, p: S.players[S.role], other: S.players[other(S.role)], world: S.world, t: S.t });
-      hudTick();
+      if (!$('endModal').hidden) ending.draw(now); // adegan penutup menggantikan pandangan hutan
+      else {
+        if (!modalOpen()) step(dt);
+        renderer.draw({ role: S.role, p: S.players[S.role], other: S.players[other(S.role)], world: S.world, t: S.t });
+        hudTick();
+      }
       if (multi() && T.net.connected()) {
         sendT += dt; seenT += dt;
         if (sendT > 0.08) { sendT = 0; const p = S.players[S.role]; T.net.send({ t: 'pos', x: +p.x.toFixed(3), y: +p.y.toFixed(3), a: +p.a.toFixed(3) }); }

@@ -94,6 +94,9 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 - Branch `pratinjau-v15`: 3 hewan baru (total 10) + Benhat lebih besar di layar Tutu (tinggi 1,25 dari 0,95);
   keterangan Tutu memilih hewan terdekat yang sedang dilihat; layar judul tidak lagi menyimpan dunia latar sebagai progres;
   cahaya dibatasi supaya pohon dekat tidak silau.
+- Juga di `pratinjau-v15`: **adegan penutup** setelah 10 hewan selamat (`penyelamat/js/ending.js`): malam → pagi di
+  Pohon Sarang, semua hewan (versi sudah sembuh `T.SPR_FREE`) melompat, hati beterbangan, Tutu terbang berputar, Benhat
+  di tengah; kalimat "Kamu jago sekali, terus menolong sesama ya!" muncul detik ke-2,5, tombol detik ke-5.
 - Belum diputuskan: pengguna bertanya suara **metode Ummi**. Rekaman Ummi tidak tersedia bebas.
   Opsi yang ditawarkan: (1) mode rekam suara orang tua/ustadzah per ayat di iPad (fallback Al-Husary),
   (2) file audio Ummi dari TPA dengan izin, (3) pilihan qari lain di Pengaturan — tersedia di everyayah:

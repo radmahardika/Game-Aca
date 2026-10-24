@@ -119,20 +119,25 @@
   </div></div>
 
   <!-- Selesai -->
-  <div class="modal" id="endModal" hidden><div class="card">
-    <h2>Kesepuluh hewan selamat!</h2>
-    <p>Pohon Sarang jadi ramai dan hutan terang oleh kunang-kunang. Hebat, Tutu dan Benhat!</p>
-    <p id="endWait" hidden>Menunggu teman memulai petualangan baru…</p>
-    <div class="col">
+  <!-- Adegan penutup -->
+  <div class="ending" id="endModal" hidden>
+    <canvas id="endc"></canvas>
+    <div class="endtext" id="endText">
+      <h2>Kamu jago sekali, terus menolong sesama ya!</h2>
+      <p>Kesepuluh hewan selamat, dan pagi pun tiba di Pohon Sarang.</p>
+    </div>
+    <div class="endbtns" id="endBtns">
+      <p id="endWait" hidden>Menunggu teman memulai petualangan baru…</p>
       <button class="go" id="againBtn" type="button">🌙 Main lagi (posisi hewan baru)</button>
       <button class="go alt" id="endHome" type="button">🏠 Ke layar judul</button>
     </div>
-  </div></div>
+  </div>
 </div>
 
 <script src="vendor/peerjs.min.js?v=7"></script>
 <script src="js/data.js?v=7"></script>
 <script src="js/render.js?v=7"></script>
+<script src="js/ending.js?v=7"></script>
 <script src="js/audio.js?v=7"></script>
 <script src="js/net.js?v=7"></script>
 <script src="js/main.js?v=7"></script>

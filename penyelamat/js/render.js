@@ -147,7 +147,7 @@
         if (v.id == 'kucing' && !v.rescued) { add({ x: v.x, y: v.y, s: SPR.pohon, h: 2.2, z: 0 }); add({ x: v.x, y: v.y, s: SPR.kucing, h: 0.32, z: 1.45, off: 0.01 }); }
         else if (v.id == 'pipit' && !v.rescued) { add({ x: v.x, y: v.y, s: SPR.pohonSarang, h: 2.2, z: 0 }); add({ x: v.x, y: v.y, s: SPR.pipit, h: 0.3, z: 0, off: 0.05 }); }
         else if (v.id == 'pipit') add({ x: v.x, y: v.y, s: SPR.pipit, h: 0.3, z: 0 });
-        else add({ x: v.x, y: v.y, s: SPR[v.id], h: v.id == 'kerbau' ? 0.6 : 0.5, z: 0 });
+        else add({ x: v.x, y: v.y, s: (v.rescued && T.SPR_FREE[v.id]) || SPR[v.id], h: v.id == 'kerbau' ? 0.6 : 0.5, z: 0 });
         if (v.id == 'rubah' && !v.rescued) add({ x: v.x, y: v.y, s: SPR.asap, h: 0.6, z: 0.45, off: 0.02 });
         if (!owl && !v.rescued) {
           const d = Math.hypot(v.x - p.x, v.y - p.y);
