@@ -186,6 +186,10 @@
     '........KK........',
   ];
   S.ROTNI_KEPALA = S.ROTNI.slice(0, 14);
+  // Kurcaci Penjaga (topi biru, janggut putih) & Alien Usil (hijau bertopeng) + karung curian
+  S.KURCACI = ['....KKKKKK....', '...KJJJJJJK...', '..KJJJyJJJJK..', '.KKKKKKKKKKKK.', '..KlsssssssK..', '..KsKsssssKsK.', '..KssssssssK..', '..KxxsppsxxK..', '.KxxxxxxxxxxK.', '.KxxxxxxxxxxK.', '..KxxxxxxxxK..', '.KJJKxxxxKJJK.', 'KJJJJKxxKJJJJK', 'KsKJJJJJJJJKsK', '.KKJJJyJJJJKK.', '..KJJJJJJJJK..', '..KJJJJJJJJK..', '..KddK..KddK..', '.KdddK..KdddK.', '.KKKKK..KKKKK.'];
+  S.USIL = ['....KKKKKK.......', '...KaaaaaaK......', '..KaaaaaaaaK.....', '.KaaaaaaaaaaK....', '.KKKKKKKKKKKK....', '.KKcKKKKKcKKK....', '.KaaaaaaaaaAK....', '.KaaKaaaaKaAK....', '.KaaaKKKKaaAK....', '..KaaaaaaaAK.....', '.KaaaaaaaaaAK....', 'KaaKaaaaaaKaAK...', 'KaKKaaaaaaKKAK...', '.K.KaaaaaaAK.....', '...KaaaaaaAK.....', '...KAK..KAK......', '...KKK..KKK......'];
+  S.KARUNG = ['...KK...', '..KFFK..', '.KFFFFK.', 'KFFFFFYK', 'KFFFFFYK', 'KFFFFYYK', '.KKKKKK.'];
   S.STAR = ['...y...', '...y...', 'yyyyyyy', '.yyyyy.', '..yYy..', '.yY.Yy.', 'y.....y'];
   S.HEART = ['.rr.rr.', 'rrrrrrr', 'rrrrrrr', '.rrrrr.', '..rrr..', '...r...'];
   S.ROKET = ['.....KK.....', '....KwwK....', '...KwwwWK...', '..KwwwwwWK..', '..KwbbbwWK..', '..KwbBbwWK..', '..KwwwwwWK..', '..KrrrrrRK..', '..KwwwwwWK..', '..KwwwwwWK..', '..KwwwwwWK..', '.KrKwwwwWKrK', 'KrrKwwwwWKrR', 'KrRKrrrrRKRR', 'KK.KKKKKKK.K', '....KqqK....', '....KyyK....'];
@@ -495,6 +499,40 @@
     built = { stationBack: st.back, stationFront: st.front, tundra: buildTundra(), fores: buildFores(), peri: buildPeri(), earth: buildEarthView() };
     return built;
   };
+
+  // hiasan toko yang dibeli dari Tabung
+  art.decor = function (ctx, layer, list, t) {
+    if (!list || !list.length) return;
+    const has = (k) => list.includes(k);
+    const f = (c, a, b, w, h) => { ctx.fillStyle = c; ctx.fillRect(a, b, w, h); };
+    if (layer === 'back') {
+      if (has('poster')) { f('#1a1420', 120, 124, 26, 22); f('#2d2358', 121, 125, 24, 20); f('#e8893a', 127, 129, 10, 10); f('#c56a26', 132, 129, 5, 10); f('#f3d9a0', 123, 134, 20, 2); f('#fff6d8', 140, 127, 1, 1); f('#fff6d8', 124, 142, 1, 1); }
+      if (has('papan')) {
+        ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 1; ctx.strokeRect(270.5, 66.5, 109, 15);
+        const k = Math.floor(t * 2) % 4; f('#fff1c0', 272 + k * 34, 67, 2, 1); f('#fff1c0', 378, 70 + k * 2, 1, 2);
+      }
+      if (has('karpet')) { f('#86282a', 150, 196, 108, 4); f('#c8463d', 150, 196, 108, 2); for (let i = 152; i < 256; i += 6) f('#f2c14e', i, 198, 2, 1); }
+      if (has('balon')) {
+        [[248, 62, '#ff7aa8'], [256, 56, '#ffd25a'], [264, 64, '#5ad0ff']].forEach(([a, b, c], i) => {
+          const y = b + Math.round(Math.sin(t * 1.6 + i) * 2);
+          f('#1a1420', a + 2, y + 8, 1, 108 - y); ball2(ctx, a + 2, y + 3, 4, c);
+        });
+      }
+      if (has('lampu')) {
+        const cols = ['#ff5a5a', '#ffd25a', '#5ad0ff', '#7aff8a', '#ff7ad0'];
+        for (let i = 0; i < 14; i++) {
+          const X = 256 + i * 10, Y = 99 + Math.round(Math.sin(i * 0.9) * 2), on = (Math.floor(t * 2) + i) % 3 !== 0;
+          f('#1a1420', X, Y - 1, 1, 2); f(on ? cols[i % 5] : '#4d4466', X - 1, Y + 1, 3, 3);
+          if (on) glowOn(ctx, X, Y + 2, 7, '255,230,160', 0.3);
+        }
+      }
+    } else if (has('tanaman')) {
+      f('#1a1420', 240, 178, 16, 18); f('#b05e22', 241, 180, 14, 15); f('#e8893a', 241, 180, 14, 2);
+      for (let k = 0; k < 5; k++) { const sw = Math.round(Math.sin(t * 1.5 + k) * 1); f('#3f9a5a', 244 + k * 2 + sw, 166 - (k % 2) * 4, 2, 14); f('#9ae08a', 243 + k * 2 + sw, 164 - (k % 2) * 4, 4, 3); }
+      f('#ff7aa8', 247, 160, 3, 3);
+    }
+  };
+  function ball2(ctx, cx, cy, r, c) { ctx.fillStyle = c; for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) if (i * i + j * j <= r * r) ctx.fillRect(cx + i, cy + j, 1, 1); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(cx - 2, cy - 2, 1, 1); }
 
   // efek bergerak per planet
   art.weather = function (ctx, kind, t) {

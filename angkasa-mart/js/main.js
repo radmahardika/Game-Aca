@@ -17,7 +17,7 @@
 
   // ---------- simpan ----------
   function fresh() {
-    return { v: 1, day: 1, kas: AM.MODAL_AWAL, tabung: 0, berbagi: 0, total: 0, stage: 0, gudang: [], stiker: [], trends: [], today: null, up: { gudang: 0, kotak: 0 }, ditabung: 0, dibagi: 0 };
+    return { v: 1, day: 1, kas: AM.MODAL_AWAL, tabung: 0, berbagi: 0, total: 0, stage: 0, gudang: [], stiker: [], trends: [], today: null, up: { gudang: 0, kotak: 0 }, ditabung: 0, dibagi: 0, hias: [] };
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) return Object.assign(fresh(), s, { up: Object.assign({ gudang: 0, kotak: 0 }, s.up) }); } catch (e) {} return null; }
@@ -52,9 +52,11 @@
     for (let i = 0; i < stage().pembeli; i++) cust.push(genCustomer());
     // alien yang butuh bantuan: mulai hari ke-2, kira-kira tiap 3 hari
     if (S.day >= 2 && S.day % 3 === 2) cust.splice(1 + Math.floor(rand() * (cust.length - 1)), 0, { needy: true, planet: pick(planets), varian: Math.floor(rand() * 3) });
+    // Alien Usil: mulai tahap Toko, kadang ada peringatan di Kabar Angkasa
+    const warn = S.stage >= 1 && S.day >= 3 && !(S.today && S.today.warn) && rand() < 0.3;
     let bonus = 0;
     if (S.kas < 3 && S.gudang.length === 0) { bonus = 6 - S.kas; S.kas = 6; }
-    S.today = { phase: 'kabar', cust, ci: 0, energy: AM.ENERGI, asked: {}, aliens: {}, tally: {}, sold: [], missing: {}, mahal: 0, spent: 0, bonus };
+    S.today = { phase: 'kabar', warn, cust, ci: 0, energy: AM.ENERGI, asked: {}, aliens: {}, tally: {}, sold: [], missing: {}, mahal: 0, spent: 0, bonus };
     save();
   }
 
@@ -68,12 +70,15 @@
   function station(t, opt) {
     const b = A.build();
     cx.drawImage(b.stationBack, 0, 0);
+    A.decor(cx, 'back', S ? S.hias : [], t);
     A.glow(cx, 250, 118, 60, '255,200,110', 0.4 + Math.sin(t * 7) * 0.04 + Math.sin(t * 13) * 0.03);
     A.glow(cx, 365, 119, 40, '255,190,100', 0.25);
     if (opt.queue) drawQueue(t);
     if (opt.customer && V.c) drawCustomer(t);
     A.angkasa(cx, 296, 122, t, false);
     cx.drawImage(b.stationFront, 0, 0);
+    A.decor(cx, 'front', S ? S.hias : [], t);
+    if (opt.night) nightScene(t);
     if (opt.customer && V.c && V.c.showItem) { const [w, h] = A.size(A.ITEM[V.c.item], 2); A.draw(cx, A.ITEM[V.c.item], 286 - w / 2, 160 - h, 2); }
     if (opt.rotni) A.rotni(cx, 214, 40, t, 2);
   }
@@ -160,7 +165,28 @@
     else if (s === 'pesan') earthScene(t);
     else if (s === 'toko') station(t, { customer: true, queue: true });
     else if (s === 'tutup') { station(t, {}); dim(0.6); }
+    else if (s === 'malam') station(t, { night: true });
     drawFx(t);
+  }
+  // malam: Alien Usil datang; dijaga Kurcaci atau mencuri barang
+  function nightScene(t) {
+    const n = V.night; if (!n) return;
+    const k = t - n.t0;
+    dim(0.5);
+    const S2 = A.S;
+    let ux;
+    if (k < 1.6) ux = -40 + (200 + 40) * (k / 1.6);
+    else if (n.guard) ux = k < 2.4 ? 200 : 200 - (k - 2.4) * 160;
+    else ux = k < 2.6 ? 200 : 200 - (k - 2.6) * 110;
+    const bob = Math.round(Math.abs(Math.sin(k * 10)) * 2);
+    A.draw(cx, S2.USIL, ux, GY - 34 - bob, 2);
+    if (!n.guard && k > 2.2) A.draw(cx, S2.KARUNG, ux + 28, GY - 18 - bob, 2);
+    if (n.guard) {
+      const gx = k < 1.4 ? 420 : Math.max(232, 420 - (k - 1.4) * 220);
+      [0, 34].forEach((o) => A.draw(cx, S2.KURCACI, gx + o, GY - 40 - Math.round(Math.abs(Math.sin(k * 9 + o)) * 2), 2));
+      if (k > 1.6) { cx.fillStyle = 'rgba(255,240,170,.3)'; cx.beginPath(); cx.moveTo(gx + 6, GY - 22); cx.lineTo(gx - 60, GY - 36); cx.lineTo(gx - 60, GY - 6); cx.fill(); }
+    }
+    if (k > 2.4 && ux < 190) { cx.fillStyle = '#fff'; [[10, 0], [6, 8], [12, 16]].forEach(([a, b]) => cx.fillRect(ux + 34 + a, GY - 30 + b, 6, 1)); }
   }
   function dim(a) { cx.fillStyle = `rgba(14,10,30,${a})`; cx.fillRect(0, 0, A.W, A.H); }
 
@@ -179,7 +205,7 @@
   function renderTop() {
     if (V.screen === 'title') { topEl.hidden = true; return; }
     topEl.hidden = false;
-    const name = { kabar: 'Pagi', survei: 'Survei', pesan: 'Pesan ke Bumi', toko: 'Toko buka', tutup: 'Tutup toko' }[V.screen];
+    const name = { kabar: 'Pagi', survei: 'Survei', pesan: 'Pesan ke Bumi', toko: 'Toko buka', tutup: 'Tutup toko', malam: 'Malam' }[V.screen];
     let q = '';
     if (V.screen === 'toko') q = '<span class="queue">' + S.today.cust.map((c, i) => `<i class="${i < S.today.ci ? 'done' : i === S.today.ci ? 'now' : ''}"></i>`).join('') + '</span>';
     topEl.innerHTML = `<b class="brand">ANGKASA MART</b><span class="ph">Hari ${S.day} · ${name}</span>${q}<span class="kas">Kas ${S.kas} ${STAR}</span>` +
@@ -188,7 +214,7 @@
   function render() {
     renderTop();
     const s = V.screen;
-    ui.innerHTML = s === 'title' ? uiTitle() : s === 'kabar' ? uiKabar() : s === 'survei' ? uiSurvei() : s === 'pesan' ? uiPesan() : s === 'toko' ? uiToko() : uiTutup();
+    ui.innerHTML = s === 'title' ? uiTitle() : s === 'kabar' ? uiKabar() : s === 'survei' ? uiSurvei() : s === 'pesan' ? uiPesan() : s === 'toko' ? uiToko() : s === 'malam' ? uiMalam() : uiTutup();
   }
 
   // ----- judul -----
@@ -208,10 +234,10 @@
   function uiKabar() {
     const td = S.today;
     const lines = S.trends.map((t) => { const tr = AM.TRENDS[t.i], pl = AM.PLANETS[tr.planet]; return `<li class="${pl.kelas}"><span class="pi">${pl.ikon}</span>${t.baru ? '' : '<small>Masih: </small>'}${tr.kabar}</li>`; }).join('');
-    return `<div class="pp kabar" style="${P(228, 126, 720, 470)}">
+    return `<div class="pp kabar" style="left:228px;top:110px;width:720px;min-height:440px;max-height:700px">
       <h2>📰 KABAR ANGKASA</h2>
       <p class="day">Hari ${S.day} · ${stage().nama} Angkasa</p>
-      <ul>${lines || '<li>Hari ini semua planet tenang.</li>'}</ul>
+      <ul>${lines || '<li>Hari ini semua planet tenang.</li>'}${td.warn ? '<li class="warn"><span class="pi">⚠️</span>Alien Usil terlihat di dekat stasiun! Hati-hati malam ini.</li>' : ''}</ul>
       ${td.bonus ? `<p class="note">Kas hampir habis… Rotni menemukan ${td.bonus} ${STAR} di sakunya!</p>` : ''}
       <button class="pb red big" data-a="toSurvei" type="button">Mulai survei ➜</button>
     </div>`;
@@ -258,6 +284,11 @@
   }
 
   // ----- pesan ke Bumi -----
+  function tallyRows() { const td = S.today; return Object.keys(td.tally).sort((a, b) => td.tally[b].n - td.tally[a].n || td.tally[b].love - td.tally[a].love); }
+  function miniNotes() {
+    const td = S.today, rows = tallyRows().slice(0, 4).map((k) => `<div class="r">${ic(k, 1)}<span class="bars">${'|'.repeat(td.tally[k].n)}</span>${td.tally[k].love ? hearts(1) : ''}</div>`).join('');
+    return `<div class="pp mini" style="left:864px;top:236px;width:300px"><h4>📋 Catatan Survei</h4>${rows || '<p class="empty">Belum ada catatan.</p>'}</div>`;
+  }
   const cartTotal = () => V.cart.reduce((s, k) => s + IT[k].beli, 0);
   function uiPesan() {
     const st = stage(), sisa = V.fly ? S.kas : S.kas - cartTotal();
@@ -276,6 +307,7 @@
       <div class="pd kotak" style="${P(600, 558, 564, 132)}"><span class="lbl">📦 Kotak Rotni<br><small>${V.cart.length}/${capKotak()} · ${cartTotal()} ${STAR}</small></span><div class="slots">${kotak}</div></div>
       <div class="pd gudang" style="${P(600, 698, 354, 106)}"><span class="lbl">🏬 Gudang<br><small>sisa ${free - V.cart.length}</small></span><div class="gslots" style="${gcols(capGudang())}">${gud}</div></div>
       <button class="pb red tall" style="${P(966, 698, 198, 106)}" data-a="kirim" type="button" ${V.fly ? 'disabled' : ''}>Kirim 🚀<br><small>ke Bumi</small></button>
+      ${miniNotes()}
       <div class="pp sisa" style="${P(864, 102, 300, 124)}"><span>Sisa kas: <b>${sisa}</b> ${STAR}</span><button class="pb teal tbg" data-a="tabung" type="button" ${V.fly ? 'disabled' : ''}>🫙 Tabung: ${S.tabung} ${STAR}</button></div>`;
   }
 
@@ -292,7 +324,7 @@
       else if (c.mode === 'sedih') txt = `<p>${c.reply}</p>`;
       else if (c.needy) txt = `<p>${it.tolong}</p><p>Tapi bintangku <b class="red">cuma 1…</b> ${ic(c.item, 2)}</p>`;
       else if (c.mode === 'tawar') txt = `<p>Hmm, mahal… Kalau <b>${c.max} ${STAR}</b> boleh?</p>`;
-      else if (c.mode === 'kembalian') txt = `<p>Ini <b>10 ${STAR}</b>. Kembaliannya berapa?</p>`;
+      else if (c.mode === 'kembalian') txt = c.wrong ? `<p>Eh, kembaliannya <b class="red">${c.wrong}!</b> 😠</p><p>Aku bayar 10 ${STAR}, harganya ${c.price} ${STAR}.</p>` : `<p>Ini <b>10 ${STAR}</b>. Kembaliannya berapa?</p>`;
       else txt = `<p>${it.butuh}</p><p class="need">Ada ${it.nama.toLowerCase()}? ${ic(c.item, 2)}</p><p>${hearts(c.hearts)}</p>`;
       bub = `<div class="pp bubble" style="left:420px;bottom:${816 - 330}px;width:380px">${txt}</div>`;
     }
@@ -313,7 +345,10 @@
       mid = `<p class="big">Pembeli menawar<br><b>${c.max} ${STAR}</b></p><p class="small">Harga beli di Bumi: ${IT[c.item].beli} ${STAR}</p>`;
       right = `<button class="pb green" data-a="boleh" type="button">Boleh 👍</button><button class="pb grey" data-a="tolak" type="button">Tidak</button>`;
     } else if (c && c.mode === 'kembalian') {
-      mid = `<p class="big">Harga ${c.price} ${STAR}<br>dibayar 10 ${STAR}</p><p class="small">Kembaliannya = 10 − ${c.price}</p>`;
+      if (c.wrong) {
+        let coins = ''; for (let i = 0; i < 10; i++) coins += `<span class="c ${i < c.price ? 'x' : ''}">${star(2)}</span>`;
+        mid = `<p class="q">Coret harga ${c.price} ${STAR} dari 10 ${STAR}</p><div class="coins">${coins}</div><p class="small">Sisa bintang = kembaliannya</p>`;
+      } else mid = `<p class="big">Harga ${c.price} ${STAR}<br>dibayar 10 ${STAR}</p><p class="small">Kembaliannya = 10 − ${c.price}</p>`;
       right = '<div class="opts">' + c.opts.map((o) => `<button class="pb blue" data-a="kembali" data-v="${o}" type="button">${o} ${STAR}</button>`).join('') + '</div>';
     } else {
       mid = '<p class="wait">…</p>';
@@ -328,7 +363,7 @@
   // ----- tutup toko -----
   function dayResult() {
     const td = S.today;
-    const hasil = td.sold.reduce((s, x) => s + x.price, 0), modal = td.sold.reduce((s, x) => s + x.beli, 0);
+    const hasil = td.sold.reduce((s, x) => s + x.price, 0), modal = td.sold.reduce((s, x) => s + x.beli, 0) + (td.biaya || 0);
     return { hasil, modal, untung: hasil - modal };
   }
   function notes() {
@@ -359,7 +394,7 @@
     const prog = nxt ? `<div class="bar"><i style="width:${Math.min(100, tot / nxt.butuh * 100)}%"></i><span>${tot} / ${nxt.butuh} → ${nxt.nama}</span></div>` : '<p class="small">Angkasa Mart sudah jadi Stasiun! 🎉</p>';
     const steps = AM.STAGES.map((s, i) => `<span class="stp ${i <= S.stage ? 'on' : ''}"><i>${i <= S.stage ? '✓' : '?'}</i>${s.nama}</span>`).join('');
     return `<div class="pp kas" style="${P(12, 100, 744, 320)}"><h3>Buku Kas hari ini</h3>
-        <div class="kascol"><span class="kl red">Modal barang terjual</span>${stars(r.modal)}<b>${r.modal}</b></div>
+        <div class="kascol"><span class="kl red">Modal barang terjual${td.biaya ? ` + penjaga ${td.biaya}` : ''}</span>${stars(r.modal)}<b>${r.modal}</b></div>
         <div class="arrow">➜</div>
         <div class="kascol w"><span class="kl teal">Hasil jualan</span>${stars(r.hasil)}<b>${r.hasil}</b></div>
         <div class="untung ${r.untung < 0 ? 'neg' : ''}"><span>UNTUNG</span><b>${untungTxt}</b></div></div>
@@ -381,6 +416,7 @@
     if (screen === 'tutup') {
       if (!S.today.bagi) S.today.bagi = { tabung: 0, berbagi: 0 };
       hint(dayResult().untung > 0 && S.berbagi === 0 ? 'Mau sisihkan sedikit untuk toples Berbagi?' : 'Toko tutup. Ayo hitung untung hari ini!');
+      if (S.today.warn && S.today.guard === undefined && !S.today.closed) { if (S.gudang.length) setTimeout(guardOffer, 0); else S.today.guard = false; }
     }
     if (screen === 'title') hint('');
     render();
@@ -438,24 +474,53 @@
     for (let k = 0; k < 3; k++) V.fx.push({ kind: 'heart', t0: T + k * 0.2, dur: 1.2, x: 190 + k * 8, y: 140 });
     const u = c.price - beli;
     hint(u < 0 ? 'Yah, kita rugi sedikit. Harganya di bawah harga beli.' : u === 0 ? 'Pembeli senang, tapi kita tidak untung.' : c.price === c.max && c.hearts === 3 ? `Pas sekali! Untung ${u} ${STAR}!` : `Untung ${u} ${STAR}!`);
-    leave(true, pick(['Terima kasih! 😊', 'Asyik, dapat juga! 😄', 'Terima kasih, Angkasa! 💛']));
+    leave(true, S.hias.length && rand() < 0.35 ? 'Wah, tokonya cantik! ✨' : pick(['Terima kasih! 😊', 'Asyik, dapat juga! 😄', 'Terima kasih, Angkasa! 💛']));
   }
 
 
   // ---------- Tabung: memperbesar toko ----------
   function upPrice(kind) { const l = AM.UPGRADE[kind], n = S.up[kind]; return n < l.length ? l[n] : null; }
   function uiTabungModal(msg) {
+    if (V.tab === 'hias') { uiHiasModal(msg); return; }
     const card = (kind, title, from, to, desc, head) => {
       const price = upPrice(kind);
       const btn = price === null ? '<button class="pb grey" type="button" disabled>Sudah paling besar</button>'
         : `<button class="pb teal" data-a="upBuy" data-v="${kind}" type="button" ${S.tabung < price ? 'disabled' : ''}>Beli ${price} ${STAR}</button>`;
       return `<div class="uc">${head || ''}<div class="big2">${title}</div><div>${price === null ? 'Sudah maksimal' : `${from} <b>${to - 1} → ${to}</b>`}</div><div>${desc}</div>${btn}</div>`;
     };
-    modal(`<h3>🫙 Belanja pakai Tabung</h3><p>Isi Tabung: <b class="tb2">${S.tabung} ${STAR}</b> · Tabung dipakai untuk <b>memperbesar toko</b>.</p>
+    modal(`<h3>🫙 Belanja pakai Tabung</h3><p>Isi Tabung: <b class="tb2">${S.tabung} ${STAR}</b></p>${tabs()}
       <div class="upg">${card('gudang', '🏬 +1 kotak gudang', 'Gudang', capGudang() + 1, 'Barang lebih banyak bisa disimpan')}${card('kotak', '📦 +1 kotak Rotni', 'Kotak Rotni', capKotak() + 1, 'Rotni bawa lebih banyak dari Bumi', A.img(A.S.ROTNI_KEPALA, 1))}</div>
       <p class="${msg ? 'ok' : 'small'}">${msg || `Harga naik sedikit tiap kali dibeli. Gudang paling banyak +${AM.UPGRADE.gudang.length}, kotak Rotni +${AM.UPGRADE.kotak.length}.`}</p>
       <div class="mrow"><button class="pb grey" data-a="close" type="button">Tutup</button></div>`);
     modalEl.firstChild.classList.add('wide');
+  }
+  const tabs = () => `<div class="tabs"><button class="pb ${V.tab !== 'hias' ? 'teal sel' : 'grey'}" data-a="tab" data-v="besar" type="button">🏬 Perbesar toko</button><button class="pb ${V.tab === 'hias' ? 'teal sel' : 'grey'}" data-a="tab" data-v="hias" type="button">✨ Hiasan</button></div>`;
+  function uiHiasModal(msg) {
+    const cards = AM.HIASAN.map((h) => {
+      const own = S.hias.includes(h.id);
+      return `<div class="uc ${own ? 'own' : ''}"><div class="ico">${h.ikon}</div><div>${h.nama}</div>${own ? '<button class="pb grey" type="button" disabled>Sudah dipasang ✓</button>' : `<button class="pb teal" data-a="hiasBuy" data-v="${h.id}" type="button" ${S.tabung < h.harga ? 'disabled' : ''}>Beli ${h.harga} ${STAR}</button>`}</div>`;
+    }).join('');
+    modal(`<h3>🫙 Belanja pakai Tabung</h3><p>Isi Tabung: <b class="tb2">${S.tabung} ${STAR}</b></p>${tabs()}<div class="upg3">${cards}</div>
+      <p class="${msg ? 'ok' : 'small'}">${msg || 'Hiasan membuat toko makin cantik. Pembeli kadang memujinya!'}</p>
+      <div class="mrow"><button class="pb grey" data-a="close" type="button">Tutup</button></div>`);
+    modalEl.firstChild.classList.add('wide');
+  }
+  // ---------- malam: Alien Usil ----------
+  function guardOffer() {
+    const ok = S.kas >= AM.SEWA_PENJAGA;
+    modal(`<div class="duo">${A.img(A.S.USIL, 3)}<span class="vs">⚔️</span>${A.img(A.S.KURCACI, 3)}</div>
+      <h3>🌙 Hati-hati malam ini!</h3><p class="big">Kabar: <b>Alien Usil</b> terlihat di dekat stasiun.</p>
+      <p>Gudang masih berisi <b>${S.gudang.length} barang</b>. Mau sewa <b>Kurcaci Penjaga</b> untuk malam ini?</p>
+      <div class="mrow"><button class="pb green" data-a="sewa" type="button" ${ok ? '' : 'disabled'}>🛡️ Sewa ${AM.SEWA_PENJAGA} ${STAR}</button><button class="pb grey" data-a="tidakSewa" type="button">Tidak usah</button></div>
+      <p class="small">${ok ? 'Uang sewa diambil dari kas dan dicatat sebagai biaya. Kalau tidak dijaga, Alien Usil bisa mencuri barang di gudang.' : 'Kasnya tidak cukup untuk menyewa penjaga.'}</p>`);
+    modalEl.firstChild.classList.add('wide');
+  }
+  function uiMalam() {
+    const n = V.night;
+    const msg = n.guard ? 'Gudang aman! ✓' : n.stolen.length ? `Yah… ${n.stolen.length} barang dicuri.` : 'Untung gudangnya kosong!';
+    const items = n.stolen.map((k) => ic(k, 1)).join(' ');
+    return `<div class="pp bubble" style="left:390px;top:300px;width:330px" id="nb1" hidden><p>${n.guard ? 'Pergi sana! Gudang ini dijaga! 🛡️' : 'Hihihi… aku ambil, ya!'}</p></div>
+      <div class="pp night" style="${P(250, 630, 676, 170)}"><p class="big">🌙 Malam hari · ${msg} ${items}</p><p class="small">${n.guard ? 'Kurcaci Penjaga mengusir Alien Usil.' : 'Lain kali, sewa Kurcaci Penjaga kalau ada kabar Alien Usil.'}</p><button class="pb red" data-a="pagi" type="button">Pagi tiba ☀️ ➜</button></div>`;
   }
   // ---------- ucapan naik tingkat ----------
   function congrats(fromName) {
@@ -525,7 +590,9 @@
       if (!V.cart.length) { modal(`<h3>Tidak belanja?</h3><p>Kotak Rotni masih kosong. Buka toko dengan barang di gudang saja?</p><div class="mrow"><button class="pb red" data-a="bukaToko" type="button">Buka toko</button><button class="pb grey" data-a="close" type="button">Pilih barang</button></div>`); return; }
       const count = {}; V.cart.forEach((k) => (count[k] = (count[k] || 0) + 1));
       const list = Object.keys(count).map((k) => `${count[k]} ${IT[k].nama.toLowerCase()}`).join(' + ');
-      modal(`<div class="rotni">${A.img(A.S.ROTNI_KEPALA, 2)}</div><h3>Rotni membacakan daftar</h3><p class="big">${list}</p><p>Totalnya <b>${cartTotal()} ${STAR}</b> ya?</p><div class="mrow"><button class="pb red" data-a="berangkat" type="button">Ya, berangkat! 🚀</button><button class="pb grey" data-a="close" type="button">Ubah lagi</button></div>`);
+      const top = tallyRows()[0];
+      const lupa = top && !V.cart.includes(top) && !S.gudang.includes(top) ? `<p class="warnp">📋 Catatan: <b>${IT[top].nama.toLowerCase()}</b> paling dicari${S.today.tally[top].love ? ' ❤' : ''}, tapi belum ada di kotak. Yakin?</p>` : '';
+      modal(`<div class="rotni">${A.img(A.S.ROTNI_KEPALA, 2)}</div><h3>Rotni membacakan daftar</h3><p class="big">${list}</p><p>Totalnya <b>${cartTotal()} ${STAR}</b> ya?</p>${lupa}<div class="mrow"><button class="pb red" data-a="berangkat" type="button">Ya, berangkat! 🚀</button><button class="pb grey" data-a="close" type="button">Ubah lagi</button></div>`);
     },
     berangkat() {
       closeModal();
@@ -533,7 +600,17 @@
       V.fly = { phase: 'go', t0: T }; AU.sfx('fly'); hint('Wuuush! Rotni terbang ke Bumi…'); render();
     },
     bukaToko() { closeModal(); go('toko'); },
-    tabung() { AU.sfx('tap'); uiTabungModal(); },
+    tabung() { AU.sfx('tap'); V.tab = 'besar'; uiTabungModal(); },
+    tab(v) { AU.sfx('tap'); V.tab = v; uiTabungModal(); },
+    hiasBuy(id) {
+      const h = AM.HIASAN.find((q) => q.id === id);
+      if (!h || S.hias.includes(id) || S.tabung < h.harga) { AU.sfx('no'); return; }
+      S.tabung -= h.harga; S.hias.push(id); save(); AU.sfx('up'); render();
+      uiHiasModal(`Hore! ${h.nama} sudah dipasang di toko.`);
+    },
+    sewa() { closeModal(); S.kas -= AM.SEWA_PENJAGA; S.today.guard = true; S.today.biaya = AM.SEWA_PENJAGA; save(); AU.sfx('coin'); hint('Kurcaci Penjaga siap berjaga malam ini! 🛡️'); render(); },
+    tidakSewa() { closeModal(); S.today.guard = false; save(); hint('Semoga Alien Usil tidak datang…'); render(); },
+    pagi() { V.night = null; finishDay(); },
     upBuy(kind) {
       const price = upPrice(kind);
       if (price === null || S.tabung < price) { AU.sfx('no'); return; }
@@ -545,16 +622,23 @@
     plus() { const c = V.c; if (c.price < AM.HARGA_MAKS) { c.price++; AU.sfx('tap'); render(); } },
     tawarkan() {
       const c = V.c;
+      if (c.hearts === 3 && c.price <= IT[c.item].beli && !c.reminded) {
+        c.reminded = true; AU.sfx('ask');
+        modal(`<div class="rotni">${A.img(A.S.ROTNI_KEPALA, 2)}</div><h3>Tunggu sebentar!</h3><p class="big">${IT[c.item].nama} sedang dicari ❤❤❤</p><p>Harganya ${c.price} ${STAR}, ${c.price < IT[c.item].beli ? 'lebih murah dari' : 'sama dengan'} harga beli di Bumi (${IT[c.item].beli} ${STAR}). Mau naikkan harga?</p><div class="mrow"><button class="pb green" data-a="naikkan" type="button">Naikkan ⬆️</button><button class="pb grey" data-a="tetap" type="button">Tetap</button></div>`);
+        return;
+      }
       if (c.price <= c.max) { sell(c.price); return; }
       if (!c.tawar) { c.tawar = true; c.mode = 'tawar'; AU.sfx('ask'); hint('Pembeli menawar. Mau terima?'); render(); return; }
     },
+    naikkan() { closeModal(); hint('Tekan + untuk menaikkan harga, lalu Tawarkan.'); },
+    tetap() { closeModal(); ACT.tawarkan(); },
     boleh() { sell(V.c.max); },
     tolak() { S.today.mahal++; save(); AU.sfx('sad'); hint('Kalau terlalu mahal, pembeli jadi sedih.'); leave(false, 'Mahal sekali… aku jadi sedih. 😢'); },
     tidakada() { const c = V.c; S.today.missing[c.item] = (S.today.missing[c.item] || 0) + 1; save(); AU.sfx('sad'); hint(`Rotni mencatat: ada yang cari ${IT[c.item].nama.toLowerCase()}.`); leave(false, 'Yah… tidak apa-apa. 😔', 1300); },
     kembali(v) {
       const c = V.c;
       if (+v === 10 - c.price) { AU.sfx('coin'); paid(); }
-      else { AU.sfx('no'); hint(`Coba lagi: 10 − ${c.price} = ?`); }
+      else { AU.sfx('no'); c.wrong = +v < 10 - c.price ? 'kurang' : 'kelebihan'; hint('Pembeli protes! Hitung lagi bintang yang tidak dicoret.'); render(); }
     },
     beri() {
       const c = V.c, cost = needCost(c), i = S.gudang.indexOf(c.item);
@@ -571,16 +655,36 @@
     'jar+'(k) { const b = S.today.bagi, r = dayResult().untung; if (b.tabung + b.berbagi < r) { b[k]++; AU.sfx('add'); save(); render(); } },
     'jar-'(k) { const b = S.today.bagi; if (b[k] > 0) { b[k]--; AU.sfx('remove'); save(); render(); } },
     tidur() {
-      const r = dayResult(), b = S.today.bagi;
-      if (r.untung > 0) { S.kas -= b.tabung + b.berbagi; S.tabung += b.tabung; S.berbagi += b.berbagi; S.ditabung += b.tabung; S.dibagi += b.berbagi; S.total += r.untung; }
+      const td = S.today, r = dayResult(), b = td.bagi;
+      if (!td.closed) {
+        if (r.untung > 0) { S.kas -= b.tabung + b.berbagi; S.tabung += b.tabung; S.berbagi += b.berbagi; S.ditabung += b.tabung; S.dibagi += b.berbagi; S.total += r.untung; }
+        td.closed = true;
+      }
+      if (td.warn && td.guard !== undefined) {
+        let stolen = td.stolen;
+        if (!stolen) {
+          stolen = [];
+          if (!td.guard) { const n = Math.min(S.gudang.length, rand() < 0.5 ? 1 : 2); for (let i = 0; i < n; i++) stolen.push(S.gudang.splice(Math.floor(rand() * S.gudang.length), 1)[0]); }
+          td.stolen = stolen;
+        }
+        save();
+        V.night = { guard: td.guard, stolen, t0: T }; V.screen = 'malam'; hint(''); render(); AU.sfx(td.guard ? 'up' : 'sad');
+        setTimeout(() => { const e = document.getElementById('nb1'); if (e) e.hidden = false; }, 1700);
+        return;
+      }
+      finishDay();
+    },
+  };
+  function finishDay() {
+    {
       let up = false; const from = S.stage;
       while (S.stage < AM.STAGES.length - 1 && S.total >= AM.STAGES[S.stage + 1].butuh) { S.stage++; up = true; }
       S.day++; startDay();
       V.planet = stage().planet[0];
       if (up) congrats(AM.STAGES[from].nama);
       go('kabar');
-    },
-  };
+    }
+  }
 
   function onTap(e) {
     const b = e.target.closest('[data-a]');

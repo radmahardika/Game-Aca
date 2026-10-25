@@ -1,5 +1,5 @@
 // Angkasa Mart — data barang, planet, tren, dan tahap toko.
-window.AM = { VERSION: 1 };
+window.AM = { VERSION: 2 };
 (function () {
   const AM = window.AM;
   AM.MODAL_AWAL = 20;
@@ -51,6 +51,16 @@ window.AM = { VERSION: 1 };
   ];
   // harga memperbesar toko dari toples Tabung (per tambahan kotak)
   AM.UPGRADE = { gudang: [5, 7, 9, 11], kotak: [8, 12] };
+  // hiasan toko dari toples Tabung (hanya untuk keindahan)
+  AM.HIASAN = [
+    { id: 'lampu', nama: 'Lampu warna-warni', ikon: '💡', harga: 4 },
+    { id: 'tanaman', nama: 'Tanaman alien', ikon: '🪴', harga: 3 },
+    { id: 'poster', nama: 'Poster planet', ikon: '🖼️', harga: 3 },
+    { id: 'papan', nama: 'Papan nama emas', ikon: '🏅', harga: 6 },
+    { id: 'karpet', nama: 'Karpet merah', ikon: '🟥', harga: 5 },
+    { id: 'balon', nama: 'Balon bintang', ikon: '🎈', harga: 2 },
+  ];
+  AM.SEWA_PENJAGA = 3;
   // tambahan harga yang masih mau dibayar pembeli, menurut jumlah hati (1–3)
   AM.LEBIH = [0, 1, 2, 4];
 })();

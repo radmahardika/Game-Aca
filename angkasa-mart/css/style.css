@@ -65,7 +65,8 @@ h3 { font-size: 26px; }
 .kabar li small { font-size: 22px; color: #8a7a6a; }
 .kabar li .pi { font-size: 34px; }
 .kabar .note { font-size: 22px; color: #3f7f86; margin-bottom: 10px; }
-.kabar .pb { margin-top: auto; }
+.kabar .pb { margin-top: auto; flex: none; }
+.kabar li { font-size: 28px; }
 
 /* survei */
 .zone { background: none; display: flex; justify-content: center; align-items: flex-start; }
@@ -136,8 +137,8 @@ h3 { font-size: 26px; }
 .kascol { position: absolute; top: 52px; left: 24px; width: 220px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .kascol.w { left: 330px; width: 250px; }
 .kascol b { font-size: 46px; }
-.kl { font-size: 20px; }
-.stars { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; min-height: 150px; align-content: flex-end; }
+.kl { font-size: 18px; text-align: center; min-height: 44px; }
+.stars { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; min-height: 120px; align-content: flex-end; }
 .stars .pxi { width: 24px !important; height: 24px !important; }
 .arrow { position: absolute; left: 262px; top: 150px; font-size: 44px; }
 .untung { position: absolute; right: 18px; top: 18px; width: 120px; height: 270px; background: var(--gold); border: 3px solid var(--dark); box-shadow: inset 0 6px 0 #fff1c0, inset 0 -8px 0 #b9852a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
@@ -198,3 +199,18 @@ h3 { font-size: 26px; }
 .hadiah { background: #e6f4e8; border: 3px solid var(--dark); padding: 10px; font-size: 20px; }
 .conf { position: absolute; width: 10px; height: 14px; animation: jatuh 2.4s linear infinite; }
 @keyframes jatuh { 0% { transform: translateY(0) rotate(0); } 100% { transform: translateY(640px) rotate(540deg); } }
+
+/* v2: catatan mini, kembalian dicoret, hiasan, malam */
+.mini { font-size: 20px; } .mini h4 { margin: 0 0 6px; font-size: 22px; } .mini .empty { font-size: 18px; }
+.mini .r { display: flex; align-items: center; gap: 10px; margin: 4px 0; } .mini .bars { font-size: 24px; letter-spacing: 2px; }
+.mcard .warnp { background: #fff1c0; border: 3px solid var(--dark); padding: 8px 12px; font-size: 21px; }
+.coins { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; width: 440px; }
+.coins .c { position: relative; } .coins .c.x::after { content: ""; position: absolute; left: -2px; right: -2px; top: 18px; height: 4px; background: var(--red); transform: rotate(-30deg); }
+.tabs { display: flex; gap: 10px; justify-content: center; } .tabs .pb { font-size: 22px; height: 56px; min-width: 220px; }
+.upg3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.uc .ico { font-size: 44px; } .uc.own { background: #e6f4e8; }
+.mcard .duo { display: flex; justify-content: center; gap: 40px; align-items: flex-end; } .mcard .vs { font-size: 40px; }
+.kabar li.warn { background: #fde4dc; color: #86282a; }
+.night { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.night .big { font-size: 30px; display: flex; align-items: center; gap: 10px; } .night .small { font-size: 19px; color: #6e4a34; }
+.night .pb { width: 360px; height: 60px; font-size: 26px; }

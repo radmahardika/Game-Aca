@@ -113,10 +113,18 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/angkasa-mart/), ver
   +1 kotak Rotni (8/12 ★, maks +2), menumpuk dengan kapasitas tahap (`AM.UPGRADE`, `S.up`).
 - **Naik tingkat** → ucapan "Selamat! … Kamu berhasil mengelola keuangan dengan baik!" + confetti, Angkasa & Rotni,
   ringkasan total untung / ditabung / dibagi (`S.ditabung`, `S.dibagi`) + hadiah tahap.
+- **v2 (masukan anak & orang tua):** catatan survei mini di layar Pesan + Rotni mengingatkan kalau barang paling dicari
+  belum dibawa; pengingat harga saat barang ❤❤❤ ditawarkan ≤ harga beli (Naikkan/Tetap); kembalian salah → pembeli protes
+  "kurang/kelebihan" + alat bantu 10 bintang dicoret, tidak pergi sampai benar; **Hiasan** dari Tabung (`AM.HIASAN`, `S.hias`:
+  lampu, tanaman, poster, papan emas, karpet, balon; tampil di toko, kadang dipuji pembeli); **Alien Usil** (ide anak):
+  mulai tahap Toko ±30% hari ada peringatan di Kabar (`today.warn`) → saat tutup toko (jika gudang berisi) tawaran sewa
+  **Kurcaci Penjaga** 3 ★ dari kas (`AM.SEWA_PENJAGA`, dicatat sebagai biaya di Buku Kas) → layar Malam: dijaga = pencuri
+  diusir, tidak = 1–2 barang gudang dicuri (uang tidak pernah dicuri).
 - Simpanan `localStorage` kunci `angkasa-mart-v1`. Tes: `AM.debug` (S, V, go, act, newDay; `V.forceChange` = paksa kembalian).
 
 ## Status & yang sedang dibahas
 
+- **Angkasa Mart versi 2** sedang di branch `pratinjau-v18` (belum digabung ke `main`).
 - Rilis terakhir di `main`: **versi 17** = rilis **Angkasa Mart versi 1** (`angkasa-mart/`, termasuk Tabung untuk
   memperbesar toko & ucapan naik tingkat). Game Aksa & Penjaga Rimba tidak berubah.
 - Versi 16 (game Aksa sama dengan versi 7) +
