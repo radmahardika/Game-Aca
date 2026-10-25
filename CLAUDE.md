@@ -124,8 +124,9 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/angkasa-mart/), ver
 
 ## Status & yang sedang dibahas
 
-- **Angkasa Mart versi 2** sedang di branch `pratinjau-v18` (belum digabung ke `main`).
-- Rilis terakhir di `main`: **versi 17** = rilis **Angkasa Mart versi 1** (`angkasa-mart/`, termasuk Tabung untuk
+- Rilis terakhir di `main`: **versi 18** = **Angkasa Mart versi 2** (lihat bagian v2 di atas). Laporan pengguna v1: lancar,
+  anak suka, sudah menyisihkan untuk Berbagi & menabung.
+- Versi 17 = rilis **Angkasa Mart versi 1** (`angkasa-mart/`, termasuk Tabung untuk
   memperbesar toko & ucapan naik tingkat). Game Aksa & Penjaga Rimba tidak berubah.
 - Versi 16 (game Aksa sama dengan versi 7) +
   **Penjaga Rimba versi 9** di `penyelamat/`: 3 level (lihat atas) + judul baru **"Penjaga Rimba"** + halaman awal,
