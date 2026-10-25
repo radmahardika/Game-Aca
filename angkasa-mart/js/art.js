@@ -11,6 +11,7 @@
     o: '#e8893a', O: '#b05e22', q: '#ffd88a', c: '#f3e9c8', C: '#cdbf95', v: '#8a5aa6', V: '#5d3a78', u: '#b58bd0',
     b: '#bfe3ee', B: '#7fb3c8', t: '#6fb0ae', T: '#3f7f86', m: '#7d8aa0', M: '#4d566c', n: '#a9b6c8', d: '#34354a',
     f: '#e6d38a', F: '#c9a94e', z: '#fff1c0',
+    J: '#3a4f9a', x: '#f3f3ee', a: '#6fd070', A: '#3f9a4a',
   };
 
   // ---------- alat gambar ----------
