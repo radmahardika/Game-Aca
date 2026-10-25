@@ -92,9 +92,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 15** (game Aksa sama dengan versi 7) +
-  **Duo Penyelamat versi 8** di `penyelamat/`. Di branch `pratinjau-v16`: **versi 9 = 3 level** (lihat atas) + judul baru
-  **"Penjaga Rimba"** + halaman awal,
+- Rilis terakhir di `main`: **versi 16** (game Aksa sama dengan versi 7) +
+  **Penjaga Rimba versi 9** di `penyelamat/`: 3 level (lihat atas) + judul baru **"Penjaga Rimba"** + halaman awal,
   plus perbaikan garis hitam kecil di tepi sprite jauh (indeks sprite negatif). Riwayat: v8 3 hewan baru (total 10), Benhat lebih besar, adegan penutup; v7 cahaya samar Benhat + kunang-kunang di ujung jembatan; v6 pesan selamat sampai Oke, panel alat kecil di kanan,
   lampu sorot Tutu; v5 judul "Duo Penyelamat" + petunjuk 💡 alat untuk Tutu (`hint` di `T.VICTIMS`, tidak menyebut
   nama alat); v4 Tutu terbang & lebih cepat, nama Benhat; v3 perbaikan rotasi iPad.
