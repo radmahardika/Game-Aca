@@ -109,6 +109,10 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/angkasa-mart/), ver
 - Tahap toko menurut total untung: Lapak (0) → Toko (20, mulai latihan kembalian dari 10 ★) → Mart (50) → Stasiun (100).
 - **Toples Berbagi (pilihan A)**: sesekali alien butuh bantuan muncul di antrean ("bintangku cuma 1…"); anak memilih
   Beri (toples menutup modal − 1) atau Maaf ya, tanpa hukuman/balasan untung; hadiahnya stiker di **Buku Kebaikan**.
+- **Toples Tabung** = memperbesar toko: tombol 🫙 di layar Pesan ke Bumi → +1 kotak gudang (5/7/9/11 ★, maks +4) atau
+  +1 kotak Rotni (8/12 ★, maks +2), menumpuk dengan kapasitas tahap (`AM.UPGRADE`, `S.up`).
+- **Naik tingkat** → ucapan "Selamat! … Kamu berhasil mengelola keuangan dengan baik!" + confetti, Angkasa & Rotni,
+  ringkasan total untung / ditabung / dibagi (`S.ditabung`, `S.dibagi`) + hadiah tahap.
 - Simpanan `localStorage` kunci `angkasa-mart-v1`. Tes: `AM.debug` (S, V, go, act, newDay; `V.forceChange` = paksa kembalian).
 
 ## Status & yang sedang dibahas

@@ -17,11 +17,14 @@
 
   // ---------- simpan ----------
   function fresh() {
-    return { v: 1, day: 1, kas: AM.MODAL_AWAL, tabung: 0, berbagi: 0, total: 0, stage: 0, gudang: [], stiker: [], trends: [], today: null };
+    return { v: 1, day: 1, kas: AM.MODAL_AWAL, tabung: 0, berbagi: 0, total: 0, stage: 0, gudang: [], stiker: [], trends: [], today: null, up: { gudang: 0, kotak: 0 }, ditabung: 0, dibagi: 0 };
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-  function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) return s; } catch (e) {} return null; }
+  function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) return Object.assign(fresh(), s, { up: Object.assign({ gudang: 0, kotak: 0 }, s.up) }); } catch (e) {} return null; }
   const stage = () => AM.STAGES[S.stage];
+  const capGudang = () => stage().gudang + S.up.gudang;
+  const capKotak = () => stage().kotak + S.up.kotak;
+  const gcols = (n) => `grid-template-columns:repeat(${n <= 6 ? 3 : n <= 8 ? 4 : n <= 10 ? 5 : 7},1fr)`;
   const trendItems = () => S.trends.map((t) => AM.TRENDS[t.i]);
 
   // ---------- hari baru ----------
@@ -264,23 +267,23 @@
       return `<button class="card ${ok ? '' : 'lock'}" data-a="add" data-v="${k}" type="button" ${ok ? '' : 'disabled'}>
         <span class="ci">${ok ? ic(k, k === 'kacamata' || k === 'sikat' ? 2 : 2) : '🔒'}</span><span class="cp">${star(1)}<b>${IT[k].beli}</b></span><span class="cn">${IT[k].nama}</span></button>`;
     }).join('');
-    const kotak = Array.from({ length: st.kotak }, (_, i) => V.cart[i] ? `<button class="slot full" data-a="rm" data-v="${i}" type="button">${ic(V.cart[i], 2)}</button>` : '<span class="slot"></span>').join('');
-    const gud = Array.from({ length: st.gudang }, (_, i) => S.gudang[i] ? `<button class="gs full" data-a="obral" data-v="${i}" type="button">${ic(S.gudang[i], 1)}</button>` : '<span class="gs"></span>').join('');
-    const free = st.gudang - S.gudang.length;
+    const kotak = Array.from({ length: capKotak() }, (_, i) => V.cart[i] ? `<button class="slot full" data-a="rm" data-v="${i}" type="button">${ic(V.cart[i], 2)}</button>` : '<span class="slot"></span>').join('');
+    const gud = Array.from({ length: capGudang() }, (_, i) => S.gudang[i] ? `<button class="gs full" data-a="obral" data-v="${i}" type="button">${ic(S.gudang[i], 1)}</button>` : '<span class="gs"></span>').join('');
+    const free = capGudang() - S.gudang.length;
     const say = V.fly ? 'Hati-hati di jalan, Rotni!' : V.cart.length ? `Rotni, tolong belikan ${V.cart.length} barang ini ya!` : 'Rotni, tolong belikan barang di daftar ya!';
     return `<div class="pp bubble" style="left:180px;top:168px;width:470px"><p>${say}</p></div>
       <div class="pp cat" style="${P(12, 558, 576, 246)}"><h3>🌍 Katalog Toko Bumi <small>(ketuk untuk memesan)</small></h3><div class="cards">${cards}</div></div>
-      <div class="pd kotak" style="${P(600, 558, 564, 132)}"><span class="lbl">📦 Kotak Rotni<br><small>${V.cart.length}/${st.kotak} · ${cartTotal()} ${STAR}</small></span><div class="slots">${kotak}</div></div>
-      <div class="pd gudang" style="${P(600, 698, 354, 106)}"><span class="lbl">🏬 Gudang<br><small>sisa ${free - V.cart.length}</small></span><div class="gslots c${st.gudang}">${gud}</div></div>
+      <div class="pd kotak" style="${P(600, 558, 564, 132)}"><span class="lbl">📦 Kotak Rotni<br><small>${V.cart.length}/${capKotak()} · ${cartTotal()} ${STAR}</small></span><div class="slots">${kotak}</div></div>
+      <div class="pd gudang" style="${P(600, 698, 354, 106)}"><span class="lbl">🏬 Gudang<br><small>sisa ${free - V.cart.length}</small></span><div class="gslots" style="${gcols(capGudang())}">${gud}</div></div>
       <button class="pb red tall" style="${P(966, 698, 198, 106)}" data-a="kirim" type="button" ${V.fly ? 'disabled' : ''}>Kirim 🚀<br><small>ke Bumi</small></button>
-      <div class="pp sisa" style="${P(864, 102, 300, 60)}">Sisa kas: <b>${sisa}</b> ${STAR}</div>`;
+      <div class="pp sisa" style="${P(864, 102, 300, 124)}"><span>Sisa kas: <b>${sisa}</b> ${STAR}</span><button class="pb teal tbg" data-a="tabung" type="button" ${V.fly ? 'disabled' : ''}>🫙 Tabung: ${S.tabung} ${STAR}</button></div>`;
   }
 
   // ----- toko -----
   function curCust() { return S.today.cust[S.today.ci]; }
   function uiToko() {
     const c = V.c, st = stage();
-    const gud = Array.from({ length: st.gudang }, (_, i) => S.gudang[i] ? `<span class="gs full">${ic(S.gudang[i], 1)}</span>` : '<span class="gs"></span>').join('');
+    const gud = Array.from({ length: capGudang() }, (_, i) => S.gudang[i] ? `<span class="gs full">${ic(S.gudang[i], 1)}</span>` : '<span class="gs"></span>').join('');
     let mid = '', right = '', bub = '';
     if (c && (c.mode === 'minta' || c.mode === 'tawar' || c.mode === 'kembalian' || c.mode === 'senang' || c.mode === 'sedih')) {
       const it = IT[c.item];
@@ -317,7 +320,7 @@
     }
     const emptyBtn = S.gudang.length === 0 && S.today.ci < S.today.cust.length ? `<button class="pb grey" style="${P(900, 102, 264, 60)}" data-a="tutupAwal" type="button">Tutup toko 🌙</button>` : '';
     return `${bub}${emptyBtn}
-      <div class="pd gudang tk" style="${P(12, 618, 324, 186)}"><span class="lbl">Gudang</span><div class="gslots c${st.gudang}">${gud}</div></div>
+      <div class="pd gudang tk" style="${P(12, 618, 324, 186)}"><span class="lbl">Gudang</span><div class="gslots" style="${gcols(capGudang())}">${gud}</div></div>
       <div class="pp mid" style="${P(354, 618, 474, 186)}">${mid}</div>
       <div class="right" style="${P(843, 618, 321, 186)}">${right}</div>`;
   }
@@ -438,6 +441,36 @@
     leave(true, pick(['Terima kasih! 😊', 'Asyik, dapat juga! 😄', 'Terima kasih, Angkasa! 💛']));
   }
 
+
+  // ---------- Tabung: memperbesar toko ----------
+  function upPrice(kind) { const l = AM.UPGRADE[kind], n = S.up[kind]; return n < l.length ? l[n] : null; }
+  function uiTabungModal(msg) {
+    const card = (kind, title, from, to, desc, head) => {
+      const price = upPrice(kind);
+      const btn = price === null ? '<button class="pb grey" type="button" disabled>Sudah paling besar</button>'
+        : `<button class="pb teal" data-a="upBuy" data-v="${kind}" type="button" ${S.tabung < price ? 'disabled' : ''}>Beli ${price} ${STAR}</button>`;
+      return `<div class="uc">${head || ''}<div class="big2">${title}</div><div>${price === null ? 'Sudah maksimal' : `${from} <b>${to - 1} → ${to}</b>`}</div><div>${desc}</div>${btn}</div>`;
+    };
+    modal(`<h3>🫙 Belanja pakai Tabung</h3><p>Isi Tabung: <b class="tb2">${S.tabung} ${STAR}</b> · Tabung dipakai untuk <b>memperbesar toko</b>.</p>
+      <div class="upg">${card('gudang', '🏬 +1 kotak gudang', 'Gudang', capGudang() + 1, 'Barang lebih banyak bisa disimpan')}${card('kotak', '📦 +1 kotak Rotni', 'Kotak Rotni', capKotak() + 1, 'Rotni bawa lebih banyak dari Bumi', A.img(A.S.ROTNI_KEPALA, 1))}</div>
+      <p class="${msg ? 'ok' : 'small'}">${msg || `Harga naik sedikit tiap kali dibeli. Gudang paling banyak +${AM.UPGRADE.gudang.length}, kotak Rotni +${AM.UPGRADE.kotak.length}.`}</p>
+      <div class="mrow"><button class="pb grey" data-a="close" type="button">Tutup</button></div>`);
+    modalEl.firstChild.classList.add('wide');
+  }
+  // ---------- ucapan naik tingkat ----------
+  function congrats(fromName) {
+    AU.sfx('up');
+    const cols = ['#f2c14e', '#e05a8a', '#6fb0ae', '#c8463d', '#8a5aa6'];
+    let conf = '';
+    for (let i = 0; i < 40; i++) conf += `<i class="conf" style="left:${(i * 53) % 800}px;top:${(i * 37) % 120 - 10}px;background:${cols[i % 5]};animation-delay:${(i % 8) * 0.15}s"></i>`;
+    modal(`${conf}<div class="duo">${A.img(A.S.ANGKASA, 2)}${A.img(A.S.ROTNI, 2)}</div>
+      <h3>🎉 Selamat! ${fromName} naik jadi ${stage().nama}!</h3><p class="big">Kamu berhasil mengelola keuangan dengan baik!</p>
+      <div class="stats"><div>Total untung<b>${S.total} ${STAR}</b></div><div>Ditabung<b>${S.ditabung} ${STAR}</b></div><div>Dibagi<b>${S.dibagi} ${STAR}</b></div></div>
+      <div class="hadiah">🎁 Hadiah: ${AM.HADIAH[S.stage]}</div>
+      <div class="mrow"><button class="pb red" data-a="close" type="button">Hore! 🎉</button></div>`);
+    modalEl.firstChild.classList.add('wide', 'cong');
+  }
+
   const ACT = {
     music() { AU.toggle(); AU.music(AU.on); renderTop(); },
     menu() { V.c = null; go('title'); },
@@ -476,8 +509,8 @@
     add(k) {
       const st = stage();
       if (V.fly) return;
-      if (V.cart.length >= st.kotak) { AU.sfx('no'); hint(`Kotak Rotni cuma muat ${st.kotak} barang.`); return; }
-      if (S.gudang.length + V.cart.length >= st.gudang) { AU.sfx('no'); hint('Gudang penuh! Kembalikan barang lama atau pesan lebih sedikit.'); return; }
+      if (V.cart.length >= capKotak()) { AU.sfx('no'); hint(`Kotak Rotni cuma muat ${capKotak()} barang.`); return; }
+      if (S.gudang.length + V.cart.length >= capGudang()) { AU.sfx('no'); hint('Gudang penuh! Kembalikan barang lama atau pesan lebih sedikit.'); return; }
       if (S.kas - cartTotal() < IT[k].beli) { AU.sfx('no'); hint(`Kasnya tidak cukup untuk ${IT[k].nama.toLowerCase()}.`); return; }
       V.cart.push(k); AU.sfx('add'); hint(`${IT[k].nama} masuk kotak. Totalnya ${cartTotal()} ${STAR}.`); render();
     },
@@ -500,6 +533,14 @@
       V.fly = { phase: 'go', t0: T }; AU.sfx('fly'); hint('Wuuush! Rotni terbang ke Bumi…'); render();
     },
     bukaToko() { closeModal(); go('toko'); },
+    tabung() { AU.sfx('tap'); uiTabungModal(); },
+    upBuy(kind) {
+      const price = upPrice(kind);
+      if (price === null || S.tabung < price) { AU.sfx('no'); return; }
+      S.tabung -= price; S.up[kind]++; save(); AU.sfx('up');
+      render();
+      uiTabungModal(kind === 'gudang' ? `Hore! Gudang sekarang ${capGudang()} kotak.` : `Hore! Kotak Rotni sekarang ${capKotak()} kotak.`);
+    },
     minus() { const c = V.c; if (c.price > 1) { c.price--; AU.sfx('tap'); render(); } },
     plus() { const c = V.c; if (c.price < AM.HARGA_MAKS) { c.price++; AU.sfx('tap'); render(); } },
     tawarkan() {
@@ -531,12 +572,12 @@
     'jar-'(k) { const b = S.today.bagi; if (b[k] > 0) { b[k]--; AU.sfx('remove'); save(); render(); } },
     tidur() {
       const r = dayResult(), b = S.today.bagi;
-      if (r.untung > 0) { S.kas -= b.tabung + b.berbagi; S.tabung += b.tabung; S.berbagi += b.berbagi; S.total += r.untung; }
-      let up = false;
+      if (r.untung > 0) { S.kas -= b.tabung + b.berbagi; S.tabung += b.tabung; S.berbagi += b.berbagi; S.ditabung += b.tabung; S.dibagi += b.berbagi; S.total += r.untung; }
+      let up = false; const from = S.stage;
       while (S.stage < AM.STAGES.length - 1 && S.total >= AM.STAGES[S.stage + 1].butuh) { S.stage++; up = true; }
       S.day++; startDay();
       V.planet = stage().planet[0];
-      if (up) { AU.sfx('up'); modal(`<h3>🎉 Naik jadi ${stage().nama}!</h3><p class="big">Angkasa Mart makin besar.</p><p>${AM.HADIAH[S.stage]}</p><div class="mrow"><button class="pb red" data-a="close" type="button">Hore!</button></div>`); }
+      if (up) congrats(AM.STAGES[from].nama);
       go('kabar');
     },
   };

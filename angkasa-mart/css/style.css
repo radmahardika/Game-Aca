@@ -98,11 +98,10 @@ h3 { font-size: 26px; }
 .card.lock { opacity: .5; font-size: 28px; }
 .kotak, .gudang { display: flex; align-items: center; gap: 12px; }
 .lbl { font-size: 21px; min-width: 112px; } .lbl small { font-size: 18px; color: #e6d38a; }
-.slots { display: flex; gap: 10px; }
-.slot { width: 76px; height: 84px; background: #4d4466; border: 3px solid var(--dark); display: flex; align-items: center; justify-content: center; }
+.slots { display: flex; gap: 10px; flex: 1; }
+.slot { flex: 1; max-width: 76px; min-width: 0; height: 84px; background: #4d4466; border: 3px solid var(--dark); display: flex; align-items: center; justify-content: center; }
 .slot.full { background: var(--cream); }
 .gslots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; }
-.gslots.c8 { grid-template-columns: repeat(4, 1fr); } .gslots.c10 { grid-template-columns: repeat(5, 1fr); }
 .gs { height: 36px; background: #4d4466; border: 3px solid var(--dark); display: flex; align-items: center; justify-content: center; }
 .gs.full { background: var(--cream); }
 .gs .pxi { max-height: 26px; width: auto !important; }
@@ -180,3 +179,22 @@ h3 { font-size: 26px; }
 @media (orientation: portrait) {
   #rotate { display: flex; position: fixed; inset: 0; z-index: 50; background: #0f0d24; color: var(--cream); font-size: 28px; align-items: center; justify-content: center; text-align: center; padding: 30px; }
 }
+
+/* Tabung & ucapan naik tingkat */
+.pb.teal { --c: #3f8f8a; --c2: #2a6a66; --c3: #6fb0ae; }
+.sisa { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.sisa .tbg { height: 52px; font-size: 22px; }
+.mcard.wide { width: 820px; }
+.upg { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.uc { background: var(--hi); border: 3px solid var(--dark); padding: 14px; display: flex; flex-direction: column; gap: 8px; align-items: center; font-size: 22px; }
+.uc .big2 { font-size: 30px; } .uc .pb { width: 100%; height: 70px; margin-top: auto; }
+.tb2 { font-size: 26px; color: #3f7f86; }
+.mcard .small { font-size: 19px; color: #6e4a34; } .mcard .ok { font-size: 24px; color: #2a6a4a; }
+.cong { position: relative; overflow: hidden; }
+.cong .duo { display: flex; justify-content: center; gap: 30px; align-items: flex-end; }
+.stats { display: flex; justify-content: center; gap: 14px; }
+.stats div { background: var(--hi); border: 3px solid var(--dark); padding: 10px 14px; font-size: 20px; min-width: 170px; }
+.stats b { display: block; font-size: 34px; }
+.hadiah { background: #e6f4e8; border: 3px solid var(--dark); padding: 10px; font-size: 20px; }
+.conf { position: absolute; width: 10px; height: 14px; animation: jatuh 2.4s linear infinite; }
+@keyframes jatuh { 0% { transform: translateY(0) rotate(0); } 100% { transform: translateY(640px) rotate(540deg); } }

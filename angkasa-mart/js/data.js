@@ -49,6 +49,8 @@ window.AM = { VERSION: 1 };
     'Gudang 8 kotak, kotak Rotni 5, dan Planet Peri terbuka!',
     'Angkasa Mart jadi Stasiun Belanja! 10 pembeli tiap hari.',
   ];
+  // harga memperbesar toko dari toples Tabung (per tambahan kotak)
+  AM.UPGRADE = { gudang: [5, 7, 9, 11], kotak: [8, 12] };
   // tambahan harga yang masih mau dibayar pembeli, menurut jumlah hati (1–3)
   AM.LEBIH = [0, 1, 2, 4];
 })();
