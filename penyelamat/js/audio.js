@@ -1,4 +1,4 @@
-// Duo Penyelamat — musik malam yang tenang & efek suara (WebAudio, tanpa file).
+// Penjaga Rimba — musik malam yang tenang & efek suara (WebAudio, tanpa file).
 (function () {
   const T = window.TPM;
   const A = (T.audio = { on: true });

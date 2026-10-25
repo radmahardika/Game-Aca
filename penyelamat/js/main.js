@@ -1,4 +1,4 @@
-// Duo Penyelamat — alur utama: layar judul, ruangan dua iPad, kontrol analog, aturan penyelamatan, simpan progres.
+// Penjaga Rimba — alur utama: layar judul, ruangan dua iPad, kontrol analog, aturan penyelamatan, simpan progres.
 (function () {
   const T = window.TPM;
   const $ = (id) => document.getElementById(id);
@@ -8,7 +8,7 @@
   addEventListener('resize', remeasure);
   addEventListener('orientationchange', () => { resetStick(); for (const ms of [100, 300, 700]) setTimeout(remeasure, ms); });
   if (window.visualViewport) visualViewport.addEventListener('resize', remeasure);
-  $('ver').textContent = 'versi ' + T.VERSION;
+  $('ver').textContent = $('splashVer').textContent = 'versi ' + T.VERSION;
 
   // ---------- keadaan ----------
   const S = (T.S = {
@@ -332,6 +332,7 @@
   }
   // adegan penutup: pagi tiba, semua hewan melompat gembira; kalimat penutup lalu tombol muncul bertahap
   const ending = T.Ending($('endc'));
+  const splash = T.Splash($('splashc'));
   let endTimers = [];
   function showEnd() {
     const e = $('endModal'), lv = S.world.level;
@@ -600,6 +601,8 @@
 
   // ---------- tombol ----------
   const tap = () => { T.audio.unlock(); T.audio.sfx('tap'); };
+  // halaman awal: ketukan pertama sekaligus mengizinkan suara di iPad
+  $('startBtn').onclick = () => { tap(); $('splash').hidden = true; T.audio.music(true); };
   $('twoBtn').onclick = () => { tap(); show('two'); };
   $('soloBtn').onclick = () => { tap(); S.mode = 'solo'; S.role = 'owl'; showLevels(); };
   $('hostBtn').onclick = () => { tap(); show('rolePick'); };
@@ -683,7 +686,8 @@
       }
       saveT += dt;
       if (saveT > 5) { saveT = 0; save(); }
-    } else if (S.world) {
+    } else if (!$('splash').hidden) splash.draw(now);
+    else if (S.world) {
       // layar judul: kamera berputar pelan di depan Pohon Sarang
       renderer.draw({ role: 'owl', p: { x: 18, y: 25.5, a: -Math.PI / 2 + Math.sin(S.t * 0.15) * 0.9 }, other: null, world: S.world, t: S.t });
     }

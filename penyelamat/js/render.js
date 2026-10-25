@@ -1,4 +1,4 @@
-// Duo Penyelamat — mesin first person pixel (raycasting) dengan cahaya malam.
+// Penjaga Rimba — mesin first person pixel (raycasting) dengan cahaya malam.
 (function () {
   const T = window.TPM;
   const { N, WALL, FLOOR, I, hash } = T;

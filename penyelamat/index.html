@@ -6,9 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Penyelamat">
+<meta name="apple-mobile-web-app-title" content="Penjaga Rimba">
 <meta name="theme-color" content="#070a16">
-<title>Duo Penyelamat</title>
+<title>Penjaga Rimba</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,9 +39,17 @@
     <div class="toast" id="toast" hidden></div>
   </div>
 
+  <!-- Halaman awal -->
+  <div class="splash" id="splash">
+    <canvas id="splashc"></canvas>
+    <div class="splashtext"><h1>Penjaga Rimba</h1><p>🦉 Tutu & 🐻 Benhat menjaga hewan-hewan hutan</p></div>
+    <button class="go big" id="startBtn" type="button">▶ Ketuk untuk mulai</button>
+    <p class="ver" id="splashVer">versi 1</p>
+  </div>
+
   <!-- Layar judul -->
   <div class="modal" id="title"><div class="card title">
-    <h1>Duo Penyelamat</h1>
+    <h1>Penjaga Rimba</h1>
     <p class="lead">🦉 Tutu & 🐻 Benhat menolong hewan di hutan yang gelap. Ada 3 level!</p>
     <p class="save" id="saveInfo" hidden></p>
     <div class="col">
@@ -145,6 +153,7 @@
 <script src="js/data.js?v=9"></script>
 <script src="js/render.js?v=9"></script>
 <script src="js/ending.js?v=9"></script>
+<script src="js/splash.js?v=9"></script>
 <script src="js/audio.js?v=9"></script>
 <script src="js/net.js?v=9"></script>
 <script src="js/main.js?v=9"></script>

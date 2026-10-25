@@ -1,4 +1,4 @@
-// Duo Penyelamat — koneksi dua iPad lewat PeerJS (WebRTC).
+// Penjaga Rimba — koneksi dua iPad lewat PeerJS (WebRTC).
 // iPad pembuat ruangan = "tuan rumah" yang menyimpan keadaan dunia; iPad kedua bergabung dengan kode 4 gambar.
 (function () {
   const T = window.TPM;

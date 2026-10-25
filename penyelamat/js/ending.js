@@ -1,4 +1,4 @@
-// Duo Penyelamat — adegan penutup: pagi tiba di Pohon Sarang, semua hewan melompat gembira bersama Tutu & Benhat.
+// Penjaga Rimba — adegan penutup: pagi tiba di Pohon Sarang, semua hewan melompat gembira bersama Tutu & Benhat.
 // Hewan berbaris 1-3 baris (5/10/15 hewan); Level 3 ditambah pelangi.
 (function () {
   const T = window.TPM;

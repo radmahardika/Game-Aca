@@ -50,12 +50,14 @@ https://radmahardika.github.io/Game-Aca/
   Ustadz Hasan: Susun Ayat (ketuk berurutan) & Kata yang Hilang. Audio: **Syaikh Al-Husary Mu'allim**.
   Teks ditampilkan sebagai bacaan waqaf (akhiran dalam kurung dibuang).
 
-## Game kedua: Duo Penyelamat (`penyelamat/`, dulu "Tim Penyelamat Malam")
+## Game kedua: Penjaga Rimba (`penyelamat/`, dulu "Duo Penyelamat" / "Tim Penyelamat Malam")
 
 Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game-Aca/penyelamat/), versi sendiri
 (`TPM.VERSION` di `penyelamat/js/data.js` + `?v=N` di `penyelamat/index.html`). Tujuan: survival & problem solving,
 **dimainkan anak + orang tua di dua iPad** (atau satu iPad bergantian).
 
+- **Halaman awal** (`js/splash.js`, v9): malam di Pohon Sarang, Benhat berdiri, Tutu terbang berputar, hewan melompat,
+  judul "Penjaga Rimba" + tombol "▶ Ketuk untuk mulai" (sekaligus membuka suara iPad) → menu judul.
 - First person **3D pixel** (raycasting), malam gelap tapi tidak horor. Kontrol: analog melayang di 60% kiri layar
   (atas/bawah = maju/mundur, kiri/kanan = belok; kecepatan sudah diturunkan atas permintaan pengguna).
 - **Tutu** — "Burung Hantu yang suka membantu" (kecil & gesit; dulu bernama Sinar): melihat dalam gelap (lingkaran redup kehijauan), terbang melintasi sungai,
@@ -91,7 +93,8 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
 ## Status & yang sedang dibahas
 
 - Rilis terakhir di `main`: **versi 15** (game Aksa sama dengan versi 7) +
-  **Duo Penyelamat versi 8** di `penyelamat/`. Di branch `pratinjau-v16`: **Duo Penyelamat versi 9 = 3 level** (lihat atas),
+  **Duo Penyelamat versi 8** di `penyelamat/`. Di branch `pratinjau-v16`: **versi 9 = 3 level** (lihat atas) + judul baru
+  **"Penjaga Rimba"** + halaman awal,
   plus perbaikan garis hitam kecil di tepi sprite jauh (indeks sprite negatif). Riwayat: v8 3 hewan baru (total 10), Benhat lebih besar, adegan penutup; v7 cahaya samar Benhat + kunang-kunang di ujung jembatan; v6 pesan selamat sampai Oke, panel alat kecil di kanan,
   lampu sorot Tutu; v5 judul "Duo Penyelamat" + petunjuk 💡 alat untuk Tutu (`hint` di `T.VICTIMS`, tidak menyebut
   nama alat); v4 Tutu terbang & lebih cepat, nama Benhat; v3 perbaikan rotasi iPad.

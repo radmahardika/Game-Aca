@@ -44,7 +44,7 @@ Dipilih dari layar judul kapan saja. Aksa dan Ara menjemput teman-teman TPA yang
 - Teks Latin dari **equran.id (Kemenag RI)**, ditampilkan sebagai bacaan waqaf (tanpa akhiran dalam kurung). Audio: **Syaikh Mahmud Khalil Al-Husary (Mu'allim)** dari everyayah.com, disimpan di `audio/husary-muallim/`.
 - Data dibuat dengan `node tools/ambil-juzamma.mjs` (di lingkungan dengan proxy: `NODE_USE_ENV_PROXY=1 node tools/ambil-juzamma.mjs`). Mohon teks dicek ulang oleh orang tua/guru.
 
-## Game kedua: Duo Penyelamat 🦉🐻
+## Game kedua: Penjaga Rimba 🦉🐻
 
 Folder `penyelamat/` → `https://radmahardika.github.io/Game-Aca/penyelamat/`
 

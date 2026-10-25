@@ -1,4 +1,4 @@
-// Duo Penyelamat — data dunia: peta, hewan, alat, sprite & tekstur pixel.
+// Penjaga Rimba — data dunia: peta, hewan, alat, sprite & tekstur pixel.
 (function () {
   const T = (window.TPM = window.TPM || {});
   T.VERSION = 9;
