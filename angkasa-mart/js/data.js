@@ -1,5 +1,5 @@
 // Angkasa Mart — data barang, planet, tren, dan tahap toko.
-window.AM = { VERSION: 2 };
+window.AM = { VERSION: 3 };
 (function () {
   const AM = window.AM;
   AM.MODAL_AWAL = 20;

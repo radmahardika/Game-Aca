@@ -68,16 +68,16 @@
     requestAnimationFrame(frame);
   }
   function station(t, opt) {
-    const b = A.build();
-    cx.drawImage(b.stationBack, 0, 0);
+    A.drawBack(cx, 'station', t);
     A.decor(cx, 'back', S ? S.hias : [], t);
     A.glow(cx, 250, 118, 60, '255,200,110', 0.4 + Math.sin(t * 7) * 0.04 + Math.sin(t * 13) * 0.03);
     A.glow(cx, 365, 119, 40, '255,190,100', 0.25);
     if (opt.queue) drawQueue(t);
     if (opt.customer && V.c) drawCustomer(t);
     A.angkasa(cx, 296, 122, t, false);
-    cx.drawImage(b.stationFront, 0, 0);
+    A.drawFront(cx, 'station');
     A.decor(cx, 'front', S ? S.hias : [], t);
+    A.post(cx, 'station', t);
     if (opt.night) nightScene(t);
     if (opt.customer && V.c && V.c.showItem) { const [w, h] = A.size(A.ITEM[V.c.item], 2); A.draw(cx, A.ITEM[V.c.item], 286 - w / 2, 160 - h, 2); }
     if (opt.rotni) A.rotni(cx, 214, 40, t, 2);
@@ -119,8 +119,8 @@
   }
   const ALIEN_X = [150, 200, 250];
   function planetScene(t) {
-    const b = A.build(), p = V.planet;
-    cx.drawImage(b[p], 0, 0);
+    const p = V.planet;
+    A.drawBack(cx, p, t);
     A.weather(cx, p, t);
     A.draw(cx, A.S.ROKET, 22, GY - 34, 2);
     A.angkasa(cx, 74, GY - 62, t, true);
@@ -130,10 +130,11 @@
       const r = A.alien(cx, p, c.varian, ALIEN_X[i], GY, t + i * 0.7, { walk: asked && V.bubble && V.bubble.i === i && t - V.bubble.t0 < 0.6 });
       c._top = r[2]; c._w = r[0];
     });
+    A.post(cx, p, t);
   }
   function earthScene(t) {
-    const b = A.build(), gy = 182;
-    cx.drawImage(b.earth, 0, 0);
+    const gy = 182;
+    A.drawBack(cx, 'earth', t);
     A.angkasa(cx, 80, gy - 62, t, true);
     cx.fillStyle = '#1a1420'; cx.fillRect(118, gy - 40, 12, 15); cx.fillStyle = '#fff8e0'; cx.fillRect(119, gy - 39, 10, 13);
     cx.fillStyle = '#8a7a6a'; for (let k = 0; k < 4; k++) cx.fillRect(121, gy - 36 + k * 3, 6, 1);
@@ -142,9 +143,9 @@
       const go = f.phase === 'go', k = Math.min(1, (t - f.t0) / 1.7);
       const p = go ? k : 1 - k;
       cx.fillStyle = 'rgba(255,216,138,.8)';
-      for (let i = 0; i < 34; i += 2) { const q = i / 34; cx.fillRect(184 + q * 120, 108 - q * 50 - Math.sin(q * 3.14) * 16, 2, 2); }
+      for (let i = 0; i < 34; i += 2) { const q = i / 34; cx.fillRect(184 + q * 50, 108 - q * 40 - Math.sin(q * 3.14) * 16, 2, 2); }
       if (f.phase !== 'wait') {
-        const X = 166 + (300 - 166) * p, Y = gy - 74 - (gy - 74 - 50) * p - Math.sin(p * 3.14) * 16;
+        const X = 166 + (236 - 166) * p, Y = gy - 74 - (gy - 74 - 46) * p - Math.sin(p * 3.14) * 16;
         cx.globalAlpha = p > 0.85 ? Math.max(0, (1 - p) / 0.15) : 1;
         A.rotni(cx, X, Y, t, p > 0.45 ? 1 : 2, !go);
         cx.globalAlpha = 1;
@@ -155,6 +156,7 @@
     } else {
       A.rotni(cx, 166, gy - 74, t, 2, V.cart.length > 0);
     }
+    A.post(cx, 'earth', t);
   }
   function draw(t) {
     cx.clearRect(0, 0, A.W, A.H);

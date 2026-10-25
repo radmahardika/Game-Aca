@@ -120,10 +120,16 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/angkasa-mart/), ver
   mulai tahap Toko ±30% hari ada peringatan di Kabar (`today.warn`) → saat tutup toko (jika gudang berisi) tawaran sewa
   **Kurcaci Penjaga** 3 ★ dari kas (`AM.SEWA_PENJAGA`, dicatat sebagai biaya di Buku Kas) → layar Malam: dijaga = pencuri
   diusir, tidak = 1–2 barang gudang dicuri (uang tidak pernah dicuri).
+- **v3 visual ala Sons of Valhalla:** tiap latar = lapisan `sky` / `clouds` (2×W, bergeser pelan) / `back` / `front`
+  (`art.drawBack`, `art.drawFront`), kontras hangat-dingin + kedalaman udara, sinar cahaya, tanah berlapis sampai garis air
+  `art.WL` = 214, lalu `art.post` per frame: rumput bergoyang, **kolam pantulan** beriak (es di Tundra), alang-alang, debu
+  cahaya, bintang jatuh, vinyet. Tokoh diberi **cahaya tepi** hangat (`RIM`) + **bayangan panjang** ke kiri (`art.castShadow`).
+  Panel bawah Toko/Survei tetap menutupi kolam (pilihan pengguna).
 - Simpanan `localStorage` kunci `angkasa-mart-v1`. Tes: `AM.debug` (S, V, go, act, newDay; `V.forceChange` = paksa kembalian).
 
 ## Status & yang sedang dibahas
 
+- **Angkasa Mart versi 3** (visual baru) sedang di branch `pratinjau-v19`.
 - Rilis terakhir di `main`: **versi 18** = **Angkasa Mart versi 2** (lihat bagian v2 di atas). Laporan pengguna v1: lancar,
   anak suka, sudah menyisihkan untuk Berbagi & menabung.
 - Versi 17 = rilis **Angkasa Mart versi 1** (`angkasa-mart/`, termasuk Tabung untuk
