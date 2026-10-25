@@ -90,7 +90,30 @@ Game terpisah di folder `penyelamat/` (link: https://radmahardika.github.io/Game
   lalu buka `penyelamat/?peer=127.0.0.1:9000` di dua konteks Playwright. `TPM.debug` (place, act, swap, doA, doMark, ...),
   `TPM.S` = keadaan.
 
+## Game ketiga: Angkasa Mart (`angkasa-mart/`)
+
+Game terpisah (link: https://radmahardika.github.io/Game-Aca/angkasa-mart/), versi sendiri (`AM.VERSION` di
+`angkasa-mart/js/data.js` + `?v=N` di `angkasa-mart/index.html`). Tujuan: melatih jiwa wirausaha, peka peluang & riset pasar.
+
+- Gaya **pixel art detail** (ala Moonlighter/Kingdom: latar berlapis, kabut, cahaya lentera), BUKAN pixel polos game Aksa.
+  Kanvas 392×272 diperbesar 3× → panggung 1176×816 yang di-skala agar pas layar; UI = DOM di atasnya (huruf Pixelify Sans).
+- **Angkasa** (anak bumi, wajah seperti Aksa, baju astronot + helm kaca) punya toko di stasiun luar angkasa.
+  **Rotni** = robot mini sahabat: saran kecil di kiri atas + kurir yang terbang ke Bumi membeli barang.
+- Satu hari: **Kabar Angkasa** (tren) → **Survei** (4 energi tanya; alien di planet = calon pembeli hari itu; Catatan Survei
+  turus + ❤) → **Pesan ke Bumi** (katalog, Kotak Rotni 4, gudang 6 terbatas; Rotni membacakan daftar & total; barang lama
+  bisa dikembalikan setengah harga) → **Toko buka** (5–10 pembeli; pasang harga –/+, reaksi baru muncul setelah **Tawarkan**;
+  kemahalan → alien menawar balik, ditolak → pergi sedih; barang tak ada → dicatat) → **Tutup toko** (Buku Kas: modal barang
+  terjual → hasil → untung; Catatan pembeli; bagi untung ke toples Tabung / Modal besok / Berbagi; kemajuan).
+- Planet: **Tundra** (selimut, termos), **Fores** (payung, senter), **Peri** (kipas, kacamata hitam, kerupuk; terbuka di
+  tahap Mart); sikat gigi untuk semua. Tren = 3 hati, mau bayar sampai beli+4.
+- Tahap toko menurut total untung: Lapak (0) → Toko (20, mulai latihan kembalian dari 10 ★) → Mart (50) → Stasiun (100).
+- **Toples Berbagi (pilihan A)**: sesekali alien butuh bantuan muncul di antrean ("bintangku cuma 1…"); anak memilih
+  Beri (toples menutup modal − 1) atau Maaf ya, tanpa hukuman/balasan untung; hadiahnya stiker di **Buku Kebaikan**.
+- Simpanan `localStorage` kunci `angkasa-mart-v1`. Tes: `AM.debug` (S, V, go, act, newDay; `V.forceChange` = paksa kembalian).
+
 ## Status & yang sedang dibahas
+
+- **Angkasa Mart versi 1** sedang di branch `pratinjau-v17` (belum digabung ke `main`).
 
 - Rilis terakhir di `main`: **versi 16** (game Aksa sama dengan versi 7) +
   **Penjaga Rimba versi 9** di `penyelamat/`: 3 level (lihat atas) + judul baru **"Penjaga Rimba"** + halaman awal,
