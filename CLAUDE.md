@@ -150,13 +150,13 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
 
 ## Status & yang sedang dibahas
 
-- Pratinjau di branch `pratinjau-v20` (dibuat ulang dari `main`): **Tunggu Dulu! versi 2** = perbaikan iPad:
+- Rilis terakhir di `main`: **versi 20** = **Tunggu Dulu! versi 2** = perbaikan iPad:
   (1) layar terpotong saat landscape → `fit()` memakai `visualViewport` + area aman (`env(safe-area-inset-*)`),
   diukur ulang setelah iPad diputar; (2) **ketukan di meja tidak sampai** karena `svg#ui` menutupi layar →
   `#ui { pointer-events: none }`, hanya `[data-act]` yang bisa diketuk. Tes wajib pakai ketukan sungguhan
   (`page.touchscreen.tap` / `elementFromPoint`), bukan `dispatchEvent` langsung ke tombol.
-- Rilis terakhir di `main`: **versi 19** = **Tunggu Dulu! versi 1** (game keempat, `tunggu-dulu/`, lihat atas; dikerjakan
-  di branch `pratinjau-v20` karena `pratinjau-v19` dipakai Angkasa Mart versi 3 yang belum digabung → rilisnya nanti versi 20).
+- Versi 19 = **Tunggu Dulu! versi 1** (game keempat, `tunggu-dulu/`, lihat atas). Branch `pratinjau-v19` berisi Angkasa Mart
+  versi 3 (sesi lain, belum digabung) → kalau dirilis, nomornya versi berikutnya setelah 20.
 - Versi 18 = **Angkasa Mart versi 2** (lihat bagian v2 di atas). Laporan pengguna v1: lancar,
   anak suka, sudah menyisihkan untuk Berbagi & menabung.
 - Versi 17 = rilis **Angkasa Mart versi 1** (`angkasa-mart/`, termasuk Tabung untuk
