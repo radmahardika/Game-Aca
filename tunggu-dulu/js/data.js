@@ -4,7 +4,7 @@ window.TD = { VERSION: 1 };
   const TD = window.TD;
   TD.HARI_TERAKHIR = 5;
   TD.PERISAI_MAKS = 5;
-  TD.PERMATA_AWAL = 12;
+  TD.PANEN_AWAL = 12; // keranjang hasil panen di lumbung desa
   TD.TAMU_PER_HARI = 6;
   TD.TROLL_PER_HARI = [0, 2, 2, 2, 2, 3]; // indeks = hari
   TD.LEMBUR = 2; // tamu tambahan (1 troll + 1 kurcaci)

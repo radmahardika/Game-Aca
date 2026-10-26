@@ -127,7 +127,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/angkasa-mart/), ver
 Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), versi sendiri (`TD.VERSION` di
 `tunggu-dulu/js/data.js` + `?v=N` di `tunggu-dulu/index.html`). Tujuan: **ketelitian & tanggung jawab** (mekanik ala Papers Please).
 
-- Pemain = **kurcaci penjaga muda** di gerbang Desa Kurcaci; troll jahat menyamar jadi kurcaci untuk mencuri permata.
+- Pemain = **kurcaci penjaga muda** di gerbang Desa Kurcaci; troll jahat menyamar jadi kurcaci untuk mencuri
+  **hasil panen** (madu, apel, labu, roti untuk Pesta Panen; dulu permata, diganti agar lebih ramah anak).
   **Sudut pandang orang pertama** dari dalam pos jaga (jendela loket, meja, tangan penjaga).
 - Gaya visual **ilustrasi buku cerita anak** (guas + pensil warna, tanpa garis tinta, palet hangat peach/hijau zaitun/terakota,
   lentera berpendar, wajah mata titik & pipi merona). Semua gambar SVG di `js/art.js` (filter `rough` + tekstur kertas);
@@ -138,13 +139,13 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
   Stempel **BOLEH MASUK** / **TUNGGU DULU!**; belum melihat kartu → Tetua: "Tunggu dulu! Periksa kartunya dulu".
 - 5 hari, aturan bertambah 1 per hari (foto → cap → bawaan → fisik → semua). 6 tamu/hari, troll 2 (hari 5: 3);
   tamu pertama tiap hari selalu kurcaci jujur. Hasil tiap tamu: pita hijau/merah/oranye + alasan/petunjuk yang terlewat.
-- **Reputasi** 5 perisai: troll lolos −1 (permata −1) + **lembur** besok (+2 tamu: 1 troll + 1 kurcaci); kurcaci jujur
-  ditolak −½; perisai habis → ulangi hari (perisai jadi maks(awal hari, 3), permata dikembalikan); hari tanpa kesalahan +1.
-- Layar: judul → cerita Tetua (5 halaman) → pagi (aturan BARU) → loket → laporan malam → ... → Pesta Permata.
-  Laporan & Pesta = **bentangan buku cerita** (`js/buku.js`, sesuai referensi pengguna): halaman kiri senja desa + kalimat
+- **Reputasi** 5 perisai: troll lolos −1 (panen −1 🧺) + **lembur** besok (+2 tamu: 1 troll + 1 kurcaci); kurcaci jujur
+  ditolak −½; perisai habis → ulangi hari (perisai jadi maks(awal hari, 3), panen dikembalikan); hari tanpa kesalahan +1.
+- Layar: judul → cerita Tetua (5 halaman) → pagi (aturan BARU) → loket → laporan malam → ... → Pesta Panen.
+  Laporan & Pesta Panen = **bentangan buku cerita** (`js/buku.js`, sesuai referensi pengguna): halaman kiri senja desa + kalimat
   cerita di langit (penjaga muda & Tetua), halaman kanan malam + lingkaran cahaya lentera, warga yang diterima hari itu
-  berkumpul, panel gelembung pikiran (troll ketahuan, kurcaci masuk, permata, troll lolos/kesalahan/tanpa salah).
-- Simpanan `localStorage` kunci `tunggu-dulu-v1` (`{hari, rep, permata, lembur, mulai, selesai}`, disimpan di akhir hari).
+  berkumpul, panel gelembung pikiran (troll ketahuan, kurcaci masuk, keranjang panen, troll lolos/kesalahan/tanpa salah).
+- Simpanan `localStorage` kunci `tunggu-dulu-v1` (`{hari, rep, panen, lembur, mulai, selesai}`, disimpan di akhir hari).
   Tes: `TD.debug` (`day(n)`, `guest({...})`, `decide`, `act`, layar-layar), `TD.S` = keadaan.
 
 ## Status & yang sedang dibahas

@@ -175,7 +175,7 @@
     <path d="M280 424 l-8 -12 M296 418 l-2 -14 M312 420 l4 -12 M512 420 l-4 -12 M528 418 l2 -14 M544 424 l8 -12" stroke="#f3e6cc" stroke-width="5" stroke-linecap="round"/>
   </g>`;
 
-  // troll lolos: lari ke desa membawa karung permata
+  // troll lolos: lari membawa karung hasil panen
   A.trollEscaping = g => `<g transform="translate(-250 -330) scale(1.6)"><g filter="url(#rough)">
     <path d="M396 470 l-14 26 M424 470 l16 24" stroke="#5f7f3a" stroke-width="12" stroke-linecap="round"/>
     <ellipse cx="410" cy="436" rx="30" ry="40" fill="${g.baju}"/>
@@ -183,7 +183,7 @@
     <path d="M390 380 l-16 -14 l6 18 M430 380 l16 -14 l-6 18" fill="#8db35a"/>
     <ellipse cx="452" cy="404" rx="30" ry="34" fill="#d8c08e"/>
     <path d="M434 378 Q420 390 410 400" stroke="#a88a5a" stroke-width="5" fill="none"/></g>
-    <path d="M442 382 l4 -8 l4 8 l-4 6z" fill="#5ad0ff"/><path d="M462 378 l4 -8 l4 8 l-4 6z" fill="#ff7ab8"/><path d="M452 368 l3 -6 l3 6 l-3 5z" fill="#ffd84a"/>
+    <circle cx="444" cy="378" r="7" fill="#d84a3a"/><ellipse cx="462" cy="376" rx="9" ry="7" fill="#e0874a"/><path d="M462 369 v-4" stroke="#6f9445" stroke-width="2"/><ellipse cx="452" cy="366" rx="4" ry="8" fill="#f2c14e" transform="rotate(20 452 366)"/>
     <path d="M480 360 l3 -8 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3z" fill="#fff6c0"/>
     <g filter="url(#rough)" opacity="0.7"><ellipse cx="380" cy="488" rx="10" ry="5" fill="#a88a5a"/><ellipse cx="360" cy="496" rx="11" ry="5" fill="#a88a5a"/></g>
     <g filter="url(#rough)" transform="rotate(-20 330 300)"><path d="M300 330 Q310 290 340 270 Q356 262 366 264 Q358 290 366 330 Q332 338 300 330 Z" fill="${hatC(g)}"/></g>
@@ -260,6 +260,8 @@
   };
 
   const ITEM = {
+    labu: `<path d="M0 -14 q2 -8 8 -10" stroke="#6f9445" stroke-width="4" fill="none"/><ellipse cx="0" cy="6" rx="26" ry="19" fill="#e0874a"/><path d="M-9 -10 q-6 16 0 32 M9 -10 q6 16 0 32" stroke="#b8642a" stroke-width="3" fill="none"/>`,
+    jagung: `<ellipse cx="0" cy="0" rx="11" ry="24" fill="#f2c14e"/><path d="M-6 -16 v32 M0 -20 v40 M6 -16 v32" stroke="#d8a43a" stroke-width="2"/><path d="M-4 24 Q-22 6 -14 -18 Q-6 4 2 22 Z M4 24 Q22 6 14 -18 Q6 4 -2 22 Z" fill="#7a9f4c"/>`,
     roti: `<ellipse cx="0" cy="6" rx="26" ry="15" fill="#d9944a"/><path d="M-14 0 l5 8 M0 -3 l5 8 M14 0 l5 8" stroke="#f3d29a" stroke-width="4"/>`,
     madu: `<path d="M-18 24 Q-22 -6 -12 -12 L12 -12 Q22 -6 18 24 Z" fill="#e8a83a"/><rect x="-16" y="-22" width="32" height="12" rx="3" fill="#c8553d"/><rect x="-10" y="0" width="20" height="12" rx="2" fill="#f3e3c3"/>`,
     apel: `<circle cx="0" cy="6" r="20" fill="#d84a3a"/><path d="M0 -12 q2 -10 8 -12" stroke="#5a3a2a" stroke-width="4" fill="none"/><ellipse cx="9" cy="-14" rx="8" ry="4" fill="#6f9445"/><ellipse cx="-7" cy="0" rx="5" ry="7" fill="#fff" opacity="0.35"/>`,
@@ -330,7 +332,7 @@
       ${rules.map((r, i) => `<text x="892" y="${200 + i * 30}" font-size="20">${i + 1}. ${r.teks}</text>`).join('')}</g>
     <g transform="rotate(1.5 1010 410)"><text x="892" y="378" font-size="24" font-weight="700" fill="#f6d58e">Reputasi Penjaga</text>
       ${A.shields(S.rep, 892, 398)}
-      <text x="892" y="476" font-size="19" fill="#f3e3c3">💎 Permata aman: ${S.permata}</text>
+      <text x="892" y="476" font-size="19" fill="#f3e3c3">🧺 Panen aman: ${S.panen}</text>
       ${S.repDelta ? `<g filter="url(#rough)"><rect x="1062" y="306" width="96" height="44" rx="20" fill="#b8482e"/></g><text x="1110" y="338" text-anchor="middle" font-size="26" font-weight="700" fill="#fbf2de">${S.repDelta} 🛡️</text>` : ''}</g>
     <text x="80" y="47" font-size="30" font-weight="700" fill="#f6d58e">Tunggu Dulu!</text>
     <text x="290" y="46" font-size="22" fill="#f3e3c3">Hari ${S.hari} · ${Math.min(S.idx + 1, S.tamu.length)}/${S.tamu.length}</text>`;
@@ -410,5 +412,11 @@
     <path d="M-20 4 Q-22 40 0 44 Q22 40 20 4 Q0 12 -20 4 Z" fill="${beard}"/>
     <circle cx="-9" cy="-8" r="3" fill="#3a2a22"/><circle cx="9" cy="-8" r="3" fill="#3a2a22"/>
     <ellipse cx="-14" cy="2" rx="5" ry="3" fill="#e88a78" opacity="0.6"/><ellipse cx="14" cy="2" rx="5" ry="3" fill="#e88a78" opacity="0.6"/></g>`;
-  A.gem = (x, y, s, c) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-14 -8 L-6 -16 L6 -16 L14 -8 L0 14 Z" fill="${c}"/><path d="M-14 -8 H14 M-6 -16 L-3 -8 L0 14 M6 -16 L3 -8" stroke="#fff" stroke-opacity="0.5" stroke-width="2" fill="none"/></g>`;
+  A.produce = (k, x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})" filter="url(#rough)">${ITEM[k]}</g>`;
+  // keranjang anyaman penuh hasil panen
+  A.basket = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">
+    ${A.produce('labu', -14, -16, 0.8)}${A.produce('jagung', 18, -22, 0.7)}${A.produce('apel', 4, -8, 0.7)}${A.produce('roti', -26, -2, 0.55)}${A.produce('apel', 28, -4, 0.6)}
+    <g filter="url(#rough)"><path d="M-42 -4 Q-48 -26 -20 -40" stroke="#8a5634" stroke-width="6" fill="none"/>
+    <path d="M-44 -4 L44 -4 L34 34 L-34 34 Z" fill="#b8843a"/>
+    <path d="M-42 6 H42 M-39 16 H39 M-36 26 H36" stroke="#8a5a2a" stroke-width="3"/><path d="M-20 -4 L-18 34 M0 -4 V34 M20 -4 L18 34" stroke="#d8a85a" stroke-width="3"/></g></g>`;
 })();

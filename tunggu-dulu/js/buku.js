@@ -1,4 +1,4 @@
-// Tunggu Dulu! — layar bentangan buku cerita: laporan malam & Pesta Permata.
+// Tunggu Dulu! — layar bentangan buku cerita: laporan malam & Pesta Panen.
 // Halaman kiri = suasana senja desa + kalimat cerita di langit; halaman kanan = malam, lingkaran cahaya lentera,
 // warga berkumpul, dan panel "gelembung pikiran" berisi kejadian hari itu.
 (function () {
@@ -136,7 +136,7 @@
     { topi: 'oranye', janggut: 'oranye', baju: '#5a6aa0' }, { topi: 'ungu', janggut: 'putih', baju: '#6a7a3a' },
     { topi: 'merah', janggut: 'cokelat', baju: '#8a5a7a' }, { topi: 'kuning', janggut: 'putih', baju: '#b0843a' }];
 
-  // o: {hari, st, permata, rep, repGain, lembur, perfect, mood, say, diterima, last}
+  // o: {hari, st, panen, rep, repGain, lembur, perfect, mood, say, diterima, last}
   A.reportSpread = function (o) {
     const st = o.st;
     const warga = o.diterima.concat(FILL).slice(0, 6);
@@ -147,15 +147,14 @@
       const g = warga[i] || FILL[i];
       return A.miniDwarf(812 + i * 26 - (Math.min(st.masuk, 4) - 1) * 13, 160, 0.62, TD.TOPI[g.topi], TD.JANGGUT[g.janggut], g.baju);
     }).join('');
-    const gems = [['#5ad0ff', -26, 8], ['#ff7ab8', 0, -6], ['#ffd84a', 26, 8], ['#8ae07a', -13, 26], ['#5ad0ff', 13, 26]]
-      .map(([c, dx, dy]) => A.gem(958 + dx, 140 + dy, 1.1, c)).join('');
+    const panen = A.basket(958, 160, 0.95);
     let fourth, cap4, bg4;
     if (st.lolos) { fourth = A.trollRun(1092, 150, 1); cap4 = st.salah ? `${st.lolos + st.salah} kesalahan` : `${st.lolos} troll lolos`; bg4 = '#b8482e'; }
     else if (st.salah) { fourth = A.villager(1100, 196, 0.65, { hat: '#4f7aa8', coat: '#a8432e' }) + `<path d="M1094 132 q-3 9 0 13 q4 -4 0 -13" fill="#8cc6e8"/>`; cap4 = `${st.salah} salah tuduh`; bg4 = '#c8803a'; }
     else { fourth = A.star(1100, 150, 2.2); cap4 = 'Tanpa salah!'; bg4 = '#6f9445'; }
     const panels = A.thought(616, 96, 108, 140, '#5f7f55', trollFaces, `${st.ketahuan} ketahuan`, [800, 430])
       + A.thought(750, 96, 120, 140, '#e9b6a8', heads, `${st.masuk} masuk`, [850, 420])
-      + A.thought(896, 96, 124, 140, '#3a4a6a', `<circle cx="958" cy="150" r="44" fill="url(#glow)"/>` + gems, `💎 ${o.permata}/${TD.PERMATA_AWAL}`, [920, 420])
+      + A.thought(896, 96, 124, 140, '#3a4a6a', `<circle cx="958" cy="150" r="44" fill="url(#glow)"/>` + panen, `🧺 ${o.panen}/${TD.PANEN_AWAL}`, [920, 420])
       + A.thought(1046, 96, 112, 140, bg4, fourth, cap4, [980, 430]);
     let pita = '';
     if (o.perfect) pita = ribbon('⭐ Hari Sempurna!' + (o.repGain ? '  +1 🛡️' : ''), '#6f9445');
@@ -164,7 +163,7 @@
       + people.slice(4).join('') + A.elder(o.mood, 885, 570, 0.42) + people.slice(0, 4).join('')
       + `<g filter="url(#rough)"><rect x="606" y="700" width="300" height="104" rx="18" fill="#1d2a30" opacity="0.75"/></g>
          <text x="626" y="734" font-size="22" font-weight="700" fill="#f6d58e">Reputasi Penjaga</text>${A.shields(o.rep, 626, 744, 54)}`
-      + A.button(o.last ? 'Pesta Permata ▶' : `Hari ${o.hari + 1} ▶`, 922, 712, 240, '#6f9445', o.last ? 'pesta' : 'hariBerikut', 84);
+      + A.button(o.last ? 'Pesta Panen ▶' : `Hari ${o.hari + 1} ▶`, 922, 712, 240, '#6f9445', o.last ? 'pesta' : 'hariBerikut', 84);
     const leftCast = A.guard(250, 770, 1.45, { lantern: true })
       + A.elder(o.mood, 420, 690, 0.5)
       + A.bubble(o.say, 300, 330, 270, 'down', 22);
@@ -180,29 +179,30 @@
       <text x="886" y="302" text-anchor="middle" font-size="26" font-weight="700" fill="#fbf2de">${text}</text>`;
   }
 
-  // o: {permata, rep, warga}
+  // o: {panen, rep}
   A.partySpread = function (o) {
     const cols = FILL;
     let dancers = '';
-    [[60, 760, 1.2], [470, 770, 1.25], [540, 690, 1.0], [30, 660, 0.95], [380, 700, 0.9]].forEach(([x, y, s], i) => {
+    [[60, 790, 1.2], [400, 808, 1.15], [540, 800, 1.15], [560, 690, 0.95], [30, 680, 0.95]].forEach(([x, y, s], i) => {
       const g = cols[i];
       dancers += `<g class="hop" style="animation-delay:${i * 0.17}s">${A.villager(x, y, s, { hat: TD.TOPI[g.topi], beard: TD.JANGGUT[g.janggut], coat: g.baju, happy: true, lantern: i % 2 === 1, flip: i % 2 === 0 })}</g>`;
     });
-    const chest = `<g filter="url(#rough)"><rect x="200" y="640" width="160" height="90" rx="10" fill="#8a5634"/><rect x="200" y="672" width="160" height="12" fill="#e8b84a"/>
-      <path d="M196 640 Q280 580 364 640 Z" fill="#a8683a"/><rect x="268" y="664" width="24" height="28" rx="4" fill="#e8b84a"/></g>
-      <circle cx="280" cy="630" r="110" fill="url(#glow)"/>`
-      + [['#5ad0ff', 230, 628], ['#ff7ab8', 262, 612], ['#ffd84a', 296, 616], ['#8ae07a', 326, 630], ['#5ad0ff', 280, 596]].map(([c, x, y]) => A.gem(x, y, 1.3, c)).join('');
+    const chest = `<g transform="translate(0 -70)"><circle cx="290" cy="640" r="150" fill="url(#glow)"/>
+      <g filter="url(#rough)"><rect x="150" y="660" width="290" height="16" rx="4" fill="#8a5634"/>
+      <path d="M150 660 L440 660 L452 712 L138 712 Z" fill="#c8553d"/><path d="M180 660 l-6 52 M220 660 l-3 52 M260 660 v52 M300 660 v52 M340 660 l3 52 M380 660 l6 52 M420 660 l8 52" stroke="#f3e3c3" stroke-width="5" opacity="0.6"/>
+      <rect x="160" y="712" width="12" height="60" fill="#6a4228"/><rect x="418" y="712" width="12" height="60" fill="#6a4228"/></g>`
+      + A.produce('labu', 190, 640, 1.2) + A.produce('roti', 250, 648, 1) + A.basket(305, 636, 0.8) + A.produce('madu', 362, 640, 1) + A.produce('apel', 408, 646, 0.9) + A.produce('jagung', 430, 630, 0.8) + '</g>';
     const confetti = Array.from({ length: 26 }, (_, i) => {
       const x = (i * 97) % 580 + 5, y = 170 + (i * 61) % 300, c = ['#ff7ab8', '#ffd84a', '#5ad0ff', '#8ae07a', '#fff8ea'][i % 5];
       return `<rect class="twinkle" style="animation-delay:${(i * 0.23) % 2}s" x="${x}" y="${y}" width="8" height="5" rx="1" fill="${c}" transform="rotate(${i * 37} ${x} ${y})"/>`;
     }).join('');
-    const leftCast = confetti + chest + dancers + A.elder('happy', 170, 650, 0.42);
+    const leftCast = confetti + chest + dancers + A.elder('happy', 250, 735, 0.42);
     const medal = `<g filter="url(#rough)"><path d="M862 340 L842 410 L862 400 L874 414 L886 346 Z M908 340 L928 410 L908 400 L896 414 L884 346 Z" fill="#c8553d"/></g>
       <circle cx="885" cy="330" r="70" fill="url(#glow)"/>
       <g filter="url(#rough)"><circle cx="885" cy="320" r="46" fill="#e8b84a"/><circle cx="885" cy="320" r="36" fill="#f2cf6a"/></g>
       ${A.star(885, 322, 1.4, '#c8553d')}`;
     const rightInner = `<text x="885" y="112" text-anchor="middle" font-size="26" fill="#f6d58e">Lencana Penjaga Hebat</text>` + medal
-      + A.thought(624, 200, 150, 150, '#3a4a6a', `<circle cx="699" cy="255" r="44" fill="url(#glow)"/>` + [['#5ad0ff', -22, 0], ['#ff7ab8', 0, -14], ['#ffd84a', 22, 0], ['#8ae07a', 0, 16]].map(([c, dx, dy]) => A.gem(699 + dx, 258 + dy, 1.1, c)).join(''), `💎 ${o.permata}/${TD.PERMATA_AWAL} aman`, [760, 470])
+      + A.thought(624, 200, 150, 150, '#3a4a6a', `<circle cx="699" cy="255" r="44" fill="url(#glow)"/>` + A.basket(699, 268, 1.1), `🧺 ${o.panen}/${TD.PANEN_AWAL} aman`, [760, 470])
       + A.thought(996, 200, 150, 150, '#5f7f55', A.shields(o.rep, 1008, 230, 26).replace(/h36 v24 q0 18 -18 26 q-18 -8 -18 -26/g, 'h22 v14 q0 11 -11 16 q-11 -5 -11 -16').replace(/h18 v50 q-18 -8 -18 -26/g, 'h11 v30 q-11 -5 -11 -16'), `🛡️ ${o.rep} perisai`, [1010, 470])
       + A.villager(760, 660, 1.2, { hat: '#d9a441', coat: '#5f948c', lantern: true, happy: true })
       + A.villager(1010, 660, 1.2, { hat: '#4f7aa8', coat: '#a8432e', beard: '#8a5a3a', lantern: true, happy: true, flip: true })
@@ -210,8 +210,8 @@
       + `<text x="885" y="745" text-anchor="middle" font-size="30" font-weight="700" fill="#fff2d0">Kamu Penjaga Hebat! 💛</text>`
       + A.button('🔁 Main Lagi', 640, 760, 240, '#6f9445', 'baru', 52) + A.button('🏠 Judul', 900, 760, 240, '#8a7a6a', 'judul', 52);
     return spread({
-      judul: 'Pesta Permata!',
-      kalimat: ['Berkat penjaga yang teliti dan', 'adil, permata desa tetap aman.'],
+      judul: 'Pesta Panen!',
+      kalimat: ['Berkat penjaga yang teliti,', 'panen desa aman untuk semua.'],
       leftCast, judulKanan: 'Terima kasih, Penjaga!', rightInner,
     });
   };

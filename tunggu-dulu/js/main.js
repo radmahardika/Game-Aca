@@ -1,11 +1,11 @@
-// Tunggu Dulu! — alur game: judul → cerita → pagi → loket (periksa tamu) → laporan malam → ... → pesta permata.
+// Tunggu Dulu! — alur game: judul → cerita → pagi → loket (periksa tamu) → laporan malam → ... → Pesta Panen.
 (function () {
   const TD = window.TD, A = TD.art, AU = TD.audio;
   const $ = id => document.getElementById(id);
   const SAVE_KEY = 'tunggu-dulu-v1';
 
   const S = (TD.S = {
-    screen: 'muat', hari: 1, rep: TD.PERISAI_MAKS, permata: TD.PERMATA_AWAL, lembur: false,
+    screen: 'muat', hari: 1, rep: TD.PERISAI_MAKS, panen: TD.PANEN_AWAL, lembur: false,
     tamu: [], idx: 0, phase: 'inspect', checked: {}, tool: null, lifted: false, bagOpen: false,
     result: null, pressed: null, repDelta: null, bubble: null, hint: null, anim: '', lensPos: [410, 300],
     stats: {}, dayStart: null, lemburBesok: false, ceritaHal: 0,
@@ -92,7 +92,7 @@
       + A.paper(380, 120, 520, 520)
       + `<text x="640" y="236" text-anchor="middle" font-size="70" font-weight="700" fill="#a8432e">Tunggu Dulu!</text>
          <text x="640" y="282" text-anchor="middle" font-size="26" fill="#6e4a34">Penjaga Gerbang Desa Kurcaci</text>
-         ${A.gem(560, 330, 1.3, '#5ad0ff')}${A.gem(640, 322, 1.6, '#ff7ab8')}${A.gem(720, 330, 1.3, '#ffd84a')}`
+         ${A.produce('apel', 556, 336, 1)}${A.basket(640, 340, 0.9)}${A.produce('labu', 726, 336, 1)}`
       + (lanjut
         ? A.button(`▶ Lanjut Hari ${sv.hari}`, 470, 390, 340, '#6f9445', 'lanjutHari', 76) + A.button('Mulai dari awal', 520, 488, 240, '#8a7a6a', 'baru', 56)
         : A.button('▶ Mulai', 490, 400, 300, '#6f9445', 'baru', 84))
@@ -101,7 +101,7 @@
 
   const CERITA = [
     'Halo, Penjaga muda! Selamat datang di Desa Kurcaci.',
-    'Desa kita punya banyak permata. Troll jahat ingin mencurinya!',
+    'Desa kita baru saja panen: madu, apel, labu, dan roti untuk Pesta Panen. Troll jahat ingin mencurinya!',
     'Troll suka menyamar jadi kurcaci. Tugasmu memeriksa setiap tamu.',
     'Kalau tamunya kurcaci asli, cap BOLEH MASUK. Kalau troll, cap TUNGGU DULU!',
     'Tapi jangan menuduh kurcaci yang jujur, ya. Penjaga yang baik itu teliti dan adil.',
@@ -143,7 +143,7 @@
     const st = S.stats, perfect = !st.lolos && !st.salah;
     const say = perfect ? ['Kerja hebat, Penjaga!', 'Desa kita aman. 💛']
       : st.lolos ? ['Troll sempat masuk.', 'Besok jaga lebih teliti, ya!'] : ['Ingat, jangan menuduh', 'kurcaci yang jujur, ya.'];
-    showScreen('laporan', A.reportSpread({ hari: S.hari, st, permata: S.permata, rep: S.rep, repGain: S.repGain, perfect,
+    showScreen('laporan', A.reportSpread({ hari: S.hari, st, panen: S.panen, rep: S.rep, repGain: S.repGain, perfect,
       lembur: st.lolos && S.hari < TD.HARI_TERAKHIR, mood: perfect ? 'happy' : 'stern', say, diterima: S.diterima,
       last: S.hari >= TD.HARI_TERAKHIR }));
     AU.music(false);
@@ -166,19 +166,19 @@
   }
 
   function partyScreen() {
-    showScreen('pesta', A.partySpread({ permata: S.permata, rep: S.rep }));
+    showScreen('pesta', A.partySpread({ panen: S.panen, rep: S.rep }));
     AU.sfx('party');
   }
 
   // ---------------- alur hari ----------------
   function newGame() {
-    Object.assign(S, { hari: 1, rep: TD.PERISAI_MAKS, permata: TD.PERMATA_AWAL, lembur: false });
-    save({ hari: 1, rep: S.rep, permata: S.permata, lembur: false, mulai: true });
+    Object.assign(S, { hari: 1, rep: TD.PERISAI_MAKS, panen: TD.PANEN_AWAL, lembur: false });
+    save({ hari: 1, rep: S.rep, panen: S.panen, lembur: false, mulai: true });
     S.ceritaHal = 0; storyScreen();
   }
   function resume() {
     const sv = load();
-    Object.assign(S, { hari: sv.hari, rep: sv.rep, permata: sv.permata, lembur: !!sv.lembur });
+    Object.assign(S, { hari: sv.hari, rep: sv.rep, panen: sv.panen ?? TD.PANEN_AWAL, lembur: !!sv.lembur });
     morningScreen();
   }
   function startDay() {
@@ -186,7 +186,7 @@
     S.idx = 0;
     S.stats = { masuk: 0, ketahuan: 0, lolos: 0, salah: 0 };
     S.diterima = [];
-    S.dayStart = { rep: S.rep, permata: S.permata };
+    S.dayStart = { rep: S.rep, panen: S.panen };
     S.lemburBesok = false; S.repGain = 0;
     hideScreen();
     AU.music(true);
@@ -204,8 +204,8 @@
     S.repGain = !st.lolos && !st.salah && S.rep < TD.PERISAI_MAKS ? 1 : 0;
     S.rep += S.repGain;
     const last = S.hari >= TD.HARI_TERAKHIR;
-    save(last ? { selesai: true, hari: S.hari, rep: S.rep, permata: S.permata }
-      : { hari: S.hari + 1, rep: S.rep, permata: S.permata, lembur: S.lemburBesok, mulai: true });
+    save(last ? { selesai: true, hari: S.hari, rep: S.rep, panen: S.panen }
+      : { hari: S.hari + 1, rep: S.rep, panen: S.panen, lembur: S.lemburBesok, mulai: true });
     reportScreen();
   }
 
@@ -227,14 +227,14 @@
       setTimeout(() => AU.sfx('good'), 250);
     } else if (!accept && g.troll) {
       S.result = 'ok-troll'; S.stats.ketahuan++;
-      S.banner = { title: 'Hebat! Troll ketahuan! 💎 aman', sub: clues, color: BANNER_HIJAU };
+      S.banner = { title: 'Hebat! Troll ketahuan! 🧺 aman', sub: clues, color: BANNER_HIJAU };
       S.bubble = ['Grrr! Ketahuan!', 'Awas ya!'];
       setTimeout(() => AU.sfx('troll'), 200); setTimeout(() => AU.sfx('caught'), 700);
     } else if (accept && g.troll) {
       S.result = 'troll-lolos'; S.stats.lolos++;
-      S.rep = Math.max(0, S.rep - 1); S.permata = Math.max(0, S.permata - 1); S.lemburBesok = true; S.repDelta = '−1';
-      S.banner = { title: 'Oh tidak! Itu troll! 💎 −1', sub: 'Terlewat: ' + clues, color: BANNER_MERAH };
-      S.bubble = ['Hehehe...', 'permatanya', 'kubawa!'];
+      S.rep = Math.max(0, S.rep - 1); S.panen = Math.max(0, S.panen - 1); S.lemburBesok = true; S.repDelta = '−1';
+      S.banner = { title: 'Oh tidak! Itu troll! 🧺 −1', sub: 'Terlewat: ' + clues, color: BANNER_MERAH };
+      S.bubble = ['Hehehe...', 'panennya', 'kubawa!'];
       setTimeout(() => AU.sfx('bad'), 250);
     } else {
       S.result = 'salah-tuduh'; S.stats.salah++;
@@ -275,7 +275,7 @@
       else if (name === 'cerita') { if (++S.ceritaHal < CERITA.length) storyScreen(); else morningScreen(); }
       else if (name === 'buka') startDay();
       else if (name === 'hariBerikut') { S.hari++; S.lembur = S.lemburBesok; morningScreen(); }
-      else if (name === 'ulangi') { S.rep = Math.max(S.dayStart.rep, 3); S.permata = S.dayStart.permata; morningScreen(); }
+      else if (name === 'ulangi') { S.rep = Math.max(S.dayStart.rep, 3); S.panen = S.dayStart.panen; morningScreen(); }
       else if (name === 'pesta') partyScreen();
       else if (name === 'judul') titleScreen();
       return;
