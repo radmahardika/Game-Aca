@@ -150,6 +150,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
 
 ## Status & yang sedang dibahas
 
+- Pratinjau `pratinjau-v21`: **Tunggu Dulu! versi 3** = alat bisa berganti saat kaca pembesar aktif (tombol alat ada di
+  ambang jendela, dulu ketukannya dianggap menggeser lensa → sekarang ketukan pada `[data-act]` selalu didahulukan).
 - Rilis terakhir di `main`: **versi 20** = **Tunggu Dulu! versi 2** = perbaikan iPad:
   (1) layar terpotong saat landscape → `fit()` memakai `visualViewport` + area aman (`env(safe-area-inset-*)`),
   diukur ulang setelah iPad diputar; (2) **ketukan di meja tidak sampai** karena `svg#ui` menutupi layar →

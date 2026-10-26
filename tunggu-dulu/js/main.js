@@ -308,7 +308,8 @@
     AU.unlock();
     const p = toStage(e);
     const t = e.target.closest('[data-act]');
-    if (S.screen === 'main' && S.tool === 'kaca' && S.phase === 'inspect' && inWin(p) && !(t && t.closest('#ui'))) {
+    // tombol (termasuk alat di ambang jendela) selalu didahulukan; lensa hanya digeser di area kosong jendela
+    if (S.screen === 'main' && S.tool === 'kaca' && S.phase === 'inspect' && inWin(p) && !t) {
       dragging = true; moveLens(p); e.preventDefault(); return;
     }
     if (t) { e.preventDefault(); act(t.getAttribute('data-act')); }
