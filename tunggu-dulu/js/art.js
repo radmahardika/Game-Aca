@@ -107,6 +107,10 @@
   const coatPath = 'M300 500 Q296 410 350 382 Q410 364 470 382 Q526 410 524 500 Z';
   const hatPath = 'M338 254 Q350 200 392 160 Q420 128 446 112 Q470 104 486 118 Q462 126 452 150 Q466 200 484 254 Q410 266 338 254 Z';
   const beardPath = 'M360 324 Q340 360 362 392 Q382 424 410 422 Q438 424 458 392 Q480 360 460 324 Q440 340 410 340 Q380 340 360 324 Z';
+  const beardLong = 'M360 324 Q334 384 364 436 Q386 474 410 476 Q434 474 456 436 Q486 384 460 324 Q440 340 410 340 Q380 340 360 324 Z';
+  // hiasan kurcaci jujur yang terlihat aneh
+  const scarf = `<path d="M350 370 Q410 396 470 370 L472 394 Q410 420 348 394 Z" fill="#6fae4a"/><path d="M440 392 L456 454 L434 458 L424 398 Z" fill="#6fae4a"/><path d="M438 440 l18 -2" stroke="#4a8a32" stroke-width="3"/>`;
+  const feather = `<path d="M468 240 Q514 180 552 128 Q548 186 482 248 Z" fill="#e8b84a"/><path d="M474 242 Q512 190 546 138" stroke="#a87a2a" stroke-width="3" fill="none"/>`;
 
   // mood: idle | happy | sad. Troll yang menyamar memakai gambar ini juga + petunjuknya.
   A.guest = function (g, mood = 'idle') {
@@ -132,6 +136,7 @@
          <path d="M524 470 Q520 420 536 376" stroke="${g.baju}" stroke-width="30" fill="none" stroke-linecap="round"/>
          <ellipse cx="540" cy="356" rx="22" ry="22" fill="#8a5634"/>`
       : `<ellipse cx="318" cy="486" rx="28" ry="17" fill="#8a5634"/><ellipse cx="506" cy="486" rx="28" ry="17" fill="#8a5634"/>`;
+    const mitten = g.hiasan === 'sarung' ? '#8db35a' : '#8a5634';
     return `<g filter="url(#rough)">
       <path d="${coatPath}" fill="${g.baju}"/>
       <path d="M300 500 Q296 410 350 382 Q380 372 410 370 L410 500 Z" fill="#000" opacity="0.1"/>
@@ -140,16 +145,18 @@
       ${ears}
       <ellipse cx="410" cy="290" rx="66" ry="62" fill="url(#face)"/>
       <path d="${hatPath}" fill="${hatC(g)}"/>
-      <circle cx="488" cy="120" r="9" fill="#f3e3c3"/>
+      ${g.pompom ? '<circle cx="488" cy="118" r="12" fill="#f3e3c3"/>' : ''}
+      ${g.hiasan === 'bulu' ? feather : ''}
       <path d="M332 250 Q410 270 490 250 L492 266 Q410 286 330 266 Z" fill="#6a4a34"/>
       ${eyes}
       ${g.kacamata ? glasses() : ''}
       <ellipse cx="366" cy="318" rx="11" ry="7" fill="#e88a78" opacity="0.6"/><ellipse cx="454" cy="318" rx="11" ry="7" fill="#e88a78" opacity="0.6"/>
       <ellipse cx="410" cy="316" rx="10" ry="9" fill="#e09276"/>
-      <path d="${beardPath}" fill="${beardC(g)}"/>
+      <path d="${g.panjang ? beardLong : beardPath}" fill="${beardC(g)}"/>
       <path d="M384 360 q6 12 0 24 M410 364 q6 14 0 28 M436 360 q6 12 0 24" stroke="#000" stroke-opacity="0.15" stroke-width="3" fill="none"/>
       ${mouth}
-      ${hands}
+      ${g.hiasan === 'syal' ? scarf : ''}
+      ${hands.replace(/#8a5634/g, mitten)}
     </g>`;
   };
 
@@ -195,15 +202,16 @@
     return `<g transform="translate(560 120) skewX(-18) scale(0.95 0.8)" opacity="0.55" filter="url(#rough)" fill="#2a1f40">
       <path d="M-110 380 Q-114 290 -60 262 Q0 244 60 262 Q114 290 110 380 Z"/>
       <ellipse cx="0" cy="170" rx="66" ry="62"/>
+      ${g.hiasan === 'bulu' ? '<path d="M52 134 Q100 70 128 20 Q124 80 66 142 Z"/>' : ''}
       ${horns ? `<path d="M-40 120 L-70 20 L-14 112 Z M40 120 L70 20 L14 112 Z"/><path d="M-60 140 Q0 120 60 140 L50 120 Q0 90 -50 120 Z"/>`
               : `<path d="M-72 134 Q-60 80 -18 40 Q10 10 36 -6 Q60 -14 76 0 Q52 8 42 32 Q56 80 74 134 Q0 146 -72 134 Z"/>`}
     </g>`;
   };
 
   // ---------------- meja: alat, kartu, tas, stempel ----------------
-  A.tools = function (active) {
+  A.tools = function (active, showBook, bookOpen) {
     const ring = (x, y, on) => on ? `<circle cx="${x}" cy="${y}" r="44" fill="#fff3b0" opacity="0.55"/>` : '';
-    return `${ring(92, 464, active === 'kaca')}${ring(177, 462, active === 'senter')}${ring(256, 462, active === 'tetua')}
+    return `${ring(92, 464, active === 'kaca')}${ring(177, 462, active === 'senter')}${ring(258, 462, showBook && bookOpen)}
     <g data-act="kaca"><rect x="50" y="420" width="84" height="110" fill="transparent"/><g filter="url(#rough)">
       <circle cx="90" cy="466" r="22" fill="#3a2a22"/><circle cx="90" cy="466" r="16" fill="#cfe6ea"/>
       <path d="M106 482 L126 500" stroke="#6a4228" stroke-width="10" stroke-linecap="round"/></g>
@@ -212,9 +220,23 @@
       <rect x="160" y="440" width="34" height="46" rx="10" fill="#e8b84a"/><rect x="156" y="432" width="42" height="10" fill="#5a3a2a"/></g>
       <ellipse cx="177" cy="464" rx="7" ry="10" fill="${active === 'senter' ? '#fffbe0' : '#fff0b8'}"/>
       <text x="177" y="524" text-anchor="middle" font-size="18" fill="#3a2a22">Senter</text></g>
-    <g data-act="tetua"><rect x="218" y="420" width="84" height="110" fill="transparent"/><g filter="url(#rough)">
-      <path d="M220 486 Q228 462 252 456 L290 436 L292 488 Z" fill="#d8a84a"/><ellipse cx="290" cy="462" rx="8" ry="26" fill="#8a5634"/></g>
-      <text x="256" y="524" text-anchor="middle" font-size="18" fill="#3a2a22">Tetua</text></g>`;
+    ${showBook ? `<g data-act="buku"><rect x="218" y="420" width="84" height="110" fill="transparent"/><g filter="url(#rough)">
+      <rect x="228" y="440" width="60" height="44" rx="5" fill="#a8432e"/><rect x="232" y="444" width="52" height="36" rx="3" fill="#f3e3c3"/></g>
+      <path d="M258 444 v36" stroke="#a8432e" stroke-width="3"/><path d="M238 452 h14 M238 460 h14 M264 452 h14 M264 460 h14" stroke="#b8a07a" stroke-width="2"/>
+      <text x="258" y="524" text-anchor="middle" font-size="18" fill="#3a2a22">Buku</text></g>` : ''}`;
+  };
+
+  // Buku Warga terbuka di dinding kanan (menutupi papan aturan); ketuk untuk menutup
+  A.book = function (list) {
+    const row = (w, i, x) => `<text x="${x}" y="${170 + i * 55}" font-size="23" font-weight="700" fill="#3a2a22">${w.nama}</text>
+      <text x="${x}" y="${192 + i * 55}" font-size="18" fill="#6e4a34">${w.rumah}</text>`;
+    const half = Math.ceil(list.length / 2);
+    return `<g data-act="buku"><g filter="url(#rough)"><rect x="800" y="86" width="372" height="440" rx="10" fill="#7a4a2c"/>
+      <rect x="812" y="96" width="172" height="420" rx="6" fill="#f6ead0"/><rect x="988" y="96" width="172" height="420" rx="6" fill="#f3e3c3"/></g>
+      <rect x="982" y="96" width="8" height="420" fill="#c9b48a"/>
+      <text x="986" y="136" text-anchor="middle" font-size="26" font-weight="700" fill="#a8432e">📖 Buku Warga</text>
+      ${list.slice(0, half).map((w, i) => row(w, i, 830)).join('')}${list.slice(half).map((w, i) => row(w, i, 1006)).join('')}
+      <text x="986" y="508" text-anchor="middle" font-size="15" fill="#8a7a6a">ketuk buku untuk menutup</text></g>`;
   };
 
   function photo(f) {
@@ -222,7 +244,8 @@
       <circle cx="95" cy="684" r="7" fill="#f2c39c"/><circle cx="155" cy="684" r="7" fill="#f2c39c"/>
       <ellipse cx="125" cy="680" rx="30" ry="30" fill="#f2c39c"/>
       <path d="M94 664 Q110 618 130 608 Q144 632 156 664 Z" fill="${TD.TOPI[f.topi]}"/>
-      <path d="M100 696 Q96 736 125 740 Q154 736 150 696 Q125 706 100 696 Z" fill="${TD.JANGGUT[f.janggut]}"/>
+      ${f.pompom ? '<circle cx="131" cy="606" r="6" fill="#f3e3c3"/>' : ''}
+      <path d="${f.panjang ? 'M100 696 Q92 736 125 740 Q158 736 150 696 Q125 706 100 696 Z' : 'M102 696 Q102 720 125 722 Q148 720 148 696 Q125 706 102 696 Z'}" fill="${TD.JANGGUT[f.janggut]}"/>
       <circle cx="114" cy="680" r="3.5" fill="#3a2a22"/><circle cx="136" cy="680" r="3.5" fill="#3a2a22"/>
       ${f.kacamata ? `<g fill="none" stroke="#3a2a22" stroke-width="2.5"><circle cx="114" cy="680" r="8"/><circle cx="136" cy="680" r="8"/><path d="M122 680 h6"/></g>` : ''}`;
   }
@@ -240,7 +263,8 @@
       <g filter="url(#rough)" transform="rotate(-3 220 680)">
         <rect x="50" y="572" width="340" height="210" rx="8" fill="#f3e3c3"/>
         ${photo(g.foto)}
-        ${g.cap ? `<circle cx="330" cy="736" r="30" fill="#e8c46a"/><path d="M330 716 l6 13 l14 1 l-11 9 l4 14 l-13 -8 l-13 8 l4 -14 l-11 -9 l14 -1z" fill="#a8432e"/>`
+        ${g.capPalsu ? `<circle cx="330" cy="736" r="30" fill="#7fb2c8"/><path d="M330 714 L337 729 L352 736 L337 743 L330 758 L323 743 L308 736 L323 729 Z" fill="#3f5f8a"/>`
+          : g.cap ? `<circle cx="330" cy="736" r="30" fill="#e8c46a"/><path d="M330 716 l6 13 l14 1 l-11 9 l4 14 l-13 -8 l-13 8 l4 -14 l-11 -9 l14 -1z" fill="#a8432e"/>`
                 : `<circle cx="330" cy="736" r="30" fill="none" stroke="#b8a07a" stroke-width="3" stroke-dasharray="6 6"/>`}
       </g>
       <g transform="rotate(-3 220 680)" fill="#3a2a22">
@@ -329,7 +353,7 @@
     const rules = TD.rulesFor(S.hari);
     return `<g transform="rotate(-2 1010 210)" fill="#3a2a22">
       <text x="892" y="162" font-size="26" font-weight="700" fill="#a8432e">Aturan Hari Ini</text>
-      ${rules.map((r, i) => `<text x="892" y="${200 + i * 30}" font-size="20">${i + 1}. ${r.teks}</text>`).join('')}</g>
+      ${rules.map((r, i) => { const many = rules.length > 4; return `<text x="892" y="${(many ? 188 : 200) + i * (many ? 24 : 30)}" font-size="${many ? 17 : 20}">${i + 1}. ${TD.ruleText(r, S.hari)}</text>`; }).join('')}</g>
     <g transform="rotate(1.5 1010 410)"><text x="892" y="378" font-size="24" font-weight="700" fill="#f6d58e">Reputasi Penjaga</text>
       ${A.shields(S.rep, 892, 398)}
       <text x="892" y="476" font-size="19" fill="#f3e3c3">🧺 Panen aman: ${S.panen}</text>

@@ -12,7 +12,13 @@
   });
 
   // ---------------- simpan ----------------
-  function load() { try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || null; } catch (e) { return null; } }
+  function load() {
+    let sv = null;
+    try { sv = JSON.parse(localStorage.getItem(SAVE_KEY)) || null; } catch (e) {}
+    // tamat di versi lama (5 hari) → lanjut ke hari berikutnya
+    if (sv && sv.selesai && sv.hari < TD.HARI_TERAKHIR) sv = { hari: sv.hari + 1, rep: sv.rep, panen: sv.panen, lembur: false, mulai: true };
+    return sv;
+  }
   function save(obj) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(obj)); } catch (e) {} }
 
   // ---------------- lapisan gambar ----------------
@@ -43,7 +49,8 @@
   function renderDesk() {
     const g = cur(); if (!g) return;
     const card = A.card(g, { lifted: S.lifted, stamp: S.pressed, hint: !S.checked.kartu && S.hari === 1 && S.idx === 0 && !S.result });
-    deskEl.innerHTML = A.tools(S.hint ? 'tetua' : S.tool) + A.boards(S)
+    const buku = S.tamu.buku;
+    deskEl.innerHTML = A.tools(S.tool, !!buku, S.bookOpen) + A.boards(S) + (buku && S.bookOpen ? A.book(buku) : '')
       + (S.lifted ? '' : card) + A.tray(g, S.bagOpen) + (S.showNext ? '' : A.stamps(S.pressed)) + (S.lifted ? card : '');
   }
   function renderUI() {
@@ -117,13 +124,14 @@
 
   function morningScreen() {
     const rules = TD.rulesFor(S.hari);
-    const baru = S.hari <= 4 ? TD.RULES[S.hari - 1] : null;
-    const info = baru ? A.wrap(baru.baru, 40) : ['Hari terakhir! Troll makin pintar', 'menyamar. Periksa semuanya!'];
+    const baru = TD.RULES.find(r => r.hari === S.hari);
+    const info = A.wrap(baru ? baru.baru : TD.PESAN_PAGI[S.hari] || '', 44);
+    const step = rules.length > 4 ? 34 : 40;
     let y = 250, s = '';
     rules.forEach((r, i) => {
-      s += `<text x="520" y="${y}" font-size="25" fill="#3a2a22">${i + 1}. ${r.teks}</text>`;
+      s += `<text x="520" y="${y}" font-size="${rules.length > 4 ? 23 : 25}" fill="#3a2a22">${i + 1}. ${TD.ruleText(r, S.hari)}</text>`;
       if (r === baru) s += `<g filter="url(#rough)"><rect x="1000" y="${y - 26}" width="80" height="34" rx="14" fill="#c8553d"/></g><text x="1040" y="${y - 2}" text-anchor="middle" font-size="20" font-weight="700" fill="#fbf2de">BARU</text>`;
-      y += 40;
+      y += step;
     });
     y += 10;
     s += info.map((l, i) => `<text x="520" y="${y + i * 32}" font-size="22" fill="#6e4a34">${l}</text>`).join('');
@@ -158,7 +166,7 @@
       + `<text x="800" y="360" text-anchor="middle" font-size="26" fill="#3a2a22">Hari ini terlalu banyak kesalahan.</text>
          <text x="800" y="400" text-anchor="middle" font-size="26" fill="#3a2a22">Tidak apa-apa, ayo coba lagi</text>
          <text x="800" y="440" text-anchor="middle" font-size="26" fill="#3a2a22">dengan lebih teliti!</text>
-         <text x="800" y="500" text-anchor="middle" font-size="21" fill="#7a6a5a">💡 Pakai kaca pembesar &amp; senter, lalu tanya Tetua</text>`
+         <text x="800" y="500" text-anchor="middle" font-size="21" fill="#7a6a5a">💡 Periksa kartu, tas, kaca pembesar &amp; senter dulu</text>`
       + A.button(`🔁 Ulangi Hari ${S.hari}`, 630, 560, 340, '#c8803a', 'ulangi')
       + A.bubble(['Penjaga yang hebat', 'tidak menyerah.', 'Ayo coba lagi!'], 40, 60, 260, 'right'));
     AU.music(false);
@@ -195,7 +203,7 @@
   function newGuest() {
     const g = cur();
     Object.assign(S, { phase: 'inspect', checked: {}, tool: null, lifted: false, bagOpen: false, result: null, pressed: null,
-      repDelta: null, hint: null, showNext: false, anim: 'arrive', lensPos: [410, 300] });
+      repDelta: null, hint: null, showNext: false, anim: 'arrive', lensPos: [410, 300], bookOpen: S.bookOpen && !!S.tamu.buku });
     S.bubble = A.wrap(g.sapa, 20);
     renderAll();
   }
@@ -222,7 +230,7 @@
     const clues = g.clues.map(c => TD.clueText(c, g)).join(' · ');
     if (accept && !g.troll) {
       S.result = 'ok-jujur'; S.stats.masuk++; S.diterima.push(g);
-      S.banner = { title: `Benar! ${g.nama} kurcaci asli`, sub: TD.buktiJujur(S.hari), color: BANNER_HIJAU };
+      S.banner = { title: `Benar! ${g.nama} kurcaci asli`, sub: TD.buktiJujur(S.hari, g), color: BANNER_HIJAU };
       S.bubble = ['Terima kasih,', 'Penjaga! 😊'];
       setTimeout(() => AU.sfx('good'), 250);
     } else if (!accept && g.troll) {
@@ -239,7 +247,7 @@
     } else {
       S.result = 'salah-tuduh'; S.stats.salah++;
       S.rep = Math.max(0, S.rep - 0.5); S.repDelta = '−½';
-      S.banner = { title: `Ups! ${g.nama} kurcaci asli`, sub: TD.buktiJujur(S.hari), color: BANNER_ORANYE };
+      S.banner = { title: `Ups! ${g.nama} kurcaci asli`, sub: TD.buktiJujur(S.hari, g), color: BANNER_ORANYE };
       S.bubble = ['Tapi... aku warga', 'asli desa ini...'];
       setTimeout(() => AU.sfx('sad'), 250);
     }
@@ -258,14 +266,6 @@
     }, 650);
   }
 
-  function tetuaHint() {
-    const rules = TD.rulesFor(S.hari).map(r => r.id), c = S.checked, mark = b => (b ? '✓ ' : '○ ');
-    const lines = ['Sudah diperiksa?', mark(c.kartu) + 'Kartu & foto'];
-    if (rules.includes('bawaan')) lines.push(mark(c.tas) + 'Isi tas');
-    if (rules.includes('fisik')) { lines.push(mark(c.kaca) + 'Telinga (kaca)'); lines.push(mark(c.senter) + 'Bayangan (senter)'); }
-    S.hint = lines;
-  }
-
   // ---------------- input ----------------
   function act(name) {
     if (S.screen !== 'main') {
@@ -282,12 +282,12 @@
     }
     if (name === 'lanjut') { if (S.showNext) { AU.sfx('tap'); next(); } return; }
     if (S.phase !== 'inspect') return;
-    const hadHint = !!S.hint; S.hint = null;
+    S.hint = null;
     if (name === 'kartu') { S.lifted = !S.lifted; S.checked.kartu = true; AU.sfx('card'); }
     else if (name === 'tas') { if (!S.bagOpen) AU.sfx('bag'); S.bagOpen = true; S.checked.tas = true; }
     else if (name === 'kaca') { S.tool = S.tool === 'kaca' ? null : 'kaca'; if (S.tool) { S.checked.kaca = true; S.lensPos = [410, 290]; AU.sfx('lens'); } }
     else if (name === 'senter') { S.tool = S.tool === 'senter' ? null : 'senter'; if (S.tool) { S.checked.senter = true; AU.sfx('light'); } }
-    else if (name === 'tetua') { if (!hadHint) { tetuaHint(); AU.sfx('hint'); } }
+    else if (name === 'buku') { if (!S.tamu.buku) return; S.bookOpen = !S.bookOpen; if (S.bookOpen) { S.checked.buku = true; AU.sfx('card'); } }
     else if (name === 'boleh') return decide(true);
     else if (name === 'tolak') return decide(false);
     S.anim = '';

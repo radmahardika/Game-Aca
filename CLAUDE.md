@@ -135,21 +135,27 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
   lapisan statis (pemandangan, pos jaga, tekstur) dilukis sekali ke kanvas (`A.raster`) supaya iPad ringan. Huruf Andika.
 - Periksa 3 hal: **identitas** (Kartu Warga: foto topi/janggut/kacamata, cap ⭐ Tetua), **barang bawaan** (buka tas,
   cocokkan dengan daftar; troll bawa karung/jaring/palu atau jumlah beda), **fisik** (🔍 kaca pembesar = lensa yang digeser
-  di jendela → telinga hijau runcing; 🔦 senter → bayangan bertanduk). 📯 Tetua = daftar centang hal yang sudah diperiksa.
-  Stempel **BOLEH MASUK** / **TUNGGU DULU!**; belum melihat kartu → Tetua: "Tunggu dulu! Periksa kartunya dulu".
-- 5 hari, aturan bertambah 1 per hari (foto → cap → bawaan → fisik → semua). 6 tamu/hari, troll 2 (hari 5: 3);
-  tamu pertama tiap hari selalu kurcaci jujur. Hasil tiap tamu: pita hijau/merah/oranye + alasan/petunjuk yang terlewat.
+  di jendela → telinga hijau runcing; 🔦 senter → bayangan bertanduk). **Tidak ada bantuan Tetua** (tombol 📯 dihapus di v4
+  atas permintaan pengguna). Stempel **BOLEH MASUK** / **TUNGGU DULU!**; belum melihat kartu → "Tunggu dulu! Periksa kartunya dulu".
+- **10 hari** (v4). Hari 1–5: aturan bertambah (foto → cap → bawaan → fisik → semua). Hari 6: **📖 Buku Warga** (tombol Buku di
+  ambang, buku terbuka menutupi papan dinding kanan; 12 warga) → nama troll mirip (tukar/ganti huruf: BOLRI ≠ BORLI). Hari 7: rumah
+  harus sama dengan buku. Hari 8: penyamaran rapi (foto beda **pompom topi / panjang janggut / kacamata**, tas 3 jenis barang) +
+  **kurcaci jujur berhiasan** (`TD.HIASAN`: syal hijau, bulu di topi → bayangan 1 bulu ≠ 2 tanduk, sarung tangan hijau). Hari 9:
+  **cap palsu** (bintang 4 biru; asli bintang 5 merah). Hari 10: semua, 10 tamu, 1 petunjuk per troll. Tamu/troll per hari di
+  `TD.TAMU_PER_HARI` / `TD.TROLL_PER_HARI`; pesan pagi hari tanpa aturan baru di `TD.PESAN_PAGI`. Tamu pertama tiap hari selalu kurcaci jujur. Hasil tiap tamu: pita hijau/merah/oranye + alasan/petunjuk yang terlewat.
 - **Reputasi** 5 perisai: troll lolos −1 (panen −1 🧺) + **lembur** besok (+2 tamu: 1 troll + 1 kurcaci); kurcaci jujur
   ditolak −½; perisai habis → ulangi hari (perisai jadi maks(awal hari, 3), panen dikembalikan); hari tanpa kesalahan +1.
 - Layar: judul → cerita Tetua (5 halaman) → pagi (aturan BARU) → loket → laporan malam → ... → Pesta Panen.
   Laporan & Pesta Panen = **bentangan buku cerita** (`js/buku.js`, sesuai referensi pengguna): halaman kiri senja desa + kalimat
   cerita di langit (penjaga muda & Tetua), halaman kanan malam + lingkaran cahaya lentera, warga yang diterima hari itu
   berkumpul, panel gelembung pikiran (troll ketahuan, kurcaci masuk, keranjang panen, troll lolos/kesalahan/tanpa salah).
-- Simpanan `localStorage` kunci `tunggu-dulu-v1` (`{hari, rep, panen, lembur, mulai, selesai}`, disimpan di akhir hari).
+- Simpanan `localStorage` kunci `tunggu-dulu-v1` (`{hari, rep, panen, lembur, mulai, selesai}`, disimpan di akhir hari);
+  simpanan yang tamat di versi 5 hari otomatis lanjut ke Hari 6.
   Tes: `TD.debug` (`day(n)`, `guest({...})`, `decide`, `act`, layar-layar), `TD.S` = keadaan.
 
 ## Status & yang sedang dibahas
 
+- Pratinjau `pratinjau-v22`: **Tunggu Dulu! versi 4** = 10 hari + tantangan baru hari 6–10 + bantuan Tetua dihapus (lihat atas).
 - Rilis terakhir di `main`: **versi 21** = **Tunggu Dulu! versi 3** = alat bisa berganti saat kaca pembesar aktif (tombol alat ada di
   ambang jendela, dulu ketukannya dianggap menggeser lensa → sekarang ketukan pada `[data-act]` selalu didahulukan).
 - Versi 20 = **Tunggu Dulu! versi 2** = perbaikan iPad:
