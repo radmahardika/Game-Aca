@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tunggu Dulu">
+<meta name="theme-color" content="#3a2a22">
+<title>Tunggu Dulu!</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap">
+<link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+<svg id="defs" width="0" height="0" aria-hidden="true"></svg>
+<div id="stage">
+  <canvas id="bg"></canvas>
+  <svg id="scene" class="layer" viewBox="0 0 1180 820"></svg>
+  <canvas id="fg"></canvas>
+  <svg id="desk" class="layer" viewBox="0 0 1180 820"></svg>
+  <canvas id="tex"></canvas>
+  <svg id="ui" class="layer" viewBox="0 0 1180 820"></svg>
+  <div id="lens" hidden><div id="lensInner"><canvas id="lensBg"></canvas><div id="lensScene"></div></div></div>
+  <div id="screen" hidden></div>
+  <div id="topBtns"><button id="homeBtn" type="button" aria-label="Judul">🏠</button><button id="soundBtn" type="button" aria-label="Suara">🔊</button></div>
+  <div id="loading">Memuat…</div>
+</div>
+<div id="rotate">Putar iPad ke posisi mendatar 🔄</div>
+<script src="js/data.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/art.js?v=1"></script>
+<script src="js/main.js?v=1"></script>
+</body>
+</html>

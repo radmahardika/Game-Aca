@@ -122,7 +122,32 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/angkasa-mart/), ver
   diusir, tidak = 1–2 barang gudang dicuri (uang tidak pernah dicuri).
 - Simpanan `localStorage` kunci `angkasa-mart-v1`. Tes: `AM.debug` (S, V, go, act, newDay; `V.forceChange` = paksa kembalian).
 
+## Game keempat: Tunggu Dulu! (`tunggu-dulu/`)
+
+Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), versi sendiri (`TD.VERSION` di
+`tunggu-dulu/js/data.js` + `?v=N` di `tunggu-dulu/index.html`). Tujuan: **ketelitian & tanggung jawab** (mekanik ala Papers Please).
+
+- Pemain = **kurcaci penjaga muda** di gerbang Desa Kurcaci; troll jahat menyamar jadi kurcaci untuk mencuri permata.
+  **Sudut pandang orang pertama** dari dalam pos jaga (jendela loket, meja, tangan penjaga).
+- Gaya visual **ilustrasi buku cerita anak** (guas + pensil warna, tanpa garis tinta, palet hangat peach/hijau zaitun/terakota,
+  lentera berpendar, wajah mata titik & pipi merona). Semua gambar SVG di `js/art.js` (filter `rough` + tekstur kertas);
+  lapisan statis (pemandangan, pos jaga, tekstur) dilukis sekali ke kanvas (`A.raster`) supaya iPad ringan. Huruf Andika.
+- Periksa 3 hal: **identitas** (Kartu Warga: foto topi/janggut/kacamata, cap ⭐ Tetua), **barang bawaan** (buka tas,
+  cocokkan dengan daftar; troll bawa karung/jaring/palu atau jumlah beda), **fisik** (🔍 kaca pembesar = lensa yang digeser
+  di jendela → telinga hijau runcing; 🔦 senter → bayangan bertanduk). 📯 Tetua = daftar centang hal yang sudah diperiksa.
+  Stempel **BOLEH MASUK** / **TUNGGU DULU!**; belum melihat kartu → Tetua: "Tunggu dulu! Periksa kartunya dulu".
+- 5 hari, aturan bertambah 1 per hari (foto → cap → bawaan → fisik → semua). 6 tamu/hari, troll 2 (hari 5: 3);
+  tamu pertama tiap hari selalu kurcaci jujur. Hasil tiap tamu: pita hijau/merah/oranye + alasan/petunjuk yang terlewat.
+- **Reputasi** 5 perisai: troll lolos −1 (permata −1) + **lembur** besok (+2 tamu: 1 troll + 1 kurcaci); kurcaci jujur
+  ditolak −½; perisai habis → ulangi hari (perisai jadi maks(awal hari, 3), permata dikembalikan); hari tanpa kesalahan +1.
+- Layar: judul → cerita Tetua (5 halaman) → pagi (aturan BARU) → loket → laporan malam → ... → Pesta Permata.
+- Simpanan `localStorage` kunci `tunggu-dulu-v1` (`{hari, rep, permata, lembur, mulai, selesai}`, disimpan di akhir hari).
+  Tes: `TD.debug` (`day(n)`, `guest({...})`, `decide`, `act`, layar-layar), `TD.S` = keadaan.
+
 ## Status & yang sedang dibahas
+
+- Pratinjau **versi 20** di branch `pratinjau-v20`: **Tunggu Dulu! versi 1** (game keempat, lihat atas). Belum digabung
+  (branch `pratinjau-v19` dipakai Angkasa Mart versi 3).
 
 - Rilis terakhir di `main`: **versi 18** = **Angkasa Mart versi 2** (lihat bagian v2 di atas). Laporan pengguna v1: lancar,
   anak suka, sudah menyisihkan untuk Berbagi & menabung.

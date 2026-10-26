@@ -1,0 +1,46 @@
+/* Tunggu Dulu! — panggung 1180×820 yang diperkecil/diperbesar agar pas layar */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: #2a1d16; overflow: hidden; overscroll-behavior: none; font-family: 'Andika', 'Trebuchet MS', sans-serif; }
+#defs { position: absolute; }
+#stage { position: fixed; left: 50%; top: 50%; width: 1180px; height: 820px; transform-origin: 50% 50%; overflow: hidden;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; background: #3a2a22; }
+#stage canvas, .layer, #screen { position: absolute; left: 0; top: 0; width: 1180px; height: 820px; display: block; }
+.layer, #screen svg { overflow: hidden; }
+svg text { font-family: 'Andika', 'Trebuchet MS', sans-serif; }
+#tex { mix-blend-mode: multiply; opacity: 0.55; pointer-events: none; }
+#bg, #fg, #scene { pointer-events: none; }
+[data-act] { cursor: pointer; }
+#screen svg { width: 1180px; height: 820px; display: block; }
+
+/* tamu datang & pergi */
+.guest { transform-box: view-box; transform-origin: 410px 420px; }
+.guest.arrive { animation: arrive 0.9s cubic-bezier(.2, .8, .3, 1); }
+.guest.leave-right { animation: leaveRight 0.65s ease-in forwards; }
+.guest.leave-left { animation: leaveLeft 0.55s ease-in forwards; }
+.guest.leave-back { animation: leaveBack 0.65s ease-in forwards; }
+.guest.fade { animation: fadeOut 0.5s ease-in forwards; }
+@keyframes arrive { from { transform: translate(-10px, -10px) scale(0.3); opacity: 0; } 40% { opacity: 1; } to { transform: none; } }
+@keyframes leaveRight { to { transform: translate(520px, 20px); opacity: 0; } }
+@keyframes leaveLeft { to { transform: translate(-560px, 30px) rotate(-8deg); opacity: 0; } }
+@keyframes leaveBack { to { transform: translate(-10px, -20px) scale(0.3); opacity: 0; } }
+@keyframes fadeOut { to { opacity: 0; } }
+.hop { transform-box: fill-box; transform-origin: 50% 100%; animation: hop 0.6s ease-in-out infinite alternate; }
+@keyframes hop { to { transform: translateY(-22px); } }
+
+/* kaca pembesar */
+#lens { position: absolute; width: 260px; height: 260px; border-radius: 50%; overflow: hidden; pointer-events: none;
+  border: 10px solid #3a2a22; box-shadow: 0 0 0 4px #8a5634, 0 10px 24px rgba(0, 0, 0, 0.35); background: #fbe0b8; }
+#lens::after { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 10px 12px 24px rgba(255, 255, 255, 0.35); }
+#lensInner { position: absolute; left: 0; top: 0; width: 1180px; height: 820px; transform-origin: 0 0; }
+#lensBg, #lensScene, #lensScene svg { position: absolute; left: 0; top: 0; width: 1180px; height: 820px; }
+
+#screen { z-index: 5; }
+#topBtns { position: absolute; right: 14px; top: 8px; z-index: 6; display: flex; gap: 10px; }
+#topBtns button { width: 54px; height: 50px; font-size: 26px; border: 0; border-radius: 14px; background: rgba(90, 58, 42, 0.85); color: #fff; padding: 0; }
+#loading { position: absolute; inset: 0; z-index: 9; display: flex; align-items: center; justify-content: center; color: #f3e3c3; font-size: 36px; background: #3a2a22; }
+
+#rotate { display: none; }
+@media (orientation: portrait) {
+  #rotate { display: flex; position: fixed; inset: 0; z-index: 50; background: #3a2a22; color: #f3e3c3; font-size: 28px; align-items: center; justify-content: center; text-align: center; padding: 30px; font-family: 'Andika', sans-serif; }
+}
