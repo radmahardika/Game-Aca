@@ -325,11 +325,28 @@
   $('homeBtn').addEventListener('pointerdown', e => { e.stopPropagation(); AU.sfx('tap'); titleScreen(); });
   $('soundBtn').textContent = AU.on ? '🔊' : '🔈';
 
+  // Ukur area yang benar-benar terlihat (visualViewport) dikurangi area aman (bilah status/jam di mode Layar Utama),
+  // lalu skala panggung agar seluruhnya muat. Diukur ulang beberapa kali setelah iPad diputar karena ukurannya telat berubah.
+  const safe = document.createElement('div');
+  safe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+  document.body.appendChild(safe);
   function fit() {
-    scale = Math.min(window.innerWidth / A.W, window.innerHeight / A.H);
-    stage.style.transform = `translate(-50%,-50%) scale(${scale})`;
+    const vv = window.visualViewport;
+    const vw = Math.min(vv ? vv.width : innerWidth, document.documentElement.clientWidth || innerWidth);
+    const vh = Math.min(vv ? vv.height : innerHeight, document.documentElement.clientHeight || innerHeight);
+    const cs = getComputedStyle(safe), px = k => parseFloat(cs[k]) || 0;
+    const l = px('paddingLeft'), r = px('paddingRight'), t = px('paddingTop'), b = px('paddingBottom');
+    const aw = Math.max(1, vw - l - r), ah = Math.max(1, vh - t - b);
+    scale = Math.min(aw / A.W, ah / A.H);
+    stage.style.left = (l + (aw - A.W * scale) / 2) + 'px';
+    stage.style.top = (t + (ah - A.H * scale) / 2) + 'px';
+    stage.style.transform = `scale(${scale})`;
   }
-  window.addEventListener('resize', fit); fit();
+  const refit = () => { fit(); for (const ms of [100, 300, 700]) setTimeout(fit, ms); };
+  window.addEventListener('resize', refit);
+  window.addEventListener('orientationchange', refit);
+  if (window.visualViewport) visualViewport.addEventListener('resize', fit);
+  fit();
 
   // ---------------- mulai: lukis lapisan statis sekali ----------------
   async function boot() {

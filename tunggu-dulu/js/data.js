@@ -1,5 +1,5 @@
 // Tunggu Dulu! — data tamu, aturan per hari, dan pembuat antrean tamu.
-window.TD = { VERSION: 1 };
+window.TD = { VERSION: 2 };
 (function () {
   const TD = window.TD;
   TD.HARI_TERAKHIR = 5;

@@ -1,15 +1,16 @@
 /* Tunggu Dulu! — panggung 1180×820 yang diperkecil/diperbesar agar pas layar */
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html, body { margin: 0; height: 100%; background: #2a1d16; overflow: hidden; overscroll-behavior: none; font-family: 'Andika', 'Trebuchet MS', sans-serif; }
+html, body { margin: 0; width: 100%; height: 100%; background: #2a1d16; overflow: hidden; overscroll-behavior: none; font-family: 'Andika', 'Trebuchet MS', sans-serif; }
 #defs { position: absolute; }
-#stage { position: fixed; left: 50%; top: 50%; width: 1180px; height: 820px; transform-origin: 50% 50%; overflow: hidden;
+#stage { position: fixed; left: 0; top: 0; width: 1180px; height: 820px; transform-origin: 0 0; overflow: hidden;
   touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; background: #3a2a22; }
 #stage canvas, .layer, #screen { position: absolute; left: 0; top: 0; width: 1180px; height: 820px; display: block; }
 .layer, #screen svg { overflow: hidden; }
 svg text { font-family: 'Andika', 'Trebuchet MS', sans-serif; }
 #tex { mix-blend-mode: multiply; opacity: 0.55; pointer-events: none; }
-#bg, #fg, #scene { pointer-events: none; }
+#bg, #fg, #scene, #ui { pointer-events: none; }
+#ui [data-act] { pointer-events: auto; }
 [data-act] { cursor: pointer; }
 #screen svg { width: 1180px; height: 820px; display: block; }
 
