@@ -76,7 +76,7 @@
     screenEl.innerHTML = svgOpen + markup + '</svg>';
     screenEl.hidden = false;
     lens.hidden = true;
-    $('homeBtn').hidden = name === 'judul';
+    $('homeBtn').hidden = name === 'judul' || name === 'laporan' || name === 'pesta';
   }
   function hideScreen() { screenEl.hidden = true; screenEl.innerHTML = ''; S.screen = 'main'; $('homeBtn').hidden = false; }
 
@@ -141,28 +141,11 @@
 
   function reportScreen() {
     const st = S.stats, perfect = !st.lolos && !st.salah;
-    const mood = perfect ? 'happy' : 'stern';
-    const say = perfect ? ['Kerja hebat,', 'Penjaga! Desa', 'kita aman. 💛']
-      : st.lolos ? ['Troll sempat masuk.', 'Besok kita jaga', 'lebih teliti, ya!'] : ['Ingat, jangan', 'menuduh kurcaci', 'yang jujur, ya.'];
-    let box = '';
-    if (perfect) box = `<g filter="url(#rough)"><rect x="510" y="550" width="580" height="80" rx="10" fill="#cfe0b0"/></g>
-      <text x="530" y="584" font-size="26" font-weight="700" fill="#4f8a3a">⭐ Hari Sempurna!</text>
-      <text x="530" y="616" font-size="21" fill="#3a2a22">${S.repGain ? 'Tidak ada kesalahan, 1 perisai kembali' : 'Tidak ada kesalahan sama sekali'}</text>`;
-    else if (st.lolos && S.hari < TD.HARI_TERAKHIR) box = `<g filter="url(#rough)"><rect x="510" y="550" width="580" height="80" rx="10" fill="#e8c4a8"/></g>
-      <text x="530" y="584" font-size="26" font-weight="700" fill="#a8432e">⏰ Besok LEMBUR: +${TD.LEMBUR} tamu</text>
-      <text x="530" y="616" font-size="21" fill="#3a2a22">karena ada troll yang lolos hari ini</text>`;
-    const last = S.hari >= TD.HARI_TERAKHIR;
-    showScreen('laporan', A.nightBg(false) + A.elder(mood, 250, 420, 0.95)
-      + A.paper(470, 60, 660, 700)
-      + `<text x="800" y="140" text-anchor="middle" font-size="40" font-weight="700" fill="#a8432e">Laporan Hari ${S.hari}</text>`
-      + A.rows([['👥', 'Tamu diperiksa', S.tamu.length], ['😊', 'Kurcaci masuk', st.masuk], ['🧌', 'Troll ketahuan', st.ketahuan, '#4f8a3a'],
-        ['🏃', 'Troll lolos', st.lolos, st.lolos ? '#b8382a' : '#4f8a3a'], ['😢', 'Kurcaci salah ditolak', st.salah, st.salah ? '#b8382a' : '#4f8a3a'],
-        ['💎', 'Permata aman', S.permata + ' / ' + TD.PERMATA_AWAL]], 520, 200)
-      + `<text x="520" y="500" font-size="26" fill="#3a2a22">🛡️ Reputasi</text>` + A.shields(S.rep, 700, 474, 56)
-      + (S.repGain ? `<text x="1088" y="500" text-anchor="end" font-size="26" font-weight="700" fill="#4f8a3a">+1</text>` : '')
-      + box
-      + A.button(last ? 'Pesta Permata ▶' : `Lanjut ke Hari ${S.hari + 1} ▶`, 620, 660, 360, '#6f9445', last ? 'pesta' : 'hariBerikut')
-      + A.bubble(say, 40, 60, 260, 'right'));
+    const say = perfect ? ['Kerja hebat, Penjaga!', 'Desa kita aman. 💛']
+      : st.lolos ? ['Troll sempat masuk.', 'Besok jaga lebih teliti, ya!'] : ['Ingat, jangan menuduh', 'kurcaci yang jujur, ya.'];
+    showScreen('laporan', A.reportSpread({ hari: S.hari, st, permata: S.permata, rep: S.rep, repGain: S.repGain, perfect,
+      lembur: st.lolos && S.hari < TD.HARI_TERAKHIR, mood: perfect ? 'happy' : 'stern', say, diterima: S.diterima,
+      last: S.hari >= TD.HARI_TERAKHIR }));
     AU.music(false);
     AU.sfx(perfect ? 'good' : 'sad');
   }
@@ -183,20 +166,7 @@
   }
 
   function partyScreen() {
-    let dwarves = '';
-    const cols = [['#4f7aa8', '#f3e6cc', '#a8432e'], ['#d9a441', '#8a5a3a', '#5f948c'], ['#c8553d', '#d98a4a', '#5a6aa0'], ['#7a5aa8', '#f3e6cc', '#6a7a3a'], ['#e0874a', '#8a5a3a', '#8a5a7a']];
-    [[120, 660], [250, 700], [940, 690], [1060, 650], [1150, 720]].forEach(([x, y], i) => { dwarves += `<g class="hop" style="animation-delay:${i * 0.15}s">${A.miniDwarf(x, y, 1.1, ...cols[i])}</g>`; });
-    let gems = '';
-    for (let i = 0; i < S.permata; i++) gems += A.gem(472 + (i % 6) * 64, 400 + Math.floor(i / 6) * 50, 1.4, ['#5ad0ff', '#ff7ab8', '#ffd84a', '#8ae07a'][i % 4]);
-    showScreen('pesta', A.nightBg(true)
-      + `<path d="M0 130 Q590 240 1180 130" fill="none" stroke="#5a3a2a" stroke-width="3"/>`
-      + [120, 300, 480, 700, 880, 1060].map((x, i) => A.lantern(x, 150 + Math.sin(i) * 18 + 30)).join('')
-      + dwarves + A.elder('happy', 640, 610, 0.55)
-      + A.paper(400, 200, 480, 300)
-      + `<text x="640" y="276" text-anchor="middle" font-size="50" font-weight="700" fill="#a8432e">Pesta Permata!</text>
-         <text x="640" y="320" text-anchor="middle" font-size="26" fill="#3a2a22">Kamu Penjaga Hebat! 💛</text>
-         <text x="640" y="356" text-anchor="middle" font-size="22" fill="#6e4a34">Permata aman: ${S.permata} / ${TD.PERMATA_AWAL}</text>` + gems
-      + A.button('🔁 Main Lagi', 300, 60, 260, '#6f9445', 'baru', 64) + A.button('🏠 Judul', 720, 60, 220, '#8a7a6a', 'judul', 64));
+    showScreen('pesta', A.partySpread({ permata: S.permata, rep: S.rep }));
     AU.sfx('party');
   }
 
@@ -215,6 +185,7 @@
     S.tamu = TD.makeDay(S.hari, S.lembur);
     S.idx = 0;
     S.stats = { masuk: 0, ketahuan: 0, lolos: 0, salah: 0 };
+    S.diterima = [];
     S.dayStart = { rep: S.rep, permata: S.permata };
     S.lemburBesok = false; S.repGain = 0;
     hideScreen();
@@ -250,7 +221,7 @@
     AU.sfx('stamp');
     const clues = g.clues.map(c => TD.clueText(c, g)).join(' · ');
     if (accept && !g.troll) {
-      S.result = 'ok-jujur'; S.stats.masuk++;
+      S.result = 'ok-jujur'; S.stats.masuk++; S.diterima.push(g);
       S.banner = { title: `Benar! ${g.nama} kurcaci asli`, sub: TD.buktiJujur(S.hari), color: BANNER_HIJAU };
       S.bubble = ['Terima kasih,', 'Penjaga! 😊'];
       setTimeout(() => AU.sfx('good'), 250);

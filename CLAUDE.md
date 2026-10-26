@@ -141,6 +141,9 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
 - **Reputasi** 5 perisai: troll lolos −1 (permata −1) + **lembur** besok (+2 tamu: 1 troll + 1 kurcaci); kurcaci jujur
   ditolak −½; perisai habis → ulangi hari (perisai jadi maks(awal hari, 3), permata dikembalikan); hari tanpa kesalahan +1.
 - Layar: judul → cerita Tetua (5 halaman) → pagi (aturan BARU) → loket → laporan malam → ... → Pesta Permata.
+  Laporan & Pesta = **bentangan buku cerita** (`js/buku.js`, sesuai referensi pengguna): halaman kiri senja desa + kalimat
+  cerita di langit (penjaga muda & Tetua), halaman kanan malam + lingkaran cahaya lentera, warga yang diterima hari itu
+  berkumpul, panel gelembung pikiran (troll ketahuan, kurcaci masuk, permata, troll lolos/kesalahan/tanpa salah).
 - Simpanan `localStorage` kunci `tunggu-dulu-v1` (`{hari, rep, permata, lembur, mulai, selesai}`, disimpan di akhir hari).
   Tes: `TD.debug` (`day(n)`, `guest({...})`, `decide`, `act`, layar-layar), `TD.S` = keadaan.
 
