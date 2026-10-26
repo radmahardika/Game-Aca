@@ -150,10 +150,9 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
 
 ## Status & yang sedang dibahas
 
-- Pratinjau **versi 20** di branch `pratinjau-v20`: **Tunggu Dulu! versi 1** (game keempat, lihat atas). Belum digabung
-  (branch `pratinjau-v19` dipakai Angkasa Mart versi 3).
-
-- Rilis terakhir di `main`: **versi 18** = **Angkasa Mart versi 2** (lihat bagian v2 di atas). Laporan pengguna v1: lancar,
+- Rilis terakhir di `main`: **versi 19** = **Tunggu Dulu! versi 1** (game keempat, `tunggu-dulu/`, lihat atas; dikerjakan
+  di branch `pratinjau-v20` karena `pratinjau-v19` dipakai Angkasa Mart versi 3 yang belum digabung → rilisnya nanti versi 20).
+- Versi 18 = **Angkasa Mart versi 2** (lihat bagian v2 di atas). Laporan pengguna v1: lancar,
   anak suka, sudah menyisihkan untuk Berbagi & menabung.
 - Versi 17 = rilis **Angkasa Mart versi 1** (`angkasa-mart/`, termasuk Tabung untuk
   memperbesar toko & ucapan naik tingkat). Game Aksa & Penjaga Rimba tidak berubah.
