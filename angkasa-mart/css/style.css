@@ -214,3 +214,41 @@ h3 { font-size: 26px; }
 .night { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .night .big { font-size: 30px; display: flex; align-items: center; gap: 10px; } .night .small { font-size: 19px; color: #6e4a34; }
 .night .pb { width: 360px; height: 60px; font-size: 26px; }
+
+/* v3: Kelola Toko, buku kas rinci, bencana, berbagi */
+.mcard.kelola { width: 1000px; gap: 10px; padding: 20px 26px; }
+.mtabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; } .mtabs .pb { font-size: 20px; height: 50px; min-width: 160px; }
+.paysrc { display: flex; gap: 10px; justify-content: center; align-items: center; font-size: 20px; } .paysrc .pb { height: 46px; font-size: 20px; min-width: 180px; }
+.dt { display: inline-block; background: #fff1c0; border: 3px solid var(--dark); padding: 2px 8px; font-size: 17px; }
+.dtbar { font-size: 22px; } .dtbar small { font-size: 16px; color: #6e4a34; }
+.upg5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.uc.sm { padding: 8px; gap: 4px; font-size: 17px; } .uc.sm .ico { font-size: 34px; } .uc.sm .hn { min-height: 44px; display: flex; align-items: center; }
+.uc.sm .pb { height: 46px; font-size: 20px; }
+.uc.prem { background: #fff1c0; } .uc.dim { opacity: .55; }
+.peg { display: flex; gap: 18px; align-items: center; text-align: left; } .peg .pp2 { background: var(--hi); border: 3px solid var(--dark); padding: 14px; flex: 1; font-size: 21px; line-height: 1.45; }
+.peg .nm { font-size: 28px; } .bigico { font-size: 96px; } .status-ok { font-size: 22px; color: #2a6a4a; align-self: center; }
+.cab { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; } .cab .uc { gap: 6px; } .cab small { font-size: 16px; color: #6e4a34; }
+.bar.cb { width: 100%; height: 32px; margin: 4px 0; } .bar.cb span { font-size: 19px; }
+.mrow.sm { margin: 0; gap: 8px; } .mrow.sm .pb { min-width: 0; height: 52px; font-size: 20px; flex: 1; }
+.rusak { background: #fde4dc; border: 3px solid var(--dark); padding: 10px 14px; font-size: 21px; color: #86282a; display: flex; align-items: center; gap: 14px; justify-content: center; }
+.rusak .pb { height: 52px; font-size: 22px; }
+.kasx { position: absolute; left: 24px; top: 50px; right: 160px; font-size: 19px; line-height: 1.45; }
+.kasx p { display: block; } .kasx b { color: #2a6a4a; }
+.grow .kel { position: absolute; left: 14px; right: 14px; bottom: 14px; height: 54px; font-size: 22px; }
+.cards.six { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.card.c6 { flex-direction: column; justify-content: flex-start; gap: 2px; padding: 6px 2px 16px; height: 90px; }
+.card.c6 .ci { height: 42px; display: flex; align-items: center; } .card.c6 .cp { font-size: 22px; } .card.c6 .cn { font-size: 12px; }
+.card.prem { background: #fff1c0; }
+.uc.pick { cursor: pointer; color: var(--ink); font: inherit; } .uc.pick.on { border-color: var(--gold); box-shadow: inset 0 0 0 4px var(--gold); background: #fff1c0; }
+.uc.pick small { font-size: 17px; color: #6e4a34; }
+.price.sdk { justify-content: center; gap: 20px; } .price.sdk span { font-size: 60px; }
+.pp.cap { left: 50%; transform: translateX(-50%); top: 618px; width: 760px; text-align: center; font-size: 28px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pp.cap span { font-size: 21px; color: #6e4a34; } .pp.cap .pb { width: 300px; height: 56px; font-size: 24px; }
+.stk .emo { font-size: 46px; }
+.night .mid2 { font-size: 22px; } .night .pb.grey { width: 300px; height: 52px; font-size: 22px; }
+.sisa .tbg small { font-size: 17px; }
+.card.c6 { padding: 4px 2px; } .card.c6 .cn { position: static; font-size: 11px; line-height: 1.05; }
+.mrow.sm .pb { font-size: 18px; white-space: nowrap; padding: 4px 6px 8px; }
+.grow .steps { margin: 6px 0; } .grow .stp i { width: 48px; height: 48px; font-size: 24px; }
+.grow .bar { margin-top: 6px; } .grow .small { margin-top: 2px; font-size: 18px; }
+.card.c6 .ci .pxi { max-height: 38px; width: auto !important; }
