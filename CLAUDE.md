@@ -120,6 +120,17 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/angkasa-mart/), ver
   mulai tahap Toko ±30% hari ada peringatan di Kabar (`today.warn`) → saat tutup toko (jika gudang berisi) tawaran sewa
   **Kurcaci Penjaga** 3 ★ dari kas (`AM.SEWA_PENJAGA`, dicatat sebagai biaya di Buku Kas) → layar Malam: dijaga = pencuri
   diusir, tidak = 1–2 barang gudang dicuri (uang tidak pernah dicuri).
+- **v3 (uang anak menumpuk: hari 34, kas 80):** tombol **🏪 Kelola Toko** (Pesan & Tutup toko) dengan tab Perbesar /
+  Hiasan / Pegawai / Asuransi / Cabang, bayar dari **Tabung atau Kas** (`V.pay`). Hiasan punya daya tarik (`dt`): tiap 2 ⭐ =
+  +1 pembeli/hari, maks +4; hiasan baru neon 8, patung Rotni 12, air mancur 15, panggung musik 20 ★. **Kiki si Kasir Cilik**
+  (`S.pegawai`, gaji 3 ★/hari) menjual 2 barang gudang saat tutup toko. **Asuransi** 1 ★/hari. **Bencana** (meteor/debu/gempa,
+  mulai tahap Toko, jeda ≥6 hari, ±15%, diramalkan di Kabar) → malam: atap bocor (`S.rusak`: pembeli −2, gudang −2) → renovasi
+  12 ★ dari Kas/Tabung atau nanti; diasuransikan = tukang kurcaci gratis. **Cabang** Tundra/Fores/Peri 60/80/100 ★ dicicil
+  (`S.cabangSaved`, `S.cabang`), +3 ★/hari. **Sewa tempat** 1–2 ★/hari. **Barang premium** (mulai Mart): teleskop 7,
+  sepeda roket 9, mahkota bunga 6; harga jual s.d. 15, jarang dicari, kadang tren di Kabar. Semua biaya & pemasukan dihitung
+  sekali di `settle()` saat tutup toko dan tampil rinci di Buku Kas. **Berbagi tiap 20 hari** (`today.sedekah`): Panti Asuhan
+  atau Jumat Berkah, jumlah –/+ dari Kas, adegan pendek (`art.sedekahScene`), stiker 🏠/🕌 di Buku Kebaikan (disebut
+  "berbagi/sedekah", bukan zakat).
 - Simpanan `localStorage` kunci `angkasa-mart-v1`. Tes: `AM.debug` (S, V, go, act, newDay; `V.forceChange` = paksa kembalian).
 
 ## Game keempat: Tunggu Dulu! (`tunggu-dulu/`)
@@ -155,7 +166,9 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 22** = **Tunggu Dulu! versi 4** = 10 hari + tantangan baru hari 6–10 + bantuan Tetua dihapus (lihat atas).
+- Rilis terakhir di `main`: **versi 23** = **Angkasa Mart versi 3** (fitur keuangan v3 di atas: Kelola Toko, pegawai,
+  asuransi, bencana, cabang, barang premium, berbagi tiap 20 hari). Game lain tidak berubah.
+- Versi 22 = **Tunggu Dulu! versi 4** = 10 hari + tantangan baru hari 6–10 + bantuan Tetua dihapus (lihat atas).
 - Versi 21 = **Tunggu Dulu! versi 3** = alat bisa berganti saat kaca pembesar aktif (tombol alat ada di
   ambang jendela, dulu ketukannya dianggap menggeser lensa → sekarang ketukan pada `[data-act]` selalu didahulukan).
 - Versi 20 = **Tunggu Dulu! versi 2** = perbaikan iPad:
@@ -163,8 +176,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
   diukur ulang setelah iPad diputar; (2) **ketukan di meja tidak sampai** karena `svg#ui` menutupi layar →
   `#ui { pointer-events: none }`, hanya `[data-act]` yang bisa diketuk. Tes wajib pakai ketukan sungguhan
   (`page.touchscreen.tap` / `elementFromPoint`), bukan `dispatchEvent` langsung ke tombol.
-- Versi 19 = **Tunggu Dulu! versi 1** (game keempat, `tunggu-dulu/`, lihat atas). Branch `pratinjau-v19` berisi Angkasa Mart
-  versi 3 (sesi lain, belum digabung) → kalau dirilis, nomornya versi berikutnya setelah 22.
+- Versi 19 = **Tunggu Dulu! versi 1** (game keempat, `tunggu-dulu/`, lihat atas). Branch `pratinjau-v19` berisi visual Angkasa Mart
+  ala Sons of Valhalla yang **ditolak pengguna** (jangan dipakai); fitur keuangan Angkasa Mart v3 dirilis di versi 23.
 - Versi 18 = **Angkasa Mart versi 2** (lihat bagian v2 di atas). Laporan pengguna v1: lancar,
   anak suka, sudah menyisihkan untuk Berbagi & menabung.
 - Versi 17 = rilis **Angkasa Mart versi 1** (`angkasa-mart/`, termasuk Tabung untuk
