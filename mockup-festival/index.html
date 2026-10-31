@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Festival Telaga Biru</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1180px; height: 820px; overflow: hidden; font-family: 'Fredoka', 'Trebuchet MS', sans-serif; background: #4fb3c4; color: #3b2e22; }
+  #c { position: absolute; left: 0; top: 0; width: 1180px; height: 820px; }
+  #ui { position: absolute; inset: 0; pointer-events: none; }
+  .card { position: absolute; background: #fff8ea; border-radius: 18px; box-shadow: 0 4px 0 #d9c49c, 0 8px 18px rgba(20,60,70,.25); padding: 10px 16px; }
+  .pill { position: absolute; background: #fff8ea; border-radius: 999px; box-shadow: 0 3px 0 #d9c49c, 0 6px 14px rgba(20,60,70,.2); padding: 6px 16px; font-weight: 600; font-size: 22px; display: flex; gap: 8px; align-items: center; }
+  .lv { left: 18px; top: 16px; }
+  .lv small { display: block; font-size: 14px; color: #8a7458; font-weight: 500; }
+  .lv b { font-size: 22px; }
+  .bar { width: 120px; height: 14px; background: #eadbbd; border-radius: 99px; overflow: hidden; display: inline-block; vertical-align: middle; }
+  .bar i { display: block; height: 100%; background: linear-gradient(#7fd36b,#4fb04a); border-radius: 99px; }
+  .bar.gold i { background: linear-gradient(#ffd75e,#f2a926); }
+  .ok { color: #3a9a3a; }
+  .bubble { position: absolute; background: #fff; border-radius: 14px; padding: 6px 10px; font-weight: 600; font-size: 17px; box-shadow: 0 3px 8px rgba(0,0,0,.2); transform: translate(-50%, -100%); white-space: nowrap; }
+  .bubble:after { content: ''; position: absolute; left: 50%; bottom: -8px; margin-left: -8px; border: 8px solid transparent; border-bottom: 0; border-top-color: #fff; }
+  .bubble.warn { background: #ffe1d6; border: 3px solid #ff7a50; animation: none; }
+  .bubble.warn:after { border-top-color: #ff7a50; }
+  .tray { position: absolute; left: 640px; bottom: 14px; transform: translateX(-50%); display: flex; gap: 10px; align-items: flex-end; }
+  .tabs { position: absolute; left: 640px; bottom: 148px; transform: translateX(-50%); display: flex; gap: 6px; }
+  .tab { white-space: nowrap; background: #f1e3c4; border-radius: 12px 12px 0 0; padding: 6px 14px; font-weight: 600; font-size: 16px; color: #8a7458; }
+  .tab.on { background: #fff8ea; color: #3b2e22; }
+  .item { width: 104px; background: #fff8ea; border-radius: 16px; box-shadow: 0 4px 0 #d9c49c, 0 6px 12px rgba(20,60,70,.2); text-align: center; padding: 8px 4px 6px; }
+  .item .e { font-size: 42px; line-height: 50px; }
+  .item .n { font-size: 15px; font-weight: 600; line-height: 1.1; height: 34px; display: flex; align-items: center; justify-content: center; }
+  .item .p { font-size: 17px; font-weight: 700; color: #b9771b; }
+  .item.sel { outline: 4px solid #4fb04a; transform: translateY(-8px); }
+  .hearts { font-size: 12px; letter-spacing: -2px; }
+  .go { position: absolute; right: 18px; bottom: 18px; background: linear-gradient(#7fd36b,#3f9e3c); color: #fff; font-weight: 700; font-size: 26px; padding: 14px 24px; border-radius: 20px; box-shadow: 0 5px 0 #2e7a2c, 0 8px 16px rgba(0,0,0,.25); }
+  .kiko { position: absolute; left: 14px; bottom: 16px; display: flex; align-items: flex-end; gap: 6px; }
+  .kiko canvas { width: 96px; height: 96px; }
+  .kiko .say { background: #fff; border-radius: 16px; padding: 10px 14px; font-size: 17px; font-weight: 500; max-width: 200px; box-shadow: 0 4px 10px rgba(0,0,0,.2); margin-bottom: 40px; position: relative; }
+  .wish { right: 18px; top: 84px; width: 250px; }
+  .wish h4 { font-size: 17px; margin-bottom: 4px; }
+  .wish div { font-size: 19px; display: flex; justify-content: space-between; align-items: center; padding: 2px 0; }
+  .dim { position: absolute; inset: 0; background: rgba(25,55,70,.45); }
+  .report { left: 50%; top: 50%; transform: translate(-50%,-50%); width: 640px; padding: 22px 30px 20px; }
+  .report h2 { text-align: center; font-size: 34px; color: #c2541f; }
+  .report .stars { text-align: center; font-size: 46px; margin: 2px 0 8px; letter-spacing: 6px; }
+  .row { display: flex; justify-content: space-between; align-items: center; font-size: 22px; padding: 6px 4px; border-bottom: 2px dashed #e6d6b4; }
+  .row b { font-size: 24px; }
+  .sub { font-size: 17px; color: #8a7458; padding: 0 4px 0 30px; display: flex; justify-content: space-between; }
+  .says { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .says span { background: #eef8ff; border-radius: 12px; padding: 5px 10px; font-size: 16px; }
+  .btns { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
+  .btn { background: linear-gradient(#ffcf5a,#f0a020); color: #5a3510; font-weight: 700; font-size: 21px; padding: 10px 20px; border-radius: 16px; box-shadow: 0 4px 0 #b9771b; }
+  .btn.green { background: linear-gradient(#7fd36b,#3f9e3c); color: #fff; box-shadow: 0 4px 0 #2e7a2c; }
+  .lbl { position: absolute; transform: translate(-50%, 0); text-align: center; background: #fff8ea; border-radius: 14px; padding: 5px 12px; font-weight: 600; font-size: 16px; box-shadow: 0 3px 0 #d9c49c; white-space: nowrap; }
+  .lbl small { display: block; font-weight: 500; font-size: 13px; color: #8a7458; }
+  .lbl.lock { background: #e5e5e0; color: #777; box-shadow: 0 3px 0 #bbb; }
+  .title { left: 50%; top: 16px; transform: translateX(-50%); text-align: center; padding: 10px 28px; }
+  .title b { font-size: 30px; color: #2d7f95; }
+  .title small { display: block; font-size: 16px; color: #8a7458; }
+  .sun { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui"></div>
+<script>
+const W = 1180, H = 820, DPR = window.devicePixelRatio || 1;
+const cv = document.getElementById('c');
+cv.width = W * DPR; cv.height = H * DPR;
+const ctx = cv.getContext('2d');
+ctx.scale(DPR, DPR);
+const SCREEN = new URLSearchParams(location.search).get('s') || 'rencana';
+const UI = document.getElementById('ui');
+const EMO = '"Noto Color Emoji","Apple Color Emoji",sans-serif';
+
+// ---------- noise ----------
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+function noise2(seed, G) {
+  const r = rng(seed), g = [];
+  for (let k = 0; k < (G + 1) * (G + 1); k++) g.push(r());
+  const sm = t => t * t * (3 - 2 * t);
+  return (x, y) => {
+    x = Math.max(0, Math.min(0.9999, x)) * G; y = Math.max(0, Math.min(0.9999, y)) * G;
+    const ix = Math.floor(x), iy = Math.floor(y), tx = sm(x - ix), ty = sm(y - iy);
+    const a = g[ix * (G + 1) + iy], b = g[(ix + 1) * (G + 1) + iy], c = g[ix * (G + 1) + iy + 1], d = g[(ix + 1) * (G + 1) + iy + 1];
+    return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty;
+  };
+}
+function segDist(px, py, pts) {
+  let best = 9;
+  for (let k = 0; k < pts.length - 1; k++) {
+    const [ax, ay] = pts[k], [bx, by] = pts[k + 1];
+    const dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+    best = Math.min(best, Math.hypot(px - ax - dx * t, py - ay - dy * t));
+  }
+  return best;
+}
+
+// ---------- terrain ----------
+const TOPS = ['#000', '#f4e2a6', '#c4e38e', '#addb7c', '#97cf6c', '#84c362', '#a3d47f', '#b8de95'];
+const SIDE_HI = '#e8cc95', SIDE_LO = '#c99f6a', SIDE_WET = '#a88456';
+function makeTerrain(o) {
+  const n1 = noise2(o.seed, 6), n2 = noise2(o.seed + 7, 14);
+  const T = Object.assign({ hc: [], q: [], plaza: [] }, o);
+  T.ch = o.cw / 2;
+  for (let i = 0; i < o.N; i++) {
+    T.hc[i] = []; T.q[i] = []; T.plaza[i] = [];
+    for (let j = 0; j < o.N; j++) {
+      const u = (i / (o.N - 1) - 0.5) * 2, v = (j / (o.N - 1) - 0.5) * 2;
+      const nz = n1(i / o.N, j / o.N) * 0.7 + n2(i / o.N, j / o.N) * 0.3;
+      let h = o.shape(u, v, nz, T, i, j);
+      T.hc[i][j] = h;
+      T.q[i][j] = h < 0 ? 0 : Math.min(o.levels, 1 + Math.floor(h * o.levels));
+    }
+  }
+  return T;
+}
+function P(T, i, j, lift = 0) {
+  const ii = Math.max(0, Math.min(T.N - 1, Math.round(i))), jj = Math.max(0, Math.min(T.N - 1, Math.round(j)));
+  return { x: T.cx + (i - j) * T.cw / 2, y: T.cy + (i + j) * T.ch / 2 - T.q[ii][jj] * T.lh - lift, q: T.q[ii][jj] };
+}
+function cellPath(T, test) {
+  const p = new Path2D(), rx = T.cw * 0.74, ry = T.ch * 0.74;
+  for (let i = 0; i < T.N; i++) for (let j = 0; j < T.N; j++) {
+    if (!test(i, j)) continue;
+    const x = T.cx + (i - j) * T.cw / 2, y = T.cy + (i + j) * T.ch / 2;
+    p.moveTo(x + rx, y); p.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  }
+  return p;
+}
+function drawTerrain(T, gray) {
+  ctx.save();
+  // shallow water halo (Godus-like bands)
+  const bands = [[-0.22, 'rgba(120,214,214,0.35)'], [-0.13, 'rgba(140,224,218,0.55)'], [-0.05, 'rgba(190,240,226,0.8)']];
+  for (const [th, col] of bands) { ctx.fillStyle = col; ctx.fill(cellPath(T, (i, j) => T.hc[i][j] > th)); }
+  let maxL = 0; for (const r of T.q) for (const v of r) maxL = Math.max(maxL, v);
+  for (let L = 1; L <= maxL; L++) {
+    const path = cellPath(T, (i, j) => T.q[i][j] >= L);
+    for (let k = 0; k <= T.lh; k++) {
+      ctx.save(); ctx.translate(0, -(L - 1) * T.lh - k);
+      ctx.fillStyle = L === 1 && k < 4 ? SIDE_WET : (k < T.lh * 0.45 ? SIDE_LO : SIDE_HI);
+      ctx.fill(path); ctx.restore();
+    }
+    ctx.save(); ctx.translate(0, -L * T.lh);
+    ctx.fillStyle = TOPS[L] || TOPS[TOPS.length - 1]; ctx.fill(path);
+    // grass tufts
+    const r = rng(L * 31 + T.seed);
+    ctx.fillStyle = 'rgba(70,120,40,0.13)';
+    for (let i = 0; i < T.N; i++) for (let j = 0; j < T.N; j++) {
+      if (T.q[i][j] === L && L > 1 && r() < 0.18) {
+        const x = T.cx + (i - j) * T.cw / 2 + (r() - 0.5) * 6, y = T.cy + (i + j) * T.ch / 2;
+        ctx.beginPath(); ctx.ellipse(x, y, 2.2, 1.2, 0, 0, 7); ctx.fill();
+      }
+    }
+    if (T.plazaLevel === L) {
+      ctx.fillStyle = '#ecdcae';
+      ctx.fill(cellPath(T, (i, j) => T.plaza[i][j] && T.q[i][j] === L));
+    }
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---------- props ----------
+function shadow(x, y, rx) { ctx.fillStyle = 'rgba(40,60,20,0.22)'; ctx.beginPath(); ctx.ellipse(x, y, rx, rx * 0.45, 0, 0, 7); ctx.fill(); }
+function tree(x, y, s = 1, col = '#5fae4f') {
+  shadow(x, y, 9 * s);
+  ctx.fillStyle = '#8a5a34'; ctx.fillRect(x - 2 * s, y - 10 * s, 4 * s, 10 * s);
+  const blob = (dx, dy, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x + dx * s, y + dy * s, r * s, 0, 7); ctx.fill(); };
+  blob(0, -18, 11, col); blob(-6, -14, 7, col); blob(6, -15, 7, col);
+  blob(-3, -22, 5, 'rgba(255,255,255,0.25)');
+}
+function palm(x, y, s = 1) {
+  shadow(x, y, 8 * s);
+  ctx.strokeStyle = '#9a6a3c'; ctx.lineWidth = 3 * s; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 4 * s, y - 14 * s, x + 2 * s, y - 26 * s); ctx.stroke();
+  ctx.fillStyle = '#4f9f48';
+  for (let a = 0; a < 6; a++) { const an = a / 6 * Math.PI * 2; ctx.beginPath(); ctx.ellipse(x + 2 * s + Math.cos(an) * 8 * s, y - 26 * s + Math.sin(an) * 3 * s, 9 * s, 3 * s, an, 0, 7); ctx.fill(); }
+}
+function rock(x, y, s = 1) { ctx.fillStyle = '#a9a294'; ctx.beginPath(); ctx.ellipse(x, y - 3 * s, 7 * s, 5 * s, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#c8c2b4'; ctx.beginPath(); ctx.ellipse(x - 2 * s, y - 5 * s, 4 * s, 2.5 * s, 0, 0, 7); ctx.fill(); }
+function emoji(e, x, y, size) { ctx.font = `${size}px ${EMO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(e, x, y); }
+function stall(x, y, c1, e, s = 1) {
+  shadow(x, y + 2, 26 * s);
+  // counter
+  ctx.fillStyle = '#b97a45'; ctx.fillRect(x - 22 * s, y - 14 * s, 44 * s, 14 * s);
+  ctx.fillStyle = '#e2a96f'; ctx.fillRect(x - 24 * s, y - 18 * s, 48 * s, 5 * s);
+  ctx.fillStyle = '#9b6438'; for (let k = -16; k <= 16; k += 8) ctx.fillRect(x + k * s, y - 13 * s, 1.5 * s, 13 * s);
+  // poles
+  ctx.fillStyle = '#7a4c2a'; ctx.fillRect(x - 23 * s, y - 42 * s, 3 * s, 26 * s); ctx.fillRect(x + 20 * s, y - 42 * s, 3 * s, 26 * s);
+  // awning
+  const top = y - 50 * s, w = 54 * s, n = 6;
+  for (let k = 0; k < n; k++) {
+    ctx.fillStyle = k % 2 ? '#fffaf0' : c1;
+    ctx.beginPath(); ctx.moveTo(x - w / 2 + k * w / n, top + 10 * s); ctx.lineTo(x - w / 2 + (k + 1) * w / n, top + 10 * s);
+    ctx.lineTo(x - w / 2 + (k + 1) * w / n + 2 * s, top - 2 * s); ctx.lineTo(x - w / 2 + k * w / n + 2 * s, top - 2 * s); ctx.fill();
+    ctx.beginPath(); ctx.arc(x - w / 2 + (k + 0.5) * w / n, top + 10 * s, w / n / 2, 0, Math.PI); ctx.fill();
+  }
+  // sign
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, top - 14 * s, 13 * s, 0, 7); ctx.fill();
+  ctx.strokeStyle = c1; ctx.lineWidth = 3 * s; ctx.stroke();
+  emoji(e, x, top - 13 * s, 16 * s);
+}
+function stage(x, y, s = 1) {
+  shadow(x, y + 4, 40 * s);
+  ctx.fillStyle = '#8f5a33'; ctx.beginPath(); ctx.moveTo(x - 40 * s, y - 8 * s); ctx.lineTo(x, y + 10 * s); ctx.lineTo(x + 40 * s, y - 8 * s); ctx.lineTo(x + 40 * s, y - 16 * s); ctx.lineTo(x, y + 2 * s); ctx.lineTo(x - 40 * s, y - 16 * s); ctx.fill();
+  ctx.fillStyle = '#d99b5f'; ctx.beginPath(); ctx.moveTo(x - 40 * s, y - 16 * s); ctx.lineTo(x, y + 2 * s); ctx.lineTo(x + 40 * s, y - 16 * s); ctx.lineTo(x, y - 34 * s); ctx.fill();
+  // shell backdrop
+  ctx.fillStyle = '#ff9fb6'; ctx.beginPath(); ctx.moveTo(x - 30 * s, y - 28 * s); ctx.quadraticCurveTo(x, y - 90 * s, x + 30 * s, y - 28 * s); ctx.fill();
+  ctx.strokeStyle = '#ffd2dc'; ctx.lineWidth = 2 * s;
+  for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(x, y - 30 * s); ctx.lineTo(x + k * 12 * s, y - 62 * s + Math.abs(k) * 8 * s); ctx.stroke(); }
+}
+function lanterns(x1, y1, x2, y2) {
+  ctx.strokeStyle = '#6b4a2a'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo((x1 + x2) / 2, (y1 + y2) / 2 + 14, x2, y2); ctx.stroke();
+  const cols = ['#ff6b6b', '#ffd25e', '#6bd1ff', '#9aff8a', '#ff9de0'];
+  for (let k = 1; k < 8; k++) {
+    const t = k / 8, x = (1 - t) * (1 - t) * x1 + 2 * (1 - t) * t * (x1 + x2) / 2 + t * t * x2;
+    const y = (1 - t) * (1 - t) * y1 + 2 * (1 - t) * t * ((y1 + y2) / 2 + 14) + t * t * y2;
+    ctx.fillStyle = cols[k % cols.length]; ctx.beginPath(); ctx.ellipse(x, y + 5, 3.5, 4.5, 0, 0, 7); ctx.fill();
+  }
+}
+function pole(x, y, h = 40) { ctx.fillStyle = '#7a4c2a'; ctx.fillRect(x - 1.5, y - h, 3, h); }
+function palace(x, y, s = 1) {
+  shadow(x, y + 6, 60 * s);
+  // walls
+  ctx.fillStyle = '#e9f3f5'; ctx.fillRect(x - 46 * s, y - 40 * s, 92 * s, 40 * s);
+  ctx.fillStyle = '#c9dfe4'; ctx.fillRect(x - 46 * s, y - 6 * s, 92 * s, 6 * s);
+  ctx.fillStyle = '#5ab0c8'; ctx.beginPath(); ctx.arc(x, y, 12 * s, Math.PI, 0); ctx.fill();
+  // towers
+  for (const d of [-52, 52]) {
+    ctx.fillStyle = '#f4fbfc'; ctx.fillRect(x + d * s - 9 * s, y - 64 * s, 18 * s, 64 * s);
+    ctx.fillStyle = '#3c9bb8'; ctx.beginPath(); ctx.moveTo(x + d * s - 12 * s, y - 64 * s); ctx.lineTo(x + d * s, y - 86 * s); ctx.lineTo(x + d * s + 12 * s, y - 64 * s); ctx.fill();
+    ctx.fillStyle = '#5ab0c8'; ctx.fillRect(x + d * s - 3 * s, y - 50 * s, 6 * s, 9 * s);
+  }
+  // lotus dome
+  const pc = ['#ffb3c6', '#ff8fae', '#ffc8d6'];
+  for (let k = -3; k <= 3; k++) {
+    ctx.fillStyle = pc[(k + 3) % 3];
+    ctx.save(); ctx.translate(x + k * 8 * s, y - 42 * s); ctx.rotate(k * 0.28);
+    ctx.beginPath(); ctx.ellipse(0, -16 * s, 9 * s, 22 * s, 0, 0, 7); ctx.fill(); ctx.restore();
+  }
+  ctx.fillStyle = '#ffe17a'; ctx.beginPath(); ctx.arc(x, y - 70 * s, 6 * s, 0, 7); ctx.fill();
+  ctx.fillStyle = '#7a4c2a'; ctx.fillRect(x - 1, y - 100 * s, 2, 26 * s);
+  ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.moveTo(x + 1, y - 100 * s); ctx.lineTo(x + 18 * s, y - 94 * s); ctx.lineTo(x + 1, y - 88 * s); ctx.fill();
+}
+function lily(x, y, s = 1, flower) {
+  ctx.fillStyle = '#5fb35a'; ctx.beginPath(); ctx.ellipse(x, y, 9 * s, 4.5 * s, 0, 0.3, Math.PI * 2 - 0.1); ctx.lineTo(x, y); ctx.fill();
+  ctx.fillStyle = '#7fcc6a'; ctx.beginPath(); ctx.ellipse(x - 2 * s, y - 1 * s, 5 * s, 2 * s, 0, 0, 7); ctx.fill();
+  if (flower) { ctx.fillStyle = '#ff9fbf'; for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.ellipse(x + k * 2.5 * s, y - 4 * s, 2 * s, 4 * s, k * 0.5, 0, 7); ctx.fill(); } ctx.fillStyle = '#ffe17a'; ctx.beginPath(); ctx.arc(x, y - 4 * s, 1.5 * s, 0, 7); ctx.fill(); }
+}
+function boat(x, y, s = 1, riders = []) {
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.ellipse(x, y + 3 * s, 26 * s, 6 * s, 0, 0, 7); ctx.fill();
+  riders.forEach((r, k) => critter(r, x - 10 * s + k * 10 * s, y - 3 * s, 0.85 * s));
+  ctx.fillStyle = '#9a5f35'; ctx.beginPath(); ctx.moveTo(x - 24 * s, y - 6 * s); ctx.lineTo(x + 24 * s, y - 6 * s); ctx.quadraticCurveTo(x + 18 * s, y + 6 * s, x, y + 6 * s); ctx.quadraticCurveTo(x - 18 * s, y + 6 * s, x - 24 * s, y - 6 * s); ctx.fill();
+  ctx.fillStyle = '#c98b55'; ctx.fillRect(x - 24 * s, y - 7 * s, 48 * s, 3 * s);
+}
+function waterfall(x, yTop, yBot, w) {
+  const g = ctx.createLinearGradient(0, yTop, 0, yBot);
+  g.addColorStop(0, '#bff0ff'); g.addColorStop(1, '#6fd0ea');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x - w / 2, yTop); ctx.lineTo(x + w / 2, yTop); ctx.lineTo(x + w / 2 + 4, yBot); ctx.lineTo(x - w / 2 - 4, yBot); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 1.5;
+  for (let k = -w / 2 + 3; k < w / 2; k += 5) { ctx.beginPath(); ctx.moveTo(x + k, yTop + 4); ctx.lineTo(x + k * 1.1, yBot - 4); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  for (let k = 0; k < 7; k++) { ctx.beginPath(); ctx.arc(x - w / 2 + k * w / 6, yBot, 4 + (k % 2) * 2, 0, 7); ctx.fill(); }
+}
+function bridge(x1, y1, x2, y2) {
+  const n = 7;
+  for (let k = 0; k <= n; k++) {
+    const t = k / n, x = x1 + (x2 - x1) * t, y = y1 + (y2 - y1) * t - Math.sin(t * Math.PI) * 6;
+    ctx.fillStyle = k % 2 ? '#c98b55' : '#b37443';
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(y2 - y1, x2 - x1) + Math.PI / 2);
+    ctx.fillRect(-9, -2.5, 18, 5); ctx.restore();
+  }
+  ctx.strokeStyle = '#7a4c2a'; ctx.lineWidth = 1.5;
+  for (const o of [-8, 8]) { ctx.beginPath(); ctx.moveTo(x1 + o * 0.5, y1 - 8 + o * 0.3); ctx.quadraticCurveTo((x1 + x2) / 2 + o * 0.5, (y1 + y2) / 2 - 14 + o * 0.3, x2 + o * 0.5, y2 - 8 + o * 0.3); ctx.stroke(); }
+}
+function dock(x, y, s = 1.5) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); x = 0; y = 0;
+  ctx.fillStyle = '#7a4c2a';
+  for (let k = 0; k < 3; k++) ctx.fillRect(x + k * 12 - 2, y + k * 6, 3, 10);
+  for (let k = 0; k < 6; k++) { ctx.fillStyle = k % 2 ? '#c98b55' : '#b37443'; ctx.save(); ctx.translate(x + k * 6, y + k * 3); ctx.rotate(-0.46); ctx.fillRect(-10, -2, 20, 4); ctx.restore(); }
+  ctx.restore();
+}
+function bin(x, y, full, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); x = 0; y = 0;
+  shadow(x, y, 6);
+  ctx.fillStyle = '#4f9f48'; ctx.fillRect(x - 5, y - 12, 10, 12); ctx.fillStyle = '#6fc061'; ctx.fillRect(x - 6, y - 14, 12, 3);
+  if (full) { ctx.fillStyle = '#d9b35c'; ctx.beginPath(); ctx.arc(x - 2, y - 16, 3, 0, 7); ctx.arc(x + 3, y - 17, 3, 0, 7); ctx.fill(); }
+  ctx.restore();
+}
+function bench(x, y, s = 1) { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); x = 0; y = 0; shadow(x, y, 10); ctx.fillStyle = '#9b6438'; ctx.fillRect(x - 10, y - 7, 20, 3); ctx.fillRect(x - 9, y - 4, 2, 4); ctx.fillRect(x + 7, y - 4, 2, 4); ctx.restore(); }
+function poster(x, y, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); x = 0; y = 0;
+  shadow(x, y, 8); ctx.fillStyle = '#7a4c2a'; ctx.fillRect(x - 1.5, y - 18, 3, 18);
+  ctx.fillStyle = '#fff3c4'; ctx.fillRect(x - 10, y - 34, 20, 16); ctx.strokeStyle = '#e07a3a'; ctx.lineWidth = 2; ctx.strokeRect(x - 10, y - 34, 20, 16);
+  emoji('🎉', x, y - 26, 10);
+  ctx.restore();
+}
+function fountain(x, y, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); x = 0; y = 0;
+  shadow(x, y + 3, 22);
+  ctx.fillStyle = '#cfc7b4'; ctx.beginPath(); ctx.ellipse(x, y, 20, 10, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#7fd6ee'; ctx.beginPath(); ctx.ellipse(x, y - 2, 16, 7, 0, 0, 7); ctx.fill();
+  lily(x - 7, y - 1, 0.7, true); lily(x + 7, y - 3, 0.6);
+  ctx.fillStyle = '#9ad7c0'; ctx.beginPath(); ctx.ellipse(x, y - 12, 5, 8, 0, 0, 7); ctx.fill(); // fish statue
+  ctx.fillStyle = 'rgba(200,245,255,0.9)'; ctx.beginPath(); ctx.arc(x, y - 24, 3, 0, 7); ctx.arc(x - 5, y - 18, 2, 0, 7); ctx.arc(x + 5, y - 18, 2, 0, 7); ctx.fill();
+  ctx.restore();
+}
+
+// critters: kodok, bebek, kura-kura, berang-berang, ikan (dengan kaki kecil = warga)
+const CR = {
+  kodok: { b: '#6cc35a', d: '#4a9a3e' }, bebek: { b: '#ffd84f', d: '#e8b52e' }, kura: { b: '#8fd27a', d: '#4d8a3e' },
+  berang: { b: '#b07a4f', d: '#8a5a36' }, ikan: { b: '#ff9a52', d: '#e5702e' }, udang: { b: '#ff8a8a', d: '#e06060' },
+};
+function critter(type, x, y, s = 1, happy) {
+  const c = CR[type];
+  ctx.fillStyle = 'rgba(40,60,20,0.25)'; ctx.beginPath(); ctx.ellipse(x, y, 5 * s, 2 * s, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = c.b;
+  if (type === 'kura') { ctx.fillStyle = '#e9d58a'; ctx.beginPath(); ctx.arc(x, y - 11 * s, 4 * s, 0, 7); ctx.fill(); ctx.fillStyle = c.d; ctx.beginPath(); ctx.ellipse(x, y - 5 * s, 6.5 * s, 5 * s, 0, Math.PI, 0); ctx.fill(); ctx.fillStyle = c.b; ctx.beginPath(); ctx.arc(x - 2 * s, y - 7 * s, 1.6 * s, 0, 7); ctx.arc(x + 2.5 * s, y - 6.5 * s, 1.4 * s, 0, 7); ctx.fill(); }
+  else { ctx.beginPath(); ctx.ellipse(x, y - 5 * s, 5 * s, 5.5 * s, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(x, y - 11 * s, 4.5 * s, 0, 7); ctx.fill(); }
+  if (type === 'kodok') { ctx.fillStyle = c.b; ctx.beginPath(); ctx.arc(x - 2.5 * s, y - 14.5 * s, 2.2 * s, 0, 7); ctx.arc(x + 2.5 * s, y - 14.5 * s, 2.2 * s, 0, 7); ctx.fill(); }
+  if (type === 'bebek') { ctx.fillStyle = '#ff9a3a'; ctx.beginPath(); ctx.ellipse(x + 3.5 * s, y - 10 * s, 2.5 * s, 1.3 * s, 0, 0, 7); ctx.fill(); }
+  if (type === 'berang') { ctx.fillStyle = '#e8cfa8'; ctx.beginPath(); ctx.ellipse(x, y - 9.5 * s, 2.6 * s, 2 * s, 0, 0, 7); ctx.fill(); ctx.fillStyle = c.d; ctx.beginPath(); ctx.arc(x - 3.5 * s, y - 14.5 * s, 1.4 * s, 0, 7); ctx.arc(x + 3.5 * s, y - 14.5 * s, 1.4 * s, 0, 7); ctx.fill(); }
+  if (type === 'ikan') { ctx.fillStyle = c.d; ctx.beginPath(); ctx.moveTo(x - 1 * s, y - 15 * s); ctx.lineTo(x + 2 * s, y - 18 * s); ctx.lineTo(x + 3 * s, y - 14 * s); ctx.fill(); }
+  if (type === 'udang') { ctx.strokeStyle = c.d; ctx.lineWidth = 0.8 * s; ctx.beginPath(); ctx.moveTo(x - 1 * s, y - 15 * s); ctx.quadraticCurveTo(x - 4 * s, y - 20 * s, x - 7 * s, y - 18 * s); ctx.moveTo(x + 1 * s, y - 15 * s); ctx.quadraticCurveTo(x + 4 * s, y - 20 * s, x + 7 * s, y - 18 * s); ctx.stroke(); }
+  // eyes
+  const ey = type === 'kodok' ? y - 14.5 * s : y - 12 * s;
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x - 1.8 * s, ey, 1.3 * s, 0, 7); ctx.arc(x + 1.8 * s, ey, 1.3 * s, 0, 7); ctx.fill();
+  ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(x - 1.6 * s, ey, 0.7 * s, 0, 7); ctx.arc(x + 2 * s, ey, 0.7 * s, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,120,140,0.6)'; ctx.beginPath(); ctx.arc(x - 3 * s, y - 9.5 * s, 0.9 * s, 0, 7); ctx.arc(x + 3 * s, y - 9.5 * s, 0.9 * s, 0, 7); ctx.fill();
+  if (happy) emoji('❤️', x + 5 * s, y - 22 * s, 8 * s);
+}
+function koi(x, y, a = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.fillStyle = 'rgba(255,140,60,0.85)'; ctx.beginPath(); ctx.ellipse(0, 0, 6, 2.5, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.moveTo(-5, 0); ctx.lineTo(-10, -3); ctx.lineTo(-10, 3); ctx.fill(); ctx.restore(); }
+
+// ---------- UI helpers ----------
+function el(html, cls, style) { const d = document.createElement('div'); d.className = cls || ''; if (style) d.style.cssText = style; d.innerHTML = html; UI.appendChild(d); return d; }
+function bub(x, y, html, warn) { el(html, 'bubble' + (warn ? ' warn' : ''), `left:${x}px;top:${y}px`); }
+function kikoFace(cvs) {
+  const c = cvs.getContext('2d'); cvs.width = 192; cvs.height = 192; c.scale(2, 2);
+  const s = 4.2, x = 48, y = 88;
+  const save = ctx; window.ctx = c;
+  critterBig(c, x, y);
+}
+function critterBig(c, x, y) {
+  // Kiko si Katak penasihat: kodok kecil dengan topi pita & papan klip
+  c.fillStyle = 'rgba(0,0,0,0.15)'; c.beginPath(); c.ellipse(x, y, 26, 7, 0, 0, 7); c.fill();
+  c.fillStyle = '#6cc35a'; c.beginPath(); c.ellipse(x, y - 22, 24, 22, 0, 0, 7); c.fill();
+  c.fillStyle = '#a8e68e'; c.beginPath(); c.ellipse(x, y - 16, 15, 13, 0, 0, 7); c.fill();
+  c.fillStyle = '#6cc35a'; c.beginPath(); c.arc(x - 13, y - 44, 10, 0, 7); c.arc(x + 13, y - 44, 10, 0, 7); c.fill();
+  c.fillStyle = '#fff'; c.beginPath(); c.arc(x - 13, y - 45, 7, 0, 7); c.arc(x + 13, y - 45, 7, 0, 7); c.fill();
+  c.fillStyle = '#222'; c.beginPath(); c.arc(x - 11, y - 45, 3.5, 0, 7); c.arc(x + 15, y - 45, 3.5, 0, 7); c.fill();
+  c.fillStyle = '#fff'; c.beginPath(); c.arc(x - 10, y - 46.5, 1.2, 0, 7); c.arc(x + 16, y - 46.5, 1.2, 0, 7); c.fill();
+  c.strokeStyle = '#2f6b2a'; c.lineWidth = 2.5; c.beginPath(); c.arc(x, y - 32, 8, 0.2, Math.PI - 0.2); c.stroke();
+  c.fillStyle = 'rgba(255,120,140,0.6)'; c.beginPath(); c.arc(x - 16, y - 30, 3.5, 0, 7); c.arc(x + 16, y - 30, 3.5, 0, 7); c.fill();
+  // topi daun teratai
+  c.fillStyle = '#ff9fbf'; for (let k = -2; k <= 2; k++) { c.save(); c.translate(x + k * 5, y - 56); c.rotate(k * 0.35); c.beginPath(); c.ellipse(0, -6, 4, 9, 0, 0, 7); c.fill(); c.restore(); }
+  // papan klip
+  c.fillStyle = '#c98b55'; c.fillRect(x + 12, y - 26, 20, 26); c.fillStyle = '#fff'; c.fillRect(x + 15, y - 22, 14, 19);
+  c.fillStyle = '#888'; c.fillRect(x + 17, y - 28, 10, 4);
+  c.strokeStyle = '#7fb3d0'; c.lineWidth = 1.5; for (let k = 0; k < 4; k++) { c.beginPath(); c.moveTo(x + 17, y - 18 + k * 4); c.lineTo(x + 27, y - 18 + k * 4); c.stroke(); }
+}
+function kiko(text) {
+  const d = el(`<canvas></canvas><div class="say">${text}</div>`, 'kiko');
+  critterBigInto(d.querySelector('canvas'));
+}
+function critterBigInto(cvs) { const c = cvs.getContext('2d'); cvs.width = 192; cvs.height = 192; c.scale(2, 2); critterBig(c, 48, 90); }
+
+// ---------- scenes ----------
+function sea() {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#5cc2cf'); g.addColorStop(1, '#3a9fb6');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const r = rng(5);
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 2;
+  for (let k = 0; k < 70; k++) { const x = r() * W, y = r() * H; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 8, y - 3, x + 16, y); ctx.stroke(); }
+}
+
+function mainIsland(big) {
+  const RIVER = [[-0.38, -0.2], [-0.22, 0.2], [-0.4, 0.55], [-0.3, 1.1]];
+  const PC = [0.22, 0.22];
+  return makeTerrain({
+    N: 110, cw: 14.4, lh: 13, levels: 7, seed: 11, cx: 640, cy: 70,
+    shape(u, v, nz, T, i, j) {
+      const d = Math.hypot(u * 0.92, v);
+      let h = (1 - d * 1.08) * 0.55 + (nz - 0.5) * 0.32;
+      const hd = Math.hypot(u + 0.5, v + 0.42);
+      h += 0.8 * Math.exp(-hd * hd / 0.09);
+      const pd = Math.hypot(u - PC[0], v - PC[1]);
+      const w = Math.max(0, Math.min(1, (0.46 - pd) / 0.12));
+      T.plazaLevel = 3; T.plaza[i][j] = pd < 0.36;
+      h = h * (1 - w) + 0.36 * w;
+      const rd = segDist(u, v, RIVER);
+      if (rd < 0.075 && hd > 0.3) h = -0.3;
+      else if (rd < 0.11 && hd > 0.3) h = Math.min(h, 0.05);
+      return h;
+    }
+  });
+}
+
+function sceneIsland(mode) {
+  sea();
+  const T = mainIsland();
+  const F = (T.N - 1) / 65, K = 1.5;
+  const Pq = (i, j) => P(T, i * F, j * F); window.PQ = Pq;
+  // koi & lily in sea
+  const lp = [[150, 640], [190, 690], [980, 640], [1040, 600], [1010, 700], [120, 420], [1080, 420], [300, 760]];
+  lp.forEach(([x, y], k) => lily(x, y, 1.6, k % 2 === 0));
+  koi(240, 600, 0.4); koi(930, 740, -0.3); koi(1100, 520, 2.6);
+  drawTerrain(T);
+  // river lily & koi inside
+  const rv = [Pq(22, 36), Pq(21, 48), Pq(19, 60)];
+  rv.forEach((p, k) => lily(p.x + 3, p.y + 2, 0.8 * K, k === 1));
+
+  // waterfall from hill into river head
+  const wt = Pq(16, 20), wb = Pq(21, 27);
+  // objects (depth-sorted)
+  const objs = [];
+  const add = (i, j, f) => objs.push({ d: i + j, f: () => { const p = Pq(i, j); f(p.x, p.y, p); } });
+  add(15, 17, (x, y) => palace(x, y, 0.75 * K));
+  // trees around
+  const r = rng(77);
+  for (let k = 0; k < 140; k++) {
+    const i = Math.floor(r() * 66), j = Math.floor(r() * 66);
+    const q = T.q[Math.round(i*F)][Math.round(j*F)]; if (q < 2 || T.plaza[Math.round(i*F)][Math.round(j*F)]) continue;
+    const u = (i / 65 - 0.5) * 2, v = (j / 65 - 0.5) * 2;
+    if (Math.hypot(u - 0.22, v - 0.22) < 0.5) continue;
+    if (Math.hypot(u + 0.55, v + 0.45) < 0.16) continue;
+    if (Math.hypot(u - 0.62, v - 0.62) < 0.2) continue;
+    add(i, j, (x, y) => (r() < 0.25 ? palm(x, y, 0.9 * K) : tree(x, y, (0.8 + r() * 0.3) * K, ['#5fae4f', '#6dbb55', '#4f9f48', '#7cc35e'][k % 4])));
+  }
+  for (let k = 0; k < 16; k++) { const i = Math.floor(r() * 66), j = Math.floor(r() * 66); if (T.q[Math.round(i*F)][Math.round(j*F)] === 1) add(i, j, (x, y) => rock(x, y, 0.8 * K)); }
+
+  // festival plaza (center ~ i=40, j=40)
+  const plan = mode === 'rencana';
+  const S = [
+    [33, 35, '#ff6b6b', '🌽'], [38, 31, '#ffb43a', '🍧'], [45, 32, '#4fb3e8', '🥞'],
+    [33, 44, '#b26bff', '🍢'], [41, 47, '#ff7ab8', '🍡'],
+  ];
+  const shown = plan ? S.slice(0, 4) : S;
+  shown.forEach(([i, j, c, e]) => add(i, j, (x, y) => stall(x, y, c, e, 0.82 * K)));
+  add(41, 39, (x, y) => fountain(x, y, K));
+  if (!plan) add(48, 40, (x, y) => stage(x, y, 0.8 * K));
+  add(36, 39, (x, y) => bench(x, y, K));
+  add(47, 46, (x, y) => bin(x, y, mode === 'festival', K));
+  add(29, 40, (x, y) => poster(x, y, K));
+  add(49, 52, (x, y) => poster(x, y, K));
+
+  // visitors
+  const kinds = Object.keys(CR);
+  const vr = rng(mode === 'festival' ? 9 : 3);
+  const nv = mode === 'festival' ? 46 : (mode === 'laporan' ? 30 : 6);
+  for (let k = 0; k < nv; k++) {
+    const a = vr() * Math.PI * 2, rr = 2 + vr() * 9;
+    const i = 40 + Math.cos(a) * rr, j = 40 + Math.sin(a) * rr;
+    if (!T.plaza[Math.round(i*F)][Math.round(j*F)]) continue;
+    const kind = kinds[k % kinds.length];
+    add(i, j, (x, y) => critter(kind, x, y, 1.05 * K, mode === 'festival' && k % 7 === 0));
+  }
+  if (mode === 'festival') {
+    // antrean panjang di lapak jagung
+    for (let k = 0; k < 6; k++) add(34.5 + k * 0.9, 37.5 + k * 1.1, (x, y) => critter(kinds[(k + 2) % 6], x, y, 1.05 * K));
+  }
+  objs.sort((a, b) => a.d - b.d).forEach(o => o.f());
+
+  // waterfall after hill props
+  waterfall(wb.x + 4, wt.y + 10, wb.y + 2, 26);
+  // bridge across river toward plaza
+  const b1 = Pq(24, 40), b2 = Pq(28, 37);
+  bridge(b1.x - 26, b1.y + 6, b2.x + 4, b2.y);
+  // lanterns over plaza
+  const l1 = Pq(32, 32), l2 = Pq(48, 36), l3 = Pq(36, 50);
+  [l1, l2, l3].forEach(p => pole(p.x, p.y, 64));
+  lanterns(l1.x, l1.y - 64, l2.x, l2.y - 64); lanterns(l1.x, l1.y - 64, l3.x, l3.y - 64);
+  // dock + boats (visitors arriving)
+  const dk = Pq(56, 58);
+  dock(dk.x - 6, dk.y - 4);
+  if (mode !== 'rencana') {
+    boat(dk.x + 100, dk.y + 70, 1.6, ['bebek', 'kodok', 'udang']);
+    boat(dk.x + 230, dk.y - 10, 1.6, ['kura', 'ikan', 'berang']);
+    boat(dk.x - 420, dk.y + 120, 1.6, ['kodok', 'bebek']);
+  } else {
+    boat(dk.x + 100, dk.y + 70, 1.6, []);
+  }
+  return T;
+}
+
+function topHud(vis, visT, cash, profT, profit, lvName) {
+  el(`<small>Festival 1 · Kerajaan Telaga Biru</small><b>🏮 ${lvName}</b>`, 'card lv');
+  const pv = Math.min(100, vis / visT * 100), pp = Math.max(0, Math.min(100, profit / profT * 100));
+  el(`🐸 <span>Pengunjung</span> <span class="bar"><i style="width:${pv}%"></i></span> <b>${vis}/${visT}</b>${vis >= visT ? ' <span class="ok">✔</span>' : ''}`, 'pill', 'left:18px;top:96px');
+  el(`🪙 <span>Untung</span> <span class="bar gold"><i style="width:${pp}%"></i></span> <b>${profit}/${profT}</b>${profit >= profT ? ' <span class="ok">✔</span>' : ''}`, 'pill', 'left:18px;top:146px');
+  el(`👛 Kas <b>${cash}</b> 🪙`, 'pill', `right:18px;top:18px`);
+}
+
+function screenRencana() {
+  const T = sceneIsland('rencana');
+  topHud(0, 20, 6, 10, 0, 'Bazar Kolam Teratai');
+  el(`<h4>📋 Hasil tanya warga</h4>
+     <div>🌽 Jagung bakar <span class="hearts">❤️❤️❤️</span></div>
+     <div>🍡 Kue klepon <span class="hearts">❤️❤️❤️</span></div>
+     <div>🍧 Es serut <span class="hearts">❤️❤️</span></div>
+     <div>🎵 Musik <span class="hearts">❤️❤️</span></div>
+     <div>🥞 Serabi <span class="hearts">❤️</span></div>`, 'card wish');
+  // ghost placement
+  const g = PQ(41, 47);
+  ctx.save(); ctx.globalAlpha = 0.55; stall(g.x, g.y, '#ff7ab8', '🍡', 1.23); ctx.restore();
+  ctx.save(); ctx.strokeStyle = '#3fbf3f'; ctx.lineWidth = 3; ctx.setLineDash([6, 5]);
+  ctx.beginPath(); ctx.moveTo(g.x - 50, g.y); ctx.lineTo(g.x, g.y - 25); ctx.lineTo(g.x + 50, g.y); ctx.lineTo(g.x, g.y + 25); ctx.closePath(); ctx.stroke(); ctx.restore();
+  bub(g.x, g.y - 120, '👆 Taruh di sini?');
+  el(`<div class="tab on">🍢 Lapak Makanan</div><div class="tab">🎪 Hiburan</div><div class="tab">🪑 Fasilitas</div><div class="tab">📣 Promosi</div>`, 'tabs');
+  el(`
+    <div class="item"><div class="e">🌽</div><div class="n">Jagung Bakar</div><div class="p">3 🪙</div></div>
+    <div class="item sel"><div class="e">🍡</div><div class="n">Kue Klepon</div><div class="p">3 🪙</div></div>
+    <div class="item"><div class="e">🍧</div><div class="n">Es Serut</div><div class="p">2 🪙</div></div>
+    <div class="item"><div class="e">🥞</div><div class="n">Serabi</div><div class="p">2 🪙</div></div>
+    <div class="item"><div class="e">🍢</div><div class="n">Sate Jamur</div><div class="p">4 🪙</div></div>
+  `, 'tray');
+  kiko('Warga paling suka <b>klepon</b>! Taruh dekat dermaga biar cepat dilihat 🛶');
+  el('Buka Festival ▶', 'go');
+}
+
+function screenFestival() {
+  const T = sceneIsland('festival');
+  topHud(17, 20, 21, 10, 7, 'Bazar Kolam Teratai');
+  el(`☀️ Siang <span class="bar" style="width:160px"><i style="width:55%;background:linear-gradient(#ffe48a,#ffb43a)"></i></span> 🌙`, 'pill', 'right:18px;top:66px');
+  const a = PQ(33, 35), bn = PQ(47, 46), st = PQ(48, 40), kl = PQ(41, 47), sr = PQ(45, 32);
+  bub(a.x - 10, a.y - 100, '😣 Antre panjang!', true);
+  bub(bn.x, bn.y - 26, '🗑️ Penuh! Ketuk', true);
+  bub(st.x + 6, st.y - 84, '🎵 ♪ ♫');
+  bub(kl.x, kl.y - 94, '😋 +2 🪙');
+  bub(sr.x + 30, sr.y - 92, '🥞 Sepi…');
+  kiko('Antrean jagung bakar panjang! Mau <b>tambah 1 penjual</b>? (2 🪙)');
+  el(`<div class="item" style="width:92px"><div class="e">🧑‍🍳</div><div class="n">Tambah penjual</div><div class="p">2 🪙</div></div>
+      <div class="item" style="width:92px"><div class="e">🧹</div><div class="n">Panggil petugas</div><div class="p">1 🪙</div></div>
+      <div class="item" style="width:92px"><div class="e">📣</div><div class="n">Promo serabi</div><div class="p">1 🪙</div></div>`, 'tray', 'left:auto;right:20px;transform:none');
+}
+
+function screenLaporan() {
+  sceneIsland('laporan');
+  el('', 'dim');
+  el(`<h2>🎉 Festival Selesai!</h2>
+    <div class="stars">⭐⭐⭐</div>
+    <div class="row"><span>🐸 Pengunjung datang</span><b>24 <small style="font-size:16px;color:#8a7458">/ target 20</small> <span class="ok">✔</span></b></div>
+    <div class="row"><span>💰 Uang masuk (jualan)</span><b>34 🪙</b></div>
+    <div class="sub"><span>🏮 Sewa lapak & hiasan</span><span>− 14</span></div>
+    <div class="sub"><span>🎵 Bayar pemusik</span><span>− 4</span></div>
+    <div class="sub"><span>🧹 Petugas kebersihan</span><span>− 2</span></div>
+    <div class="row"><span>💸 Biaya semuanya</span><b>− 20 🪙</b></div>
+    <div class="row" style="border:0"><span><b>😊 Untung</b> = 34 − 20</span><b style="color:#3a9a3a">14 🪙 <small style="font-size:16px;color:#8a7458">/ target 10</small> <span class="ok">✔</span></b></div>
+    <div class="says"><span>🦆 "Kleponnya enak!"</span><span>🐢 "Antre jagungnya lama…"</span><span>🐸 "Musiknya seru!"</span><span>🦦 "Mana tempat duduk?"</span></div>
+    <div class="btns"><div class="btn">📖 Catatan</div><div class="btn green">👑 Lapor ke Raja ▶</div></div>`, 'card report');
+}
+
+function miniIsland(seed, cx, cy, N, cw, lh, levels, size) {
+  return makeTerrain({
+    N, cw, lh, levels, seed, cx, cy,
+    shape(u, v, nz) { const d = Math.hypot(u, v); return (1 - d * 1.15) * size + (nz - 0.5) * 0.35; }
+  });
+}
+function screenKerajaan() {
+  sea();
+  // jalur sungai
+  const spots = [
+    { x: 175, y: 640, N: 20, cw: 13, lev: 3, sz: 0.55, name: '1 · Bazar Kolam Teratai', sub: '🐸 20 · 🪙 10 · 5 lapak', st: '⭐⭐⭐' },
+    { x: 400, y: 470, N: 24, cw: 13, lev: 4, sz: 0.65, name: '2 · Pasar Malam Kunang-kunang', sub: '🐸 40 · 🪙 25 · malam & lampion', st: 'baru!' },
+    { x: 640, y: 690, N: 28, cw: 13, lev: 5, sz: 0.75, name: '3 · Festival Sungai Pelangi', sub: '🐸 80 · 🪙 50 · lomba perahu', lock: 1 },
+    { x: 850, y: 430, N: 30, cw: 13, lev: 6, sz: 0.85, name: '4 · Pesta Panen Danau Raya', sub: '🐸 150 · 🪙 100 · 2 pulau', lock: 1 },
+    { x: 1040, y: 700, N: 32, cw: 13, lev: 7, sz: 0.95, name: '5 · Festival Agung Telaga Biru', sub: '🐸 300 · 🪙 200 · kembang api', lock: 1 },
+  ];
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 5; ctx.setLineDash([2, 12]); ctx.lineCap = 'round';
+  ctx.beginPath(); spots.forEach((s, k) => k ? ctx.lineTo(s.x, s.y - 60) : ctx.moveTo(s.x, s.y - 60)); ctx.stroke(); ctx.setLineDash([]);
+  spots.forEach((s, k) => {
+    const T = miniIsland(20 + k * 3, s.x, s.y - s.N * s.cw / 2 - 20, s.N, s.cw, 9, s.lev, s.sz);
+    if (s.lock) ctx.filter = 'saturate(0.35) brightness(1.05)';
+    drawTerrain(T);
+    // props
+    const c = Math.floor(s.N / 2), r = rng(k + 4);
+    const cols = ['#ff6b6b', '#ffb43a', '#4fb3e8', '#b26bff', '#ff7ab8'];
+    const foods = ['🌽', '🍧', '🥞', '🍢', '🍡'];
+    const nst = 2 + k;
+    const items = [];
+    for (let t = 0; t < 8 + k * 2; t++) { const i = Math.floor(r() * s.N), j = Math.floor(r() * s.N); if (T.q[i][j] >= 2 && Math.hypot(i - c - 2, j - c - 2) > 5) items.push({ d: i + j, f: () => { const p = P(T, i, j); tree(p.x, p.y, 0.8); } }); }
+    for (let t = 0; t < nst; t++) { const a = t / nst * 6.28, i = c + 2 + Math.cos(a) * 3.2, j = c + 2 + Math.sin(a) * 3.2; items.push({ d: i + j, f: () => { const p = P(T, i, j); stall(p.x, p.y, cols[t % 5], foods[t % 5], 0.6); } }); }
+    if (k === 4) items.push({ d: 2 * c - 6, f: () => { const p = P(T, c - 3, c - 3); palace(p.x, p.y, 0.6); } });
+    items.sort((a, b) => a.d - b.d).forEach(o => o.f());
+    ctx.filter = 'none';
+    if (k === 4) { [[s.x - 90, s.y - 420, '#ffd25e'], [s.x + 80, s.y - 450, '#ff7ab8'], [s.x + 10, s.y - 500, '#7fe0ff']].forEach(([fx, fy, fc]) => { ctx.strokeStyle = fc; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (let a = 0; a < 12; a++) { const an = a / 12 * 6.28; ctx.beginPath(); ctx.moveTo(fx + Math.cos(an) * 10, fy + Math.sin(an) * 10); ctx.lineTo(fx + Math.cos(an) * 26, fy + Math.sin(an) * 26); ctx.stroke(); } }); }
+    el(`${s.lock ? '🔒 ' : ''}${s.name}<small>${s.sub}</small>${s.st ? `<small style="color:#c2541f;font-weight:600">${s.st}</small>` : ''}`, 'lbl' + (s.lock ? ' lock' : ''), `left:${s.x}px;top:${s.y + 8}px`);
+  });
+  el(`<b>👑 Kerajaan Telaga Biru</b><small>Dari pesta kecil di kolam… sampai Festival Agung!</small>`, 'card title');
+  // Raja Kura-kura bubble
+  const rc = document.createElement('canvas'); rc.width = 220; rc.height = 220; rc.style.cssText = 'position:absolute;left:24px;top:110px;width:110px;height:110px';
+  UI.appendChild(rc); const c = rc.getContext('2d'); c.scale(2, 2); kingTurtle(c, 55, 100);
+  el(`<b>Raja Kura-kura:</b> "Hebat! Festival kecilmu ramai. Sekarang coba <b>Pasar Malam</b> ya!"`, 'card', 'left:130px;top:120px;width:300px;font-size:18px');
+}
+function kingTurtle(c, x, y) {
+  c.fillStyle = 'rgba(0,0,0,0.15)'; c.beginPath(); c.ellipse(x, y, 34, 8, 0, 0, 7); c.fill();
+  c.fillStyle = '#e9d58a'; c.beginPath(); c.ellipse(x - 22, y - 4, 7, 5, 0, 0, 7); c.ellipse(x + 22, y - 4, 7, 5, 0, 0, 7); c.fill();
+  c.fillStyle = '#4d8a3e'; c.beginPath(); c.ellipse(x, y - 18, 30, 20, 0, Math.PI, 0); c.lineTo(x + 30, y - 10); c.lineTo(x - 30, y - 10); c.fill();
+  c.fillStyle = '#6fae55'; [[-14, -22], [0, -28], [14, -22], [-7, -14], [7, -14]].forEach(([dx, dy]) => { c.beginPath(); c.arc(x + dx, y + dy, 5.5, 0, 7); c.fill(); });
+  c.fillStyle = '#e9d58a'; c.beginPath(); c.arc(x + 4, y - 50, 16, 0, 7); c.fill();
+  c.fillStyle = '#fff'; c.fillRect(x - 6, y - 44, 20, 14); // jenggot
+  c.beginPath(); c.moveTo(x - 6, y - 30); c.lineTo(x + 4, y - 22); c.lineTo(x + 14, y - 30); c.fill();
+  c.fillStyle = '#222'; c.beginPath(); c.arc(x - 1, y - 53, 2.2, 0, 7); c.arc(x + 10, y - 53, 2.2, 0, 7); c.fill();
+  c.fillStyle = '#ffcf3a'; c.beginPath(); c.moveTo(x - 10, y - 62); c.lineTo(x - 8, y - 76); c.lineTo(x - 1, y - 68); c.lineTo(x + 4, y - 80); c.lineTo(x + 9, y - 68); c.lineTo(x + 16, y - 76); c.lineTo(x + 18, y - 62); c.fill();
+  c.fillStyle = '#ff6b6b'; c.beginPath(); c.arc(x + 4, y - 66, 2.2, 0, 7); c.fill();
+}
+
+document.fonts.ready.then(() => {
+  ({ rencana: screenRencana, festival: screenFestival, laporan: screenLaporan, kerajaan: screenKerajaan })[SCREEN]();
+  document.body.dataset.ready = '1';
+});
+</script>
+</body>
+</html>
