@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Festival Telaga (gaya Townscaper)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: #2c8a99; }
+  .board { position: absolute; left: 22px; right: 22px; top: 76px; align-items: start; display: grid; grid-template-columns: 1.05fr 1fr 1fr; gap: 16px; }
+  .col { background: #fff8ea; border-radius: 20px; box-shadow: 0 5px 0 #d9c49c, 0 10px 22px rgba(10,40,50,.3); padding: 14px 16px; position: relative; }
+  .col h3 { font-size: 21px; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; }
+  .col h3 .n { margin-left: auto; font-size: 15px; background: #ffe7b0; border-radius: 99px; padding: 2px 10px; color: #8a5a1a; }
+  .task { display: flex; gap: 10px; align-items: center; font-size: 17px; padding: 7px 8px; border-radius: 12px; margin-bottom: 6px; background: #f6ecd6; }
+  .task .ck { width: 26px; height: 26px; border-radius: 8px; background: #fff; border: 3px solid #d2bd92; display: flex; align-items: center; justify-content: center; font-size: 16px; flex: none; }
+  .task.done { background: #e2f4d8; } .task.done .ck { background: #5cb84f; border-color: #5cb84f; color: #fff; }
+  .task.warn { background: #ffe4d8; outline: 3px dashed #ff8a5c; }
+  .task small { margin-left: auto; color: #8a7458; font-size: 14px; white-space: nowrap; }
+  .day { font-size: 14px; font-weight: 600; color: #2d7f95; margin: 8px 0 4px; }
+  .slot { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .slot .t { width: 62px; font-weight: 700; font-size: 17px; color: #2d7f95; flex: none; }
+  .slot .c { flex: 1; border-radius: 14px; padding: 8px 10px; font-size: 17px; font-weight: 500; background: #f6ecd6; display: flex; gap: 8px; align-items: center; min-height: 44px; }
+  .slot .c.empty { background: transparent; border: 3px dashed #d2bd92; color: #a99273; justify-content: center; }
+  .slot .c.bad { background: #ffe4d8; border: 3px solid #ff8a5c; }
+  .cards { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .cards span { background: #fff; border-radius: 12px; padding: 6px 10px; font-size: 16px; box-shadow: 0 3px 0 #d9c49c; font-weight: 500; }
+  .vol { display: flex; gap: 8px; margin: 2px 0 10px; }
+  .vol div { flex: 1; text-align: center; background: #fff; border-radius: 14px; padding: 6px 2px; box-shadow: 0 3px 0 #d9c49c; font-size: 13px; font-weight: 600; }
+  .vol canvas { width: 54px; height: 54px; display: block; margin: 0 auto; }
+  .post { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #f6ecd6; border-radius: 12px; margin-bottom: 6px; font-size: 16px; }
+  .post .who { margin-left: auto; border: 3px dashed #d2bd92; border-radius: 10px; padding: 2px 8px; color: #a99273; font-size: 14px; }
+  .post .who.ok { border: 0; background: #e2f4d8; color: #3a7a30; font-weight: 600; }
+  .mini { background: #eef8ff; border-radius: 14px; padding: 8px 10px; font-size: 16px; margin-top: 8px; }
+  .mini b { color: #2d7f95; }
+  .ans { display: inline-flex; gap: 6px; margin-left: 6px; }
+  .ans span { background: #fff; border-radius: 8px; padding: 0 9px; font-weight: 700; box-shadow: 0 2px 0 #c9d9e4; }
+  .topbar { position: absolute; left: 22px; right: 22px; top: 14px; display: flex; gap: 12px; align-items: center; }
+  .topbar .pill { position: static; }
+  .check { right: 18px; top: 84px; width: 300px; }
+  .check h4 { font-size: 18px; margin-bottom: 6px; }
+  .check div { font-size: 16px; padding: 4px 0; display: flex; gap: 8px; align-items: flex-start; }
+  .tag3 { position: absolute; transform: translate(-50%, -50%); font-size: 15px; font-weight: 700; color: #fff; background: #ff6b4a; border-radius: 99px; padding: 3px 10px; white-space: nowrap; box-shadow: 0 3px 6px rgba(0,0,0,.25); }
+  .tag3.g { background: #3fa142; }
+  .nameplate { position: absolute; transform: translate(-50%, 0); text-align: center; background: #fff8ea; border-radius: 16px; padding: 8px 16px; box-shadow: 0 4px 0 #d9c49c, 0 8px 16px rgba(0,0,0,.2); }
+  .nameplate b { font-size: 22px; display: block; }
+  .nameplate small { font-size: 15px; color: #8a7458; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui"></div>
+<script type="module">
+import * as THREE from './vendor/three.module.min.js';
+const W = 1180, H = 820;
+const SCREEN = new URLSearchParams(location.search).get('s') || 'tata';
+const UI = document.getElementById('ui');
+const cv = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(window.devicePixelRatio || 1);
+renderer.setSize(W, H, false);
+cv.style.width = W + 'px'; cv.style.height = H + 'px';
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#9fdbe3');
+
+// ---------- helpers ----------
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+const matCache = {};
+const M = (c, o = {}) => { const k = c + JSON.stringify(o); return matCache[k] || (matCache[k] = new THREE.MeshStandardMaterial({ color: c, roughness: 0.85, ...o })); };
+function add(geo, mat, x, y, z, parent = scene) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; }
+const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+const sph = r => new THREE.SphereGeometry(r, 18, 14);
+function emojiTex(e, ring = '#ff6b6b', bg = '#fff') {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d');
+  if (bg) { x.fillStyle = bg; x.beginPath(); x.arc(64, 64, 56, 0, 7); x.fill(); x.lineWidth = 10; x.strokeStyle = ring; x.stroke(); }
+  x.font = '72px "Noto Color Emoji"'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(e, 64, 70);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+function sprite(e, x, y, z, s = 0.7, ring, bg) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: emojiTex(e, ring, bg), depthWrite: false })); sp.position.set(x, y, z); sp.scale.set(s, s, s); scene.add(sp); return sp; }
+
+// ---------- lights ----------
+scene.add(new THREE.HemisphereLight('#fff7e8', '#5aa6b0', 1.5));
+const sun = new THREE.DirectionalLight('#fff0d8', 2.4);
+sun.position.set(-10, 22, 8); sun.target.position.set(13, 0, 10); scene.add(sun.target);
+sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 22, bottom: -22, near: 1, far: 80 });
+sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02; scene.add(sun);
+
+// ---------- water ----------
+const water = add(new THREE.PlaneGeometry(400, 400), M('#3aa2b0', { roughness: 0.35, metalness: 0.05 }), 13, 0, 10);
+water.rotation.x = -Math.PI / 2; water.castShadow = false;
+const shallow = M('#6cc9cf', { roughness: 0.4 }), foam = M('#ffffff', { roughness: 0.6 });
+
+// ---------- map ----------
+const NI = 27, NJ = 20, Q = 0.5;
+const R = rng(42);
+const kind = [];   // '.' air, 'q' dermaga batu, 'p' alun-alun, 'g' rumput, 'h' rumah, 'b' jembatan, 'k' istana
+const canalX = j => 7.2 + Math.sin(j * 0.45) * 0.9;
+for (let i = 0; i < NI; i++) { kind[i] = []; for (let j = 0; j < NJ; j++) {
+  const wob = Math.sin(i * 0.9) * 0.05 + Math.cos(j * 1.1) * 0.05;
+  const e = ((i - 13) / 12.6) ** 2 + ((j - 9.6) / 8.6) ** 2 + wob;
+  let k = e < 1 ? 'q' : '.';
+  if (k === 'q' && Math.abs(i - canalX(j)) < 0.75 && j > 3) k = (j === 11 ? 'b' : '.');
+  if (k === 'q' && ((i - 15.5) / 5.6) ** 2 + ((j - 10.5) / 4.2) ** 2 < 1) k = 'p';
+  kind[i][j] = k;
+} }
+const isLand = (i, j) => i >= 0 && j >= 0 && i < NI && j < NJ && kind[i][j] !== '.' && kind[i][j] !== 'b';
+// houses: along edges (except dock front & plaza), grass in west quarter
+const housesAt = [];
+for (let i = 0; i < NI; i++) for (let j = 0; j < NJ; j++) {
+  if (kind[i][j] !== 'q') continue;
+  let nearW = false; for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) if (!isLand(i + di, j + dj)) nearW = true;
+  const front = j >= 15 && i >= 11 && i <= 21;
+  const palaceZone = i >= 10 && i <= 16 && j <= 4;
+  if (palaceZone) { kind[i][j] = 'k'; continue; }
+  if (i < canalX(j) - 0.5 && !nearW && R() < 0.55) { kind[i][j] = 'g'; continue; }
+  if ((nearW && !front && R() < 0.85) || (i < canalX(j) && R() < 0.35)) { kind[i][j] = 'h'; housesAt.push([i, j]); }
+}
+
+const stoneTop = M('#ddd0b4'), stoneSide = M('#c4b190'), plazaM = M('#f0dfbd'), grassM = M('#9fcf7f');
+const stoneGeo = box(1.0, Q, 1.0), topGeo = box(1.0, 0.04, 1.0);
+for (let i = 0; i < NI; i++) for (let j = 0; j < NJ; j++) {
+  const k = kind[i][j]; if (k === '.' || k === 'b') continue;
+  const h = k === 'k' ? Q + 0.9 : Q;
+  const b = add(box(1.0, h, 1.0), stoneSide, i, h / 2, j);
+  add(topGeo, k === 'p' ? plazaM : k === 'g' ? grassM : stoneTop, i, h + 0.02, j);
+  const f = add(box(1.14, 0.03, 1.14), foam, i, 0.015, j); f.castShadow = false;
+  const sh = add(box(1.6, 0.02, 1.6), shallow, i, 0.005, j); sh.castShadow = false;
+  // cobble pattern on plaza
+  if (k === 'p' && (i + j) % 2 === 0) add(box(0.98, 0.01, 0.98), M('#e6cfa6'), i, Q + 0.045, j).castShadow = false;
+}
+// bridge over canal
+{ const bx = canalX(11); add(box(1.4, 0.18, 1.0), M('#c98b55'), bx, Q + 0.05, 11); for (const dz of [-0.45, 0.45]) add(box(1.4, 0.25, 0.08), M('#fff'), bx, Q + 0.25, 11 + dz); add(box(1.0, Q, 0.9), M('#d6c7aa'), bx, Q / 2 - 0.2, 11).scale.y = 0.5; }
+
+// ---------- buildings ----------
+const WALLS = ['#f6e7c8', '#f8c6c0', '#bfe5d2', '#ffe08a', '#c7dcf5', '#ffb38a', '#f2f2ea', '#d9c7f0'];
+const ROOFS = ['#d4584a', '#3f8fa6', '#e3873f', '#c94f6d', '#5e9e6b'];
+const winM = M('#33507a', { roughness: 0.3 }), white = M('#ffffff');
+function prism(len, w, hgt, mat, x, y, z, alongX) {
+  const r = w / Math.sqrt(3);
+  const g = new THREE.CylinderGeometry(r, r, len, 3, 1, false, Math.PI / 2); g.rotateZ(Math.PI / 2);
+  const m = add(g, mat, x, y + (r / 2) * (hgt / (1.5 * r)), z);
+  m.scale.set(1, hgt / (1.5 * r), 1);
+  if (!alongX) m.rotation.y = Math.PI / 2;
+  return m;
+}
+function house(i, j, floors, wall, roof, alongX, rr) {
+  const base = Q + 0.04, fh = 0.82;
+  for (let f = 0; f < floors; f++) {
+    const y = base + f * fh;
+    add(box(0.92, fh, 0.92), M(wall), i, y + fh / 2, j);
+    add(box(0.96, 0.05, 0.96), white, i, y + fh, j);
+    // windows on visible faces (+z, +x)
+    const door = f === 0 && rr() < 0.5;
+    for (const [dx, dz, ry] of [[0, 0.465, 0], [0.465, 0, Math.PI / 2]]) {
+      const n = door && dz ? 1 : (rr() < 0.5 ? 2 : 1);
+      for (let w = 0; w < n; w++) {
+        const off = n === 2 ? (w ? 0.2 : -0.2) : 0;
+        const wy = door && dz ? y + 0.25 : y + fh * 0.55;
+        const wh = door && dz ? 0.46 : 0.26;
+        const fr = add(box(0.24, wh + 0.07, 0.03), white, i + dx + (dz ? off : 0), wy, j + dz + (dx ? off : 0)); fr.rotation.y = ry;
+        const gl = add(box(0.17, wh, 0.03), door && dz ? M('#8a5a36') : winM, i + dx * 1.02 + (dz ? off : 0), wy, j + dz * 1.02 + (dx ? off : 0)); gl.rotation.y = ry;
+      }
+    }
+  }
+  const top = base + floors * fh;
+  prism(1.02, 1.06, 0.5, M(roof), i, top, j, alongX);
+  if (rr() < 0.45) { add(box(0.12, 0.3, 0.12), white, i + 0.25, top + 0.35, j - 0.15); }
+}
+const rr = rng(7);
+housesAt.forEach(([i, j]) => {
+  const fl = 1 + Math.floor(rr() * (j < 6 ? 3 : 2.2));
+  house(i, j, fl, WALLS[Math.floor(rr() * WALLS.length)], ROOFS[Math.floor(rr() * ROOFS.length)], rr() < 0.5, rr);
+});
+// trees on grass
+function tree(x, z, s = 1) {
+  const y = Q + 0.04;
+  add(new THREE.CylinderGeometry(0.05 * s, 0.07 * s, 0.4 * s, 8), M('#8a5a36'), x, y + 0.2 * s, z);
+  add(sph(0.3 * s), M('#6cb85a'), x, y + 0.55 * s, z);
+  add(sph(0.2 * s), M('#83c96a'), x + 0.12 * s, y + 0.72 * s, z - 0.05 * s);
+}
+for (let i = 0; i < NI; i++) for (let j = 0; j < NJ; j++) if (kind[i][j] === 'g') tree(i + (rr() - 0.5) * 0.3, j + (rr() - 0.5) * 0.3, 0.9 + rr() * 0.4);
+
+// palace (istana teratai) on raised platform
+{
+  const px = 13, pz = 2.4, py = Q + 0.94;
+  add(box(3.2, 1.4, 1.8), M('#f6f1e6'), px, py + 0.7, pz);
+  add(box(3.3, 0.08, 1.9), white, px, py + 1.42, pz);
+  for (const dx of [-1.9, 1.9]) {
+    add(new THREE.CylinderGeometry(0.45, 0.5, 2.6, 16), M('#f9f6ee'), px + dx, py + 1.3, pz);
+    add(new THREE.ConeGeometry(0.6, 1.0, 16), M('#3f8fa6'), px + dx, py + 3.1, pz);
+    add(box(0.18, 0.3, 0.05), winM, px + dx, py + 1.9, pz + 0.47);
+  }
+  for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; const p = add(sph(0.42), M(k % 2 ? '#ff9fb8' : '#ffc2d2'), px + Math.cos(a) * 0.55, py + 2.0, pz + Math.sin(a) * 0.4); p.scale.set(0.6, 1.4, 0.6); p.rotation.z = Math.cos(a) * 0.5; p.rotation.x = -Math.sin(a) * 0.5; }
+  add(sph(0.3), M('#ffe17a'), px, py + 2.55, pz);
+  add(box(0.6, 0.9, 0.06), M('#3f8fa6'), px, py + 0.45, pz + 0.92);
+  // stairs
+  for (let s = 0; s < 4; s++) add(box(1.2, 0.24, 0.3), stoneTop, px, Q + 0.12 + s * 0.22, pz + 1.9 - s * 0.28);
+  add(new THREE.CylinderGeometry(0.02, 0.02, 1, 6), M('#7a4c2a'), px, py + 3.2, pz);
+  const fl = add(box(0.5, 0.28, 0.02), M('#ff6b6b'), px + 0.26, py + 3.55, pz);
+}
+
+// ---------- festival props ----------
+const FOOD = { jagung: ['🌽', '#ff6b6b'], es: ['🍧', '#ffb43a'], serabi: ['🥞', '#4fb3e8'], sate: ['🍢', '#b26bff'], klepon: ['🍡', '#ff7ab8'] };
+function stall(x, z, food, opts = {}) {
+  const g = new THREE.Group(); g.position.set(x, Q + 0.04, z); g.rotation.y = opts.rot || 0; scene.add(g);
+  const [e, col] = FOOD[food];
+  add(box(1.1, 0.42, 0.5), M('#c98b55'), 0, 0.21, 0.15, g);
+  add(box(1.16, 0.06, 0.56), M('#e8b27a'), 0, 0.45, 0.15, g);
+  for (const [dx, dz] of [[-0.52, -0.1], [0.52, -0.1], [-0.52, 0.4], [0.52, 0.4]]) add(new THREE.CylinderGeometry(0.025, 0.025, 1.0, 6), M('#7a4c2a'), dx, 0.5, dz, g);
+  for (let k = 0; k < 6; k++) { const s = add(box(0.2, 0.04, 0.8), M(k % 2 ? '#ffffff' : col), -0.5 + k * 0.2, 1.02, 0.12, g); s.rotation.x = 0.28; }
+  if (opts.ghost) g.traverse(o => { if (o.material) { o.material = o.material.clone(); o.material.transparent = true; o.material.opacity = 0.5; } });
+  sprite(e, x, Q + 1.65, z, 0.62, col);
+  return g;
+}
+function stage(x, z) {
+  add(box(2.2, 0.3, 1.6), M('#c98b55'), x, Q + 0.19, z);
+  add(box(2.3, 0.06, 1.7), M('#e8b27a'), x, Q + 0.36, z);
+  const sh = add(new THREE.CylinderGeometry(1.0, 1.0, 0.12, 24, 1, false, Math.PI, Math.PI), M('#ff9fb8'), x, Q + 1.2, z - 0.7);
+  sh.rotation.x = Math.PI / 2;
+  for (let k = 0; k < 5; k++) { const r = add(box(0.06, 0.9, 0.04), M('#ffd2dc'), x + (k - 2) * 0.35, Q + 1.0, z - 0.62); r.rotation.z = (k - 2) * 0.3; }
+}
+function lanternLine(a, b, h = 1.5) {
+  for (const p of [a, b]) add(new THREE.CylinderGeometry(0.03, 0.03, h, 6), M('#7a4c2a'), p[0], Q + h / 2, p[1]);
+  const cols = ['#ff6b6b', '#ffd25e', '#6bd1ff', '#9aff8a', '#ff9de0'];
+  for (let k = 1; k < 9; k++) { const t = k / 9; const x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t, y = Q + h - Math.sin(t * Math.PI) * 0.35; add(sph(0.07), M(cols[k % 5], { emissive: cols[k % 5], emissiveIntensity: 0.6 }), x, y - 0.08, z).castShadow = false; }
+}
+function bin(x, z, full) { add(new THREE.CylinderGeometry(0.13, 0.11, 0.32, 12), M('#4f9f48'), x, Q + 0.2, z); if (full) for (let k = 0; k < 3; k++) add(sph(0.07), M('#d9b35c'), x + (k - 1) * 0.07, Q + 0.4, z); }
+function bench(x, z, rot = 0) { const b = add(box(0.7, 0.06, 0.22), M('#a8693a'), x, Q + 0.25, z); b.rotation.y = rot; }
+function tent(x, z) { const g = add(new THREE.ConeGeometry(0.75, 0.7, 4), M('#fff4e0'), x, Q + 1.2, z); g.rotation.y = Math.PI / 4; add(new THREE.CylinderGeometry(0.03, 0.03, 0.85, 6), M('#7a4c2a'), x, Q + 0.45, z); }
+function infoBooth(x, z) { add(box(0.7, 0.5, 0.5), M('#4fb3e8'), x, Q + 0.29, z); prism(0.8, 0.7, 0.3, M('#ffffff'), x, Q + 0.54, z, true); sprite('ℹ️', x, Q + 1.25, z, 0.5, '#4fb3e8'); }
+function gate(x, z) {
+  for (const dx of [-0.9, 0.9]) add(box(0.18, 1.6, 0.18), M('#ffffff'), x + dx, Q + 0.8, z);
+  const a = add(new THREE.TorusGeometry(0.9, 0.09, 8, 24, Math.PI), M('#ff9fb8'), x, Q + 1.6, z);
+  sprite('🪷', x, Q + 2.55, z, 0.55, '#ff9fb8');
+}
+function boat(x, z, riders = [], rot = 0) {
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rot; scene.add(g);
+  add(box(1.5, 0.22, 0.55), M('#a8693a'), 0, 0.08, 0, g);
+  add(box(1.56, 0.06, 0.6), M('#ffffff'), 0, 0.2, 0, g);
+  const wk = add(box(2.4, 0.01, 0.8), M('#bfeff0'), -0.6, 0.006, 0, g); wk.castShadow = false;
+  riders.forEach((r, k) => critter(r, -0.45 + k * 0.45, 0.2, 0, 0.9, g));
+}
+function lily(x, z, flower) { add(new THREE.CylinderGeometry(0.28, 0.28, 0.02, 16, 1, false, 0.4, Math.PI * 1.85), M('#5fb35a'), x, 0.02, z).castShadow = false; if (flower) { for (let k = 0; k < 5; k++) { const a = k / 5 * 6.28; const p = add(sph(0.06), M('#ff9fbf'), x + Math.cos(a) * 0.06, 0.09, z + Math.sin(a) * 0.06); p.scale.set(1, 1.6, 1); } } }
+function pathDot(x, z, bad) { const d = add(new THREE.CylinderGeometry(0.14, 0.14, 0.03, 14), M(bad ? '#ff6b4a' : '#38b6e0', { emissive: bad ? '#ff6b4a' : '#38b6e0', emissiveIntensity: 0.5 }), x, Q + 0.07, z); d.castShadow = false; }
+
+// critters
+const CR = { kodok: '#6cc35a', bebek: '#ffd84f', kura: '#8fd27a', berang: '#b07a4f', ikan: '#ff9a52', udang: '#ff8a8a' };
+function critter(type, x, y, z, s = 1, parent = scene) {
+  const g = new THREE.Group(); g.position.set(x, y, z); g.scale.setScalar(s); parent.add(g);
+  const c = M(CR[type]);
+  if (type === 'kura') { const sh = add(sph(0.14), M('#4d8a3e'), 0, 0.1, 0, g); sh.scale.set(1.2, 0.8, 1.2); add(sph(0.08), M('#e9d58a'), 0, 0.24, 0.08, g); }
+  else { const b = add(sph(0.11), c, 0, 0.12, 0, g); b.scale.y = 1.15; add(sph(0.09), c, 0, 0.3, 0.02, g); }
+  const hy = type === 'kura' ? 0.26 : 0.32, hz = type === 'kura' ? 0.15 : 0.1;
+  for (const dx of [-0.035, 0.035]) { add(sph(0.022), white, dx, hy, hz, g).castShadow = false; add(sph(0.012), M('#222'), dx, hy, hz + 0.017, g).castShadow = false; }
+  if (type === 'kodok') for (const dx of [-0.05, 0.05]) add(sph(0.035), c, dx, 0.39, 0.03, g);
+  if (type === 'bebek') add(sph(0.035), M('#ff9a3a'), 0, 0.29, 0.11, g).scale.set(1.2, 0.5, 1);
+  if (type === 'berang') for (const dx of [-0.07, 0.07]) add(sph(0.025), M('#8a5a36'), dx, 0.38, 0, g);
+  if (type === 'ikan') { const f = add(new THREE.ConeGeometry(0.04, 0.1, 6), M('#e5702e'), 0, 0.42, 0, g); }
+  if (type === 'udang') for (const dx of [-0.04, 0.04]) { const a = add(new THREE.CylinderGeometry(0.006, 0.006, 0.18, 4), M('#e06060'), dx, 0.45, 0.02, g); a.rotation.z = dx * 6; }
+  return g;
+}
+// Nara si penata pesta cilik (tokoh baru)
+function nara(x, z, s = 1) {
+  const g = new THREE.Group(); g.position.set(x, Q + 0.04, z); g.scale.setScalar(s); scene.add(g);
+  const skin = M('#c98d63');
+  for (const dx of [-0.06, 0.06]) add(new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8), M('#3c4f7a'), dx, 0.1, 0, g);
+  add(new THREE.CylinderGeometry(0.12, 0.14, 0.28, 12), M('#ffffff'), 0, 0.33, 0, g);
+  const vest = add(new THREE.CylinderGeometry(0.125, 0.145, 0.22, 12, 1, true), M('#2bb3a3', { side: THREE.DoubleSide }), 0, 0.35, 0, g);
+  add(sph(0.15), skin, 0, 0.6, 0, g);
+  const hair = add(sph(0.155), M('#2b1d14'), 0, 0.64, -0.02, g); hair.scale.set(1, 0.75, 1);
+  // topi dengan teratai
+  add(new THREE.CylinderGeometry(0.16, 0.16, 0.05, 16), M('#ffcf3a'), 0, 0.73, 0, g);
+  const vis = add(box(0.16, 0.02, 0.12), M('#ffcf3a'), 0, 0.71, 0.14, g);
+  add(sph(0.04), M('#ff9fbf'), 0.08, 0.78, 0.02, g);
+  for (const dx of [-0.05, 0.05]) { add(sph(0.022), M('#2b1d14'), dx, 0.62, 0.135, g).castShadow = false; }
+  add(sph(0.025), M('#ff9a9a'), -0.09, 0.57, 0.12, g); add(sph(0.025), M('#ff9a9a'), 0.09, 0.57, 0.12, g);
+  // papan klip + headset
+  const cb = add(box(0.16, 0.2, 0.02), M('#c98b55'), 0.14, 0.36, 0.13, g); cb.rotation.y = -0.4;
+  add(box(0.12, 0.15, 0.022), white, 0.145, 0.355, 0.135, g).rotation.y = -0.4;
+  add(new THREE.TorusGeometry(0.16, 0.012, 6, 16, Math.PI), M('#333'), 0, 0.64, 0, g);
+  add(sph(0.035), M('#333'), 0.155, 0.6, 0, g);
+  for (const dx of [-0.15, 0.15]) { const a = add(new THREE.CylinderGeometry(0.035, 0.035, 0.22, 8), skin, dx, 0.33, 0.02, g); a.rotation.z = dx > 0 ? 0.5 : -0.2; }
+  return g;
+}
+function kiko(x, z, s = 1) {
+  const g = new THREE.Group(); g.position.set(x, Q + 0.04, z); g.scale.setScalar(s); scene.add(g);
+  const c = M('#6cc35a');
+  const b = add(sph(0.16), c, 0, 0.16, 0, g); b.scale.set(1.1, 0.9, 1);
+  add(sph(0.11), M('#b4e89a'), 0, 0.13, 0.08, g);
+  for (const dx of [-0.08, 0.08]) { add(sph(0.06), c, dx, 0.3, 0.02, g); add(sph(0.04), white, dx, 0.31, 0.06, g); add(sph(0.02), M('#222'), dx, 0.31, 0.095, g); }
+  for (let k = 0; k < 5; k++) { const p = add(sph(0.04), M('#ff9fbf'), (k - 2) * 0.03, 0.38, -0.02, g); p.scale.set(0.6, 1.5, 0.6); p.rotation.z = (k - 2) * 0.3; }
+  return g;
+}
+function king(x, z, s = 1) {
+  const g = new THREE.Group(); g.position.set(x, Q + 0.04, z); g.scale.setScalar(s); scene.add(g);
+  const sh = add(sph(0.26), M('#4d8a3e'), 0, 0.2, -0.04, g); sh.scale.set(1.1, 0.85, 1.1);
+  add(sph(0.14), M('#e9d58a'), 0, 0.44, 0.14, g);
+  add(sph(0.08), white, 0, 0.36, 0.25, g).scale.set(1, 1.3, 0.7);
+  for (const dx of [-0.05, 0.05]) add(sph(0.02), M('#222'), dx, 0.48, 0.26, g);
+  const cr = add(new THREE.CylinderGeometry(0.09, 0.1, 0.1, 6), M('#ffcf3a', { metalness: 0.3 }), 0, 0.6, 0.12, g);
+  return g;
+}
+
+// ---------- layout ----------
+const P = { cx: 15.5, cz: 10.5 };
+lanternLine([12, 8], [19, 8]); lanternLine([12, 8], [12, 13.5]);
+const fountain = () => { add(new THREE.CylinderGeometry(0.6, 0.65, 0.2, 20), M('#e2d6bf'), P.cx, Q + 0.14, P.cz); add(new THREE.CylinderGeometry(0.5, 0.5, 0.05, 20), M('#7fd6ee', { roughness: 0.2 }), P.cx, Q + 0.24, P.cz).castShadow = false; const f = add(sph(0.16), M('#9ad7c0'), P.cx, Q + 0.45, P.cz); f.scale.y = 1.6; };
+fountain();
+function planter(x, z, c) { add(box(0.36, 0.22, 0.36), M('#d98a5a'), x, Q + 0.15, z); add(sph(0.2), M('#6cb85a'), x, Q + 0.36, z); for (let k = 0; k < 4; k++) add(sph(0.05), M(c), x + Math.cos(k * 1.6) * 0.13, Q + 0.48, z + Math.sin(k * 1.6) * 0.13); }
+[[11.6, 10.6, '#ff7ab8'], [19.6, 8.2, '#ffd25e'], [11.8, 8.4, '#ff6b6b'], [20.4, 13.2, '#b26bff'], [13.6, 14.4, '#ffd25e']].forEach(a => planter(...a));
+const cam = new THREE.PerspectiveCamera(28, W / H, 0.1, 300);
+
+function project(x, y, z) { const v = new THREE.Vector3(x, y, z).project(cam); return { x: (v.x + 1) / 2 * W, y: (1 - v.y) / 2 * H }; }
+function el(html, cls, style) { const d = document.createElement('div'); d.className = cls || ''; if (style) d.style.cssText = style; d.innerHTML = html; UI.appendChild(d); return d; }
+function bub(x, y, z, html, warn) { const p = project(x, y, z); el(html, 'bubble' + (warn ? ' warn' : ''), `left:${p.x}px;top:${p.y}px`); }
+function tag(x, y, z, html, good) { const p = project(x, y, z); el(html, 'tag3' + (good ? ' g' : ''), `left:${p.x}px;top:${p.y}px`); }
+
+function festivalScene(mode) {
+  stall(13, 9.2, 'jagung', { rot: 0.3 }); stall(15.4, 8.4, 'es'); stall(18.2, 9.0, 'serabi', { rot: -0.3 });
+  stall(12.6, 12.4, 'sate', { rot: 0.9 });
+  if (mode !== 'tata') { stall(18.6, 12.4, 'klepon', { rot: -0.9 }); stage(20.6, 10.3); tent(14, 13.7); infoBooth(19.9, 14.2); }
+  bin(14.3, 9.6, mode === 'festival'); bin(17, 12.9);
+  bench(16.6, 9.7); bench(14.4, 11.7, 0.6);
+  gate(16.5, 15.4);
+  // dermaga + lily
+  for (let k = 0; k < 3; k++) add(box(0.9, 0.12, 0.9), M('#c98b55'), 16.5, Q - 0.02, 16.6 + k * 0.85);
+  [[4, 17, 1], [22, 17.5, 0], [24.5, 15, 1], [2.5, 6, 0], [9.5, 18.5, 1], [7.3, 8, 1], [6.9, 14.2, 0], [26, 6, 1]].forEach(([x, z, f]) => lily(x, z, f));
+  const kinds = Object.keys(CR), vr = rng(mode === 'festival' ? 9 : 3);
+  const nv = mode === 'festival' ? 70 : mode === 'tata' ? 0 : 30;
+  for (let k = 0; k < nv; k++) {
+    const a = vr() * 6.28, r = 0.9 + vr() * 4.2;
+    const x = P.cx + Math.cos(a) * r * 1.2, z = P.cz + Math.sin(a) * r * 0.85;
+    if (kind[Math.round(x)]?.[Math.round(z)] !== 'p') continue;
+    const c = critter(kinds[k % 6], x, Q + 0.04, z, 1.1); c.rotation.y = vr() * 6.28;
+  }
+  if (mode === 'festival') {
+    for (let k = 0; k < 7; k++) critter(kinds[(k + 1) % 6], 13.3 + k * 0.32, Q + 0.04, 9.9 + k * 0.42, 1.1).rotation.y = -2.3; // antrean jagung
+    boat(19.5, 17.6, ['bebek', 'kodok', 'udang'], 0.2); boat(23.8, 12.5, ['kura', 'ikan', 'berang'], 1.4); boat(10.5, 18, ['kodok', 'bebek'], -0.4);
+    // sampah di telaga
+    for (const [x, z] of [[20.6, 17.4], [21, 17.7], [20.3, 17.9]]) add(sph(0.08), M('#d9b35c'), x, 0.04, z);
+    king(16.5, 14.2, 1.2).rotation.y = Math.PI;
+    critter('kodok', 20.6, Q + 0.38, 10.4, 1.4).rotation.y = 0; // pemusik
+    // anak berudu hilang
+    critter('kodok', 13.0, Q + 0.04, 13.6, 0.8);
+  } else boat(19.5, 17.6, [], 0.2);
+  nara(15.6, 12.2, 1.15).rotation.y = -0.2;
+  kiko(16.3, 12.4, 1.1).rotation.y = -0.4;
+}
+
+function hud(vis, visT, profit, profT, cash) {
+  el(`<small>Festival 1 · Kerajaan Telaga Biru</small><b>🪷 Bazar Kolam Teratai</b>`, 'card lv');
+  const pv = Math.min(100, vis / visT * 100), pp = Math.max(0, Math.min(100, profit / profT * 100));
+  el(`🐸 <span>Pengunjung</span> <span class="bar"><i style="width:${pv}%"></i></span> <b>${vis}/${visT}</b>`, 'pill', 'left:18px;top:96px');
+  el(`🪙 <span>Untung</span> <span class="bar gold"><i style="width:${pp}%"></i></span> <b>${profit}/${profT}</b>`, 'pill', 'left:18px;top:146px');
+  el(`👛 Kas <b>${cash}</b> 🪙`, 'pill', 'right:18px;top:18px');
+}
+function kikoSay(t) { el(`<div style="font-size:64px;line-height:1">🐸</div><div class="say">${t}</div>`, 'kiko'); }
+
+function render() { renderer.render(scene, cam); }
+
+if (SCREEN === 'tata' || SCREEN === 'festival' || SCREEN === 'papan') {
+  festivalScene(SCREEN === 'papan' ? 'tata' : SCREEN);
+  cam.position.set(P.cx - 13, 21, P.cz + 23); cam.lookAt(P.cx - 1.6, 0, P.cz - 0.6);
+  if (SCREEN === 'papan') { cam.position.set(13 - 12, 22, 10 + 24); cam.lookAt(13, 0, 9); }
+  cam.updateMatrixWorld();
+}
+if (SCREEN === 'tata') {
+  // jalur pengunjung dari gerbang
+  const path = [[16.5, 15], [16.3, 14], [16, 13], [15.8, 12], [15, 11.2], [14.2, 10.6], [16.6, 11], [17.4, 10.2], [17.8, 9.6]];
+  path.forEach(([x, z]) => pathDot(x, z));
+  stall(16.2, 13.4, 'klepon', { ghost: true });
+  pathDot(16.2, 13.6, true);
+  render();
+  hud(0, 20, 0, 10, 6);
+  tag(16.2, Q + 2.3, 13.4, '✖ Menghalangi jalan!');
+  bub(14.3, Q + 1.1, 9.6, '🗑️ ✔ dekat lapak');
+  el(`<h4>🔍 Cek Tata Letak Kiko</h4>
+      <div>✅ Gerbang dekat dermaga</div>
+      <div>✅ Tempat sampah dekat lapak makanan</div>
+      <div>❌ Lapak klepon menutup jalan masuk</div>
+      <div>⚠️ Belum ada tempat berteduh (sore hujan 🌧️)</div>
+      <div>⚠️ Belum ada pos informasi ℹ️</div>`, 'card check');
+  el(`<div class="tab on">🍢 Lapak</div><div class="tab">🎪 Hiburan</div><div class="tab">🪑 Fasilitas</div><div class="tab">📣 Promosi</div>`, 'tabs');
+  el(`<div class="item"><div class="e">🍡</div><div class="n">Klepon</div><div class="p">3 🪙</div></div>
+      <div class="item"><div class="e">⛺</div><div class="n">Tenda Teduh</div><div class="p">2 🪙</div></div>
+      <div class="item"><div class="e">ℹ️</div><div class="n">Pos Informasi</div><div class="p">2 🪙</div></div>
+      <div class="item"><div class="e">🪑</div><div class="n">Bangku</div><div class="p">1 🪙</div></div>
+      <div class="item"><div class="e">🗑️</div><div class="n">Tempat Sampah</div><div class="p">1 🪙</div></div>`, 'tray');
+  kikoSay('Ups! Lapak itu <b>menutup jalan</b> pengunjung. Geser ke samping, ya!');
+  el('Siap? ✔', 'go');
+}
+if (SCREEN === 'festival') {
+  render();
+  hud(17, 20, 7, 10, 21);
+  el(`☀️ Siang <span class="bar" style="width:160px"><i style="width:62%;background:linear-gradient(#ffe48a,#ffb43a)"></i></span> 🌙`, 'pill', 'right:18px;top:66px');
+  bub(13.6, Q + 2.0, 9.4, '😣 Antre panjang!', true);
+  bub(16.5, Q + 1.4, 14.2, '👑 Raja datang! Kursinya?', true);
+  bub(13.0, Q + 0.75, 13.6, '😢 Aku terpisah dari ibu…', true);
+  bub(19.6, 0.4, 17.9, '🐟 Sampah di telaga!', true);
+  bub(20.6, Q + 2.4, 10.0, '🎵 ♪ ♫');
+  bub(18.6, Q + 2.0, 12.4, '😋 +2 🪙');
+  kikoSay('Ada anak berudu tersesat! Antar ke <b>Pos Informasi</b> ℹ️');
+  el(`<div class="item" style="width:92px"><div class="e">🧑‍🍳</div><div class="n">Tambah penjual</div><div class="p">2 🪙</div></div>
+      <div class="item" style="width:92px"><div class="e">🪑</div><div class="n">Kursi Raja</div><div class="p">1 🪙</div></div>
+      <div class="item" style="width:92px"><div class="e">🧹</div><div class="n">Relawan bersih</div><div class="p">✔</div></div>`, 'tray', 'left:auto;right:20px;transform:none');
+}
+if (SCREEN === 'papan') {
+  render();
+  el('', 'dim');
+  el(`<div class="pill">📋 Papan Persiapan · Bazar Kolam Teratai</div><div style="flex:1"></div><div class="pill">⏳ 3 hari lagi</div><div class="pill">👛 20 🪙</div>`, 'topbar');
+  const vols = [['kodok', 'Kiko'], ['bebek', 'Bubu'], ['berang', 'Oto'], ['kura', 'Pak Kur']];
+  el(`
+  <div class="col"><h3>✅ Daftar Persiapan <span class="n">4/9</span></h3>
+    <div class="day">H-3 · Rencana</div>
+    <div class="task done"><div class="ck">✔</div>Tanya warga mau makan apa<small>📋</small></div>
+    <div class="task done"><div class="ck">✔</div>Pilih tempat: Alun-alun<small>📍</small></div>
+    <div class="day">H-2 · Pesan & ajak</div>
+    <div class="task done"><div class="ck">✔</div>Sewa 4 lapak makanan<small>−12 🪙</small></div>
+    <div class="task done"><div class="ck">✔</div>Ajak pemusik kodok<small>−4 🪙</small></div>
+    <div class="task warn"><div class="ck"></div>Pesan bahan klepon<small>sebelum H-1!</small></div>
+    <div class="day">H-1 · Siapkan</div>
+    <div class="task"><div class="ck"></div>Tempel poster di 3 tempat<small>📣</small></div>
+    <div class="task"><div class="ck"></div>Pasang lampion & tenda<small>⛺</small></div>
+    <div class="task"><div class="ck"></div>Bagi tugas relawan<small>👫</small></div>
+  </div>
+  <div class="col"><h3>🎤 Susun Acara</h3>
+    <div class="slot"><div class="t">08.00</div><div class="c">👑 Pembukaan oleh Raja</div></div>
+    <div class="slot"><div class="t">09.00</div><div class="c">🎵 Musik kodok</div></div>
+    <div class="slot"><div class="t">11.00</div><div class="c empty">taruh di sini</div></div>
+    <div class="slot"><div class="t">12.00</div><div class="c bad">🎆 Kembang api <small style="margin-left:auto;color:#c2541f">siang tidak kelihatan!</small></div></div>
+    <div class="slot"><div class="t">19.00</div><div class="c empty">taruh di sini</div></div>
+    <div class="cards"><span>🛶 Lomba perahu daun</span><span>🍽️ Istirahat makan</span><span>🏆 Bagi hadiah</span></div>
+    <div class="mini">🌦️ <b>Ramalan cuaca:</b> sore hujan sebentar. Sudah siap <b>tenda teduh</b>?</div>
+  </div>
+  <div class="col"><h3>👫 Tugas Relawan</h3>
+    <div class="vol">${vols.map(([k, n]) => `<div><canvas data-k="${k}"></canvas>${n}</div>`).join('')}</div>
+    <div class="post">🎟️ Jaga gerbang<span class="who ok">🦆 Bubu</span></div>
+    <div class="post">🧹 Kebersihan<span class="who ok">🦦 Oto</span></div>
+    <div class="post">ℹ️ Pos informasi<span class="who">pilih…</span></div>
+    <div class="post">🩹 Pos P3K<span class="who">pilih…</span></div>
+    <div class="mini">🧮 <b>Hitung lapak:</b> 1 lapak melayani 5 tamu. Tamu 20 → butuh berapa lapak?
+      <span class="ans"><span>3</span><span>4</span><span>5</span></span></div>
+  </div>`, 'board');
+  // relawan avatars: render small critter portraits
+  document.querySelectorAll('canvas[data-k]').forEach(c => {
+    c.width = c.height = 120; const x = c.getContext('2d');
+    const col = CR[c.dataset.k]; x.fillStyle = col; x.beginPath(); x.arc(60, 72, 34, 0, 7); x.fill(); x.beginPath(); x.arc(60, 42, 28, 0, 7); x.fill();
+    x.fillStyle = '#fff'; x.beginPath(); x.arc(50, 40, 8, 0, 7); x.arc(70, 40, 8, 0, 7); x.fill(); x.fillStyle = '#222'; x.beginPath(); x.arc(51, 41, 4, 0, 7); x.arc(71, 41, 4, 0, 7); x.fill();
+    x.fillStyle = 'rgba(255,120,140,.6)'; x.beginPath(); x.arc(40, 54, 5, 0, 7); x.arc(80, 54, 5, 0, 7); x.fill();
+  });
+}
+if (SCREEN === 'tokoh') {
+  scene.background = new THREE.Color('#bfe9ef');
+  // panggung kecil batu untuk lineup
+  const O = 60; sun.position.set(O - 10, 22, 8); sun.target.position.set(O + 3, 0, 1); sun.target.updateMatrixWorld();
+  for (let i = -1; i < 9; i++) for (let j = 0; j < 4; j++) { add(box(1, Q, 1), stoneSide, O + i, Q / 2, j); add(topGeo, (i + j) % 2 ? plazaM : stoneTop, O + i, Q + 0.02, j); add(box(1.14, 0.03, 1.14), foam, O + i, 0.015, j); }
+  house(O - 1, 0, 2, '#f8c6c0', '#d4584a', true, rng(3)); house(O + 8, 0, 3, '#bfe5d2', '#3f8fa6', false, rng(5)); house(O, 0, 1, '#ffe08a', '#e3873f', false, rng(8));
+  stall(O + 6.6, 0.4, 'klepon'); tree(O + 1.2, 0.3, 1.2); lily(O + 2, 4.8, 1); lily(O + 5, 5.2, 0);
+  nara(O + 2.2, 1.6, 2.4).rotation.y = 0.15;
+  kiko(O + 3.7, 1.9, 2.2).rotation.y = -0.1;
+  king(O + 5.2, 1.6, 2.2).rotation.y = -0.2;
+  ['bebek', 'berang', 'ikan', 'udang'].forEach((k, n) => critter(k, O + 0.6 + n * 0.6 + (n > 1 ? 5.6 : 0), Q + 0.04, 2.6, 1.8).rotation.y = (n - 1.5) * 0.2);
+  cam.fov = 24; cam.updateProjectionMatrix();
+  cam.position.set(O + 3.6, 5.0, 12.5); cam.lookAt(O + 3.6, 1.0, 1.4); cam.updateMatrixWorld();
+  render();
+  const lab = (x, y, z, b, s) => { const p = project(x, y, z); el(`<b>${b}</b><small>${s}</small>`, 'nameplate', `left:${p.x}px;top:${p.y}px`); };
+  lab(O + 2.2, 0.2, 2.2, 'Nara', 'Penata Pesta Cilik (kamu!)');
+  lab(O + 3.7, 0.2, 2.8, 'Kiko', 'katak asisten');
+  lab(O + 5.2, 0.2, 2.2, 'Raja Kura-kura', 'pemberi tugas');
+  el(`<b>🪷 Festival Telaga</b><small>Tokoh-tokoh · gaya Townscaper</small>`, 'card title');
+}
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>
