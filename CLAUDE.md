@@ -196,8 +196,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Status & yang sedang dibahas
 
-- Pratinjau **versi 24** (branch `pratinjau-v24`, belum dirilis) = **Njajan Fest versi 1** (game kelima, Tahap 1). Game lain tidak berubah.
-- Rilis terakhir di `main`: **versi 23** = **Angkasa Mart versi 3** (fitur keuangan v3 di atas: Kelola Toko, pegawai,
+- Rilis terakhir di `main`: **versi 24** = **Njajan Fest versi 1** (game kelima, Tahap 1). Game lain tidak berubah.
+- Versi 23 = **Angkasa Mart versi 3** (fitur keuangan v3 di atas: Kelola Toko, pegawai,
   asuransi, bencana, cabang, barang premium, berbagi tiap 20 hari). Game lain tidak berubah.
 - Versi 22 = **Tunggu Dulu! versi 4** = 10 hari + tantangan baru hari 6–10 + bantuan Tetua dihapus (lihat atas).
 - Versi 21 = **Tunggu Dulu! versi 3** = alat bisa berganti saat kaca pembesar aktif (tombol alat ada di
