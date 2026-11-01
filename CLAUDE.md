@@ -190,6 +190,14 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
   per jajan; masalah diketuk: sampah → kalau lama jatuh ke telaga, jajanan habis → tambah penjual 1 🪙, anak berudu terpisah →
   Pos Informasi, Raja datang → bangku, hujan → daun talas; ⏩ 2×) → **Laporan** (tamu, uang masuk − biaya rinci = untung, senang
   ≥70% → 3 bintang, komentar tamu). Modal 18, target 20 tamu & untung 6.
+- v4 (pratinjau v26): **Peta Kerajaan Telaga** setelah pilih tokoh (`screenPeta`, Tahap 2–3 terkunci "segera hadir");
+  **Papan Persiapan 3 langkah** (`papanStep`): 1 Tanya warga & hitung → 2 **Susun Acara** (`NF.ACARA`, jam di `LV.jam`; aturan
+  pembukaan paling awal, hadiah sesudah lomba, konser butuh Pemusik; `acaraCek`, kejadian acara saat festival `acaraEvent`) →
+  3 **Relawan** (`NF.RELAWAN` Bubu ramah/Oto rajin/Pak Kur sabar → `NF.POS` gerbang/bersih/bantu; cocok = lebih cepat; gerbang
+  menambah kesabaran antre, bersih & bantu otomatis membereskan masalah, `relawanBantu`) + **Tamu istimewa** (`NF.TAMU_IST`:
+  Nenek Kura-kura butuh bangku dekat gerbang, Rombongan Berudu butuh Pemusik, Pak Bangau butuh 2 keranjang; puas = senang + tip
+  2 🪙). Laporan: **Catatan Kiko** (≤3 saran dari log festival) + **Stiker** (`SAVE.stk`: `hero-tahap` emas/perak + spesial
+  `NF.STIKER`) + **Buku Stiker** (tombol di judul, tokoh, peta, laporan).
 - Kamera: geser 1 jari = putar sedikit, cubit = zoom (layar menata & festival).
 - Simpanan `localStorage` kunci `njajan-fest-v1` (`{cerita, best:{tiko,bebi,lumi}, main, hero, muted}`).
   Tes: buka `njajan-fest/?lite` (tanpa bayangan, render pelan — perlu untuk Playwright/swiftshader) lalu `NF.debug`
@@ -200,7 +208,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Status & yang sedang dibahas
 
-- Pratinjau **versi 26** (branch `pratinjau-v26`) = **Njajan Fest versi 3**: model Raja Kura-kura baru (kura-kura berkaki empat,
+- Pratinjau **versi 26** (branch `pratinjau-v26`) = **Njajan Fest versi 4** (peta, susun acara, relawan, tamu istimewa, catatan,
+  stiker; Tahap 2 Pasar Malam menyusul di pratinjau berikutnya, mockup `mockup-festival/tahap2.html`) + versi 3: model Raja Kura-kura baru (kura-kura berkaki empat,
   tempurung kubah bermotif heksagon + pinggiran krem, leher & kepala menjulur, mahkota emas, kerah merah).
 - Rilis terakhir di `main`: **versi 25** = **Njajan Fest versi 2** (area lebih luas, putar barang, 10 jajanan).
 - Versi 24 = **Njajan Fest versi 1** (game kelima, Tahap 1). Game lain tidak berubah.

@@ -1,8 +1,8 @@
 // Njajan Fest — alur utama: judul → pilih tokoh → cerita → papan persiapan → menata → festival → laporan
 import * as THREE from '../vendor/three.module.min.js';
-import { NF } from './data.js?v=3';
-import * as G from './models.js?v=3';
-import * as A from './audio.js?v=3';
+import { NF } from './data.js?v=4';
+import * as G from './models.js?v=4';
+import * as A from './audio.js?v=4';
 
 const W = 1180, H = 820, PADY = G.PADY;
 const $ = id => document.getElementById(id);
@@ -14,7 +14,8 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
 // ================= simpanan =================
 function loadSave() { try { return JSON.parse(localStorage.getItem(NF.SAVE_KEY)) || {}; } catch (e) { return {}; } }
-const SAVE = Object.assign({ cerita: false, best: {}, main: 0, hero: null, muted: false }, loadSave());
+const SAVE = Object.assign({ cerita: false, best: {}, main: 0, hero: null, muted: false, stk: {} }, loadSave());
+SAVE.stk = SAVE.stk || {};
 function save() { try { localStorage.setItem(NF.SAVE_KEY, JSON.stringify(SAVE)); } catch (e) {} }
 
 // ================= panggung & renderer =================
@@ -304,6 +305,7 @@ function screenJudul() {
   const b = el('<button class="btn" style="font-size:28px;padding:14px 34px">▶ Ketuk untuk mulai</button>', '', 'position:absolute;left:50%;bottom:40px;transform:translateX(-50%)');
   b.querySelector('button').onclick = goTokoh;
   el('versi ' + NF.VERSION, 'ver');
+  const sb = el('<button class="btn kuning">📒 Buku Stiker</button>', '', 'position:absolute;right:20px;bottom:40px'); sb.querySelector('button').onclick = () => { A.unlock(); A.sfx('tap'); bukuStiker(); };
 }
 function goTokoh() { A.unlock(); A.sfx('tap'); A.music(true); screenTokoh(); }
 function spawnDecorCritter() {
@@ -330,7 +332,8 @@ function screenTokoh() {
   });
   const gw = el('<button class="btn" style="font-size:26px">Pilih ▶</button>', '', 'position:absolute;right:24px;bottom:20px');
   const go = gw.querySelector('button'); go.disabled = !chosen;
-  go.onclick = () => { if (!chosen) return; A.sfx('good'); S.hero = SAVE.hero = chosen; save(); if (!SAVE.cerita) screenCerita(); else screenPapan(); };
+  go.onclick = () => { if (!chosen) return; A.sfx('good'); S.hero = SAVE.hero = chosen; save(); if (!SAVE.cerita) screenCerita(); else screenPeta(); };
+  const sb = el('<button class="btn kuning">📒 Buku Stiker</button>', '', 'position:absolute;left:24px;bottom:20px'); sb.querySelector('button').onclick = () => { A.sfx('tap'); bukuStiker(); };
 }
 let hop = null;
 
@@ -350,7 +353,7 @@ function screenCerita() {
   const d = el('', 'dialog');
   const show = () => {
     d.innerHTML = `<div class="who"><span class="face">👑</span>Raja Kura-kura</div>${lines[i]}<div class="nx"><button class="btn">${i < lines.length - 1 ? 'Lanjut ▶' : 'Siap! ▶'}</button></div>`;
-    d.querySelector('button').onclick = () => { A.sfx('tap'); i++; if (i < lines.length) show(); else { SAVE.cerita = true; save(); screenPapan(); } };
+    d.querySelector('button').onclick = () => { A.sfx('tap'); i++; if (i < lines.length) show(); else { SAVE.cerita = true; save(); screenPeta(); } };
   };
   show();
 }
@@ -363,10 +366,26 @@ function rollHearts() {
 function screenPapan() {
   S.screen = 'papan'; document.body.className = 's-papan'; clearUI(); resetActors(); clearDyn(); sunAt(1, -1); setCam('venue');
   S.placed = []; S.musik = false; S.spent = 0; S.hitungOk = false; SLOTS.forEach(s => s.item = null);
+  S.acara = LV.jam.map(() => null); S.rel = {}; S.tamuIst = pick(Object.keys(NF.TAMU_IST));
   rollHearts();
+  papanStep(1);
+}
+function papanStep(n) {
+  clearUI(); S.papanStep = n;
   el('', 'dim');
-  el(`<div class="pill" style="position:static;display:inline-flex">📋 Papan Persiapan · ${LV.nama}</div>`, '', 'position:absolute;left:134px;top:16px');
-  el(`<div class="pill" style="position:static;display:inline-flex">👛 Modal ${LV.modal} 🪙</div>`, '', 'position:absolute;right:22px;top:16px');
+  const lbl = ['1 Tanya warga', '2 Susun acara', '3 Relawan & tamu'];
+  el(lbl.map((t, i) => `<div class="s ${i + 1 === n ? 'on' : i + 1 < n ? 'ok' : ''}">${i + 1 < n ? '✔ ' : ''}${t}</div>`).join(''), 'steps');
+  el(`<div class="pill" style="position:static;display:inline-flex">👛 Modal ${LV.modal} 🪙</div>`, '', 'position:absolute;right:22px;top:14px');
+  if (n === 1) papan1(); else if (n === 2) papan2(); else papan3();
+}
+function papanNav(back, nextLabel, onNext, enabled = true) {
+  const nv = el(`${back ? '<button class="btn abu">◀ Kembali</button>' : ''}<button class="btn">${nextLabel}</button>`, 'nav');
+  const btns = nv.querySelectorAll('button'); const nx = btns[btns.length - 1];
+  if (back) btns[0].onclick = () => { A.sfx('tap'); papanStep(S.papanStep - 1); };
+  nx.disabled = !enabled; nx.onclick = () => { A.sfx('tap'); onNext(); };
+  return nx;
+}
+function papan1() {
   const order = [...NF.LAPAK].sort((a, b) => S.hearts[b] - S.hearts[a]);
   const wish = order.map(k => `<div class="r"><img src="${G.foodURL(k, 72)}">${NF.ITEMS[k].nama}<small class="hg">${costOf(k)}🪙</small><span class="h">${'❤️'.repeat(S.hearts[k])}</span></div>`).join('');
   const groups = Array.from({ length: LV.targetTamu / LV.porsi }, () => `<span class="g">${'🐸'.repeat(LV.porsi)}</span>`).join('');
@@ -376,22 +395,132 @@ function screenPapan() {
     <div class="col"><h3>🧮 Hitung lapak</h3>
       <div style="font-size:17px;font-weight:700">Target: <b>${LV.targetTamu} tamu</b>. Satu lapak bisa melayani <b>${LV.porsi} tamu</b>.<br>Butuh berapa lapak?</div>
       <div class="groups">${groups}</div>
-      <div class="ans">${[3, 4, 5].map(n => `<button data-n="${n}">${n}</button>`).join('')}</div>
+      <div class="ans">${[3, 4, 5].map(n => `<button data-n="${n}" class="${S.hitungOk && n === LV.targetTamu / LV.porsi ? 'ok' : ''}">${n}</button>`).join('')}</div>
       <div class="fb"></div></div>
     <div class="col"><h3>🌦️ Ramalan & persiapan</h3>
       <div class="mini" style="margin-top:0">🌧️ <b>Sore nanti hujan sebentar.</b> Siapkan tempat berteduh!</div>
       <div class="mini">👶 Di festival ramai, kadang ada anak yang terpisah dari ibunya.</div>
-      <div class="mini">👑 Raja juga akan datang berkunjung!</div>
-      <div style="font-size:15px;font-weight:700;color:#6b7b84;margin-top:10px">Nanti cek daftar di layar menata, ya.</div></div>`, 'board');
+      <div class="mini">👑 Raja juga akan datang berkunjung!</div></div>`, 'board');
+  const nx = papanNav(false, 'Lanjut ▶', () => papanStep(2), S.hitungOk);
   board.querySelectorAll('.ans button').forEach(b => b.onclick = () => {
     const n = +b.dataset.n, ok = n === LV.targetTamu / LV.porsi, fb = board.querySelector('.fb');
     board.querySelectorAll('.ans button').forEach(x => x.className = '');
-    if (ok) { b.className = 'ok'; fb.innerHTML = `✔ Betul! ${n} kelompok × ${LV.porsi} tamu = ${LV.targetTamu} tamu. Siapkan <b>${n} lapak</b>.`; fb.style.color = '#3a9a3a'; A.sfx('good'); S.hitungOk = true; go.disabled = false; }
+    if (ok) { b.className = 'ok'; fb.innerHTML = `✔ Betul! ${n} kelompok × ${LV.porsi} tamu = ${LV.targetTamu} tamu. Siapkan <b>${n} lapak</b>.`; fb.style.color = '#3a9a3a'; A.sfx('good'); S.hitungOk = true; nx.disabled = false; }
     else { b.className = 'no'; fb.innerHTML = 'Hmm, coba hitung kotak hijaunya lagi 🙂'; fb.style.color = '#d9603f'; A.sfx('bad'); }
   });
-  const gw = el('<button class="btn" disabled>Mulai menata ▶</button>', 'board-go');
-  const go = gw.querySelector('button'); go.onclick = () => { A.sfx('tap'); screenTata(); };
   helper('Baca hasil tanya warga, lalu hitung butuh berapa lapak!');
+}
+// aturan acara: pembukaan paling awal, hadiah sesudah lomba
+function acaraCek(list = S.acara) {
+  const idx = k => list.indexOf(k);
+  const res = list.map(k => k ? 'ok' : null);
+  if (idx('pembukaan') > 0) res[idx('pembukaan')] = 'no';
+  if (idx('hadiah') >= 0 && (idx('lomba') < 0 || idx('hadiah') < idx('lomba'))) res[idx('hadiah')] = 'no';
+  return res;
+}
+function acaraTepat() { return S.acara.every(Boolean) && acaraCek().every(r => r === 'ok'); }
+let acaraSel = null;
+function papan2() {
+  const cek = acaraCek();
+  const slots = LV.jam.map((j, i) => {
+    const k = S.acara[i], A2 = k && NF.ACARA[k];
+    return `<div class="slot siang" data-i="${i}"><div class="jam">${j}</div><div class="langit">${i < 2 ? '🌤️' : '☀️'}</div>
+      ${k ? `<div class="kartu"><span class="e">${A2.e}</span>${A2.nama}</div>` : '<div class="kosong">ketuk di sini</div>'}
+      ${cek[i] === 'ok' ? '<span class="ok">✅</span>' : cek[i] === 'no' ? '<span class="no">❌</span>' : ''}</div>`;
+  }).join('');
+  const left = LV.acara.filter(k => !S.acara.includes(k));
+  const cards = left.map(k => `<div class="kartu ${acaraSel === k ? 'sel' : ''}" data-k="${k}"><span class="e">${NF.ACARA[k].e}</span>${NF.ACARA[k].nama}<small>${NF.ACARA[k].ket}</small></div>`).join('') || '<div style="font-weight:800;color:#3a9a3a;font-size:18px">Semua acara sudah dijadwalkan ✔</div>';
+  const p = el(`<h2>🎤 Susun Acara ${LV.nama}</h2><div class="sub">Ketuk kartu acara, lalu ketuk jamnya. Ketuk acara di jadwal untuk mengembalikannya.</div>
+    <div class="timeline">${slots}</div><div class="pilihan">${cards}</div>
+    <div class="aturan">📌 Aturan: 👑 Pembukaan paling awal · 🏆 Bagi hadiah sesudah lomba · 🎵 Konser butuh Pemusik Kodok (tab Hiburan)</div>`, 'panel');
+  p.querySelectorAll('.pilihan .kartu').forEach(c => c.onclick = () => { A.sfx('tap'); acaraSel = c.dataset.k; papanStep(2); });
+  p.querySelectorAll('.slot').forEach(sl => sl.onclick = () => {
+    const i = +sl.dataset.i;
+    if (S.acara[i]) { S.acara[i] = null; A.sfx('remove'); }
+    else if (acaraSel) { S.acara[i] = acaraSel; acaraSel = null; A.sfx('place'); }
+    else { helper('Pilih kartu acara dulu di bawah 👇', 2500); return; }
+    papanStep(2);
+    const c2 = acaraCek(); const bad = c2.indexOf('no');
+    if (bad >= 0) helper(S.acara[bad] === 'pembukaan' ? 'Hmm, <b>pembukaan</b> harus paling awal!' : 'Lombanya belum mulai, hadiahnya untuk siapa? 🏆', 3500);
+    else if (acaraTepat()) helper('Jadwal acaranya tepat! 🎉', 3000);
+  });
+  papanNav(true, 'Lanjut ▶', () => papanStep(3));
+  if (!S.acara.some(Boolean)) helper('Susun urutan acara festival. Perhatikan aturannya!');
+}
+function relCocok(pos) { const r = NF.RELAWAN.find(v => v.id === S.rel[pos]); return r && r.cocok === pos; }
+function relawanPas() { return Object.keys(NF.POS).every(p => relCocok(p)); }
+let relSel = null;
+function portrait(col, extra) {
+  const c = document.createElement('canvas'); c.width = c.height = 120; const x = c.getContext('2d');
+  x.fillStyle = col; x.beginPath(); x.arc(60, 80, 34, 0, 7); x.fill(); x.beginPath(); x.arc(60, 48, 30, 0, 7); x.fill();
+  x.fillStyle = '#fff'; x.beginPath(); x.arc(49, 44, 8, 0, 7); x.arc(71, 44, 8, 0, 7); x.fill();
+  x.fillStyle = '#222'; x.beginPath(); x.arc(50, 45, 4, 0, 7); x.arc(72, 45, 4, 0, 7); x.fill();
+  x.fillStyle = 'rgba(255,120,140,.6)'; x.beginPath(); x.arc(38, 58, 5, 0, 7); x.arc(82, 58, 5, 0, 7); x.fill();
+  extra && extra(x); return c.toDataURL();
+}
+const TI_COL = { nenek: '#a9d474', berudu: '#7fcf6a', bangau: '#f2f2ec' };
+function papan3() {
+  const used = Object.values(S.rel);
+  const vols = NF.RELAWAN.map(v => `<div class="vol ${used.includes(v.id) ? 'used' : ''} ${relSel === v.id ? 'sel' : ''}" data-v="${v.id}"><img src="${portrait(G.CR[v.kind])}"><b>${v.nama}</b><small>${v.sifat}</small></div>`).join('');
+  const posts = Object.entries(NF.POS).map(([id, p]) => {
+    const r = NF.RELAWAN.find(v => v.id === S.rel[id]);
+    const who = r ? (r.cocok === id ? `<span class="who ok">${r.sifat.split(' ')[0]} ${r.nama} ✔ cocok!</span>` : `<span class="who meh">${r.sifat.split(' ')[0]} ${r.nama} 🙂 boleh</span>`) : '<span class="who">ketuk di sini</span>';
+    return `<div class="pos" data-p="${id}"><span class="e">${p.e}</span><div>${p.nama}<small>${p.ket}</small></div>${who}</div>`;
+  }).join('');
+  const ti = NF.TAMU_IST[S.tamuIst];
+  const tiImg = portrait(TI_COL[S.tamuIst], S.tamuIst === 'nenek' ? x => { x.strokeStyle = '#555'; x.lineWidth = 3; x.beginPath(); x.arc(49, 44, 10, 0, 7); x.moveTo(81, 44); x.arc(71, 44, 10, 0, 7); x.stroke(); } : S.tamuIst === 'bangau' ? x => { x.fillStyle = '#ff9a3a'; x.beginPath(); x.moveTo(60, 52); x.lineTo(96, 58); x.lineTo(60, 62); x.fill(); } : null);
+  const p = el(`<h2>👫 Bagi Tugas Relawan</h2><div class="sub">Ketuk teman, lalu ketuk posnya. Siapa paling cocok?</div>
+    <div class="vgrid"><div><div class="vols">${vols}</div>
+      <div class="tamuis"><img src="${tiImg}"><div><b>⭐ Tamu istimewa hari ini</b><br>${ti.ikon} <b>${ti.nama}</b> akan datang.<br>Ia butuh <b>${ti.butuh}</b>.</div></div></div>
+      <div>${posts}</div></div>`, 'panel');
+  p.querySelectorAll('.vol').forEach(c => c.onclick = () => { A.sfx('tap'); relSel = c.dataset.v; papanStep(3); });
+  p.querySelectorAll('.pos').forEach(c => c.onclick = () => {
+    const id = c.dataset.p;
+    if (relSel) { for (const k in S.rel) if (S.rel[k] === relSel) delete S.rel[k]; S.rel[id] = relSel; relSel = null; A.sfx('place'); papanStep(3);
+      helper(relCocok(id) ? 'Cocok sekali! 👍' : 'Boleh, tapi ada teman yang lebih cocok di sini 🙂', 2500); }
+    else if (S.rel[id]) { delete S.rel[id]; A.sfx('remove'); papanStep(3); }
+    else helper('Pilih temannya dulu 👆', 2000);
+  });
+  papanNav(true, 'Mulai menata ▶', () => screenTata());
+  if (!Object.keys(S.rel).length) helper(`Bagi tugas teman-temanmu. Ingat, ${ti.nama} butuh ${ti.butuh}!`);
+}
+
+// ================= layar: peta kerajaan =================
+const MO = -70; const mapG = new THREE.Group(); scene.add(mapG);
+function buildMap() {
+  G.setParent(mapG);
+  G.pad(MO - 9, 3, 4.2, 1.2); G.inGroup(MO - 9, 3, () => { G.stall(-1.2, -0.6, 'klepon', 'kelopak', 0.3); G.stall(1.4, 0.2, 'putu', 'daun', -0.4); G.dewdrop(0.2, 1.6, 0.8); });
+  G.pad(MO + 1, -2, 4.6, 2.2); G.pad(MO + 6.4, -2.6, 2.6, 0.4); G.twigBridge([MO + 5.2, -2.2], [MO + 4.8, -2.3]);
+  G.pad(MO + 11.5, 4.5, 4.6, 3.6); G.pad(MO + 16, 3.5, 3, 1);
+  [[MO - 14, -4], [MO - 3, 6], [MO + 7, 8], [MO + 15, -4]].forEach(([x, z], k) => { G.reeds(x, z, 6, k + 50); G.lotus(x + 1.5, z + 0.5, 1.0, 0.05); });
+}
+CAMS.peta = { tx: MO + 2.5, tz: 1.5, yaw: 0, pitch: 0.86, dist: 50 };
+function screenPeta() {
+  S.screen = 'peta'; document.body.className = 's-peta'; clearUI(); setCam('peta'); sunAt(MO + 2, 0);
+  el(`<b>🗺️ Kerajaan Telaga</b><small>Pilih festival</small>`, 'card title');
+  const best = SAVE.best[S.hero] || 0;
+  const card = (x, z, html, cls, fn) => { const p = project(x, 0, z); const d = el(html, 'tcard ' + cls, `left:${p.x}px;top:${p.y + 50}px`); if (fn) { d.classList.add('tap'); d.onclick = fn; } return d; };
+  card(MO - 9, 3, `<b>1 · ${LV.nama}</b><small>siang · ${LV.targetTamu} tamu</small><div class="st">${'⭐'.repeat(best)}${'☆'.repeat(3 - best)}</div><div class="btn" style="font-size:18px;padding:6px 18px;margin-top:6px">Main ▶</div>`, '', () => { A.sfx('good'); screenPapan(); });
+  card(MO + 1, -2, `<b>🔒 2 · Pasar Malam Kunang-kunang</b><small>malam · 30 tamu · 2 daun</small><small>segera hadir</small>`, 'lock', () => helper('Pasar Malam sedang dibangun Tiko & teman-teman. Segera hadir! 🌙', 3000));
+  card(MO + 11.5, 4.5, `<b>🔒 3 · Festival Sungai Pelangi</b><small>segera hadir</small>`, 'lock');
+  const bk = el('<button class="btn abu" style="font-size:18px;padding:8px 16px">◀ Ganti tokoh</button>', '', 'position:absolute;left:136px;top:14px'); bk.querySelector('button').onclick = () => { A.sfx('tap'); screenTokoh(); };
+  const sb = el('<button class="btn kuning">📒 Buku Stiker</button>', '', 'position:absolute;right:24px;bottom:20px'); sb.querySelector('button').onclick = () => { A.sfx('tap'); bukuStiker(); };
+  helper(`Halo ${NF.HEROES[S.hero].nama.split(' ')[0]}! Pilih festival yang mau kamu atur.`);
+}
+
+// ================= buku stiker =================
+const HERO_IKON = { tiko: '🦦', bebi: '🦆', lumi: '🐸' };
+function bukuStiker() {
+  const wrap = el('', '', 'position:absolute;inset:0;pointer-events:auto;z-index:7'); wrap.className = 'bukuwrap';
+  const rows = ['tiko', 'bebi', 'lumi'].map(h => {
+    const cells = [1, 2, 3].map(t => { const v = SAVE.stk[`${h}-${t}`]; return `<div class="stk ${v === 'emas' ? '' : v === 'perak' ? 'silver' : 'off'}">${HERO_IKON[h]}<span class="t">Tahap ${t}${v ? (v === 'emas' ? ' 🥇' : ' 🥈') : ''}</span></div>`; }).join('');
+    return `<div class="row"><div class="h"><img src="${portrait(G.CR[{ tiko: 'berang', bebi: 'bebek', lumi: 'kodok' }[h]])}">${NF.HEROES[h].nama.split(' ')[0]}</div>${cells}</div>`;
+  }).join('');
+  const sp = NF.STIKER.map(([id, e, n]) => `<div class="stk ${SAVE.stk[id] ? '' : 'off'}">${e}<span class="t">${n}</span></div>`).join('');
+  wrap.innerHTML = `<div class="dim" style="pointer-events:auto"></div><div class="book"><div class="pg"><h3>📒 Stiker Tokoh</h3>${rows}<div style="font-size:15px;font-weight:800;color:#8a7458">🥇 emas = ⭐⭐⭐ · 🥈 perak = ⭐ atau ⭐⭐</div></div>
+    <div class="pg"><h3>🌟 Stiker Spesial</h3><div class="grid2">${sp}</div></div></div>
+    <button class="btn abu" style="position:absolute;right:76px;top:24px">✖ Tutup</button>`;
+  wrap.querySelector('button').onclick = () => { A.sfx('tap'); wrap.remove(); };
 }
 
 // ================= layar: menata =================
@@ -568,13 +697,14 @@ function startFestival() {
   F = {
     t: 0, dur: LV.durasi, speed: 1, total: Math.max(1, est + (Math.random() < 0.4 ? 1 : 0)), spawned: 0, arrived: 0,
     income: 0, extraCost: 0, happy: 100, unhappy: 0, visitors: [], boats: [], problems: [], stalls,
-    jurusUsed: false, events: [], log: { sampahTelaga: 0, berudu: null, raja: null, hujan: null, habis: 0, teduh: false },
+    jurusUsed: false, events: [], log: { sampahTelaga: 0, berudu: null, raja: null, hujan: null, habis: 0, teduh: false, acara: [], tamu: null, habisKind: [] },
     nextBoat: 1.5, nextTrash: 10, done: false, ending: 0,
   };
   const P = F.dur;
   F.events = [
-    { at: P * 0.33, type: 'berudu' }, { at: P * 0.52, type: 'raja' }, { at: P * 0.72, type: 'hujan' },
+    { at: P * 0.3, type: 'berudu' }, { at: P * 0.44, type: 'tamu' }, { at: P * 0.56, type: 'raja' }, { at: P * 0.74, type: 'hujan' },
   ];
+  S.acara.forEach((k, i) => { if (k) F.events.push({ at: P * (0.06 + i * 0.2), type: 'acara', k, i }); });
   placeHero(-1.8, 4.8, 0.4);
   festHud();
   helper(`Festival dibuka! 🎉 Ketuk gelembung <b>merah</b> kalau ada masalah.`, 5000);
@@ -637,7 +767,7 @@ function queuePos(s, k) { const d = 1.0 + k * 0.42; return { x: s.x + Math.sin(s
 function joinQueue(v) {
   const s = v.stall; if (!s) return wander(v);
   s.queue.push(v); const p = queuePos(s, s.queue.length - 1);
-  goPath(v, [{ x: ENTRY.x, z: ENTRY.z }, p], () => { v.state = 'queue'; v.t = 0; v.patience = S.hero === 'bebi' ? 16 : 9; });
+  goPath(v, [{ x: ENTRY.x, z: ENTRY.z }, p], () => { v.state = 'queue'; v.t = 0; v.patience = (S.hero === 'bebi' ? 16 : 9) + (S.rel.gerbang ? (relCocok('gerbang') ? 7 : 4) : 0); });
 }
 function wander(v) {
   const spots = S.placed.filter(p => p.kind === 'bangku' || p.kind === 'talas');
@@ -713,6 +843,7 @@ function trashEvent() {
         helper('Yah, sampahnya jatuh ke telaga 🐟 Ikan jadi sedih. Ketuk untuk mengambilnya.', 4000);
       } };
     addProblem(pr);
+    relawanBantu('bersih', pr, x, z, 'membersihkan sampah 🧹');
   });
 }
 function beruduEvent() {
@@ -726,14 +857,15 @@ function beruduEvent() {
       solve(byJurus) {
         const meet = info ? { x: info.x + 0.5, z: info.z + 0.5 } : { x: kid.x + 0.6, z: kid.z + 0.3 };
         goPath(kid, [meet], () => { kid.state = 'idle'; });
-        const delay = info || byJurus ? 2.5 : 6;
+        const delay = info || byJurus || F.relHelp ? 2.5 : 6;
         setTimeout(() => { if (!F || F.done) return; const mom = newVisitor('kodok', meet.x + 0.5, meet.z + 0.4, { s: 1.9, isKid: true }); mom.state = 'idle'; popAt(meet.x, PADY + 1.6, meet.z, '❤️ Ketemu!'); A.sfx('good');
-          F.happy = Math.min(100, F.happy + (info || byJurus ? 6 : 1)); festHud();
+          F.happy = Math.min(100, F.happy + (info || byJurus || F.log.berudu === 'pos' ? 6 : 1)); festHud();
           setTimeout(() => { if (!F || F.done) return; leave(kid); leave(mom); }, 4000); }, delay * 1000 / F.speed);
-        F.log.berudu = info ? 'pos' : 'cari';
+        F.log.berudu = info || byJurus || F.relHelp ? 'pos' : 'cari'; F.relHelp = false;
         helper(info ? 'Anak berudu diantar ke <b>Pos Informasi</b>. Ibunya cepat ketemu! ❤️' : 'Belum ada Pos Informasi… kita cari ibunya pelan-pelan.', 4000);
       },
       timeout() { F.happy = Math.max(0, F.happy - 10); F.log.berudu = 'lama'; A.sfx('bad'); leave(kid); helper('Anak berudu menunggu lama sekali 😢 Lain kali bantu lebih cepat ya.', 4000); } });
+    relawanBantu('bantu', F.problems[F.problems.length - 1], kid.x, kid.z, 'mengantar anak berudu 🤝');
   });
 }
 function rajaEvent() {
@@ -753,6 +885,52 @@ function rajaEvent() {
         setTimeout(() => { if (F && !F.done) leave(king); }, 14000 / F.speed);
       },
       timeout() { F.happy = Math.max(0, F.happy - 10); F.log.raja = 'kecewa'; A.sfx('bad'); leave(king); helper('Raja menunggu terlalu lama dan pulang 😟', 4000); } });
+  });
+}
+function relawanBantu(pos, pr, x, z, kerja) {
+  const id = S.rel[pos]; if (!id || !pr) return;
+  const r = NF.RELAWAN.find(v => v.id === id), wait = relCocok(pos) ? 3 : 6;
+  setTimeout(() => {
+    if (!F || F.done || !F.problems.includes(pr)) return;
+    if (pos === 'bantu') F.relHelp = true;
+    solveProblem(pr, false); popAt(x, PADY + 1.8, z, `${r.nama} ${kerja.split(' ').pop()}`);
+    helper(`<b>${r.nama}</b> ${kerja}${relCocok(pos) ? ' — cepat sekali!' : ''}`, 2500);
+  }, wait * 1000 / F.speed);
+}
+function acaraEvent(ev) {
+  const A2 = NF.ACARA[ev.k], cek = acaraCek()[ev.i];
+  let ok = cek === 'ok', msg;
+  if (ev.k === 'pembukaan') msg = ok ? '👑 Raja membuka festival! Selamat datang semua!' : '👑 Lho, festivalnya sudah mulai, kok baru dibuka? 😅';
+  else if (ev.k === 'hadiah') msg = ok ? '🏆 Hadiah untuk juara lomba perahu! 👏' : '🏆 Lombanya belum ada… hadiahnya untuk siapa? 🤔';
+  else if (ev.k === 'musik') { ok = S.musik; msg = ok ? '🎵 Konser kodok dimulai! Semua berjoget!' : '🎵 Waktunya konser… tapi pemusiknya belum disewa 😢'; }
+  else { msg = '🛶 Lomba perahu daun! Tamu ramai menonton!'; F.total += 2; spawnBoat(2); }
+  F.log.acara.push({ k: ev.k, ok });
+  F.happy = Math.max(0, Math.min(100, F.happy + (ok ? 3 : -6)));
+  popAt(STAGE.x, PADY + 3.6, STAGE.z, `${A2.e} ${LV.jam[ev.i]}`);
+  helper(msg, 3800); A.sfx(ok ? 'good' : 'bad'); festHud();
+}
+function tamuEvent() {
+  const id = S.tamuIst, ti = NF.TAMU_IST[id];
+  preWarn(() => ({ x: GATE.x, y: PADY + 1.6, z: GATE.z }), () => {
+    if (!F || F.done) return;
+    G.setParent(actors);
+    const grp = [];
+    if (id === 'nenek') { const v = newVisitor('kura', DOCK.x, DOCK.z, { isKing: true, speed: 0.8 }); actors.remove(v.obj); v.obj = G.king(DOCK.x, DOCK.z, 2.2); v.obj.traverse(o => { if (o.material && o.material.color && o.material.color.getHexString() === 'ffcf3a') o.visible = false; }); grp.push(v); }
+    else if (id === 'berudu') { for (let k = 0; k < 4; k++) grp.push(newVisitor('kodok', DOCK.x + k * 0.4 - 0.6, DOCK.z + (k % 2) * 0.4, { s: 1.1, isKing: true })); }
+    else { const v = newVisitor('bebek', DOCK.x, DOCK.z, { s: 2.6, isKing: true }); v.obj.traverse(o => { if (o.material && o.material.color && o.material.color.getHexString() === 'ffe27a') o.material = G.M('#f6f6f0'); }); grp.push(v); }
+    const lead = grp[0];
+    const ok = id === 'nenek' ? S.placed.some(p => p.kind === 'bangku' && dist(p, GATE) <= 5.0)
+      : id === 'berudu' ? S.musik : countKind('sampah') >= 2;
+    grp.forEach((v, k) => goPath(v, [GATE, { x: ENTRY.x + (k - 1.5) * 0.5, z: ENTRY.z + 0.6 }], () => { v.state = 'idle'; }));
+    const b = el(`${ti.ikon} ${ti.nama}: "${ok ? ti.puas : 'Mana ' + ti.butuh + '?'}"`, 'bubble ' + (ok ? '' : 'warn')); anchor(b, () => ({ x: lead.x, y: PADY + 2.4, z: lead.z }));
+    F.log.tamu = ok ? 'puas' : 'kecewa';
+    setTimeout(() => {
+      if (!F || F.done) return;
+      if (ok) { F.happy = Math.min(100, F.happy + 8); F.income += 2; F.tip = 2; popAt(lead.x, PADY + 2.8, lead.z, '❤️ tip +2 🪙'); A.sfx('coin'); helper(`<b>${ti.nama}</b> senang sekali dan memberi tip 2 🪙!`, 4000); }
+      else { F.happy = Math.max(0, F.happy - 8); A.sfx('bad'); helper(`${ti.nama} kecewa karena tidak ada ${ti.butuh} 😢`, 4000); }
+      festHud();
+    }, 3500 / F.speed);
+    setTimeout(() => { unanchor(b); if (F && !F.done) grp.forEach(v => leave(v)); }, 11000 / F.speed);
   });
 }
 function hujanEvent() {
@@ -837,7 +1015,7 @@ function stepFestival(dt) {
     if (waiting && s.stock <= 0 && !s.habisPr) {
       s.habisPr = addProblem({ type: 'habis', label: `😣 ${NF.ITEMS[s.kind].nama} habis! Antre`, pos: () => ({ x: s.x, y: PADY + 2.9, z: s.z }), t: 0, limit: 999,
         solve(byJurus) { if (!byJurus) F.extraCost += 1; s.stock += 3; s.habisPr = null; A.sfx('good'); popAt(s.x, PADY + 2.4, s.z, '🧑‍🍳 +3 jajan'); helper(`Penjual tambahan membuat ${NF.ITEMS[s.kind].nama} lagi${byJurus ? '' : ' (−1 🪙)'}. Antrean jalan lagi!`, 3500); } });
-      F.log.habis++;
+      F.log.habis++; if (!F.log.habisKind.includes(s.kind)) F.log.habisKind.push(s.kind);
       helper(`Lapak <b>${NF.ITEMS[s.kind].nama}</b> kehabisan jajanan! Ketuk untuk <b>tambah penjual</b> (1 🪙).`, 4500);
     }
     if (s.habisPr && !waiting) { removeProblem(s.habisPr); s.habisPr = null; }
@@ -846,7 +1024,7 @@ function stepFestival(dt) {
   F.nextTrash -= dt;
   if (F.nextTrash <= 0 && F.t > F.dur * 0.12 && F.t < F.dur * 0.88) { F.nextTrash = rnd(13, 17); trashEvent(); }
   // kejadian terjadwal
-  for (const ev of F.events) if (!ev.done && F.t >= ev.at) { ev.done = true; ({ berudu: beruduEvent, raja: rajaEvent, hujan: hujanEvent })[ev.type](); }
+  for (const ev of F.events) if (!ev.done && F.t >= ev.at) { ev.done = true; ({ berudu: beruduEvent, raja: rajaEvent, hujan: hujanEvent, tamu: tamuEvent, acara: () => acaraEvent(ev) })[ev.type](); }
   // batas waktu masalah
   for (const pr of F.problems.slice()) {
     if (F.lumiGuard > 0 && pr.type !== 'telaga') { solveProblem(pr, true); continue; }
@@ -881,7 +1059,36 @@ function screenLaporan() {
   const s1 = F.arrived >= LV.targetTamu, s2 = untung >= LV.targetUntung, s3 = F.happy >= 70;
   const stars = [s1, s2, s3].filter(Boolean).length;
   const prevBest = SAVE.best[S.hero] || 0;
-  SAVE.best[S.hero] = Math.max(prevBest, stars); SAVE.main = (SAVE.main || 0) + 1; save();
+  SAVE.best[S.hero] = Math.max(prevBest, stars); SAVE.main = (SAVE.main || 0) + 1;
+  // stiker
+  const baru = [];
+  const give = (id, val, e, n) => { const old = SAVE.stk[id]; if (val === 'emas' && old !== 'emas' || val === 'perak' && !old || val === true && !old) { SAVE.stk[id] = val; baru.push([e, n, val]); } };
+  if (stars) give(`${S.hero}-${LV.id}`, stars === 3 ? 'emas' : 'perak', HERO_IKON[S.hero], `${NF.HEROES[S.hero].nama.split(' ')[0]} · Tahap ${LV.id}`);
+  const SP = Object.fromEntries(NF.STIKER.map(([id, e, n]) => [id, [e, n]]));
+  const sp = id => give(id, true, ...SP[id]);
+  if (F.log.tamu === 'puas') sp(S.tamuIst);
+  if (acaraTepat() && F.log.acara.every(a => a.ok)) sp('acara');
+  if (!F.log.sampahTelaga) sp('telaga');
+  if (F.log.raja === 'bangku' || F.log.raja === 'beli') sp('raja');
+  if (relawanPas()) sp('relawan');
+  if (F.log.berudu === 'pos') sp('anak');
+  save();
+  // catatan Kiko
+  const tips = [];
+  F.log.habisKind.slice(0, 1).forEach(k => tips.push(`🍡 <b>${NF.ITEMS[k].nama} habis duluan</b>${F.unhappy ? ` — ${F.unhappy} tamu tidak kebagian` : ''}. Tambah lapak jajanan lain, atau siapkan koin untuk tambah penjual.`));
+  const tiData = NF.TAMU_IST[S.tamuIst]; if (F.log.tamu === 'kecewa') tips.push(`${tiData.ikon} <b>${tiData.nama}</b> butuh ${tiData.butuh}. Siapkan sebelum festival!`);
+  const backs = lapakList().filter(p => (p.rotK || 0) % 4 === 2); if (backs.length) tips.push(`↩️ Lapak <b>${NF.ITEMS[backs[0].kind].nama}</b> membelakangi tamu. Putar ⟳ menghadap tugu!`);
+  const bad = F.log.acara.find(a => !a.ok); if (bad) tips.push(bad.k === 'musik' ? '🎵 Konser kodok ada di jadwal, tapi <b>pemusiknya belum disewa</b> (tab Hiburan).' : bad.k === 'pembukaan' ? '👑 <b>Pembukaan</b> harus jadi acara paling awal.' : '🏆 <b>Bagi hadiah</b> sesudah lomba, ya.');
+  if (!S.acara.every(Boolean)) tips.push('🎤 Masih ada jam acara yang kosong. Isi semua supaya tamu tidak bosan.');
+  if (F.log.sampahTelaga) tips.push(S.rel.bersih ? '🧹 Sampah sempat jatuh ke telaga. Taruh keranjang lebih dekat ke lapak.' : '🧹 Sampah jatuh ke telaga. Beri teman tugas <b>Kebersihan</b> atau taruh keranjang dekat lapak.');
+  const kosong = Object.keys(NF.POS).filter(p => !S.rel[p]); if (kosong.length) tips.push(`👫 Pos <b>${NF.POS[kosong[0]].nama}</b> belum ada relawannya.`);
+  else if (!relawanPas()) tips.push('👫 Coba tukar relawan: lihat sifatnya (ramah, rajin, sabar) dan pilih pos yang paling cocok.');
+  if (F.log.hujan === 'basah') tips.push('☂️ Pasang <b>Daun Talas</b> sebelum hujan sore.');
+  if (F.log.raja === 'kecewa') tips.push('👑 Raja tidak dapat kursi. Siapkan <b>bangku kayu</b>.');
+  if (untung < LV.targetUntung) { const mahal = lapakList().slice().sort((a, b) => b.cost - a.cost)[0], murah = NF.LAPAK.filter(k => S.hearts[k] === 3 && costOf(k) < (mahal ? mahal.cost : 9)).sort((a, b) => costOf(a) - costOf(b))[0];
+    tips.push(`💡 Untung kurang ${LV.targetUntung - untung} 🪙.${mahal && murah ? ` ${NF.ITEMS[mahal.kind].nama} sewanya ${mahal.cost} 🪙 — ${NF.ITEMS[murah].nama} ❤❤❤ cuma ${costOf(murah)} 🪙!` : ' Kurangi barang yang tidak perlu.'}`); }
+  if (F.arrived < LV.targetTamu) tips.push(`🐸 Tamu kurang ${LV.targetTamu - F.arrived}. Coba poster, pemusik, atau jajanan ❤❤❤.`);
+  if (!tips.length) tips.push('🌟 Hebat! Semua rapi. Coba tokoh lain untuk mengumpulkan stiker baru!');
   const says = [];
   const fav = lapakList().find(p => S.hearts[p.kind] === 3); if (fav) says.push(`🦆 "${NF.ITEMS[fav.kind].nama}nya enak!"`);
   if (F.unhappy) says.push(`🐢 "Jajanannya habis… aku tidak kebagian 😢"`);
@@ -897,22 +1104,25 @@ function screenLaporan() {
   S.placed.forEach(p => { const k = NF.ITEMS[p.kind].cat; rinci[k] = (rinci[k] || 0) + p.cost; });
   if (S.musik) rinci.hiburan = (rinci.hiburan || 0) + costOf('musik');
   const label = { lapak: '🌿 Sewa lapak jajanan', hiburan: '🎵 Bayar pemusik', fasilitas: '🪵 Fasilitas', promosi: '📜 Poster promosi' };
-  const subRows = Object.entries(rinci).map(([k, v]) => `<div class="sub"><span>${label[k]}</span><span>− ${v}</span></div>`).join('') + (F.extraCost ? `<div class="sub"><span>🧑‍🍳 Tambahan saat festival</span><span>− ${F.extraCost}</span></div>` : '');
+  const subRows = Object.entries(rinci).map(([k, v]) => `<div class="sub"><span>${label[k]}</span><span>− ${v}</span></div>`).join('') + (F.extraCost ? `<div class="sub"><span>🧑‍🍳 Tambahan saat festival</span><span>− ${F.extraCost}</span></div>` : '') + (F.tip ? `<div class="sub"><span>❤️ Tip tamu istimewa (sudah termasuk uang masuk)</span><span>+ ${F.tip}</span></div>` : '');
   const st = [s1, s2, s3].map(x => `<span class="${x ? '' : 'off'}">⭐</span>`).join('');
   const r = el(`<h2>🎉 Festival Selesai!</h2><div class="stars">${st}</div>
     <div class="row"><span>🐸 Tamu datang</span><b>${F.arrived} <small>/ target ${LV.targetTamu}</small> <span class="${s1 ? 'ok' : 'no'}">${s1 ? '✔' : '✖'}</span></b></div>
-    <div class="row"><span>💰 Uang masuk (${F.income} jajan terjual)</span><b>${F.income} 🪙</b></div>
+    <div class="row"><span>💰 Uang masuk (${F.income - (F.tip || 0)} jajan terjual${F.tip ? ' + tip' : ''})</span><b>${F.income} 🪙</b></div>
     ${subRows}
     <div class="row"><span>💸 Biaya semuanya</span><b>− ${biaya} 🪙</b></div>
     <div class="row"><span><b>😊 Untung</b> = ${F.income} − ${biaya}</span><b class="${untung >= 0 ? 'ok' : 'no'}">${untung} 🪙 <small>/ target ${LV.targetUntung}</small> <span class="${s2 ? 'ok' : 'no'}">${s2 ? '✔' : '✖'}</span></b></div>
     <div class="row" style="border:0"><span>😊 Tamu senang</span><b>${Math.round(F.happy)}% <small>/ target 70%</small> <span class="${s3 ? 'ok' : 'no'}">${s3 ? '✔' : '✖'}</span></b></div>
-    <div class="says">${says.slice(0, 4).map(x => `<span>${x}</span>`).join('')}</div>
-    <div class="btns"><button class="btn kuning" data-a="lagi">🔁 Main lagi</button><button class="btn abu" data-a="tokoh">🔄 Ganti tokoh</button><button class="btn abu" data-a="judul">🏠 Judul</button></div>`, 'report');
+    <div class="says">${says.slice(0, 3).map(x => `<span>${x}</span>`).join('')}</div>
+    <div class="catatan"><span class="f">${asisten().face}</span><div><b>📝 Catatan ${asisten().nama} untuk festival berikutnya</b><ul>${tips.slice(0, 3).map(t => `<li>${t}</li>`).join('')}</ul></div></div>
+    ${baru.length ? `<div class="stikerbaru ${baru.length > 4 ? 'banyak' : ''}">Stiker baru! ${baru.map(([e, n, v]) => `<div class="stk ${v === 'perak' ? 'silver' : ''}">${e}<span class="t">${n}</span></div>`).join('')}</div>` : ''}
+    <div class="btns"><button class="btn kuning" data-a="lagi">🔁 Main lagi</button><button class="btn abu" data-a="stiker">📒 Stiker</button><button class="btn abu" data-a="peta">🗺️ Peta</button><button class="btn abu" data-a="tokoh">🔄 Tokoh</button></div>`, 'report');
   r.querySelector('[data-a=lagi]').onclick = () => { A.sfx('tap'); screenPapan(); };
   r.querySelector('[data-a=tokoh]').onclick = () => { A.sfx('tap'); screenTokoh(); };
-  r.querySelector('[data-a=judul]').onclick = () => { A.sfx('tap'); screenJudul(); };
+  r.querySelector('[data-a=stiker]').onclick = () => { A.sfx('tap'); bukuStiker(); };
+  r.querySelector('[data-a=peta]').onclick = () => { A.sfx('tap'); screenPeta(); };
   const dm = el('', 'dim', 'pointer-events:none'); UI.insertBefore(dm, UI.firstChild);
-  if (stars) setTimeout(() => A.sfx('star'), 300);
+  if (stars || baru.length) setTimeout(() => A.sfx('star'), 300);
   if (F.tikoPad) { world.remove(F.tikoPad); }
 }
 
@@ -975,7 +1185,7 @@ function mergeStatic(group) {
 // ================= mulai =================
 const LITE = /lite/.test(location.search);
 if (LITE) { renderer.shadowMap.enabled = false; renderer.setPixelRatio(1); }
-buildVenue(); mergeStatic(world);
+buildVenue(); mergeStatic(world); buildMap(); mergeStatic(mapG);
 buildLineup();
 // lineup: gabungkan semua kecuali tokoh yang bisa melompat
 { const tmp = new THREE.Group(); scene.add(tmp); Object.values(lineupHeroes).forEach(h => { tmp.attach(h); }); mergeStatic(lineupG); Object.values(lineupHeroes).forEach(h => lineupG.attach(h)); scene.remove(tmp); }
@@ -987,7 +1197,8 @@ requestAnimationFrame(loop);
 // ================= debug untuk pengujian =================
 window.NF.debug = {
   S, T, get F() { return F; }, SLOTS, evaluate, costOf,
-  go: name => ({ judul: screenJudul, tokoh: screenTokoh, cerita: screenCerita, papan: screenPapan, tata: screenTata, festival: startFestival, laporan: screenLaporan })[name](),
+  go: name => ({ judul: screenJudul, tokoh: screenTokoh, cerita: screenCerita, papan: screenPapan, tata: screenTata, festival: startFestival, laporan: screenLaporan, peta: screenPeta, stiker: bukuStiker })[name](),
+  step: papanStep, SAVE,
   hero: h => { S.hero = SAVE.hero = h; },
   place(kind, idx, rotK = 0) { const s = SLOTS[idx]; if (!s || s.item) return false; startGhost(kind, s); T.ghost.rotK = rotK; confirmGhost(); return true; },
   hitung() { S.hitungOk = true; },

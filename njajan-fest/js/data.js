@@ -1,6 +1,6 @@
 // Njajan Fest — data permainan (versi, tokoh, barang, tahap)
 export const NF = {
-  VERSION: 3,
+  VERSION: 4,
   SAVE_KEY: 'njajan-fest-v1',
 
   // Tokoh pemain: bakat (selalu aktif) + jurus (sekali per festival)
@@ -52,9 +52,41 @@ export const NF = {
   LAPAK: ['klepon', 'putu', 'lemper', 'serabi', 'getuk', 'cincin', 'gemblong', 'cendol', 'tehtarik', 'wedang'],
   HEARTS: [3, 3, 3, 2, 2, 2, 1, 1, 1, 1],   // dibagikan acak ke 10 jajanan tiap main
 
+  // ---- Susun Acara (Papan Persiapan langkah 2) ----
+  ACARA: {
+    pembukaan: { e: '👑', nama: 'Pembukaan Raja', ket: 'paling awal' },
+    musik:     { e: '🎵', nama: 'Konser Kodok', ket: 'perlu pemusik' },
+    lomba:     { e: '🛶', nama: 'Lomba Perahu Daun', ket: 'tamu suka menonton' },
+    hadiah:    { e: '🏆', nama: 'Bagi Hadiah', ket: 'sesudah lomba' },
+  },
+  // ---- Relawan (langkah 3) ----
+  RELAWAN: [
+    { id: 'bubu', nama: 'Bubu', sifat: '😊 ramah', kind: 'bebek', cocok: 'gerbang' },
+    { id: 'oto', nama: 'Oto', sifat: '💪 rajin', kind: 'berang', cocok: 'bersih' },
+    { id: 'pakkur', nama: 'Pak Kur', sifat: '🧘 sabar', kind: 'kura', cocok: 'bantu' },
+  ],
+  POS: {
+    gerbang: { e: '🎟️', nama: 'Jaga Gerbang', ket: 'tamu lebih sabar mengantre' },
+    bersih:  { e: '🧹', nama: 'Kebersihan', ket: 'sampah cepat diangkat' },
+    bantu:   { e: '🤝', nama: 'Penolong Anak Hilang', ket: 'anak cepat ketemu ibunya' },
+  },
+  // ---- Tamu istimewa (satu per festival, diumumkan di langkah 3) ----
+  TAMU_IST: {
+    nenek:  { nama: 'Nenek Kura-kura', ikon: '👵', butuh: 'bangku kayu dekat gerbang', puas: 'Bangkunya dekat, nenek bisa istirahat!' },
+    berudu: { nama: 'Rombongan Berudu', ikon: '🐸', butuh: 'Pemusik Kodok untuk berjoget', puas: 'Asyik, kita joget bersama! 🎵' },
+    bangau: { nama: 'Pak Bangau', ikon: '🐦', butuh: '2 keranjang sampah (telaga harus bersih)', puas: 'Telaganya bersih, aku senang!' },
+  },
+  // ---- Stiker spesial ----
+  STIKER: [
+    ['nenek', '👵', 'Nenek senang'], ['berudu', '🐸', 'Joget berudu'], ['bangau', '🐦', 'Pak Bangau senang'],
+    ['acara', '🎤', 'Acara tepat'], ['telaga', '🐟', 'Telaga bersih'], ['raja', '👑', 'Raja senang'],
+    ['relawan', '👫', 'Relawan pas'], ['anak', '❤️', 'Anak ketemu ibu'],
+  ],
+
   // Tahap 1
   LEVELS: [
-    { id: 1, nama: 'Bazar Daun Teratai', modal: 18, targetTamu: 20, targetUntung: 6, porsi: 5, durasi: 80 },
+    { id: 1, nama: 'Bazar Daun Teratai', modal: 18, targetTamu: 20, targetUntung: 6, porsi: 5, durasi: 90,
+      jam: ['09.00', '10.00', '11.00', '12.00'], acara: ['pembukaan', 'musik', 'lomba', 'hadiah'] },
   ],
 };
 window.NF = NF;
