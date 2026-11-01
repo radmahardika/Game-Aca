@@ -13,11 +13,16 @@
   .tag3 { position: absolute; transform: translate(-50%, -50%); font-size: 15px; font-weight: 700; color: #fff; background: #ff6b4a; border-radius: 99px; padding: 3px 10px; white-space: nowrap; box-shadow: 0 3px 6px rgba(0,0,0,.25); }
   .mat { position: absolute; transform: translate(-50%, -100%); background: #fff8ea; border-radius: 12px; padding: 4px 10px; font-size: 15px; font-weight: 600; box-shadow: 0 3px 0 #d9c49c; white-space: nowrap; }
   .mat small { display: block; font-weight: 500; font-size: 13px; color: #8a7458; }
-  .opt { position: absolute; transform: translate(-50%, 0); width: 230px; text-align: center; background: #fff8ea; border-radius: 18px; padding: 10px 12px; box-shadow: 0 4px 0 #d9c49c, 0 8px 18px rgba(0,0,0,.25); }
+  .opt { position: absolute; transform: translate(-50%, 0); width: 330px; text-align: left; text-align: center; background: #fff8ea; border-radius: 18px; padding: 10px 12px; box-shadow: 0 4px 0 #d9c49c, 0 8px 18px rgba(0,0,0,.25); }
   .opt .L { display: inline-block; width: 34px; height: 34px; line-height: 34px; border-radius: 50%; background: #2d7f95; color: #fff; font-weight: 700; font-size: 20px; margin-bottom: 4px; }
-  .opt b { display: block; font-size: 21px; }
+  .opt > b { display: block; font-size: 22px; text-align: center; }
+  .opt .role { display: table; margin: 4px auto 6px; color: #fff; font-weight: 700; font-size: 14px; border-radius: 99px; padding: 2px 12px; }
+  .opt .pw { font-size: 14.5px; line-height: 1.3; background: #f6ecd6; border-radius: 10px; padding: 6px 8px; margin-bottom: 5px; }
+  .opt .pw.jur { background: #fff1c2; }
+  .jbtn { position: absolute; right: 22px; bottom: 22px; width: 150px; text-align: center; background: radial-gradient(#fff8d0, #ffd25e); border-radius: 26px; padding: 8px; box-shadow: 0 0 0 5px #fff, 0 0 26px 8px rgba(255,220,90,.9); }
+  .jbtn b { display: block; font-size: 19px; } .jbtn small { font-size: 14px; color: #8a5a1a; }
   .opt small { display: block; font-size: 14.5px; color: #6f5d47; line-height: 1.3; margin-top: 3px; }
-  .opt em { display: block; font-style: normal; font-size: 13.5px; color: #2d7f95; margin-top: 5px; font-weight: 600; }
+  .opt em { display: block; text-align: center; font-style: normal; font-size: 15px; color: #2d7f95; margin-top: 5px; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -462,24 +467,68 @@ if (SCREEN === 'tokoh') {
   pad(0, 0, 5.2, -Math.PI / 2 + 0.3);
   lotus(-4.6, -3.8, 1.3, 0.05); lotus(5.2, -3.2, 1.1, 0.05); cattail(-5.6, -2.0, 3.2, 0.1); cattail(5.8, -1.0, 2.8, -0.1); reeds(-6.2, -1, 8, 2); reeds(6.4, -2, 7, 5);
   smallPad(-6.5, 3, 1.2, 1); smallPad(6.8, 2.6, 1.0, 0);
-  stall(0, -3.3, 'klepon', 'kelopak');
-  const xs = [-3.3, -1.1, 1.1, 3.3];
-  heroOtter(xs[0], 0.6, 3.6).rotation.y = 0.2;
-  heroDuck(xs[1], 0.8, 3.6).rotation.y = 0.08;
-  heroFrog(xs[2], 0.8, 3.6).rotation.y = -0.08;
-  heroKid(xs[3], 0.6, 3.6).rotation.y = -0.2;
-  kiko(-0.1, 2.9, 1.8);
+  stall(0, -3.6, 'klepon', 'kelopak');
+  const xs = [-2.9, 0, 2.9];
+  heroOtter(xs[0], 0.5, 3.5).rotation.y = 0.2;
+  heroDuck(xs[1], 0.7, 3.5);
+  heroFrog(xs[2], 0.5, 3.5).rotation.y = -0.2;
   cam.fov = 28; cam.updateProjectionMatrix();
-  cam.position.set(0, 7.0, 15.5); cam.lookAt(0, 1.0, 0.2); cam.updateMatrixWorld();
+  cam.position.set(0, 7.5, 15.5); cam.lookAt(0, -0.5, 0.2); cam.updateMatrixWorld();
   render();
-  el(`<b>🪷 Festival Telaga — pilih tokohmu</b><small>Semua memakai pakaian dari bahan kolam</small>`, 'card title');
+  el(`<b>🪷 Festival Telaga — pilih tokohmu</b><small>Tiap tokoh punya kekuatan berbeda. Coba semuanya! (Asisten: Kiko si katak · kalau pilih Lumi: Capung Cici)</small>`, 'card title');
   const opts = [
-    ['A', 'Tiko si Berang-berang', 'Rompi tosca, helm daun teratai, papan klip.', 'Berang-berang jago membangun dari ranting!'],
-    ['B', 'Bebi si Anak Bebek', 'Syal merah, headset, mahkota kelopak.', 'Ramah, suka menyapa tamu.'],
-    ['C', 'Lumi si Anak Katak', 'Rompi oranye, topi daun kering, megafon cangkang.', 'Asisten diganti: Capung Cici.'],
-    ['D', 'Ranu Anak Mini', 'Anak manusia sebesar ibu jari, tunik kelopak, topi daun teratai.', 'Seperti tamu dari dunia manusia.'],
+    ['Tiko si Berang-berang', 'Si Tukang Ranting', '🪵 <b>Hemat Bangun</b>: lapak, bangku & jembatan ranting lebih murah 1 🪙', '⚡ <b>Bangun Kilat</b>: sekali per festival, perbaiki & pindahkan lapak dalam sekejap, atau bangun jembatan ke daun baru gratis', '🪙 Jago mengejar UNTUNG', '#2bb3a3'],
+    ['Bebi si Anak Bebek', 'Si Ramah', '💛 <b>Sapaan Hangat</b>: tamu lebih sabar mengantre, tidak cepat kesal', '⚡ <b>Kwek Undangan</b>: sekali per festival, panggil rombongan perahu daun, +5 tamu datang', '🐸 Jago mengejar PENGUNJUNG', '#ff6b6b'],
+    ['Lumi si Anak Katak', 'Si Lompat Gesit', '👀 <b>Mata Jeli</b>: tanda ❗ muncul sebelum masalah terjadi', '⚡ <b>Lompat Kilat</b>: sekali per festival, lompat dari daun ke daun & bereskan 3 masalah sekaligus', '⭐ Jago membuat tamu SENANG', '#ffb43a'],
   ];
-  opts.forEach(([L, n, d, e], k) => { const p = project(xs[k], 0, 1.9); el(`<div class="L">${L}</div><b>${n}</b><small>${d}</small><em>${e}</em>`, 'opt', `left:${p.x}px;top:${p.y + 6}px`); });
+  opts.forEach(([n, g, a, b, c, col], k) => { const p = project(xs[k], 0, 1.9); el(`<b>${n}</b><span class="role" style="background:${col}">${g}</span><div class="pw">${a}</div><div class="pw jur">${b}</div><em>${c}</em>`, 'opt', `left:${p.x}px;top:470px`); });
+}
+if (SCREEN === 'jurus') {
+  const HERO = new URLSearchParams(location.search).get('h') || 'tiko';
+  venue('festival'); crowd(HERO === 'bebi' ? 75 : 50, 9);
+  cam.position.set(-1, 19.5, 19.5); cam.lookAt(1.6, 0, -0.8); cam.updateMatrixWorld();
+  for (let k = 0; k < 8; k++) critter(Object.keys(CR)[k % 6], 7.8 + (k % 4) * 0.8, PADY, -1.2 - Math.floor(k / 4) * 0.7, 1.4).rotation.y = Math.PI;
+  critter('kodok', 9.4, PADY + 0.5, -3.4, 2.0);
+  const btn = (e, n, sub) => el(`<div style="font-size:54px;line-height:60px">${e}</div><b>${n}</b><small>${sub}</small>`, 'jbtn');
+  if (HERO === 'tiko') {
+    heroOtter(-1.6, -1.2, 2.2).rotation.y = 0.6;
+    // jembatan baru ke daun baru (bersinar) + lapak rusak yang diperbaiki
+    pad(-0.9, -9.4, 2.2, Math.PI * 1.4, '#69bf55'); twigBridge([-1.6, -5.6], [-1.4, -7.1]);
+    stall(-1.0, -9.8, 'jagung', 'keringdaun', 0);
+    for (let k = 0; k < 14; k++) add(sph(0.09), M('#fff3a0', { emissive: '#fff08a', emissiveIntensity: 1 }), -1.4 + Math.cos(k) * 1.4, 0.9 + (k % 4) * 0.3, -7.3 + Math.sin(k * 1.7) * 1.0).castShadow = false;
+    render();
+    hud(15, 20, 9, 10, 18);
+    bub(-1.5, 1.3, -6.3, '🪵 Jembatan baru!');
+    bub(3.0, PADY + 2.4, -9.8, '✨ Daun baru, gratis!');
+    kikoSay('<b>Bangun Kilat!</b> Tiko membangun daun baru dalam sekejap. Tamu tidak berdesakan lagi!');
+    btn('🪵', 'Bangun Kilat', 'terpakai ✔');
+  }
+  if (HERO === 'bebi') {
+    heroDuck(0.4, 4.0, 2.2).rotation.y = Math.PI * 0.85;
+    leafBoat(-6.6, 5.6, ['bebek', 'kodok', 'udang'], 0.6); leafBoat(9.9, 1.0, ['kura', 'ikan', 'berang'], -0.4); leafBoat(9.0, 4.6, ['kodok', 'bebek', 'ikan'], 0.8); leafBoat(-5.0, -6.8, ['udang', 'kura'], -0.5);
+    render();
+    hud(25, 20, 8, 10, 22);
+    bub(0.4, PADY + 2.0, 4.0, '📣 Kwek! Ayo ke festival!');
+    bub(9.9, 1.4, 1.0, '🍃 +5 tamu datang!');
+    bub(-2.4, PADY + 2.6, -2.0, '😊 Antre? Tidak apa-apa!');
+    kikoSay('Rombongan perahu datang karena <b>Kwek Undangan</b> Bebi! Target pengunjung tercapai 🎉');
+    btn('📣', 'Kwek Undangan', 'terpakai ✔');
+  }
+  if (HERO === 'lumi') {
+    heroFrog(4.2, 1.6, 2.2).rotation.y = -0.6;
+    // lintasan lompatan (busur titik-titik) antar daun
+    const arc = (a, b, h) => { for (let k = 1; k < 14; k++) { const t = k / 14; add(sph(0.07), M('#ffb43a', { emissive: '#ffb43a', emissiveIntensity: 0.6 }), a[0] + (b[0] - a[0]) * t, PADY + 0.6 + Math.sin(t * Math.PI) * h, a[1] + (b[1] - a[1]) * t).castShadow = false; } };
+    arc([4.2, 1.6], [8.6, -2.0], 2.4); arc([4.2, 1.6], [-2.6, 3.4], 2.0); arc([4.2, 1.6], [-8.6, 1.4], 3.2); for (const [x, z] of [[-8.9, 0.6], [-8.4, 0.8]]) add(sph(0.1), M('#d9b35c'), x, PADY + 0.08, z);
+    infoShell(-2.8, 3.6); critter('kodok', -2.2, PADY, 3.8, 0.9);
+    render();
+    hud(18, 20, 8, 10, 21);
+    bub(8.6, PADY + 3.4, -2.6, '✔ Pemusik dapat minum');
+    bub(-2.4, PADY + 2.2, 3.6, '✔ Berudu bertemu ibu');
+    bub(-8.6, PADY + 1.2, 1.0, '✔ Sampah diangkat');
+    bub(4.2, PADY + 2.6, 1.6, '⚡ Lompat Kilat!');
+    el(`<svg width="84" height="70" viewBox="0 0 84 70"><ellipse cx="26" cy="22" rx="22" ry="8" fill="#bfefff" opacity=".85" transform="rotate(-15 26 22)"/><ellipse cx="58" cy="22" rx="22" ry="8" fill="#bfefff" opacity=".85" transform="rotate(15 58 22)"/><ellipse cx="28" cy="36" rx="18" ry="6" fill="#d9f6ff" opacity=".85" transform="rotate(12 28 36)"/><ellipse cx="56" cy="36" rx="18" ry="6" fill="#d9f6ff" opacity=".85" transform="rotate(-12 56 36)"/><rect x="38" y="24" width="8" height="40" rx="4" fill="#3fb6a8"/><circle cx="42" cy="20" r="9" fill="#3fb6a8"/><circle cx="38" cy="18" r="3.4" fill="#fff"/><circle cx="46" cy="18" r="3.4" fill="#fff"/><circle cx="38.5" cy="18.5" r="1.6" fill="#222"/><circle cx="46.5" cy="18.5" r="1.6" fill="#222"/></svg><div class="say"><b>Capung Cici:</b> Tiga masalah beres sekaligus! Tamu makin senang ⭐</div>`, 'kiko');
+    btn('⚡', 'Lompat Kilat', 'terpakai ✔');
+  }
 }
 document.body.dataset.ready = '1';
 </script>
