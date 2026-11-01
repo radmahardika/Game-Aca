@@ -2,12 +2,16 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<title>Mockup — Festival Telaga di atas Daun Teratai</title>
+<title>Mockup — Njajan Fest</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
 <style>
   .tabs { bottom: 160px !important; }
+  .logo { position: absolute; left: 50%; top: 40px; transform: translateX(-50%) rotate(-3deg); text-align: center; font-family: 'Fredoka', 'Nunito', sans-serif; line-height: .9; }
+  .logo .l1 { font-size: 112px; font-weight: 700; color: #fff; -webkit-text-stroke: 10px #e0703a; paint-order: stroke fill; text-shadow: 0 10px 0 #b9541f, 0 16px 30px rgba(0,0,0,.25); letter-spacing: 2px; }
+  .logo .l2 { font-size: 86px; font-weight: 700; color: #ffd84f; -webkit-text-stroke: 9px #3f9a62; paint-order: stroke fill; text-shadow: 0 8px 0 #2d7448, 0 14px 26px rgba(0,0,0,.25); margin-top: -6px; transform: rotate(4deg); }
+  .logo .sub { display: inline-block; margin-top: 18px; background: rgba(255,255,255,.88); border-radius: 999px; padding: 6px 20px; font-family: 'Nunito'; font-weight: 800; font-size: 20px; color: #3d4a52; transform: rotate(3deg); }
   body { font-family: 'Nunito', 'Fredoka', sans-serif; color: #3d4a52; background: #cdeeea; }
   #tilt-top, #tilt-bot { position: absolute; left: 0; right: 0; pointer-events: none; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
   #tilt-top { top: 0; height: 200px; mask-image: linear-gradient(#000, transparent); -webkit-mask-image: linear-gradient(#000, transparent); }
@@ -503,7 +507,7 @@ if (SCREEN === 'venue') {
   cam.position.set(0, 26, 22); cam.lookAt(0, 0, -1); cam.fov = 34; cam.updateProjectionMatrix(); cam.updateMatrixWorld();
   leafBoat(6.5, 11, ['bebek', 'kodok', 'udang'], 0.3);
   render();
-  el(`<b>🪷 Festival Telaga</b><small>Venue di atas daun teratai raksasa</small>`, 'card title');
+  el(`<b>🪷 Njajan Fest</b><small>Venue di atas daun teratai raksasa</small>`, 'card title');
   mat(-3.4, PADY + 2.6, -2.6, '🌿 Lapak ranting', 'atap daun / kelopak / daun kering');
   mat(9.4, PADY + 3.4, -3.4, '🪷 Panggung bunga teratai', 'lampu kunang-kunang');
   mat(0, PADY + 2.0, -0.2, '💧 Tugu embun', 'titik kumpul');
@@ -580,7 +584,7 @@ if (SCREEN === 'tokoh') {
   cam.fov = 28; cam.updateProjectionMatrix();
   cam.position.set(0, 7.5, 15.5); cam.lookAt(0, -0.5, 0.2); cam.updateMatrixWorld();
   render();
-  el(`<b>🪷 Festival Telaga — pilih tokohmu</b><small>Tiap tokoh punya kekuatan berbeda. Coba semuanya! (Asisten: Kiko si katak · kalau pilih Lumi: Capung Cici)</small>`, 'card title');
+  el(`<b>🪷 Njajan Fest — pilih tokohmu</b><small>Tiap tokoh punya kekuatan berbeda. Coba semuanya! (Asisten: Kiko si katak · kalau pilih Lumi: Capung Cici)</small>`, 'card title');
   const opts = [
     ['Tiko si Berang-berang', 'Si Tukang Ranting', '🪵 <b>Hemat Bangun</b>: lapak, bangku & jembatan ranting lebih murah 1 🪙', '⚡ <b>Bangun Kilat</b>: sekali per festival, perbaiki & pindahkan lapak dalam sekejap, atau bangun jembatan ke daun baru gratis', '🪙 Jago mengejar UNTUNG', '#2bb3a3'],
     ['Bebi si Anak Bebek', 'Si Ramah', '💛 <b>Sapaan Hangat</b>: tamu lebih sabar mengantre, tidak cepat kesal', '⚡ <b>Kwek Undangan</b>: sekali per festival, panggil rombongan perahu daun, +5 tamu datang', '🐸 Jago mengejar PENGUNJUNG', '#ff6b6b'],
@@ -635,6 +639,16 @@ if (SCREEN === 'jurus') {
     btn('⚡', 'Lompat Kilat', 'terpakai ✔');
   }
 }
+if (SCREEN === 'judul') {
+  venue('festival'); crowd(40, 4);
+  leafBoat(5.6, 9.5, ['bebek', 'kodok', 'udang'], 0.3); leafBoat(-6.5, 6.5, ['kura', 'ikan'], 0.6);
+  heroOtter(-1.6, 4.4, 2.2).rotation.y = 0.3; heroDuck(0.2, 5.0, 2.2); heroFrog(1.9, 4.6, 2.2).rotation.y = -0.3;
+  cam.position.set(0, 13, 17); cam.lookAt(0, 0, 0.5); cam.updateMatrixWorld();
+  render();
+  el(`<div class="logo"><div class="l1">Njajan</div><div class="l2">Fest</div><div class="sub">Pesta jajanan di Kerajaan Telaga</div></div>`, '');
+  el('▶ Ketuk untuk mulai', 'go', 'left:50%;right:auto;transform:translateX(-50%);bottom:40px;font-size:28px;padding:14px 34px');
+  el('versi 1', '', 'position:absolute;right:16px;bottom:10px;color:#fff;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.4)');
+}
 if (SCREEN === 'jajan') {
   scene.fog = null;
   pad(0, 0, 6.2, -Math.PI / 2 + 0.3);
@@ -645,7 +659,7 @@ if (SCREEN === 'jajan') {
   heroOtter(-1.1, 2.6, 2.0); critter('bebek', 1.2, PADY, 2.4, 1.8); critter('kodok', 3.2, PADY, 2.2, 1.8); critter('kura', -3.3, PADY, 2.4, 1.8);
   cam.fov = 30; cam.updateProjectionMatrix(); cam.position.set(0, 8.5, 15.5); cam.lookAt(0, 0.6, 0); cam.updateMatrixWorld();
   render();
-  el(`<b>🪷 Jajanan Festival Telaga</b><small>Lapak jajanan khas Indonesia</small>`, 'card title');
+  el(`<b>🪷 Jajanan Njajan Fest</b><small>Lapak jajanan khas Indonesia</small>`, 'card title');
   const info = [['Klepon', 'bola hijau isi gula merah, tabur kelapa'], ['Putu Bambu', 'dikukus dalam bambu, gula merah & kelapa'], ['Lemper', 'nasi ketan isi ayam, dibungkus daun pisang'], ['Serabi', 'kue bundar dengan kuah gula merah (kinca)'], ['Es Cendol', 'cendol hijau, santan & gula merah']];
   info.forEach(([n, d], k) => { const p = project(xs[k], 0, zs[k] + 1.2); el(`<img src="${foodURL(L[k][0], 72)}" style="width:60px;height:60px;display:block;margin:0 auto"><b>${n}</b><small>${d}</small>`, 'mat', `left:${p.x}px;top:625px;width:200px;white-space:normal;text-align:center;transform:translate(-50%,0)`); });
 }
