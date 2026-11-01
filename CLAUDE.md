@@ -164,8 +164,39 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/tunggu-dulu/), vers
   simpanan yang tamat di versi 5 hari otomatis lanjut ke Hari 6.
   Tes: `TD.debug` (`day(n)`, `guest({...})`, `decide`, `act`, layar-layar), `TD.S` = keadaan.
 
+## Game kelima: Njajan Fest (`njajan-fest/`)
+
+Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), versi sendiri (`NF.VERSION` di
+`njajan-fest/js/data.js` + `?v=N` di `njajan-fest/index.html` dan import `?v=N` di `js/main.js`). Tujuan: belajar
+**menjadi event organizer** (merencanakan & mengatur festival kuliner), target = jumlah tamu + untung (+ tamu senang).
+
+- **Visual gaya ISLANDERS** (low-poly pastel, efek miniatur/tilt-shift) dengan **Three.js** (`vendor/three.module.min.js` r170,
+  ES module). Venue = **daun teratai raksasa** di Kerajaan Telaga (Raja Kura-kura); bangunan dari ranting, daun, kelopak, cangkang.
+  Semua model di `js/models.js` (diambil dari mockup `mockup-festival/islanders.html`); geometri statis digabung (`mergeStatic`)
+  supaya ringan di iPad. Huruf Nunito + Fredoka (logo). Mockup lama (gaya Godus/Townscaper/teratai) ada di `mockup-festival/`.
+- **3 tokoh dipilih di awal** (bintang dicatat per tokoh, bisa ganti): Tiko si Berang-berang (bakat Hemat Bangun: lapak & bangku
+  −1 🪙; jurus Bangun Kilat: daun baru + lapak gratis), Bebi si Anak Bebek (Sapaan Hangat: tamu lebih sabar, lapak +1 porsi;
+  Kwek Undangan: +5 tamu perahu), Lumi si Anak Katak (Mata Jeli: tanda ❗ sebelum masalah; Lompat Kilat: bereskan semua masalah).
+  Jurus = tombol emas, 1× per festival. Asisten Kiko si katak (Capung Cici kalau pilih Lumi). Tokoh Ranu dihapus atas permintaan.
+- **Jajanan khas Indonesia** (ikon digambar sendiri, `drawFood`): klepon, putu bambu, lemper, serabi, es cendol.
+- Alur Tahap 1 "Bazar Daun Teratai" (`NF.LEVELS`): judul → pilih tokoh → cerita Raja (sekali) → **Papan Persiapan** (hasil tanya
+  warga ❤ acak tiap main, soal hitung "20 tamu, 1 lapak = 5 tamu → berapa lapak?" pilihan 3/4/5, ramalan hujan/anak hilang/Raja)
+  → **Menata** (kartu per tab Lapak/Hiburan/Fasilitas/Promosi, barang hantu digeser di titik slot, **angka +/− ala Islanders** +
+  perkiraan tamu, daftar Cek Kiko; ketuk barang = Pindah/Bongkar) → **Festival** (tamu datang naik perahu daun, antre & beli 1 🪙
+  per jajan; masalah diketuk: sampah → kalau lama jatuh ke telaga, jajanan habis → tambah penjual 1 🪙, anak berudu terpisah →
+  Pos Informasi, Raja datang → bangku, hujan → daun talas; ⏩ 2×) → **Laporan** (tamu, uang masuk − biaya rinci = untung, senang
+  ≥70% → 3 bintang, komentar tamu). Modal 15, target 20 tamu & untung 6.
+- Kamera: geser 1 jari = putar sedikit, cubit = zoom (layar menata & festival).
+- Simpanan `localStorage` kunci `njajan-fest-v1` (`{cerita, best:{tiko,bebi,lumi}, main, hero, muted}`).
+  Tes: buka `njajan-fest/?lite` (tanpa bayangan, render pelan — perlu untuk Playwright/swiftshader) lalu `NF.debug`
+  (`go(nama)`, `hero(id)`, `place(kind, slotIdx)`, `SLOTS`, `speed(n)`, `jurus()`, `problems()`, `F`), `NF.S` = keadaan.
+  Chromium headless perlu `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`.
+- Ide tahap berikutnya (belum dibuat): Pasar Malam Kunang-kunang → Festival Sungai Pelangi → Pesta Panen Danau Raya →
+  Festival Agung (lebih banyak daun dihubungkan jembatan ranting), susun acara & tugas relawan, tamu istimewa.
+
 ## Status & yang sedang dibahas
 
+- Pratinjau **versi 24** (branch `pratinjau-v24`, belum dirilis) = **Njajan Fest versi 1** (game kelima, Tahap 1). Game lain tidak berubah.
 - Rilis terakhir di `main`: **versi 23** = **Angkasa Mart versi 3** (fitur keuangan v3 di atas: Kelola Toko, pegawai,
   asuransi, bencana, cabang, barang premium, berbagi tiap 20 hari). Game lain tidak berubah.
 - Versi 22 = **Tunggu Dulu! versi 4** = 10 hari + tantangan baru hari 6–10 + bantuan Tetua dihapus (lihat atas).

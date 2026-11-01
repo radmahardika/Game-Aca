@@ -1,0 +1,169 @@
+/* Njajan Fest — panggung 1180×820 yang diskalakan agar pas layar iPad; gaya Islanders (low-poly pastel) */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html, body { width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; background: #cdeeea;
+  font-family: 'Nunito', 'Trebuchet MS', sans-serif; color: #3d4a52; }
+#safe { position: fixed; inset: 0; pointer-events: none; visibility: hidden;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+#stage { position: fixed; left: 0; top: 0; width: 1180px; height: 820px; transform-origin: 0 0; overflow: hidden; background: #cdeeea;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+#c { position: absolute; left: 0; top: 0; width: 1180px; height: 820px; display: block; }
+#tilt-top, #tilt-bot { position: absolute; left: 0; right: 0; pointer-events: none; backdrop-filter: blur(2.5px); -webkit-backdrop-filter: blur(2.5px); }
+#tilt-top { top: 0; height: 170px; mask-image: linear-gradient(#000, transparent); -webkit-mask-image: linear-gradient(#000, transparent); }
+#tilt-bot { bottom: 0; height: 130px; mask-image: linear-gradient(transparent, #000); -webkit-mask-image: linear-gradient(transparent, #000); }
+#vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 60%, rgba(30,80,85,.22)); }
+#ui { position: absolute; inset: 0; pointer-events: none; }
+#ui .tap, #ui button, #ui .item, #ui .tab, #ui .bubble.act, #ui .opt { pointer-events: auto; cursor: pointer; }
+#topBtns { position: absolute; left: 16px; top: 14px; z-index: 6; display: flex; gap: 8px; }
+#topBtns button { width: 48px; height: 44px; font-size: 22px; border: 0; border-radius: 14px; background: rgba(255,255,255,.75); padding: 0; box-shadow: 0 4px 14px rgba(40,90,95,.2); }
+body.s-tata #topBtns, body.s-festival #topBtns, body.s-laporan #topBtns { top: 84px; }
+body.s-cerita #topBtns { display: none; }
+#loading { position: absolute; inset: 0; z-index: 9; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; color: #fff; background: #47b8bd; }
+#rotate { display: none; }
+@media (orientation: portrait) {
+  #rotate { display: flex; position: fixed; inset: 0; z-index: 50; background: #47b8bd; color: #fff; font-size: 28px; font-weight: 800; align-items: center; justify-content: center; text-align: center; padding: 30px; }
+}
+
+/* ---------- komponen umum ---------- */
+.card { position: absolute; background: rgba(255,255,255,.9); border-radius: 18px; box-shadow: 0 6px 20px rgba(40,90,95,.18); padding: 10px 16px; }
+.pill { position: absolute; background: rgba(255,255,255,.85); border-radius: 999px; box-shadow: 0 6px 20px rgba(40,90,95,.18); padding: 6px 16px; font-weight: 800; font-size: 21px; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+.btn { display: inline-block; border: 0; font-family: inherit; font-weight: 900; font-size: 22px; color: #fff; background: #7fcf6a; border-radius: 999px; padding: 12px 26px; box-shadow: 0 5px 0 #5aa848, 0 8px 18px rgba(40,90,95,.25); }
+.btn.kuning { background: #ffc94a; color: #6b4310; box-shadow: 0 5px 0 #d99a1c, 0 8px 18px rgba(40,90,95,.25); }
+.btn.abu { background: #e9eef0; color: #5a6a72; box-shadow: 0 5px 0 #c3ccd0, 0 8px 18px rgba(40,90,95,.18); }
+.btn.merah { background: #ff8a6a; box-shadow: 0 5px 0 #d9603f, 0 8px 18px rgba(40,90,95,.25); }
+.btn:active { transform: translateY(3px); }
+.btn[disabled] { opacity: .45; }
+.title { left: 50%; top: 16px; transform: translateX(-50%); text-align: center; padding: 10px 28px; }
+.title b { font-size: 30px; color: #2d7f95; display: block; }
+.title small { font-size: 16px; color: #6b7b84; }
+
+/* ---------- layar judul ---------- */
+.logo { position: absolute; left: 50%; top: 40px; transform: translateX(-50%) rotate(-3deg); text-align: center; font-family: 'Fredoka', 'Nunito', sans-serif; line-height: .9; }
+.logo .l1 { font-size: 112px; font-weight: 700; color: #fff; -webkit-text-stroke: 10px #e0703a; paint-order: stroke fill; text-shadow: 0 10px 0 #b9541f, 0 16px 30px rgba(0,0,0,.25); letter-spacing: 2px; }
+.logo .l2 { font-size: 86px; font-weight: 700; color: #ffd84f; -webkit-text-stroke: 9px #3f9a62; paint-order: stroke fill; text-shadow: 0 8px 0 #2d7448, 0 14px 26px rgba(0,0,0,.25); margin-top: -6px; transform: rotate(4deg); }
+.logo .sub { display: inline-block; margin-top: 18px; background: rgba(255,255,255,.88); border-radius: 999px; padding: 6px 20px; font-family: 'Nunito'; font-weight: 800; font-size: 20px; color: #3d4a52; transform: rotate(3deg); }
+.ver { position: absolute; left: 16px; bottom: 12px; color: #fff; font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,.4); }
+
+/* ---------- pilih tokoh ---------- */
+.opt { position: absolute; top: 470px; transform: translateX(-50%); width: 360px; background: rgba(255,250,240,.95); border-radius: 18px; padding: 10px 12px; box-shadow: 0 6px 20px rgba(40,90,95,.2); transition: transform .15s; }
+.opt.sel { box-shadow: 0 0 0 6px #fff, 0 0 0 11px #7fcf6a, 0 10px 24px rgba(40,90,95,.3); transform: translateX(-50%) translateY(-8px); }
+.opt > b { display: block; font-size: 22px; text-align: center; }
+.opt .role { display: table; margin: 4px auto 6px; color: #fff; font-weight: 800; font-size: 14px; border-radius: 99px; padding: 2px 12px; }
+.opt .pw { font-size: 14.5px; line-height: 1.3; background: #f6ecd6; border-radius: 10px; padding: 6px 8px; margin-bottom: 5px; }
+.opt .pw.jur { background: #fff1c2; }
+.opt em { display: block; text-align: center; font-style: normal; font-size: 15px; color: #2d7f95; font-weight: 800; }
+.opt .bintang { text-align: center; font-size: 18px; letter-spacing: 2px; margin-top: 2px; }
+
+/* ---------- dialog cerita / Kiko ---------- */
+.dialog { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); width: 820px; background: rgba(255,255,255,.95); border-radius: 22px; padding: 18px 24px 16px 130px; box-shadow: 0 8px 26px rgba(40,90,95,.25); font-size: 23px; font-weight: 700; line-height: 1.35; min-height: 140px; }
+.dialog .who { position: absolute; left: 22px; top: 18px; width: 92px; text-align: center; font-size: 13px; font-weight: 900; color: #2d7f95; }
+.dialog .who .face { font-size: 64px; line-height: 70px; display: block; }
+.dialog .nx { text-align: right; margin-top: 10px; }
+.helper { position: absolute; left: 14px; bottom: 14px; display: flex; align-items: flex-end; gap: 6px; max-width: 340px; }
+.helper .face { font-size: 58px; line-height: 1; flex: none; filter: drop-shadow(0 4px 6px rgba(0,0,0,.2)); }
+.helper .face svg { display: block; }
+.helper .say { background: #fff; border-radius: 18px; padding: 10px 14px; font-size: 17px; font-weight: 700; box-shadow: 0 6px 18px rgba(40,90,95,.2); margin-bottom: 30px; line-height: 1.3; }
+.helper .say:empty { display: none; }
+
+/* ---------- papan persiapan ---------- */
+.dim { position: absolute; inset: 0; background: rgba(40,90,95,.35); pointer-events: auto; }
+.board { position: absolute; left: 22px; right: 22px; top: 70px; display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 14px; align-items: start; }
+.col { background: rgba(255,255,255,.95); border-radius: 20px; box-shadow: 0 6px 20px rgba(40,90,95,.2); padding: 14px 16px; }
+.col h3 { font-size: 21px; margin-bottom: 8px; }
+.wish div.r { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; padding: 3px 0; }
+.wish img { width: 42px; height: 42px; }
+.wish .h { margin-left: auto; font-size: 15px; letter-spacing: -2px; }
+.groups { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0; }
+.groups .g { border: 3px dashed #7fcf6a; border-radius: 14px; padding: 4px 6px; font-size: 20px; letter-spacing: -3px; }
+.ans { display: flex; gap: 12px; justify-content: center; margin-top: 6px; }
+.ans button { width: 70px; height: 60px; font-size: 30px; font-weight: 900; font-family: inherit; border: 0; border-radius: 16px; background: #eef8ff; color: #2d7f95; box-shadow: 0 4px 0 #c9d9e4; }
+.ans button.ok { background: #7fcf6a; color: #fff; box-shadow: 0 4px 0 #5aa848; }
+.ans button.no { background: #ffd2c8; color: #b8432a; }
+.fb { text-align: center; font-weight: 800; min-height: 26px; margin-top: 8px; font-size: 17px; }
+.mini { background: #eef8ff; border-radius: 14px; padding: 8px 10px; font-size: 16px; margin-top: 10px; font-weight: 700; }
+.task { display: flex; gap: 10px; align-items: center; font-size: 16px; font-weight: 700; padding: 6px 8px; border-radius: 12px; margin-bottom: 6px; background: #f3f6f7; }
+.task .ck { width: 24px; height: 24px; border-radius: 8px; background: #fff; border: 3px solid #cfd8dc; flex: none; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; }
+.task.done { background: #e2f4d8; } .task.done .ck { background: #5cb84f; border-color: #5cb84f; }
+.board-go { position: absolute; right: 26px; bottom: 22px; }
+
+/* ---------- HUD ---------- */
+.lv { position: absolute; left: 20px; top: 14px; color: #fff; text-shadow: 0 2px 8px rgba(30,80,85,.45); }
+.lv small { display: block; font-size: 14px; font-weight: 800; opacity: .95; }
+.lv b { font-weight: 900; font-size: 26px; }
+.score { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); text-align: center; color: #fff; text-shadow: 0 2px 10px rgba(30,80,85,.5); }
+.score b { font-size: 56px; font-weight: 900; line-height: 1; display: block; }
+.score b span { font-size: 30px; opacity: .85; }
+.score small { font-size: 17px; font-weight: 800; }
+.score .nb { width: 260px; height: 10px; margin: 6px auto 0; border-radius: 99px; background: rgba(255,255,255,.4); overflow: hidden; }
+.score .nb i { display: block; height: 100%; background: #fff; transition: width .3s; }
+.score.ok b { color: #eaffd8; }
+.hud-r { position: absolute; right: 18px; top: 14px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.hud-r .pill { position: static; }
+.bar { width: 120px; height: 12px; background: rgba(61,74,82,.12); border-radius: 99px; overflow: hidden; display: inline-block; }
+.bar i { display: block; height: 100%; background: #ffc94a; border-radius: 99px; }
+
+/* ---------- menata ---------- */
+.tabs { position: absolute; left: 640px; bottom: 150px; transform: translateX(-50%); display: flex; gap: 6px; }
+.tab { white-space: nowrap; background: rgba(255,255,255,.55); border-radius: 12px 12px 0 0; padding: 6px 14px; font-weight: 800; font-size: 16px; color: #5a6a72; }
+.tab.on { background: rgba(255,255,255,.95); color: #3d4a52; }
+.tray { position: absolute; left: 640px; bottom: 12px; transform: translateX(-50%); display: flex; gap: 10px; align-items: flex-end; }
+.item { width: 100px; background: rgba(255,255,255,.92); border-radius: 18px; box-shadow: 0 6px 20px rgba(40,90,95,.18); text-align: center; padding: 6px 4px; position: relative; }
+.item .e { font-size: 42px; line-height: 58px; height: 58px; }
+.item .e img { width: 58px; height: 58px; vertical-align: middle; }
+.item .n { font-size: 14.5px; font-weight: 800; line-height: 1.1; height: 32px; display: flex; align-items: center; justify-content: center; }
+.item .p { font-size: 17px; font-weight: 900; color: #e0a020; }
+.item .p s { color: #b0b8bc; font-size: 14px; margin-right: 3px; }
+.item.sel { box-shadow: 0 0 0 4px #fff, 0 0 0 8px #7fcf6a, 0 6px 20px rgba(40,90,95,.25); transform: translateY(-6px); }
+.item.off { opacity: .45; }
+.item .h { position: absolute; top: 4px; right: 6px; font-size: 10px; letter-spacing: -2px; }
+.item .cnt { position: absolute; top: 4px; left: 8px; font-size: 13px; font-weight: 900; color: #2d7f95; }
+.check { position: absolute; right: 18px; top: 112px; width: 290px; background: rgba(255,255,255,.9); border-radius: 18px; box-shadow: 0 6px 20px rgba(40,90,95,.18); padding: 10px 14px; }
+.check h4 { font-size: 17px; margin-bottom: 4px; }
+.check div { font-size: 15px; font-weight: 700; padding: 3px 0; display: flex; gap: 6px; align-items: flex-start; line-height: 1.25; }
+.go { position: absolute; right: 18px; bottom: 18px; font-size: 26px; padding: 14px 26px; }
+.pt { position: absolute; transform: translate(-50%, -50%); font-weight: 900; font-size: 26px; color: #fff; white-space: nowrap; text-align: center;
+  text-shadow: 0 0 3px #2f6f73, 0 0 3px #2f6f73, 0 2px 8px rgba(30,80,85,.7); }
+.pt small { font-size: 14px; font-weight: 800; display: block; }
+.pt.neg { color: #ffd2c8; text-shadow: 0 0 3px #b8432a, 0 0 3px #b8432a, 0 2px 8px rgba(120,40,20,.6); }
+.pt.big { font-size: 44px; }
+.ghostbtn { position: absolute; transform: translate(-50%, 0); display: flex; gap: 10px; }
+.ghostbtn button { font-size: 20px; padding: 10px 18px; }
+.warnTag { position: absolute; transform: translate(-50%, -50%); font-size: 16px; font-weight: 900; color: #fff; background: #ff8a6a; border-radius: 99px; padding: 4px 12px; white-space: nowrap; }
+.modal { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; background: #fff; border-radius: 24px; padding: 22px 26px; text-align: center; box-shadow: 0 10px 30px rgba(40,90,95,.3); font-size: 21px; font-weight: 700; pointer-events: auto; }
+.modal .row2 { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
+
+/* ---------- festival ---------- */
+.bubble { position: absolute; background: #fff; border-radius: 999px; padding: 6px 12px; font-weight: 800; font-size: 17px; box-shadow: 0 4px 12px rgba(0,0,0,.18); transform: translate(-50%, -100%); white-space: nowrap; }
+.bubble:after { content: ''; position: absolute; left: 50%; bottom: -8px; margin-left: -8px; border: 8px solid transparent; border-bottom: 0; border-top-color: #fff; }
+.bubble.warn { border: 3px solid #ff8a6a; animation: wob 1s ease-in-out infinite; }
+.bubble.warn:after { border-top-color: #ff8a6a; }
+.bubble.pre { background: #fff4c2; border: 3px solid #ffb43a; font-size: 24px; padding: 2px 12px; }
+.bubble.pre:after { border-top-color: #ffb43a; }
+@keyframes wob { 50% { transform: translate(-50%, -100%) scale(1.06); } }
+.pop { position: absolute; transform: translate(-50%, -50%); font-weight: 900; font-size: 22px; color: #ffe27a; pointer-events: none; animation: up 1s ease-out forwards;
+  text-shadow: 0 0 3px #8a5a1a, 0 0 3px #8a5a1a; }
+@keyframes up { to { transform: translate(-50%, -160%); opacity: 0; } }
+.jbtn { position: absolute; right: 22px; bottom: 22px; width: 150px; text-align: center; background: radial-gradient(#fff8d0, #ffd25e); border-radius: 26px; padding: 8px; border: 0; font-family: inherit;
+  box-shadow: 0 0 0 5px #fff, 0 0 26px 8px rgba(255,220,90,.9); animation: glow 1.4s ease-in-out infinite alternate; }
+.jbtn .ji { font-size: 50px; line-height: 58px; display: block; }
+.jbtn b { display: block; font-size: 19px; color: #3d4a52; } .jbtn small { font-size: 14px; color: #8a5a1a; font-weight: 800; }
+.jbtn.used { animation: none; filter: grayscale(.8); opacity: .7; box-shadow: 0 0 0 5px #fff; }
+@keyframes glow { to { box-shadow: 0 0 0 5px #fff, 0 0 40px 14px rgba(255,220,90,1); } }
+.speed { position: absolute; right: 190px; bottom: 30px; font-size: 20px; padding: 10px 18px; }
+.clock { width: 170px; }
+.clock i { background: linear-gradient(90deg, #ffe48a, #ffb43a); }
+
+/* ---------- laporan ---------- */
+.report { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 680px; background: rgba(255,255,255,.97); border-radius: 26px; padding: 20px 30px 18px; box-shadow: 0 10px 30px rgba(40,90,95,.3); pointer-events: auto; }
+.report h2 { text-align: center; font-size: 34px; color: #e0703a; font-family: 'Fredoka', 'Nunito'; }
+.report .stars { text-align: center; font-size: 46px; margin: 0 0 6px; letter-spacing: 6px; }
+.report .stars .off { filter: grayscale(1); opacity: .3; }
+.report .row { display: flex; justify-content: space-between; align-items: center; font-size: 21px; font-weight: 700; padding: 5px 4px; border-bottom: 2px dashed #e3e9ec; }
+.report .row b { font-size: 23px; font-weight: 900; }
+.report .row small { font-size: 15px; color: #7a8a92; font-weight: 800; }
+.report .sub { font-size: 16px; color: #7a8a92; padding: 0 4px 0 30px; display: flex; justify-content: space-between; font-weight: 700; }
+.report .ok { color: #3a9a3a; } .report .no { color: #d9603f; }
+.says { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+.says span { background: #eef8ff; border-radius: 12px; padding: 5px 10px; font-size: 16px; font-weight: 700; }
+.btns { display: flex; gap: 12px; justify-content: center; margin-top: 14px; }
+.btns .btn { font-size: 19px; padding: 10px 18px; }
