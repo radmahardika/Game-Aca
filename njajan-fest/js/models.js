@@ -81,7 +81,8 @@ function twig(x1, y1, z1, x2, y2, z2, r = 0.035, parent = P, mat = twigM) {
   return m;
 }
 function log(x, y, z, len, r, rotY = 0, parent = P) { const m = add(cyl(r, r, len, 12), bark, x, y, z, parent); m.rotation.z = Math.PI / 2; m.rotation.y = rotY; m.rotation.order = 'YXZ'; const e1 = add(cyl(r * 0.85, r * 0.85, 0.02, 12), M('#d9b07a'), 0, 0, 0, parent); return m; }
-const FOOD = { klepon: ['Klepon', '#5cb84f'], putu: ['Putu Bambu', '#e09a3a'], lemper: ['Lemper', '#3f9a62'], serabi: ['Serabi', '#f08a5a'], cendol: ['Es Cendol', '#4fb3e8'] };
+const FOOD = { klepon: ['Klepon', '#5cb84f'], putu: ['Putu Bambu', '#e09a3a'], lemper: ['Lemper', '#3f9a62'], serabi: ['Serabi', '#f08a5a'], cendol: ['Es Cendol', '#4fb3e8'],
+  getuk: ['Getuk', '#e86fa0'], cincin: ['Kue Cincin', '#b8743a'], gemblong: ['Gemblong', '#a0662e'], tehtarik: ['Teh Tarik', '#d98a3a'], wedang: ['Wedang Uwuh', '#b8402e'] };
 // ikon jajanan digambar sendiri (tidak ada emoji putu/lemper/cendol)
 function drawFood(x, kind, S = 128) {
   const k = S / 128; x.save(); x.scale(k, k);
@@ -123,6 +124,60 @@ function drawFood(x, kind, S = 128) {
     x.fillStyle = '#8a4a22'; x.beginPath(); x.ellipse(64, 72, 18, 11, 0, 0, 7); x.fill();
     x.fillStyle = '#b06a32'; x.beginPath(); x.ellipse(60, 69, 7, 4, 0, 0, 7); x.fill();
   }
+  if (kind === 'getuk') {
+    // getuk lindri: potongan berlapis pink-hijau-putih + parutan kelapa, di atas daun pisang
+    leaf(64, 92, 50, 15);
+    const piece = (cx, cy, cols) => { const w = 30, h = 13; cols.forEach((c, i) => { x.fillStyle = c; x.beginPath(); x.roundRect(cx - w / 2, cy - (i + 1) * h, w, h, 4); x.fill(); });
+      x.fillStyle = 'rgba(255,255,255,.75)'; x.beginPath(); x.roundRect(cx - w / 2 + 3, cy - cols.length * h - 2, w - 6, 3, 2); x.fill();
+      x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 2; for (let k = 0; k < 3; k++) { x.beginPath(); x.moveTo(cx - 10 + k * 10, cy - 4); x.lineTo(cx - 10 + k * 10, cy - cols.length * h + 4); x.stroke(); } };
+    piece(40, 92, ['#f6f0dc', '#8fd06a', '#f28db8']); piece(76, 92, ['#f28db8', '#f6f0dc', '#8fd06a']); piece(58, 70, ['#8fd06a', '#f28db8', '#f6f0dc']);
+    x.fillStyle = '#fff'; for (let i = 0; i < 16; i++) x.fillRect(30 + (i * 23) % 64, 44 + (i * 17) % 50, 4, 2);
+  }
+  if (kind === 'cincin') {
+    // kue cincin: cincin goreng cokelat keemasan bertumpuk
+    for (const [cx, cy, s] of [[44, 82, 1], [84, 82, 1], [64, 56, 1.05]]) {
+      x.strokeStyle = '#8a4e22'; x.lineWidth = 15 * s; x.beginPath(); x.ellipse(cx, cy + 3, 20 * s, 13 * s, 0, 0, 7); x.stroke();
+      x.strokeStyle = '#c9823e'; x.lineWidth = 13 * s; x.beginPath(); x.ellipse(cx, cy, 20 * s, 13 * s, 0, 0, 7); x.stroke();
+      x.strokeStyle = 'rgba(255,220,150,.7)'; x.lineWidth = 3; x.beginPath(); x.ellipse(cx - 2, cy - 4, 17 * s, 9 * s, 0, 3.4, 5.6); x.stroke();
+    }
+  }
+  if (kind === 'gemblong') {
+    // gemblong: ketan lonjong dibalut gula merah mengkilap
+    leaf(64, 92, 50, 15);
+    for (const [cx, cy, r] of [[42, 80, -0.3], [84, 80, 0.3], [63, 62, 0]]) {
+      x.save(); x.translate(cx, cy); x.rotate(r);
+      x.fillStyle = '#6e3c17'; x.beginPath(); x.ellipse(0, 3, 22, 12, 0, 0, 7); x.fill();
+      x.fillStyle = '#9a5a26'; x.beginPath(); x.ellipse(0, 0, 22, 12, 0, 0, 7); x.fill();
+      x.fillStyle = 'rgba(255,210,140,.75)'; x.beginPath(); x.ellipse(-6, -5, 10, 3.5, -0.1, 0, 7); x.fill();
+      x.restore();
+    }
+  }
+  if (kind === 'tehtarik') {
+    // teh tarik: gelas tinggi, teh susu oranye kecokelatan + buih tebal
+    const glass = () => { x.beginPath(); x.moveTo(36, 30); x.lineTo(92, 30); x.lineTo(84, 112); x.lineTo(44, 112); x.closePath(); };
+    x.save(); glass(); x.clip();
+    x.fillStyle = '#e9f6fb'; x.fillRect(20, 20, 90, 100);
+    const gr = x.createLinearGradient(0, 50, 0, 112); gr.addColorStop(0, '#e8a35a'); gr.addColorStop(1, '#b8692c');
+    x.fillStyle = gr; x.fillRect(20, 52, 90, 70);
+    x.fillStyle = '#fbf0dc'; x.fillRect(20, 38, 90, 16);
+    x.fillStyle = '#fff'; for (let i = 0; i < 6; i++) { x.beginPath(); x.arc(42 + i * 9, 38, 5, 0, 7); x.fill(); }
+    x.restore();
+    glass(); x.lineWidth = 4; x.strokeStyle = '#8fb8c9'; x.stroke();
+    // aliran teh "ditarik" dari atas
+    x.strokeStyle = '#d9914a'; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(64, 2); x.quadraticCurveTo(70, 18, 64, 34); x.stroke();
+  }
+  if (kind === 'wedang') {
+    // wedang uwuh: mangkuk/gelas tanah liat, air merah, rempah (secang, kayu manis, daun, cengkeh)
+    x.fillStyle = '#c9744a'; x.beginPath(); x.moveTo(24, 50); x.lineTo(104, 50); x.quadraticCurveTo(100, 112, 64, 112); x.quadraticCurveTo(28, 112, 24, 50); x.fill();
+    x.fillStyle = '#a85a36'; x.fillRect(24, 50, 80, 7);
+    x.fillStyle = '#9c2a22'; x.beginPath(); x.ellipse(64, 52, 38, 10, 0, 0, 7); x.fill();
+    x.fillStyle = '#c94a3a'; x.beginPath(); x.ellipse(58, 50, 18, 4, 0, 0, 7); x.fill();
+    x.fillStyle = '#6aa84a'; x.beginPath(); x.ellipse(44, 46, 12, 5, -0.5, 0, 7); x.fill(); x.beginPath(); x.ellipse(80, 47, 11, 4, 0.6, 0, 7); x.fill();
+    x.fillStyle = '#8a4e22'; x.save(); x.translate(66, 40); x.rotate(-0.5); x.fillRect(-16, -3, 32, 6); x.restore();
+    x.fillStyle = '#5a2e14'; for (const [a, b] of [[54, 52], [74, 54], [62, 48]]) { x.beginPath(); x.arc(a, b, 3, 0, 7); x.fill(); }
+    x.strokeStyle = 'rgba(255,255,255,.7)'; x.lineWidth = 3; x.lineCap = 'round';
+    for (const ox of [48, 64, 80]) { x.beginPath(); x.moveTo(ox, 34); x.quadraticCurveTo(ox - 6, 24, ox, 14); x.stroke(); }
+  }
   if (kind === 'cendol') {
     const glass = () => { x.beginPath(); x.moveTo(30, 34); x.lineTo(98, 34); x.lineTo(88, 112); x.lineTo(40, 112); x.closePath(); };
     x.save(); glass(); x.clip();
@@ -148,6 +203,11 @@ function foodURL(kind, S = 96) { const c = document.createElement('canvas'); c.w
 function tableFood(g, kind) {
   for (let k = 0; k < 3; k++) {
     const x = -0.36 + k * 0.36, y = 0.56, z = 0.3;
+    if (kind === 'getuk') { add(box(0.12, 0.05, 0.1), M('#f28db8'), x, y, z, g); add(box(0.12, 0.05, 0.1), M('#8fd06a'), x, y + 0.05, z, g); add(box(0.12, 0.05, 0.1), M('#f6f0dc'), x, y + 0.1, z, g); }
+    if (kind === 'cincin') { const t = add(new THREE.TorusGeometry(0.07, 0.03, 5, 10), M('#c9823e'), x, y + 0.01, z, g); t.rotation.x = Math.PI / 2; }
+    if (kind === 'gemblong') { const e = add(sph(0.07), M('#9a5a26'), x, y + 0.02, z, g); e.scale.set(1.5, 0.7, 1); }
+    if (kind === 'tehtarik') { add(cyl(0.055, 0.045, 0.2, 8), M('#e8a35a'), x, y + 0.06, z, g); add(cyl(0.056, 0.055, 0.04, 8), M('#fbf0dc'), x, y + 0.17, z, g); }
+    if (kind === 'wedang') { add(cyl(0.08, 0.06, 0.1, 8), M('#c9744a'), x, y + 0.02, z, g); add(cyl(0.07, 0.07, 0.01, 8), M('#9c2a22'), x, y + 0.075, z, g); }
     if (kind === 'klepon') for (let i = 0; i < 3; i++) add(sph(0.05), M('#4fae49'), x + (i - 1) * 0.07, y + (i === 1 ? 0.04 : 0), z, g);
     if (kind === 'putu') { add(cyl(0.05, 0.05, 0.14, 7), M(k ? '#5cb84f' : '#e8cf8a'), x, y + 0.04, z, g); add(cyl(0.05, 0.05, 0.02, 7), M('#fbf6e8'), x, y + 0.12, z, g); }
     if (kind === 'lemper') { const l = add(cyl(0.05, 0.05, 0.22, 6), M('#5aa845'), x, y, z, g); l.rotation.z = Math.PI / 2; }

@@ -1,8 +1,8 @@
 // Njajan Fest — alur utama: judul → pilih tokoh → cerita → papan persiapan → menata → festival → laporan
 import * as THREE from '../vendor/three.module.min.js';
-import { NF } from './data.js?v=1';
-import * as G from './models.js?v=1';
-import * as A from './audio.js?v=1';
+import { NF } from './data.js?v=2';
+import * as G from './models.js?v=2';
+import * as A from './audio.js?v=2';
 
 const W = 1180, H = 820, PADY = G.PADY;
 const $ = id => document.getElementById(id);
@@ -44,11 +44,11 @@ fit();
 // ================= dunia 3D =================
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#cdeeea');
-scene.fog = new THREE.Fog('#cdeeea', 34, 72);
+scene.fog = new THREE.Fog('#cdeeea', 44, 92);
 scene.add(new THREE.HemisphereLight('#ffffff', '#7fbfb6', 1.6));
 const sun = new THREE.DirectionalLight('#fff4e0', 2.6);
 sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -15, right: 15, top: 15, bottom: -15, near: 1, far: 70 });
+Object.assign(sun.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 1, far: 80 });
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03;
 scene.add(sun); scene.add(sun.target);
 function sunAt(x, z) { sun.position.set(x - 16, 20, z + 6); sun.target.position.set(x, 0, z); sun.target.updateMatrixWorld(); }
@@ -60,34 +60,35 @@ const world = new THREE.Group(), dyn = new THREE.Group(), actors = new THREE.Gro
 scene.add(world, dyn, actors, lineupG, fx);
 const cam = new THREE.PerspectiveCamera(30, W / H, 0.1, 300);
 
-const GATE = { x: 0.6, z: 4.6 }, CENTER = { x: 0, z: -0.2 }, DOCK = { x: 0.7, z: 6.6 }, STAGE = { x: 9.4, z: -3.4 };
+const PAD_R = 8.6, ENTRY = { x: 0, z: 3.0 };
+const GATE = { x: 0.8, z: 6.7 }, CENTER = { x: 0, z: -0.3 }, DOCK = { x: 0.9, z: 9.0 }, STAGE = { x: 12.6, z: -4.6 };
 function buildVenue() {
   G.setParent(world);
-  G.shore();
-  G.pad(0, 0, 6, -Math.PI / 2 + 0.25);
-  G.pad(9.2, -3.2, 3.1, Math.PI * 0.95);
-  G.pad(-9.0, 1.8, 2.8, Math.PI * 1.9);
-  G.twigBridge([5.6, -1.6], [6.6, -2.4]); G.twigBridge([-5.8, 0.9], [-6.6, 1.2]);
-  [[13, 4, 1.1, 1], [-13, -3, 1.3, 0], [-5, 9, 1.0, 1], [12, -8, 1.2, 0], [-14, 7, 0.9, 1], [2, -9.5, 1.1, 1], [15, 1, 0.8, 0], [6.5, 8.5, 1.3, 1]].forEach(([x, z, r, f]) => G.smallPad(x, z, r, f));
-  G.lotus(11.5, 6.5, 1.4, 0.05); G.lotus(-12, 4.4, 1.2, 0.05); G.lotus(-3.5, -9, 1.0, 0.05);
-  [[-7, -6], [7.5, 10.5], [-11, 9], [14, -4], [-15, -1]].forEach(([x, z], k) => { G.reeds(x, z, 6, k + 30); G.cattail(x + 0.4, z + 0.2, 2.6, 0.05); });
+  G.inGroup(0, -5, () => G.shore(), world);
+  G.pad(0, 0, PAD_R, -Math.PI / 2 + 0.17);
+  G.pad(12.4, -4.4, 3.2, Math.PI * 0.95);
+  G.pad(-12.4, 2.4, 3.0, Math.PI * 1.9);
+  G.twigBridge([8.3, -2.2], [9.4, -3.1]); G.twigBridge([-8.4, 1.2], [-9.5, 1.7]);
+  [[16, 5, 1.1, 1], [-16, -4, 1.3, 0], [-6, 12, 1.0, 1], [15, -10, 1.2, 0], [-17, 8, 0.9, 1], [3, -12.5, 1.1, 1], [18, 1, 0.8, 0], [8.5, 11.5, 1.3, 1], [-11, -9, 1.1, 0]].forEach(([x, z, r, f]) => G.smallPad(x, z, r, f));
+  G.lotus(14.5, 8.5, 1.4, 0.05); G.lotus(-15, 5.4, 1.2, 0.05); G.lotus(-4.5, -11.5, 1.0, 0.05);
+  [[-9, -8], [9.5, 13], [-13, 11], [17, -5], [-18, -1]].forEach(([x, z], k) => { G.reeds(x, z, 6, k + 30); G.cattail(x + 0.4, z + 0.2, 2.6, 0.05); });
   G.stageLotus(STAGE.x, STAGE.z, 1.5);
-  G.dewdrop(CENTER.x, CENTER.z, 1.4);
-  G.berryLights([-4.8, -1.0], [-1.2, -4.8]); G.berryLights([1.2, -4.8], [4.8, -1.0]);
+  G.dewdrop(CENTER.x, CENTER.z, 1.5);
+  G.berryLights([-6.6, -1.6], [-1.8, -6.6]); G.berryLights([1.8, -6.6], [6.6, -1.6]);
   G.reedGate(GATE.x, GATE.z);
   // tempat makan di daun kiri (dekorasi tetap)
-  G.logBench(-9.4, 1.4, 0.2); G.logBench(-8.4, 2.7, -0.3);
+  G.logBench(-12.8, 2.0, 0.2); G.logBench(-11.8, 3.3, -0.3);
   // batu pijakan = jalan masuk (tidak boleh ditutup)
-  for (let k = 0; k <= 4; k++) { const t = k / 4; const d = G.add(G.cyl(0.22, 0.24, 0.04, 7), G.M('#f3e3b5'), GATE.x + (0 - GATE.x) * t, PADY + 0.02, 4.0 + (1.6 - 4.0) * t); d.castShadow = false; }
+  for (let k = 0; k <= 6; k++) { const t = k / 6; const d = G.add(G.cyl(0.26, 0.28, 0.04, 7), G.M('#f3e3b5'), GATE.x + (ENTRY.x - GATE.x) * t, PADY + 0.02, (GATE.z - 0.6) + (ENTRY.z - 0.8 - (GATE.z - 0.6)) * t); d.castShadow = false; }
 }
-// ---- slot di daun utama ----
 function segDist(p, a, b) { const dx = b.x - a.x, dz = b.z - a.z; const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.z - a.z) * dz) / (dx * dx + dz * dz))); return Math.hypot(p.x - a.x - dx * t, p.z - a.z - dz * t); }
 const SLOTS = [];
-for (let i = -3; i <= 3; i++) for (let j = -3; j <= 3; j++) {
-  const p = { x: i * 1.7 + (j % 2 ? 0.45 : 0), z: j * 1.7 };
+const SP = 2.25;
+for (let i = -4; i <= 4; i++) for (let j = -4; j <= 4; j++) {
+  const p = { x: i * SP + (j % 2 ? SP / 2 : 0), z: j * SP };
   const d = Math.hypot(p.x - CENTER.x, p.z - CENTER.z);
-  if (Math.hypot(p.x, p.z) > 5.0 || d < 1.5) continue;
-  if (segDist(p, GATE, { x: 0, z: 1.3 }) < 1.0) continue;
+  if (Math.hypot(p.x, p.z) > PAD_R - 1.4 || d < 2.0) continue;
+  if (segDist(p, GATE, { x: ENTRY.x, z: ENTRY.z - 1.2 }) < 1.3) continue;
   SLOTS.push({ x: p.x, z: p.z, item: null, idx: SLOTS.length });
 }
 // ---- penanda slot (titik putih saat menata) ----
@@ -112,10 +113,10 @@ const lineupHeroes = {};
 
 // ================= kamera =================
 const CAMS = {
-  venue: { tx: 1.6, tz: -0.8, yaw: -0.127, pitch: 0.761, dist: 28.3 },
-  judul: { tx: 0, tz: 0.5, yaw: 0, pitch: 0.667, dist: 21.0 },
+  venue: { tx: 2.0, tz: -0.6, yaw: -0.127, pitch: 0.8, dist: 37 },
+  judul: { tx: 0, tz: 1.0, yaw: 0, pitch: 0.667, dist: 28 },
   lineup: { tx: LO, tz: 0.2, yaw: 0, pitch: 0.482, dist: 17.3, ty: -0.5 },
-  cerita: { tx: 0.6, tz: 3.4, yaw: -0.25, pitch: 0.42, dist: 9.5, ty: 0.6 },
+  cerita: { tx: 0.8, tz: 5.4, yaw: -0.25, pitch: 0.42, dist: 9.5, ty: 0.6 },
 };
 const camS = { tx: 0, ty: 0, tz: 0, yaw: 0, pitch: 0.7, dist: 25 };
 let camGoal = null;
@@ -181,17 +182,20 @@ function itemPts(it, all) {
   const near = (r) => lapaks.some(o => dist(o, it) <= r);
   switch (NF.ITEMS[it.kind].cat) {
     case 'lapak': {
-      p += 1; R.push(['+1', 'lapak jajanan']);
+      const rk = ((it.rotK || 0) % 4 + 4) % 4;
+      if (rk === 0) { p += 1; R.push(['+1', 'menghadap tamu']); }
+      else if (rk === 2) { p -= 1; R.push(['−1', 'membelakangi tamu']); }
+      else R.push(['+0', 'menghadap ke samping']);
       const hb = heartsBonus(it.kind); if (hb) { p += hb; R.push(['+' + hb, 'jajanan disukai ' + '❤'.repeat(S.hearts[it.kind])]); }
-      if (dist(it, CENTER) <= 2.6) { p += 1; R.push(['+1', 'dekat tugu embun']); }
-      if (dist(it, GATE) <= 2.9) { p += 1; R.push(['+1', 'dekat gerbang']); }
-      const crowd = lapaks.filter(o => dist(o, it) <= 1.9).length;
+      if (dist(it, CENTER) <= 3.4) { p += 1; R.push(['+1', 'dekat tugu embun']); }
+      if (dist(it, GATE) <= 3.8) { p += 1; R.push(['+1', 'dekat gerbang']); }
+      const crowd = lapaks.filter(o => dist(o, it) <= 2.4).length;
       if (crowd) { p -= crowd; R.push(['−' + crowd, 'terlalu dekat lapak lain']); }
       break;
     }
     default:
       if (it.kind === 'bangku' || it.kind === 'sampah') {
-        if (near(2.5)) { p += 1; R.push(['+1', it.kind === 'bangku' ? 'tamu bisa duduk dekat lapak' : 'dekat lapak, sampah tidak berserakan']); }
+        if (near(3.4)) { p += 1; R.push(['+1', it.kind === 'bangku' ? 'tamu bisa duduk dekat lapak' : 'dekat lapak, sampah tidak berserakan']); }
         else R.push(['+0', 'terlalu jauh dari lapak']);
       } else if (it.kind === 'talas') { p += 1; R.push(['+1', 'tempat berteduh']); }
       else if (it.kind === 'info') { p += 1; R.push(['+1', 'pos informasi']); }
@@ -207,15 +211,16 @@ function evaluate(list) {
 }
 
 // ================= model barang =================
-const ROOFS = { klepon: 'kelopak', putu: 'daun', lemper: 'talas', serabi: 'keringdaun', cendol: 'kelopak' };
+const ROOFS = { klepon: 'kelopak', putu: 'daun', lemper: 'talas', serabi: 'keringdaun', cendol: 'kelopak', getuk: 'kelopak', cincin: 'keringdaun', gemblong: 'daun', tehtarik: 'keringdaun', wedang: 'talas' };
 function posterBoard() {
   G.twig(0, 0, 0, 0, 1.1, 0, 0.04);
   const b = G.add(G.box(0.9, 0.6, 0.06), G.M('#9ed36f'), 0, 1.15, 0); b.rotation.z = 0.04;
   G.add(G.box(0.74, 0.44, 0.065), G.M('#fff6dc'), 0, 1.15, 0.005);
   const sp = G.sprite('🎉', 0, 1.15, 0.06, 0.4, '#ffc94a', null);
 }
-function buildItem(kind, x, z, ghost = false) {
-  const rot = Math.atan2(CENTER.x - x, CENTER.z - z);
+function itemRot(x, z, rotK = 0) { return Math.atan2(CENTER.x - x, CENTER.z - z) + rotK * Math.PI / 2; }
+function buildItem(kind, x, z, ghost = false, rotK = 0) {
+  const rot = itemRot(x, z, rotK);
   const g = G.inGroup(x, z, () => {
     if (NF.ITEMS[kind].cat === 'lapak') G.stall(0, 0, kind, ROOFS[kind], rot, false);
     else if (kind === 'bangku') G.logBench(0, 0, rot + Math.PI / 2);
@@ -224,7 +229,7 @@ function buildItem(kind, x, z, ghost = false) {
     else if (kind === 'info') G.infoShell(0, 0);
     else if (kind === 'poster') posterBoard();
   }, dyn);
-  if (NF.ITEMS[kind].cat === 'lapak') g.scale.setScalar(0.85);
+  if (!(NF.ITEMS[kind].cat === 'lapak' || kind === 'bangku')) g.rotation.y = rot;
   if (ghost) g.traverse(o => { if (o.material) { o.material = o.material.clone(); o.material.transparent = true; o.material.opacity = 0.5; o.material.depthWrite = false; } if (o.isMesh) o.castShadow = false; });
   g.userData.kind = kind;
   return g;
@@ -260,7 +265,7 @@ cv.addEventListener('pointermove', e => {
   if (!gesture) return;
   if (gesture.type === 'pinch' && pointers.size === 2) {
     const [a, b] = [...pointers.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
-    camS.dist = camGoal.dist = Math.max(15, Math.min(36, gesture.dist0 * gesture.d0 / d));
+    camS.dist = camGoal.dist = Math.max(18, Math.min(46, gesture.dist0 * gesture.d0 / d));
   } else if (gesture.type === 'ghost') moveGhostTo(p);
   else if (gesture.type === 'pan') {
     const dx = p.x - gesture.x0; if (Math.abs(dx) + Math.abs(p.y - gesture.y0) > 12) gesture.moved = true;
@@ -289,12 +294,12 @@ function screenJudul() {
   S.screen = 'judul'; document.body.className = 's-judul'; clearUI(); setCam('judul');
   clearDyn(); resetActors();
   // dekorasi festival contoh
-  const demoItems = [['putu', -3.4, -2.6], ['cendol', 0, -3.8], ['serabi', 3.4, -2.6], ['lemper', -4.0, 1.0], ['klepon', 4.0, 1.0]];
+  const demoItems = [['putu', -4.4, -3.2], ['tehtarik', 0, -4.6], ['serabi', 4.4, -3.2], ['getuk', -5.4, 1.2], ['klepon', 5.4, 1.2], ['wedang', -3.4, 4.6], ['cendol', 4.2, 4.4]];
   demoItems.forEach(([k, x, z]) => demo.push(buildItem(k, x, z)));
-  demo.push(buildItem('info', -2.8, 3.6), buildItem('talas', 2.6, 3.9), buildItem('sampah', -2.2, -1.4));
-  for (let k = 0; k < 26; k++) spawnDecorCritter();
+  demo.push(buildItem('info', -6.0, -2.6), buildItem('talas', 6.0, -1.8), buildItem('sampah', -2.6, -2.0));
+  for (let k = 0; k < 34; k++) spawnDecorCritter();
   G.setParent(actors);
-  G.heroOtter(-1.6, 4.4, 2.2).rotation.y = 0.3; G.heroDuck(0.2, 5.0, 2.2); G.heroFrog(1.9, 4.6, 2.2).rotation.y = -0.3;
+  G.heroOtter(-1.6, 5.4, 2.4).rotation.y = 0.3; G.heroDuck(0.3, 6.0, 2.4); G.heroFrog(2.2, 5.6, 2.4).rotation.y = -0.3;
   el(`<div class="l1">Njajan</div><div class="l2">Fest</div><div class="sub">Pesta jajanan di Kerajaan Telaga</div>`, 'logo');
   const b = el('<button class="btn" style="font-size:28px;padding:14px 34px">▶ Ketuk untuk mulai</button>', '', 'position:absolute;left:50%;bottom:40px;transform:translateX(-50%)');
   b.querySelector('button').onclick = goTokoh;
@@ -302,7 +307,7 @@ function screenJudul() {
 }
 function goTokoh() { A.unlock(); A.sfx('tap'); A.music(true); screenTokoh(); }
 function spawnDecorCritter() {
-  const kinds = Object.keys(G.CR); const a = Math.random() * 6.28, d = 1.4 + Math.random() * 3.6;
+  const kinds = Object.keys(G.CR); const a = Math.random() * 6.28, d = 2.2 + Math.random() * 5.0;
   const x = Math.cos(a) * d, z = Math.sin(a) * d;
   const c = G.critter(pick(kinds), x, PADY, z, 1.7, actors); c.rotation.y = Math.random() * 6.28;
   c.userData.bob = Math.random() * 6;
@@ -352,7 +357,7 @@ function screenCerita() {
 
 // ================= layar: papan persiapan =================
 function rollHearts() {
-  const vals = [3, 3, 2, 1, 1].sort(() => Math.random() - 0.5);
+  const vals = [...NF.HEARTS].sort(() => Math.random() - 0.5);
   S.hearts = {}; NF.LAPAK.forEach((k, i) => S.hearts[k] = vals[i]);
 }
 function screenPapan() {
@@ -363,11 +368,11 @@ function screenPapan() {
   el(`<div class="pill" style="position:static;display:inline-flex">📋 Papan Persiapan · ${LV.nama}</div>`, '', 'position:absolute;left:134px;top:16px');
   el(`<div class="pill" style="position:static;display:inline-flex">👛 Modal ${LV.modal} 🪙</div>`, '', 'position:absolute;right:22px;top:16px');
   const order = [...NF.LAPAK].sort((a, b) => S.hearts[b] - S.hearts[a]);
-  const wish = order.map(k => `<div class="r"><img src="${G.foodURL(k, 84)}">${NF.ITEMS[k].nama}<span class="h">${'❤️'.repeat(S.hearts[k])}</span></div>`).join('');
+  const wish = order.map(k => `<div class="r"><img src="${G.foodURL(k, 72)}">${NF.ITEMS[k].nama}<small class="hg">${costOf(k)}🪙</small><span class="h">${'❤️'.repeat(S.hearts[k])}</span></div>`).join('');
   const groups = Array.from({ length: LV.targetTamu / LV.porsi }, () => `<span class="g">${'🐸'.repeat(LV.porsi)}</span>`).join('');
   const board = el(`
     <div class="col wish"><h3>📋 Hasil tanya warga</h3><div style="font-size:15px;font-weight:700;color:#6b7b84;margin-bottom:6px">Jajanan yang paling disukai warga telaga:</div>${wish}
-      <div class="mini">💡 Jajanan ❤❤❤ membuat lebih banyak tamu datang!</div></div>
+      <div class="mini">💡 ❤❤❤ = lebih banyak tamu datang. Ada yang murah, ada yang mahal — pilih yang paling pas!</div></div>
     <div class="col"><h3>🧮 Hitung lapak</h3>
       <div style="font-size:17px;font-weight:700">Target: <b>${LV.targetTamu} tamu</b>. Satu lapak bisa melayani <b>${LV.porsi} tamu</b>.<br>Butuh berapa lapak?</div>
       <div class="groups">${groups}</div>
@@ -390,10 +395,10 @@ function screenPapan() {
 }
 
 // ================= layar: menata =================
-const T = { tab: 'lapak', ghost: null, menu: null };
+const T = { tab: 'kue', ghost: null, menu: null };
 function screenTata() {
   S.screen = 'tata'; document.body.className = 's-tata'; clearUI(); setCam('venue', false); sunAt(1, -1);
-  if (!heroM.obj) placeHero(-1.4, 3.4, 0.4);
+  if (!heroM.obj) placeHero(-1.8, 4.8, 0.4);
   T.ghost = null; T.menu = null; slotMarks.visible = true;
   renderTata();
   helper(`Pilih kartu di bawah, lalu geser ke tempat yang angkanya <b>+</b> paling besar!`);
@@ -408,7 +413,7 @@ function tataHud() {
   el(`<div class="pill">👛 Kas <b>${kas()}</b> 🪙</div><div class="pill" style="font-size:16px">🎯 Target untung ${LV.targetUntung} 🪙</div>`, 'hud-r', '', box);
   // daftar cek
   const lap = lapakList().length, need = LV.targetTamu / LV.porsi;
-  const binOk = S.placed.some(p => p.kind === 'sampah' && lapakList().some(l => dist(l, p) <= 2.5));
+  const binOk = S.placed.some(p => p.kind === 'sampah' && lapakList().some(l => dist(l, p) <= 3.4));
   const rows = [
     [lap >= need, `Lapak jajanan ${lap}/${need}`],
     [true, 'Jalan masuk tetap lega'],
@@ -425,7 +430,7 @@ function renderTata() {
   tataHud();
   const tabs = el(NF.TABS.map(([id, l]) => `<div class="tab ${T.tab === id ? 'on' : ''}" data-t="${id}">${l}</div>`).join(''), 'tabs');
   tabs.querySelectorAll('.tab').forEach(t => t.onclick = () => { A.sfx('tap'); T.tab = t.dataset.t; renderTata(); });
-  const kinds = Object.keys(NF.ITEMS).filter(k => NF.ITEMS[k].cat === T.tab);
+  const kinds = Object.keys(NF.ITEMS).filter(k => (NF.ITEMS[k].tab || NF.ITEMS[k].cat) === T.tab);
   const tray = el(kinds.map(k => {
     const it = NF.ITEMS[k], c = costOf(k), n = k === 'musik' ? (S.musik ? 1 : 0) : countKind(k);
     const full = it.cat === 'lapak' ? n >= 1 : (it.maks ? n >= it.maks : n >= 1);
@@ -455,15 +460,15 @@ function onCard(k) {
   if (kas() < costOf(k)) return helper('Kas tidak cukup 😅 Bongkar barang lain dulu, ya.', 3000);
   const free = SLOTS.filter(s => !s.item);
   if (!free.length) return helper('Daun sudah penuh! Bongkar sesuatu dulu.', 3000);
-  const start = free.sort((a, b) => dist(a, { x: 0.8, z: 2.6 }) - dist(b, { x: 0.8, z: 2.6 }))[0];
+  const start = free.sort((a, b) => dist(a, { x: 1.2, z: 3.6 }) - dist(b, { x: 1.2, z: 3.6 }))[0];
   startGhost(k, start);
 }
-function previewList() { const g = T.ghost; const list = S.placed.filter(p => p !== g.moving); return [...list, { kind: g.kind, x: g.slot.x, z: g.slot.z, ghost: true }]; }
+function previewList() { const g = T.ghost; const list = S.placed.filter(p => p !== g.moving); return [...list, { kind: g.kind, x: g.slot.x, z: g.slot.z, rotK: g.rotK, ghost: true }]; }
 function startGhost(kind, slot, moving = null) {
-  T.ghost = { kind, slot, group: buildItem(kind, slot.x, slot.z, true), moving };
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(2.5, 40), G.M('#ffffff', { transparent: true, opacity: 0.2, depthWrite: false }));
+  T.ghost = { kind, slot, rotK: moving ? moving.rotK || 0 : 0, moving }; T.ghost.group = buildItem(kind, slot.x, slot.z, true, T.ghost.rotK);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(3.4, 40), G.M('#ffffff', { transparent: true, opacity: 0.2, depthWrite: false }));
   disc.rotation.x = -Math.PI / 2; disc.position.y = PADY + 0.04;
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.05, 3, 48), G.M('#ffffff')); ring.rotation.x = -Math.PI / 2; ring.position.y = PADY + 0.05;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.4, 0.05, 3, 48), G.M('#ffffff')); ring.rotation.x = -Math.PI / 2; ring.position.y = PADY + 0.05;
   T.ghost.ring = new THREE.Group(); T.ghost.ring.add(disc, ring); T.ghost.ring.position.set(slot.x, 0, slot.z); fx.add(T.ghost.ring);
   renderTata(); ghostUI();
   helper(`Geser jarimu di daun untuk memindah. Lalu ketuk <b>✔ Taruh</b>.`);
@@ -472,8 +477,8 @@ function moveGhostTo(p) {
   const g = groundAt(p); if (!g || !T.ghost) return;
   let best = null, bd = 1e9;
   for (const s of SLOTS) { if (s.item && s.item !== T.ghost.moving) continue; const d = Math.hypot(s.x - g.x, s.z - g.z); if (d < bd) { bd = d; best = s; } }
-  if (!best || bd > 2.2 || best === T.ghost.slot) return;
-  T.ghost.slot = best; dyn.remove(T.ghost.group); T.ghost.group = buildItem(T.ghost.kind, best.x, best.z, true);
+  if (!best || bd > 2.8 || best === T.ghost.slot) return;
+  T.ghost.slot = best; dyn.remove(T.ghost.group); T.ghost.group = buildItem(T.ghost.kind, best.x, best.z, true, T.ghost.rotK);
   T.ghost.ring.position.set(best.x, 0, best.z); A.sfx('tap'); ghostUI(); tataHud();
 }
 function ghostUI() {
@@ -491,10 +496,17 @@ function ghostUI() {
     const a = without.per.get(it).p, bItem = list.find(o => o === it), b = withG.per.get(bItem).p;
     if (a !== b) { const d = el(`${b > a ? '+' : '−'}${Math.abs(b - a)}<small>${it.kind === 'bangku' || it.kind === 'sampah' ? 'jadi berguna' : 'terlalu dekat'}</small>`, 'pt' + (b < a ? ' neg' : '')); anchor(d, () => ({ x: it.x, y: PADY + 2.6, z: it.z })); }
   }
-  const bt = el(`<button class="btn merah">✖</button><button class="btn">✔ Taruh</button>`, 'ghostbtn');
-  anchor(bt, () => ({ x: g.slot.x, y: PADY, z: g.slot.z }), 40);
+  const bt = el(`<button class="btn merah">✖</button><button class="btn kuning">⟳ Putar</button><button class="btn">✔ Taruh</button>`, 'ghostbtn');
   bt.children[0].onclick = () => { A.sfx('remove'); cancelGhost(); renderTata(); helper('Batal. Pilih kartu lain, atau ketuk barang untuk memindah.', 3000); };
-  bt.children[1].onclick = confirmGhost;
+  bt.children[1].onclick = rotateGhost;
+  bt.children[2].onclick = confirmGhost;
+}
+function rotateGhost() {
+  const g = T.ghost; if (!g) return;
+  g.rotK = ((g.rotK || 0) + 1) % 4; A.sfx('tap');
+  dyn.remove(g.group); g.group = buildItem(g.kind, g.slot.x, g.slot.z, true, g.rotK);
+  ghostUI(); tataHud();
+  if (NF.ITEMS[g.kind].cat === 'lapak') helper(g.rotK === 0 ? 'Lapak menghadap ke tamu. Bagus! 👍' : g.rotK === 2 ? 'Ups, lapaknya <b>membelakangi</b> tamu. Putar lagi!' : 'Lapak menghadap ke samping.', 2500);
 }
 function cancelGhost() {
   const g = T.ghost; if (!g) return;
@@ -506,11 +518,11 @@ function confirmGhost() {
   const g = T.ghost; if (!g) return;
   if (g.moving) {
     const it = g.moving; it.slot.item = null; dyn.remove(it.group);
-    it.slot = g.slot; it.x = g.slot.x; it.z = g.slot.z; g.slot.item = it; it.group = buildItem(it.kind, it.x, it.z);
+    it.slot = g.slot; it.x = g.slot.x; it.z = g.slot.z; it.rotK = g.rotK; g.slot.item = it; it.group = buildItem(it.kind, it.x, it.z, false, it.rotK);
   } else {
     const c = costOf(g.kind);
-    const it = { kind: g.kind, slot: g.slot, x: g.slot.x, z: g.slot.z, cost: c };
-    it.group = buildItem(g.kind, it.x, it.z); g.slot.item = it; S.placed.push(it); S.spent += c;
+    const it = { kind: g.kind, slot: g.slot, x: g.slot.x, z: g.slot.z, cost: c, rotK: g.rotK };
+    it.group = buildItem(g.kind, it.x, it.z, false, it.rotK); g.slot.item = it; S.placed.push(it); S.spent += c;
   }
   dyn.remove(g.group); fx.remove(g.ring); T.ghost = null; A.sfx('place');
   ghostUI(); renderTata(); tataTip();
@@ -519,7 +531,7 @@ function tataTip() {
   const miss = (T.rows || []).find(r => !r[0]);
   if (!miss) return helper('Semua sudah siap! Ketuk <b>Siap ✔</b> untuk membuka festival 🎉');
   const t = miss[1];
-  if (t.startsWith('Lapak')) helper(`Kita butuh <b>${LV.targetTamu / LV.porsi} lapak</b>. Pilih jajanan ❤❤❤ dulu!`);
+  if (t.startsWith('Lapak')) helper(`Kita butuh <b>${LV.targetTamu / LV.porsi} lapak</b>. Ada 10 jajanan di tab Kue & Minuman — lihat ❤ dan harganya!`);
   else if (t.startsWith('Keranjang')) helper('Taruh <b>keranjang sampah</b> dekat lapak (tab Fasilitas) supaya telaga tetap bersih.');
   else if (t.startsWith('Tempat')) helper('Sore nanti hujan. Pasang <b>Daun Talas</b> untuk berteduh (tab Fasilitas).');
   else if (t.startsWith('Pos')) helper('Pasang <b>Pos Informasi</b> untuk membantu anak yang terpisah dari ibunya.');
@@ -527,16 +539,17 @@ function tataTip() {
 }
 function selectPlaced(it) {
   closeItemMenu(); A.sfx('tap');
-  const m = el(`<button class="btn kuning">↔ Pindah</button><button class="btn abu">🗑 Bongkar +${it.cost}🪙</button>`, 'ghostbtn');
-  anchor(m, () => ({ x: it.x, y: PADY, z: it.z }), 30); T.menu = m;
+  const m = el(`<button class="btn kuning">↔ Pindah</button><button class="btn kuning">⟳ Putar</button><button class="btn abu">🗑 Bongkar +${it.cost}🪙</button>`, 'ghostbtn');
+  T.menu = m;
   m.children[0].onclick = () => { closeItemMenu(); it.group.visible = false; startGhost(it.kind, it.slot, it); };
-  m.children[1].onclick = () => { closeItemMenu(); dyn.remove(it.group); it.slot.item = null; S.placed.splice(S.placed.indexOf(it), 1); S.spent -= it.cost; A.sfx('remove'); renderTata(); tataTip(); };
+  m.children[1].onclick = () => { it.rotK = ((it.rotK || 0) + 1) % 4; dyn.remove(it.group); it.group = buildItem(it.kind, it.x, it.z, false, it.rotK); A.sfx('tap'); renderTata(); };
+  m.children[2].onclick = () => { closeItemMenu(); dyn.remove(it.group); it.slot.item = null; S.placed.splice(S.placed.indexOf(it), 1); S.spent -= it.cost; A.sfx('remove'); renderTata(); tataTip(); };
 }
-function closeItemMenu() { if (T.menu) { unanchor(T.menu); T.menu = null; } }
+function closeItemMenu() { if (T.menu) { T.menu.remove(); T.menu = null; } }
 async function askStart() {
   A.sfx('tap'); closeItemMenu();
   const miss = T.rows.filter(r => !r[0]).map(r => r[1]);
-  if (lapakList().length === 0) return helper('Belum ada lapak jajanan sama sekali! Pilih dari tab Lapak.', 3500);
+  if (lapakList().length === 0) return helper('Belum ada lapak jajanan sama sekali! Pilih dari tab Kue atau Minuman.', 3500);
   if (miss.length) {
     const ok = await modal(`Masih ada yang belum siap:<br><span style="font-size:18px;color:#d9603f">${miss.map(m => '⬜ ' + m).join('<br>')}</span><br><br>Tetap buka festival?`, [['Belum, cek lagi', 'abu', false], ['Buka festival!', '', true]]);
     if (!ok) return;
@@ -551,7 +564,7 @@ function startFestival() {
   S.screen = 'festival'; document.body.className = 's-festival'; clearUI(); slotMarks.visible = false;
   const est = evaluate(S.placed).total;
   const porsi = LV.porsi + (S.hero === 'bebi' ? 1 : 0);
-  const stalls = lapakList().map(it => ({ it, kind: it.kind, x: it.x, z: it.z, stock: porsi, queue: [], served: 0, attr: 1 + itemPts(it, S.placed).p, dir: Math.atan2(CENTER.x - it.x, CENTER.z - it.z), habisShown: false }));
+  const stalls = lapakList().map(it => ({ it, kind: it.kind, x: it.x, z: it.z, stock: porsi, queue: [], served: 0, attr: 1 + itemPts(it, S.placed).p, dir: itemRot(it.x, it.z, it.rotK || 0), habisShown: false }));
   F = {
     t: 0, dur: LV.durasi, speed: 1, total: Math.max(1, est + (Math.random() < 0.4 ? 1 : 0)), spawned: 0, arrived: 0,
     income: 0, extraCost: 0, happy: 100, unhappy: 0, visitors: [], boats: [], problems: [], stalls,
@@ -562,7 +575,7 @@ function startFestival() {
   F.events = [
     { at: P * 0.33, type: 'berudu' }, { at: P * 0.52, type: 'raja' }, { at: P * 0.72, type: 'hujan' },
   ];
-  placeHero(-1.4, 3.4, 0.4);
+  placeHero(-1.8, 4.8, 0.4);
   festHud();
   helper(`Festival dibuka! 🎉 Ketuk gelembung <b>merah</b> kalau ada masalah.`, 5000);
 }
@@ -604,7 +617,7 @@ function spawnBoat(n, opts = {}) {
   return b;
 }
 function newVisitor(kind, x, z, opts = {}) {
-  const obj = G.critter(kind, x, PADY, z, opts.s || 1.7, actors);
+  const obj = G.critter(kind, x, PADY, z, opts.s || 2.0, actors);
   const v = { kind, obj, x, z, path: [], state: 'walk', t: 0, speed: rnd(1.3, 1.8), stall: null, patience: 0, bob: Math.random() * 6, counted: false, ...opts };
   F.visitors.push(v); return v;
 }
@@ -624,20 +637,20 @@ function queuePos(s, k) { const d = 1.0 + k * 0.42; return { x: s.x + Math.sin(s
 function joinQueue(v) {
   const s = v.stall; if (!s) return wander(v);
   s.queue.push(v); const p = queuePos(s, s.queue.length - 1);
-  goPath(v, [{ x: 0.2, z: 2.0 }, p], () => { v.state = 'queue'; v.t = 0; v.patience = S.hero === 'bebi' ? 16 : 9; });
+  goPath(v, [{ x: ENTRY.x, z: ENTRY.z }, p], () => { v.state = 'queue'; v.t = 0; v.patience = S.hero === 'bebi' ? 16 : 9; });
 }
 function wander(v) {
   const spots = S.placed.filter(p => p.kind === 'bangku' || p.kind === 'talas');
   let p;
   if (F.raining && F.log.teduh) { const t = S.placed.find(q => q.kind === 'talas'); p = { x: t.x + rnd(-0.7, 0.7), z: t.z + rnd(-0.7, 0.7) }; }
   else if (spots.length && Math.random() < 0.6) { const s = pick(spots); p = { x: s.x + rnd(-0.6, 0.6), z: s.z + rnd(-0.6, 0.6) }; }
-  else { const a = Math.random() * 6.28, d = rnd(1.5, 4.2); p = { x: Math.cos(a) * d, z: Math.sin(a) * d }; }
+  else { const a = Math.random() * 6.28, d = rnd(2.2, 6.6); p = { x: Math.cos(a) * d, z: Math.sin(a) * d }; }
   goPath(v, [p], () => { v.state = 'idle'; v.t = 0; v.stay = rnd(5, 9); });
 }
 function leave(v, sad) {
   if (v.stall) { const q = v.stall.queue; const i = q.indexOf(v); if (i >= 0) q.splice(i, 1); }
   v.stall = null; v.sad = sad;
-  goPath(v, [{ x: 0.2, z: 2.0 }, GATE, DOCK], () => { v.state = 'gone'; });
+  goPath(v, [{ x: ENTRY.x, z: ENTRY.z }, GATE, DOCK], () => { v.state = 'gone'; });
 }
 function stepVisitor(v, dt) {
   v.bob += dt * 8;
@@ -684,7 +697,7 @@ function solveProblem(pr, byJurus) {
 }
 function trashEvent() {
   const s = pick(F.stalls); if (!s) return;
-  const hasBin = S.placed.some(p => p.kind === 'sampah' && dist(p, s) <= 3.0);
+  const hasBin = S.placed.some(p => p.kind === 'sampah' && dist(p, s) <= 3.6);
   if (hasBin && Math.random() < 0.75) return;
   const x = s.x + rnd(-0.8, 0.8), z = s.z + rnd(-0.8, 0.8);
   preWarn(() => ({ x, y: PADY + 0.8, z }), () => {
@@ -694,7 +707,7 @@ function trashEvent() {
       solve() { fx.remove(m); A.sfx('good'); popAt(x, PADY + 1, z, '✨ Bersih!'); F.happy = Math.min(100, F.happy + 2); },
       timeout() { // sampah jatuh ke telaga
         fx.remove(m); F.log.sampahTelaga++; F.happy = Math.max(0, F.happy - 8); A.sfx('bad');
-        const a = Math.atan2(z, x), wx = Math.cos(a) * 6.6, wz = Math.sin(a) * 6.6;
+        const a = Math.atan2(z, x), wx = Math.cos(a) * (PAD_R + 0.7), wz = Math.sin(a) * (PAD_R + 0.7);
         const w = new THREE.Group(); fx.add(w); G.setParent(w); G.add(G.sph(0.13), G.M('#d9b35c'), wx, 0.05, wz);
         addProblem({ type: 'telaga', label: '🐟 Sampah di telaga!', pos: () => ({ x: wx, y: 0.6, z: wz }), t: 0, limit: 15, solve() { fx.remove(w); A.sfx('good'); popAt(wx, 0.8, wz, '🐟 ❤️'); }, timeout() { fx.remove(w); } });
         helper('Yah, sampahnya jatuh ke telaga 🐟 Ikan jadi sedih. Ketuk untuk mengambilnya.', 4000);
@@ -703,7 +716,7 @@ function trashEvent() {
   });
 }
 function beruduEvent() {
-  const a = Math.random() * 6.28, x = Math.cos(a) * 3.6, z = Math.sin(a) * 3.0;
+  const a = Math.random() * 6.28, x = Math.cos(a) * 5.2, z = Math.sin(a) * 4.4;
   preWarn(() => ({ x, y: PADY + 1.0, z }), () => {
     if (!F || F.done) return;
     const kid = newVisitor('kodok', x, z, { s: 1.0, isKid: true }); kid.state = 'idle';
@@ -728,7 +741,7 @@ function rajaEvent() {
     if (!F || F.done) return;
     const king = newVisitor('kura', DOCK.x, DOCK.z, { isKing: true });
     actors.remove(king.obj); G.setParent(actors); king.obj = G.king(DOCK.x, DOCK.z, 2.4); king.speed = 1.0;
-    goPath(king, [GATE, { x: 0.6, z: 3.2 }], () => { king.state = 'idle'; });
+    goPath(king, [GATE, { x: 0.8, z: 4.8 }], () => { king.state = 'idle'; });
     F.log.raja = 'datang';
     const bench = S.placed.find(p => p.kind === 'bangku');
     addProblem({ type: 'raja', label: '👑 Raja datang! Kursinya?', pos: () => ({ x: king.x, y: PADY + 2.2, z: king.z }), t: 0, limit: S.hero === 'lumi' ? 18 : 14,
@@ -744,8 +757,8 @@ function rajaEvent() {
 }
 function hujanEvent() {
   F.raining = 10; F.log.teduh = S.placed.some(p => p.kind === 'talas');
-  const n = 260, pos = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) { pos[i * 3] = rnd(-8, 10); pos[i * 3 + 1] = rnd(0, 9); pos[i * 3 + 2] = rnd(-7, 8); }
+  const n = 420, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { pos[i * 3] = rnd(-11, 15); pos[i * 3 + 1] = rnd(0, 10); pos[i * 3 + 2] = rnd(-10, 11); }
   const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   F.rain = new THREE.Points(geo, new THREE.PointsMaterial({ color: '#ffffff', size: 0.12, transparent: true, opacity: 0.8 })); fx.add(F.rain);
   if (F.log.teduh) {
@@ -769,9 +782,9 @@ function useJurus() {
     popAt(heroM.obj.position.x, PADY + 2.4, heroM.obj.position.z, '📣 Kwek!');
   } else if (S.hero === 'tiko') {
     G.setParent(world);
-    const np = { x: -1.0, z: -9.6 };
+    const np = { x: -1.4, z: -12.2 };
     const grp = new THREE.Group(); world.add(grp); G.setParent(grp);
-    G.pad(np.x + 0.1, np.z + 0.2, 2.2, Math.PI * 1.4, '#97d462'); G.twigBridge([-1.6, -5.6], [-1.4, -7.3]);
+    G.pad(np.x + 0.1, np.z + 0.2, 2.4, Math.PI * 1.4, '#97d462'); G.twigBridge([-1.5, -8.3], [-1.4, -9.7]);
     const best = NF.LAPAK.slice().sort((a, b) => S.hearts[b] - S.hearts[a])[0];
     G.inGroup(np.x, np.z, () => G.stall(0, 0, best, 'keringdaun', 0), grp);
     F.stalls.push({ it: null, kind: best, x: np.x, z: np.z + 1.0, stock: LV.porsi, queue: [], served: 0, attr: 4, dir: Math.PI, habisShown: false, far: true });
@@ -976,7 +989,7 @@ window.NF.debug = {
   S, T, get F() { return F; }, SLOTS, evaluate, costOf,
   go: name => ({ judul: screenJudul, tokoh: screenTokoh, cerita: screenCerita, papan: screenPapan, tata: screenTata, festival: startFestival, laporan: screenLaporan })[name](),
   hero: h => { S.hero = SAVE.hero = h; },
-  place(kind, idx) { const s = SLOTS[idx]; if (!s || s.item) return false; startGhost(kind, s); confirmGhost(); return true; },
+  place(kind, idx, rotK = 0) { const s = SLOTS[idx]; if (!s || s.item) return false; startGhost(kind, s); T.ghost.rotK = rotK; confirmGhost(); return true; },
   hitung() { S.hitungOk = true; },
   speed(n) { if (F) F.speed = n; },
   jurus: useJurus, problems: () => F && F.problems.map(p => p.type), solveAll: () => F && F.problems.slice().forEach(p => solveProblem(p, false)),

@@ -59,7 +59,8 @@ body.s-cerita #topBtns { display: none; }
 .dialog .who { position: absolute; left: 22px; top: 18px; width: 92px; text-align: center; font-size: 13px; font-weight: 900; color: #2d7f95; }
 .dialog .who .face { font-size: 64px; line-height: 70px; display: block; }
 .dialog .nx { text-align: right; margin-top: 10px; }
-.helper { position: absolute; left: 14px; bottom: 14px; display: flex; align-items: flex-end; gap: 6px; max-width: 340px; }
+.helper { position: absolute; left: 14px; bottom: 14px; display: flex; align-items: flex-end; gap: 6px; max-width: 320px; }
+body.s-tata .helper { bottom: 170px; max-width: 300px; }
 .helper .face { font-size: 58px; line-height: 1; flex: none; filter: drop-shadow(0 4px 6px rgba(0,0,0,.2)); }
 .helper .face svg { display: block; }
 .helper .say { background: #fff; border-radius: 18px; padding: 10px 14px; font-size: 17px; font-weight: 700; box-shadow: 0 6px 18px rgba(40,90,95,.2); margin-bottom: 30px; line-height: 1.3; }
@@ -70,8 +71,9 @@ body.s-cerita #topBtns { display: none; }
 .board { position: absolute; left: 22px; right: 22px; top: 70px; display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 14px; align-items: start; }
 .col { background: rgba(255,255,255,.95); border-radius: 20px; box-shadow: 0 6px 20px rgba(40,90,95,.2); padding: 14px 16px; }
 .col h3 { font-size: 21px; margin-bottom: 8px; }
-.wish div.r { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; padding: 3px 0; }
-.wish img { width: 42px; height: 42px; }
+.wish div.r { display: flex; align-items: center; gap: 8px; font-size: 16.5px; font-weight: 700; padding: 0; }
+.wish img { width: 38px; height: 38px; }
+.wish .hg { color: #e0a020; font-weight: 900; font-size: 14px; }
 .wish .h { margin-left: auto; font-size: 15px; letter-spacing: -2px; }
 .groups { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0; }
 .groups .g { border: 3px dashed #7fcf6a; border-radius: 14px; padding: 4px 6px; font-size: 20px; letter-spacing: -3px; }
@@ -103,11 +105,11 @@ body.s-cerita #topBtns { display: none; }
 .bar i { display: block; height: 100%; background: #ffc94a; border-radius: 99px; }
 
 /* ---------- menata ---------- */
-.tabs { position: absolute; left: 640px; bottom: 150px; transform: translateX(-50%); display: flex; gap: 6px; }
+.tabs { position: absolute; left: 670px; bottom: 150px; transform: translateX(-50%); display: flex; gap: 6px; }
 .tab { white-space: nowrap; background: rgba(255,255,255,.55); border-radius: 12px 12px 0 0; padding: 6px 14px; font-weight: 800; font-size: 16px; color: #5a6a72; }
 .tab.on { background: rgba(255,255,255,.95); color: #3d4a52; }
-.tray { position: absolute; left: 640px; bottom: 12px; transform: translateX(-50%); display: flex; gap: 10px; align-items: flex-end; }
-.item { width: 100px; background: rgba(255,255,255,.92); border-radius: 18px; box-shadow: 0 6px 20px rgba(40,90,95,.18); text-align: center; padding: 6px 4px; position: relative; }
+.tray { position: absolute; left: 670px; bottom: 12px; transform: translateX(-50%); display: flex; gap: 7px; align-items: flex-end; }
+.item { width: 90px; background: rgba(255,255,255,.92); border-radius: 18px; box-shadow: 0 6px 20px rgba(40,90,95,.18); text-align: center; padding: 6px 4px; position: relative; }
 .item .e { font-size: 42px; line-height: 58px; height: 58px; }
 .item .e img { width: 58px; height: 58px; vertical-align: middle; }
 .item .n { font-size: 14.5px; font-weight: 800; line-height: 1.1; height: 32px; display: flex; align-items: center; justify-content: center; }
@@ -126,7 +128,7 @@ body.s-cerita #topBtns { display: none; }
 .pt small { font-size: 14px; font-weight: 800; display: block; }
 .pt.neg { color: #ffd2c8; text-shadow: 0 0 3px #b8432a, 0 0 3px #b8432a, 0 2px 8px rgba(120,40,20,.6); }
 .pt.big { font-size: 44px; }
-.ghostbtn { position: absolute; transform: translate(-50%, 0); display: flex; gap: 10px; }
+.ghostbtn { position: absolute; left: 670px; bottom: 206px; transform: translateX(-50%); display: flex; gap: 10px; }
 .ghostbtn button { font-size: 20px; padding: 10px 18px; }
 .warnTag { position: absolute; transform: translate(-50%, -50%); font-size: 16px; font-weight: 900; color: #fff; background: #ff8a6a; border-radius: 99px; padding: 4px 12px; white-space: nowrap; }
 .modal { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; background: #fff; border-radius: 24px; padding: 22px 26px; text-align: center; box-shadow: 0 10px 30px rgba(40,90,95,.3); font-size: 21px; font-weight: 700; pointer-events: auto; }

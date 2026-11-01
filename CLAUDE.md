@@ -178,14 +178,18 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
   −1 🪙; jurus Bangun Kilat: daun baru + lapak gratis), Bebi si Anak Bebek (Sapaan Hangat: tamu lebih sabar, lapak +1 porsi;
   Kwek Undangan: +5 tamu perahu), Lumi si Anak Katak (Mata Jeli: tanda ❗ sebelum masalah; Lompat Kilat: bereskan semua masalah).
   Jurus = tombol emas, 1× per festival. Asisten Kiko si katak (Capung Cici kalau pilih Lumi). Tokoh Ranu dihapus atas permintaan.
-- **Jajanan khas Indonesia** (ikon digambar sendiri, `drawFood`): klepon, putu bambu, lemper, serabi, es cendol.
+- **Jajanan khas Indonesia** (ikon digambar sendiri, `drawFood`), v2 = 10 pilihan dalam tab **Kue** (klepon, putu bambu, lemper,
+  serabi 3 🪙; getuk, kue cincin, gemblong 2 🪙) & **Minuman** (es cendol 3, teh tarik 4, wedang uwuh 3). ❤ diacak tiap main
+  (`NF.HEARTS` = 3×❤❤❤, 3×❤❤, 4×❤) → anak menimbang ❤ vs harga sewa lapak.
+- v2: **venue lebih luas** (daun utama r 8,6, `PAD_R`; slot berjarak 2,25; jangkauan 3,4) dan **⟳ Putar** barang (`rotK`, 90°):
+  lapak menghadap tugu +1, ke samping 0, membelakangi −1; antrean mengikuti arah lapak. Tombol hantu/menu barang di tengah bawah.
 - Alur Tahap 1 "Bazar Daun Teratai" (`NF.LEVELS`): judul → pilih tokoh → cerita Raja (sekali) → **Papan Persiapan** (hasil tanya
   warga ❤ acak tiap main, soal hitung "20 tamu, 1 lapak = 5 tamu → berapa lapak?" pilihan 3/4/5, ramalan hujan/anak hilang/Raja)
   → **Menata** (kartu per tab Lapak/Hiburan/Fasilitas/Promosi, barang hantu digeser di titik slot, **angka +/− ala Islanders** +
   perkiraan tamu, daftar Cek Kiko; ketuk barang = Pindah/Bongkar) → **Festival** (tamu datang naik perahu daun, antre & beli 1 🪙
   per jajan; masalah diketuk: sampah → kalau lama jatuh ke telaga, jajanan habis → tambah penjual 1 🪙, anak berudu terpisah →
   Pos Informasi, Raja datang → bangku, hujan → daun talas; ⏩ 2×) → **Laporan** (tamu, uang masuk − biaya rinci = untung, senang
-  ≥70% → 3 bintang, komentar tamu). Modal 15, target 20 tamu & untung 6.
+  ≥70% → 3 bintang, komentar tamu). Modal 18, target 20 tamu & untung 6.
 - Kamera: geser 1 jari = putar sedikit, cubit = zoom (layar menata & festival).
 - Simpanan `localStorage` kunci `njajan-fest-v1` (`{cerita, best:{tiko,bebi,lumi}, main, hero, muted}`).
   Tes: buka `njajan-fest/?lite` (tanpa bayangan, render pelan — perlu untuk Playwright/swiftshader) lalu `NF.debug`
@@ -196,6 +200,7 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Status & yang sedang dibahas
 
+- Pratinjau **versi 25** (branch `pratinjau-v25`, belum dirilis) = **Njajan Fest versi 2** (area lebih luas, putar barang, 10 jajanan).
 - Rilis terakhir di `main`: **versi 24** = **Njajan Fest versi 1** (game kelima, Tahap 1). Game lain tidak berubah.
 - Versi 23 = **Angkasa Mart versi 3** (fitur keuangan v3 di atas: Kelola Toko, pegawai,
   asuransi, bencana, cabang, barang premium, berbagi tiap 20 hari). Game lain tidak berubah.

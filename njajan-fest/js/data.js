@@ -1,6 +1,6 @@
 // Njajan Fest — data permainan (versi, tokoh, barang, tahap)
 export const NF = {
-  VERSION: 1,
+  VERSION: 2,
   SAVE_KEY: 'njajan-fest-v1',
 
   // Tokoh pemain: bakat (selalu aktif) + jurus (sekali per festival)
@@ -30,11 +30,17 @@ export const NF = {
 
   // Barang yang bisa dipasang. cat = tab. slot = ditaruh di daun utama.
   ITEMS: {
-    klepon: { cat: 'lapak', nama: 'Klepon', harga: 2, slot: true },
-    putu:   { cat: 'lapak', nama: 'Putu Bambu', harga: 2, slot: true },
-    lemper: { cat: 'lapak', nama: 'Lemper', harga: 2, slot: true },
-    serabi: { cat: 'lapak', nama: 'Serabi', harga: 2, slot: true },
-    cendol: { cat: 'lapak', nama: 'Es Cendol', harga: 2, slot: true },
+    // jajanan: tab kue / minum; harga sewa lapak berbeda supaya anak menimbang ❤ vs biaya
+    klepon:   { cat: 'lapak', tab: 'kue', nama: 'Klepon', harga: 3, slot: true },
+    putu:     { cat: 'lapak', tab: 'kue', nama: 'Putu Bambu', harga: 3, slot: true },
+    lemper:   { cat: 'lapak', tab: 'kue', nama: 'Lemper', harga: 3, slot: true },
+    serabi:   { cat: 'lapak', tab: 'kue', nama: 'Serabi', harga: 3, slot: true },
+    getuk:    { cat: 'lapak', tab: 'kue', nama: 'Getuk', harga: 2, slot: true },
+    cincin:   { cat: 'lapak', tab: 'kue', nama: 'Kue Cincin', harga: 2, slot: true },
+    gemblong: { cat: 'lapak', tab: 'kue', nama: 'Gemblong', harga: 2, slot: true },
+    cendol:   { cat: 'lapak', tab: 'minum', nama: 'Es Cendol', harga: 3, slot: true },
+    tehtarik: { cat: 'lapak', tab: 'minum', nama: 'Teh Tarik', harga: 4, slot: true },
+    wedang:   { cat: 'lapak', tab: 'minum', nama: 'Wedang Uwuh', harga: 3, slot: true },
     musik:  { cat: 'hiburan', nama: 'Pemusik Kodok', ikon: '🎵', harga: 2, slot: false, tamu: 3 },
     bangku: { cat: 'fasilitas', nama: 'Bangku Kayu', ikon: '🪵', harga: 1, slot: true, maks: 2 },
     sampah: { cat: 'fasilitas', nama: 'Keranjang Sampah', ikon: '🧺', harga: 1, slot: true, maks: 2 },
@@ -42,12 +48,13 @@ export const NF = {
     info:   { cat: 'fasilitas', nama: 'Pos Informasi', ikon: '🐚', harga: 1, slot: true, maks: 1 },
     poster: { cat: 'promosi', nama: 'Poster Daun', ikon: '📜', harga: 1, slot: true, maks: 2, tamu: 2 },
   },
-  TABS: [['lapak', '🌿 Lapak'], ['hiburan', '🪷 Hiburan'], ['fasilitas', '🪵 Fasilitas'], ['promosi', '📣 Promosi']],
-  LAPAK: ['klepon', 'putu', 'lemper', 'serabi', 'cendol'],
+  TABS: [['kue', '🍡 Kue'], ['minum', '🥤 Minuman'], ['hiburan', '🪷 Hiburan'], ['fasilitas', '🪵 Fasilitas'], ['promosi', '📣 Promosi']],
+  LAPAK: ['klepon', 'putu', 'lemper', 'serabi', 'getuk', 'cincin', 'gemblong', 'cendol', 'tehtarik', 'wedang'],
+  HEARTS: [3, 3, 3, 2, 2, 2, 1, 1, 1, 1],   // dibagikan acak ke 10 jajanan tiap main
 
   // Tahap 1
   LEVELS: [
-    { id: 1, nama: 'Bazar Daun Teratai', modal: 15, targetTamu: 20, targetUntung: 6, porsi: 5, durasi: 80 },
+    { id: 1, nama: 'Bazar Daun Teratai', modal: 18, targetTamu: 20, targetUntung: 6, porsi: 5, durasi: 80 },
   ],
 };
 window.NF = NF;
