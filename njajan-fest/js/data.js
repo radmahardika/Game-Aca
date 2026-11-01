@@ -1,6 +1,6 @@
 // Njajan Fest — data permainan (versi, tokoh, barang, tahap)
 export const NF = {
-  VERSION: 2,
+  VERSION: 3,
   SAVE_KEY: 'njajan-fest-v1',
 
   // Tokoh pemain: bakat (selalu aktif) + jurus (sekali per festival)

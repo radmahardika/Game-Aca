@@ -200,6 +200,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Status & yang sedang dibahas
 
+- Pratinjau **versi 26** (branch `pratinjau-v26`) = **Njajan Fest versi 3**: model Raja Kura-kura baru (kura-kura berkaki empat,
+  tempurung kubah bermotif heksagon + pinggiran krem, leher & kepala menjulur, mahkota emas, kerah merah).
 - Rilis terakhir di `main`: **versi 25** = **Njajan Fest versi 2** (area lebih luas, putar barang, 10 jajanan).
 - Versi 24 = **Njajan Fest versi 1** (game kelima, Tahap 1). Game lain tidak berubah.
 - Versi 23 = **Angkasa Mart versi 3** (fitur keuangan v3 di atas: Kelola Toko, pegawai,

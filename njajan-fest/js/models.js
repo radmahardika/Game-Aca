@@ -326,13 +326,35 @@ function kiko(x, z, s = 1, y = PADY) {
   return g;
 }
 function king(x, z, s = 1, y = PADY) {
+  // Raja Kura-kura: kura-kura berkaki empat menghadap +z — tempurung kubah bermotif, leher & kepala menjulur, mahkota emas
   const g = new THREE.Group(); g.position.set(x, y, z); g.scale.setScalar(s); P.add(g);
-  const sh = add(sph(0.26), M('#4d8a3e'), 0, 0.2, -0.04, g); sh.scale.set(1.1, 0.85, 1.1);
-  add(sph(0.14), M('#e9d58a'), 0, 0.44, 0.14, g);
-  add(sph(0.08), white, 0, 0.36, 0.25, g).scale.set(1, 1.3, 0.7);
-  for (const dx of [-0.05, 0.05]) add(sph(0.02), M('#222'), dx, 0.48, 0.26, g);
-  for (let k = 0; k < 5; k++) { const a = k / 5 * 6.28; add(new THREE.ConeGeometry(0.03, 0.09, 5), M('#ffcf3a', { metalness: 0.4, roughness: 0.4 }), Math.cos(a) * 0.08, 0.6, 0.12 + Math.sin(a) * 0.08, g); }
-  add(cyl(0.1, 0.1, 0.04, 12), M('#ffcf3a', { metalness: 0.4, roughness: 0.4 }), 0, 0.56, 0.12, g);
+  const skin = M('#a9d474'), skinD = M('#86b85a'), gold = M('#ffcf3a', { metalness: 0.35, roughness: 0.45 });
+  // kaki gemuk & ekor
+  for (const [dx, dz] of [[-0.24, 0.17], [0.24, 0.17], [-0.24, -0.17], [0.24, -0.17]]) { add(cyl(0.065, 0.075, 0.14, 7), skin, dx, 0.07, dz, g); add(sph(0.05), skinD, dx * 1.05, 0.015, dz + 0.03, g).scale.set(1.2, 0.5, 1.4); }
+  const tail = add(new THREE.ConeGeometry(0.04, 0.14, 6), skin, 0, 0.11, -0.36, g); tail.rotation.x = -1.9;
+  // tempurung bawah (pinggiran krem) + kubah atas
+  const rim = add(cyl(0.36, 0.33, 0.07, 14), M('#e8cf8a'), 0, 0.14, 0, g); rim.scale.z = 1.12;
+  const dome = add(new THREE.SphereGeometry(1, 14, 7, 0, Math.PI * 2, 0, Math.PI / 2), M('#4f8f3a'), 0, 0.17, 0, g); dome.scale.set(0.34, 0.25, 0.38);
+  // sisik tempurung (heksagon terang)
+  const plate = M('#7cbf52');
+  const onDome = (pol, az, r) => { const sx = Math.sin(pol) * Math.cos(az) * 0.34, sy = Math.cos(pol) * 0.25 + 0.17, sz = Math.sin(pol) * Math.sin(az) * 0.38; const m = add(cyl(r, r, 0.035, 6), plate, sx, sy, sz, g); const n = new THREE.Vector3(sx / (0.34 * 0.34), (sy - 0.17) / (0.25 * 0.25), sz / (0.38 * 0.38)).normalize(); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), n); m.scale.set(1, 1, 1); };
+  onDome(0, 0, 0.1);
+  for (let k = 0; k < 6; k++) onDome(0.95, k / 6 * Math.PI * 2 + 0.52, 0.085);
+  for (let k = 0; k < 10; k++) onDome(1.38, k / 10 * Math.PI * 2, 0.05);
+  // jubah merah kecil di depan tempurung (tidak menutupi tempurung)
+  const cape = add(new THREE.TorusGeometry(0.1, 0.035, 6, 14), M('#d94a4a'), 0, 0.24, 0.3, g); cape.rotation.x = Math.PI / 2 - 0.5;
+  for (let k = 0; k < 5; k++) add(sph(0.018), white, Math.cos(k / 5 * 6.28 + 0.6) * 0.1, 0.25 + Math.sin(k / 5 * 6.28 + 0.6) * 0.04, 0.31 + Math.sin(k / 5 * 6.28 + 0.6) * 0.05, g).castShadow = false;
+  // leher & kepala menjulur ke depan
+  twig(0, 0.2, 0.3, 0, 0.32, 0.44, 0.065, g, skin);
+  const head = add(sph(0.14), skin, 0, 0.38, 0.5, g); head.scale.set(1, 0.92, 1.08);
+  add(sph(0.07), M('#c4e39a'), 0, 0.34, 0.6, g).scale.set(1.3, 0.7, 0.8); // moncong
+  for (const dx of [-0.065, 0.065]) { add(sph(0.042), white, dx, 0.43, 0.6, g).castShadow = false; add(sph(0.022), M('#222'), dx, 0.43, 0.635, g).castShadow = false; add(sph(0.008), white, dx + 0.008, 0.44, 0.655, g).castShadow = false; }
+  for (const dx of [-0.11, 0.11]) add(sph(0.022), M('#ff9a9a'), dx, 0.36, 0.6, g).castShadow = false;
+  const smile = add(new THREE.TorusGeometry(0.045, 0.008, 4, 12, Math.PI), M('#2f5a22'), 0, 0.33, 0.64, g); smile.rotation.z = Math.PI;
+  // mahkota emas dengan permata
+  add(cyl(0.085, 0.09, 0.05, 10), gold, 0, 0.52, 0.48, g);
+  for (let k = 0; k < 5; k++) { const a = k / 5 * 6.28; add(new THREE.ConeGeometry(0.025, 0.07, 5), gold, Math.cos(a) * 0.075, 0.575, 0.48 + Math.sin(a) * 0.075, g); }
+  add(sph(0.022), M('#ff4f6a'), 0, 0.53, 0.57, g).castShadow = false;
   return g;
 }
 

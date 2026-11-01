@@ -1,8 +1,8 @@
 // Njajan Fest — alur utama: judul → pilih tokoh → cerita → papan persiapan → menata → festival → laporan
 import * as THREE from '../vendor/three.module.min.js';
-import { NF } from './data.js?v=2';
-import * as G from './models.js?v=2';
-import * as A from './audio.js?v=2';
+import { NF } from './data.js?v=3';
+import * as G from './models.js?v=3';
+import * as A from './audio.js?v=3';
 
 const W = 1180, H = 820, PADY = G.PADY;
 const $ = id => document.getElementById(id);
@@ -116,7 +116,7 @@ const CAMS = {
   venue: { tx: 2.0, tz: -0.6, yaw: -0.127, pitch: 0.8, dist: 37 },
   judul: { tx: 0, tz: 1.0, yaw: 0, pitch: 0.667, dist: 28 },
   lineup: { tx: LO, tz: 0.2, yaw: 0, pitch: 0.482, dist: 17.3, ty: -0.5 },
-  cerita: { tx: 0.8, tz: 5.4, yaw: -0.25, pitch: 0.42, dist: 9.5, ty: 0.6 },
+  cerita: { tx: 0.4, tz: 4.0, yaw: 0.85, pitch: 0.42, dist: 9.0, ty: 0.7 },
 };
 const camS = { tx: 0, ty: 0, tz: 0, yaw: 0, pitch: 0.7, dist: 25 };
 let camGoal = null;
@@ -338,8 +338,8 @@ let hop = null;
 let kingObj = null;
 function screenCerita() {
   S.screen = 'cerita'; document.body.className = 's-cerita'; clearUI(); clearDyn(); resetActors(); sunAt(1, -1); setCam('cerita');
-  G.setParent(actors); kingObj = G.king(GATE.x - 0.3, GATE.z - 1.2, 2.6); kingObj.rotation.y = 0.25;
-  placeHero(GATE.x + 1.3, GATE.z - 0.6, -0.6);
+  G.setParent(actors); kingObj = G.king(GATE.x - 0.3, GATE.z - 2.9, 2.6); kingObj.rotation.y = 0.55;
+  placeHero(GATE.x + 0.6, GATE.z - 3.6, 0.6);
   const lines = [
     'Halo, Penata Pesta cilik! Aku <b>Raja Kura-kura</b> dari Kerajaan Telaga.',
     'Warga telaga ingin pesta jajanan di atas <b>daun teratai raksasa</b>. Namanya <b>Bazar Daun Teratai</b>!',
