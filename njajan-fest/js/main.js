@@ -1,21 +1,24 @@
 // Njajan Fest — alur utama: judul → pilih tokoh → cerita → papan persiapan → menata → festival → laporan
 import * as THREE from '../vendor/three.module.min.js';
-import { NF } from './data.js?v=4';
-import * as G from './models.js?v=4';
-import * as A from './audio.js?v=4';
+import { NF } from './data.js?v=5';
+import * as G from './models.js?v=5';
+import * as A from './audio.js?v=5';
 
 const W = 1180, H = 820, PADY = G.PADY;
 const $ = id => document.getElementById(id);
 const stage = $('stage'), UI = $('ui'), cv = $('c');
-const LV = NF.LEVELS[0];
+let LV = NF.LEVELS[0];
 const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
 // ================= simpanan =================
 function loadSave() { try { return JSON.parse(localStorage.getItem(NF.SAVE_KEY)) || {}; } catch (e) { return {}; } }
-const SAVE = Object.assign({ cerita: false, best: {}, main: 0, hero: null, muted: false, stk: {} }, loadSave());
-SAVE.stk = SAVE.stk || {};
+const SAVE = Object.assign({ cerita: false, best: {}, main: 0, hero: null, muted: false, stk: {}, lv: {} }, loadSave());
+SAVE.stk = SAVE.stk || {}; SAVE.lv = SAVE.lv || {};
+for (const h in SAVE.best) SAVE.lv[h + '-1'] = Math.max(SAVE.lv[h + '-1'] || 0, SAVE.best[h]);
+const bestOf = (h, id) => SAVE.lv[`${h}-${id}`] || 0;
+const tahap2Open = () => Object.keys(SAVE.lv).some(k => k.endsWith('-1') && SAVE.lv[k] >= 1);
 function save() { try { localStorage.setItem(NF.SAVE_KEY, JSON.stringify(SAVE)); } catch (e) {} }
 
 // ================= panggung & renderer =================
@@ -46,7 +49,7 @@ fit();
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#cdeeea');
 scene.fog = new THREE.Fog('#cdeeea', 44, 92);
-scene.add(new THREE.HemisphereLight('#ffffff', '#7fbfb6', 1.6));
+const hemi = new THREE.HemisphereLight('#ffffff', '#7fbfb6', 1.6); scene.add(hemi);
 const sun = new THREE.DirectionalLight('#fff4e0', 2.6);
 sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 1, far: 80 });
@@ -57,45 +60,99 @@ sunAt(1, -1);
 const water = new THREE.Mesh(new THREE.CircleGeometry(220, 64), G.M('#47b8bd'));
 water.rotation.x = -Math.PI / 2; water.receiveShadow = true; scene.add(water);
 
-const world = new THREE.Group(), dyn = new THREE.Group(), actors = new THREE.Group(), lineupG = new THREE.Group(), fx = new THREE.Group();
-scene.add(world, dyn, actors, lineupG, fx);
+const worldA = new THREE.Group(), worldB = new THREE.Group(); let world = worldA;
+const dyn = new THREE.Group(), actors = new THREE.Group(), lineupG = new THREE.Group(), fx = new THREE.Group();
+scene.add(worldA, worldB, dyn, actors, lineupG, fx); worldB.visible = false;
 const cam = new THREE.PerspectiveCamera(30, W / H, 0.1, 300);
 
 const PAD_R = 8.6, ENTRY = { x: 0, z: 3.0 };
-const GATE = { x: 0.8, z: 6.7 }, CENTER = { x: 0, z: -0.3 }, DOCK = { x: 0.9, z: 9.0 }, STAGE = { x: 12.6, z: -4.6 };
-function buildVenue() {
-  G.setParent(world);
-  G.inGroup(0, -5, () => G.shore(), world);
+const GATE = { x: 0.8, z: 6.7 }, CENTER = { x: 0, z: -0.3 }, DOCK = { x: 0.9, z: 9.0 };
+const STAGE1 = { x: 12.6, z: -4.6 }, PAD2 = { x: 16.6, z: -1.2, r: 6.2 }, STAGE2 = { x: 18.4, z: -4.2 };
+let STAGE = STAGE1;
+const BR1 = { x: 7.9, z: -0.9 }, BR2 = { x: 11.0, z: -1.0 };   // ujung jembatan daun utama ↔ daun kedua
+const onPad2 = p => LV.id === 2 && p.x > 9.6;
+function buildVenue(lv) {
+  const g = lv === 2 ? worldB : worldA; G.setParent(g);
+  const avoid = (x, z) => lv !== 2 || Math.hypot(x - PAD2.x, z - PAD2.z) > PAD2.r + 1.8;
+  G.inGroup(0, -5, () => G.shore(), g);
   G.pad(0, 0, PAD_R, -Math.PI / 2 + 0.17);
-  G.pad(12.4, -4.4, 3.2, Math.PI * 0.95);
+  if (lv === 2) { G.pad(PAD2.x, PAD2.z, PAD2.r, Math.PI); G.twigBridge([8.3, -0.9], [10.6, -1.0]); G.stageLotus(STAGE2.x, STAGE2.z, 1.5); }
+  else { G.pad(12.4, -4.4, 3.2, Math.PI * 0.95); G.twigBridge([8.3, -2.2], [9.4, -3.1]); G.stageLotus(STAGE1.x, STAGE1.z, 1.5); }
   G.pad(-12.4, 2.4, 3.0, Math.PI * 1.9);
-  G.twigBridge([8.3, -2.2], [9.4, -3.1]); G.twigBridge([-8.4, 1.2], [-9.5, 1.7]);
-  [[16, 5, 1.1, 1], [-16, -4, 1.3, 0], [-6, 12, 1.0, 1], [15, -10, 1.2, 0], [-17, 8, 0.9, 1], [3, -12.5, 1.1, 1], [18, 1, 0.8, 0], [8.5, 11.5, 1.3, 1], [-11, -9, 1.1, 0]].forEach(([x, z, r, f]) => G.smallPad(x, z, r, f));
-  G.lotus(14.5, 8.5, 1.4, 0.05); G.lotus(-15, 5.4, 1.2, 0.05); G.lotus(-4.5, -11.5, 1.0, 0.05);
-  [[-9, -8], [9.5, 13], [-13, 11], [17, -5], [-18, -1]].forEach(([x, z], k) => { G.reeds(x, z, 6, k + 30); G.cattail(x + 0.4, z + 0.2, 2.6, 0.05); });
-  G.stageLotus(STAGE.x, STAGE.z, 1.5);
+  G.twigBridge([-8.4, 1.2], [-9.5, 1.7]);
+  [[16, 5, 1.1, 1], [-16, -4, 1.3, 0], [-6, 12, 1.0, 1], [15, -10, 1.2, 0], [-17, 8, 0.9, 1], [3, -12.5, 1.1, 1], [18, 1, 0.8, 0], [8.5, 11.5, 1.3, 1], [-11, -9, 1.1, 0], [25, 6, 1.2, 1], [26, -7, 1.0, 0]].filter(([x, z]) => avoid(x, z)).forEach(([x, z, r, f]) => G.smallPad(x, z, r, f));
+  [[14.5, 8.5, 1.4], [-15, 5.4, 1.2], [-4.5, -11.5, 1.0]].filter(([x, z]) => avoid(x, z)).forEach(([x, z, sc]) => G.lotus(x, z, sc, 0.05));
+  [[-9, -8], [9.5, 13], [-13, 11], [17, -5], [-18, -1], [24.5, -2]].filter(([x, z]) => avoid(x, z)).forEach(([x, z], k) => { G.reeds(x, z, 6, k + 30); G.cattail(x + 0.4, z + 0.2, 2.6, 0.05); });
   G.dewdrop(CENTER.x, CENTER.z, 1.5);
   G.berryLights([-6.6, -1.6], [-1.8, -6.6]); G.berryLights([1.8, -6.6], [6.6, -1.6]);
   G.reedGate(GATE.x, GATE.z);
-  // tempat makan di daun kiri (dekorasi tetap)
   G.logBench(-12.8, 2.0, 0.2); G.logBench(-11.8, 3.3, -0.3);
-  // batu pijakan = jalan masuk (tidak boleh ditutup)
   for (let k = 0; k <= 6; k++) { const t = k / 6; const d = G.add(G.cyl(0.26, 0.28, 0.04, 7), G.M('#f3e3b5'), GATE.x + (ENTRY.x - GATE.x) * t, PADY + 0.02, (GATE.z - 0.6) + (ENTRY.z - 0.8 - (GATE.z - 0.6)) * t); d.castShadow = false; }
+  if (lv === 2) { // lampu tetap: tugu embun, gerbang, panggung (lingkaran cahaya)
+    FIXED_LIGHTS.forEach(L => glowDisc(L.x, L.z, L.r, g));
+    for (const dx of [-1.3, 1.3]) lampionModel(GATE.x + dx, GATE.z + 0.3, g, false);
+  }
+}
+const FIXED_LIGHTS = [{ x: CENTER.x, z: CENTER.z, r: 3.0 }, { x: GATE.x, z: GATE.z, r: 2.8 }, { x: STAGE2.x, z: STAGE2.z, r: 3.2 }];
+const glowMat = new THREE.MeshBasicMaterial({ color: '#ffd27a', transparent: true, opacity: 0.0, depthWrite: false, blending: THREE.AdditiveBlending });
+const lampMat = new THREE.MeshStandardMaterial({ color: '#ffb347', emissive: '#ffb347', emissiveIntensity: 1.6, roughness: 1, flatShading: true });
+function glowDisc(x, z, r, parent) { const d = new THREE.Mesh(new THREE.CircleGeometry(r, 28), glowMat); d.rotation.x = -Math.PI / 2; d.position.set(x, PADY + 0.035, z); d.renderOrder = 2; parent.add(d); return d; }
+function lampionModel(x, z, parent, disc = true) {
+  const old = G.setParent(parent);
+  G.cattail(x, z, 2.8, 0);
+  const l = new THREE.Mesh(G.sph(0.22), lampMat); l.position.set(x + 0.25, 2.3, z); l.scale.set(1, 1.25, 1); parent.add(l);
+  G.add(G.cyl(0.1, 0.1, 0.06, 7), G.M('#8a4e22'), x + 0.25, 2.6, z); G.add(G.cyl(0.1, 0.1, 0.06, 7), G.M('#8a4e22'), x + 0.25, 2.02, z);
+  if (disc) glowDisc(x, z, LAMP_R, parent);
+  G.setParent(old);
+}
+const LAMP_R = 3.4;
+function isLit(p, list = S.placed) {
+  if (!LV.malam) return true;
+  return FIXED_LIGHTS.some(L => Math.hypot(p.x - L.x, p.z - L.z) <= L.r) || list.some(o => o.kind === 'lampion' && dist(o, p) <= LAMP_R);
+}
+// ---- siang ↔ malam ----
+const DAY = { bg: new THREE.Color('#cdeeea'), water: new THREE.Color('#47b8bd'), hemi: 1.6, sun: 2.6 };
+const NIGHT = { bg: new THREE.Color('#1c2a4a'), water: new THREE.Color('#24506a'), hemi: 0.55, sun: 0.45 };
+let nightF = 0;
+function setNight(f) {
+  nightF = f;
+  scene.background.copy(DAY.bg).lerp(NIGHT.bg, f); scene.fog.color.copy(scene.background);
+  water.material.color.copy(DAY.water).lerp(NIGHT.water, f);
+  hemi.intensity = DAY.hemi + (NIGHT.hemi - DAY.hemi) * f; hemi.color.set(f > 0.5 ? '#9aa8ff' : '#ffffff');
+  sun.intensity = DAY.sun + (NIGHT.sun - DAY.sun) * f; sun.color.set(f > 0.5 ? '#b8c8ff' : '#fff4e0');
+  glowMat.opacity = 0.32 * f; lampMat.emissiveIntensity = 0.4 + 1.4 * f;
+  $('vig').style.background = f > 0.05 ? `radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(5,10,30,${0.5 * f}))` : '';
+  if (fireflies) fireflies.visible = f > 0.4;
+}
+let fireflies = null;
+function setLevel(id) {
+  LV = NF.LEVELS.find(l => l.id === id) || NF.LEVELS[0];
+  world = id === 2 ? worldB : worldA; worldA.visible = id !== 2; worldB.visible = id === 2;
+  STAGE = id === 2 ? STAGE2 : STAGE1;
+  buildSlots(); setNight(LV.malam ? 1 : 0);
 }
 function segDist(p, a, b) { const dx = b.x - a.x, dz = b.z - a.z; const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.z - a.z) * dz) / (dx * dx + dz * dz))); return Math.hypot(p.x - a.x - dx * t, p.z - a.z - dz * t); }
 const SLOTS = [];
 const SP = 2.25;
-for (let i = -4; i <= 4; i++) for (let j = -4; j <= 4; j++) {
-  const p = { x: i * SP + (j % 2 ? SP / 2 : 0), z: j * SP };
-  const d = Math.hypot(p.x - CENTER.x, p.z - CENTER.z);
-  if (Math.hypot(p.x, p.z) > PAD_R - 1.4 || d < 2.0) continue;
-  if (segDist(p, GATE, { x: ENTRY.x, z: ENTRY.z - 1.2 }) < 1.3) continue;
-  SLOTS.push({ x: p.x, z: p.z, item: null, idx: SLOTS.length });
+const slotMarks = new THREE.Group(); scene.add(slotMarks); slotMarks.visible = false;
+function buildSlots() {
+  SLOTS.length = 0; while (slotMarks.children.length) slotMarks.remove(slotMarks.children[0]);
+  for (let i = -4; i <= 4; i++) for (let j = -4; j <= 4; j++) {
+    const p = { x: i * SP + (j % 2 ? SP / 2 : 0), z: j * SP };
+    const d = Math.hypot(p.x - CENTER.x, p.z - CENTER.z);
+    if (Math.hypot(p.x, p.z) > PAD_R - 1.4 || d < 2.0) continue;
+    if (segDist(p, GATE, { x: ENTRY.x, z: ENTRY.z - 1.2 }) < 1.3) continue;
+    if (LV.id === 2 && segDist(p, { x: 4, z: -0.8 }, BR1) < 1.2) continue;
+    SLOTS.push({ x: p.x, z: p.z, item: null, idx: SLOTS.length });
+  }
+  if (LV.id === 2) for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) {
+    const p = { x: PAD2.x + i * SP + (j % 2 ? SP / 2 : 0), z: PAD2.z + j * SP };
+    if (Math.hypot(p.x - PAD2.x, p.z - PAD2.z) > PAD2.r - 1.3) continue;
+    if (Math.hypot(p.x - STAGE2.x, p.z - STAGE2.z) < 2.8 || Math.hypot(p.x - BR2.x, p.z - BR2.z) < 1.6) continue;
+    SLOTS.push({ x: p.x, z: p.z, item: null, idx: SLOTS.length });
+  }
+  SLOTS.forEach(s => { const m = new THREE.Mesh(G.cyl(0.12, 0.12, 0.02, 8), G.M('#ffffff', { transparent: true, opacity: 0.7 })); m.position.set(s.x, PADY + 0.03, s.z); slotMarks.add(m); s.mark = m; });
 }
-// ---- penanda slot (titik putih saat menata) ----
-const slotMarks = new THREE.Group(); scene.add(slotMarks);
-SLOTS.forEach(s => { const m = new THREE.Mesh(G.cyl(0.12, 0.12, 0.02, 8), G.M('#ffffff', { transparent: true, opacity: 0.7 })); m.position.set(s.x, PADY + 0.03, s.z); slotMarks.add(m); s.mark = m; });
-slotMarks.visible = false;
 
 // ---- lineup pilih tokoh (jauh di samping) ----
 const LO = 60;
@@ -119,6 +176,7 @@ const CAMS = {
   lineup: { tx: LO, tz: 0.2, yaw: 0, pitch: 0.482, dist: 17.3, ty: -0.5 },
   cerita: { tx: 0.4, tz: 4.0, yaw: 0.85, pitch: 0.42, dist: 9.0, ty: 0.7 },
 };
+CAMS.venue2 = { tx: 7.2, tz: -0.6, yaw: -0.08, pitch: 0.86, dist: 44 };
 const camS = { tx: 0, ty: 0, tz: 0, yaw: 0, pitch: 0.7, dist: 25 };
 let camGoal = null;
 function setCam(name, instant = true) {
@@ -189,6 +247,8 @@ function itemPts(it, all) {
       else R.push(['+0', 'menghadap ke samping']);
       const hb = heartsBonus(it.kind); if (hb) { p += hb; R.push(['+' + hb, 'jajanan disukai ' + '❤'.repeat(S.hearts[it.kind])]); }
       if (dist(it, CENTER) <= 3.4) { p += 1; R.push(['+1', 'dekat tugu embun']); }
+      if (LV.id === 2 && dist(it, STAGE2) <= 4.2) { p += 1; R.push(['+1', 'dekat panggung']); }
+      if (LV.malam) { if (isLit(it, all)) R.push(['+0', 'terang ✨']); else { p -= 2; R.push(['−2', 'gelap, tamu takut']); } }
       if (dist(it, GATE) <= 3.8) { p += 1; R.push(['+1', 'dekat gerbang']); }
       const crowd = lapaks.filter(o => dist(o, it) <= 2.4).length;
       if (crowd) { p -= crowd; R.push(['−' + crowd, 'terlalu dekat lapak lain']); }
@@ -201,11 +261,12 @@ function itemPts(it, all) {
       } else if (it.kind === 'talas') { p += 1; R.push(['+1', 'tempat berteduh']); }
       else if (it.kind === 'info') { p += 1; R.push(['+1', 'pos informasi']); }
       else if (it.kind === 'poster') { p += 2; R.push(['+2', 'promosi']); }
+      else if (it.kind === 'lampion') { R.push(['+0', 'menerangi sekitar']); }
   }
   return { p, R };
 }
 function evaluate(list) {
-  let total = BASE_TAMU + (S.musik ? NF.ITEMS.musik.tamu : 0);
+  let total = (LV.base || BASE_TAMU) + (S.musik ? NF.ITEMS.musik.tamu : 0);
   const per = new Map();
   for (const it of list) { const r = itemPts(it, list); per.set(it, r); total += r.p; }
   return { total: Math.max(0, total), per };
@@ -219,7 +280,7 @@ function posterBoard() {
   G.add(G.box(0.74, 0.44, 0.065), G.M('#fff6dc'), 0, 1.15, 0.005);
   const sp = G.sprite('🎉', 0, 1.15, 0.06, 0.4, '#ffc94a', null);
 }
-function itemRot(x, z, rotK = 0) { return Math.atan2(CENTER.x - x, CENTER.z - z) + rotK * Math.PI / 2; }
+function itemRot(x, z, rotK = 0) { const c = onPad2({ x, z }) ? PAD2 : CENTER; return Math.atan2(c.x - x, c.z - z) + rotK * Math.PI / 2; }
 function buildItem(kind, x, z, ghost = false, rotK = 0) {
   const rot = itemRot(x, z, rotK);
   const g = G.inGroup(x, z, () => {
@@ -229,6 +290,7 @@ function buildItem(kind, x, z, ghost = false, rotK = 0) {
     else if (kind === 'talas') G.taroUmbrella(0, 0, 1.3);
     else if (kind === 'info') G.infoShell(0, 0);
     else if (kind === 'poster') posterBoard();
+    else if (kind === 'lampion') { const cur = G.setParent(null); G.setParent(cur); lampionModel(0, 0, cur, true); }
   }, dyn);
   if (!(NF.ITEMS[kind].cat === 'lapak' || kind === 'bangku')) g.rotation.y = rot;
   if (ghost) g.traverse(o => { if (o.material) { o.material = o.material.clone(); o.material.transparent = true; o.material.opacity = 0.5; o.material.depthWrite = false; } if (o.isMesh) o.castShadow = false; });
@@ -292,6 +354,7 @@ function onTap(p) {
 // ================= layar: judul =================
 let demo = [];
 function screenJudul() {
+  setLevel(1);
   S.screen = 'judul'; document.body.className = 's-judul'; clearUI(); setCam('judul');
   clearDyn(); resetActors();
   // dekorasi festival contoh
@@ -319,13 +382,14 @@ function resetActors() { while (actors.children.length) actors.remove(actors.chi
 
 // ================= layar: pilih tokoh =================
 function screenTokoh() {
+  setLevel(1);
   S.screen = 'tokoh'; document.body.className = 's-tokoh'; clearUI(); setCam('lineup'); sunAt(LO, 0);
   el(`<b>Pilih tokohmu</b><small>Tiap tokoh punya kekuatan berbeda. Coba semuanya!</small>`, 'card title');
   const ids = ['tiko', 'bebi', 'lumi'], xs = [LO - 2.9, LO, LO + 2.9];
   let chosen = S.hero;
   const cards = ids.map((id, k) => {
-    const h = NF.HEROES[id]; const best = SAVE.best[id] || 0;
-    const c = el(`<b>${h.nama}</b><span class="role" style="background:${h.warna}">${h.julukan}</span><div class="pw">${h.bakat}</div><div class="pw jur">${h.jurusTeks}</div><em>${h.jago}</em><div class="bintang">${'⭐'.repeat(best)}${'<span style="opacity:.25">⭐</span>'.repeat(3 - best)}</div>`, 'opt' + (chosen === id ? ' sel' : ''));
+    const h = NF.HEROES[id]; const best = bestOf(id, 1), best2 = bestOf(id, 2);
+    const c = el(`<b>${h.nama}</b><span class="role" style="background:${h.warna}">${h.julukan}</span><div class="pw">${h.bakat}</div><div class="pw jur">${h.jurusTeks}</div><em>${h.jago}</em><div class="bintang"><small>T1</small> ${'⭐'.repeat(best)}${'<span style="opacity:.25">⭐</span>'.repeat(3 - best)}${tahap2Open() ? ` &nbsp;<small>T2</small> ${'⭐'.repeat(best2)}${'<span style="opacity:.25">⭐</span>'.repeat(3 - best2)}` : ''}</div>`, 'opt' + (chosen === id ? ' sel' : ''));
     c.style.left = (215 + k * 375) + 'px';
     c.onclick = () => { A.sfx('tap'); chosen = id; cards.forEach(x => x.classList.remove('sel')); c.classList.add('sel'); go.disabled = false; hop = lineupHeroes[id]; };
     return c;
@@ -340,6 +404,7 @@ let hop = null;
 // ================= layar: cerita Raja =================
 let kingObj = null;
 function screenCerita() {
+  setLevel(1);
   S.screen = 'cerita'; document.body.className = 's-cerita'; clearUI(); clearDyn(); resetActors(); sunAt(1, -1); setCam('cerita');
   G.setParent(actors); kingObj = G.king(GATE.x - 0.3, GATE.z - 2.9, 2.6); kingObj.rotation.y = 0.55;
   placeHero(GATE.x + 0.6, GATE.z - 3.6, 0.6);
@@ -358,13 +423,31 @@ function screenCerita() {
   show();
 }
 
+function screenCerita2() {
+  S.screen = 'cerita'; document.body.className = 's-cerita'; clearUI(); clearDyn(); resetActors(); sunAt(1, -1); setCam('cerita'); setNight(0.85);
+  G.setParent(actors); kingObj = G.king(GATE.x - 0.3, GATE.z - 2.9, 2.6); kingObj.rotation.y = 0.55;
+  placeHero(GATE.x + 0.6, GATE.z - 3.6, 0.6);
+  const lines = [
+    'Hebat! Bazar Daun Teratai sukses. Sekarang warga ingin <b>Pasar Malam Kunang-kunang</b>! 🌙',
+    `Ada <b>dua daun</b> yang disambung jembatan ranting. Targetnya <b>${LV.targetTamu} tamu</b> dan <b>untung ${LV.targetUntung} koin</b>.`,
+    'Malam itu gelap. Tamu tidak mau ke lapak yang gelap — pasang <b>lampion</b> 🏮 ya!',
+    'Dan jangan lupa: kembang api hanya indah kalau langit sudah gelap 🎆',
+  ];
+  let i = 0; const d = el('', 'dialog');
+  const show = () => {
+    d.innerHTML = `<div class="who"><span class="face">👑</span>Raja Kura-kura</div>${lines[i]}<div class="nx"><button class="btn">${i < lines.length - 1 ? 'Lanjut ▶' : 'Siap! ▶'}</button></div>`;
+    d.querySelector('button').onclick = () => { A.sfx('tap'); i++; if (i < lines.length) show(); else { SAVE.cerita2 = true; save(); screenPapan(); } };
+  };
+  show();
+}
+
 // ================= layar: papan persiapan =================
 function rollHearts() {
   const vals = [...NF.HEARTS].sort(() => Math.random() - 0.5);
   S.hearts = {}; NF.LAPAK.forEach((k, i) => S.hearts[k] = vals[i]);
 }
 function screenPapan() {
-  S.screen = 'papan'; document.body.className = 's-papan'; clearUI(); resetActors(); clearDyn(); sunAt(1, -1); setCam('venue');
+  S.screen = 'papan'; document.body.className = 's-papan'; clearUI(); resetActors(); clearDyn(); sunAt(1, -1); setCam(LV.id === 2 ? 'venue2' : 'venue');
   S.placed = []; S.musik = false; S.spent = 0; S.hitungOk = false; SLOTS.forEach(s => s.item = null);
   S.acara = LV.jam.map(() => null); S.rel = {}; S.tamuIst = pick(Object.keys(NF.TAMU_IST));
   rollHearts();
@@ -395,10 +478,10 @@ function papan1() {
     <div class="col"><h3>🧮 Hitung lapak</h3>
       <div style="font-size:17px;font-weight:700">Target: <b>${LV.targetTamu} tamu</b>. Satu lapak bisa melayani <b>${LV.porsi} tamu</b>.<br>Butuh berapa lapak?</div>
       <div class="groups">${groups}</div>
-      <div class="ans">${[3, 4, 5].map(n => `<button data-n="${n}" class="${S.hitungOk && n === LV.targetTamu / LV.porsi ? 'ok' : ''}">${n}</button>`).join('')}</div>
+      <div class="ans">${(LV.id === 2 ? [5, 6, 7] : [3, 4, 5]).map(n => `<button data-n="${n}" class="${S.hitungOk && n === LV.targetTamu / LV.porsi ? 'ok' : ''}">${n}</button>`).join('')}</div>
       <div class="fb"></div></div>
     <div class="col"><h3>🌦️ Ramalan & persiapan</h3>
-      <div class="mini" style="margin-top:0">🌧️ <b>Sore nanti hujan sebentar.</b> Siapkan tempat berteduh!</div>
+      ${LV.malam ? '<div class="mini" style="margin-top:0">🌙 <b>Pasar malam!</b> Langit gelap jam 19.00. Pasang lampion 🏮 di dekat lapak.</div><div class="mini">🤕 Jalan malam licin, kadang ada tamu terjatuh.</div>' : '<div class="mini" style="margin-top:0">🌧️ <b>Sore nanti hujan sebentar.</b> Siapkan tempat berteduh!</div>'}
       <div class="mini">👶 Di festival ramai, kadang ada anak yang terpisah dari ibunya.</div>
       <div class="mini">👑 Raja juga akan datang berkunjung!</div></div>`, 'board');
   const nx = papanNav(false, 'Lanjut ▶', () => papanStep(2), S.hitungOk);
@@ -416,6 +499,10 @@ function acaraCek(list = S.acara) {
   const res = list.map(k => k ? 'ok' : null);
   if (idx('pembukaan') > 0) res[idx('pembukaan')] = 'no';
   if (idx('hadiah') >= 0 && (idx('lomba') < 0 || idx('hadiah') < idx('lomba'))) res[idx('hadiah')] = 'no';
+  if (LV.gelap != null) {
+    if (idx('lomba') > LV.terangSampai) res[idx('lomba')] = 'no';
+    if (idx('kembangapi') >= 0 && idx('kembangapi') < LV.gelap) res[idx('kembangapi')] = 'no';
+  }
   return res;
 }
 function acaraTepat() { return S.acara.every(Boolean) && acaraCek().every(r => r === 'ok'); }
@@ -424,7 +511,8 @@ function papan2() {
   const cek = acaraCek();
   const slots = LV.jam.map((j, i) => {
     const k = S.acara[i], A2 = k && NF.ACARA[k];
-    return `<div class="slot siang" data-i="${i}"><div class="jam">${j}</div><div class="langit">${i < 2 ? '🌤️' : '☀️'}</div>
+    const sky = LV.gelap != null ? (i >= LV.gelap ? 'malam' : i > LV.terangSampai ? 'senja' : 'siang') : 'siang';
+    return `<div class="slot ${sky}" data-i="${i}"><div class="jam">${j}</div><div class="langit">${LV.langit[i]}</div>
       ${k ? `<div class="kartu"><span class="e">${A2.e}</span>${A2.nama}</div>` : '<div class="kosong">ketuk di sini</div>'}
       ${cek[i] === 'ok' ? '<span class="ok">✅</span>' : cek[i] === 'no' ? '<span class="no">❌</span>' : ''}</div>`;
   }).join('');
@@ -432,7 +520,7 @@ function papan2() {
   const cards = left.map(k => `<div class="kartu ${acaraSel === k ? 'sel' : ''}" data-k="${k}"><span class="e">${NF.ACARA[k].e}</span>${NF.ACARA[k].nama}<small>${NF.ACARA[k].ket}</small></div>`).join('') || '<div style="font-weight:800;color:#3a9a3a;font-size:18px">Semua acara sudah dijadwalkan ✔</div>';
   const p = el(`<h2>🎤 Susun Acara ${LV.nama}</h2><div class="sub">Ketuk kartu acara, lalu ketuk jamnya. Ketuk acara di jadwal untuk mengembalikannya.</div>
     <div class="timeline">${slots}</div><div class="pilihan">${cards}</div>
-    <div class="aturan">📌 Aturan: 👑 Pembukaan paling awal · 🏆 Bagi hadiah sesudah lomba · 🎵 Konser butuh Pemusik Kodok (tab Hiburan)</div>`, 'panel');
+    <div class="aturan">📌 Aturan: 👑 Pembukaan paling awal · 🏆 Bagi hadiah sesudah lomba · 🎵 Konser butuh Pemusik Kodok (tab Hiburan)${LV.gelap != null ? ' · 🛶 Lomba saat masih terang · 🎆 Kembang api saat gelap' : ''}</div>`, 'panel');
   p.querySelectorAll('.pilihan .kartu').forEach(c => c.onclick = () => { A.sfx('tap'); acaraSel = c.dataset.k; papanStep(2); });
   p.querySelectorAll('.slot').forEach(sl => sl.onclick = () => {
     const i = +sl.dataset.i;
@@ -441,14 +529,15 @@ function papan2() {
     else { helper('Pilih kartu acara dulu di bawah 👇', 2500); return; }
     papanStep(2);
     const c2 = acaraCek(); const bad = c2.indexOf('no');
-    if (bad >= 0) helper(S.acara[bad] === 'pembukaan' ? 'Hmm, <b>pembukaan</b> harus paling awal!' : 'Lombanya belum mulai, hadiahnya untuk siapa? 🏆', 3500);
+    const why = { pembukaan: 'Hmm, <b>pembukaan</b> harus paling awal!', hadiah: 'Lombanya belum mulai, hadiahnya untuk siapa? 🏆', lomba: 'Perahunya tidak kelihatan kalau sudah gelap! 🛶 Lomba saat masih terang.', kembangapi: 'Kembang api tidak kelihatan kalau masih terang! 🎆' };
+    if (bad >= 0) helper(why[S.acara[bad]], 3500);
     else if (acaraTepat()) helper('Jadwal acaranya tepat! 🎉', 3000);
   });
   papanNav(true, 'Lanjut ▶', () => papanStep(3));
   if (!S.acara.some(Boolean)) helper('Susun urutan acara festival. Perhatikan aturannya!');
 }
 function relCocok(pos) { const r = NF.RELAWAN.find(v => v.id === S.rel[pos]); return r && r.cocok === pos; }
-function relawanPas() { return Object.keys(NF.POS).every(p => relCocok(p)); }
+function relawanPas() { return LV.pos.every(p => relCocok(p)); }
 let relSel = null;
 function portrait(col, extra) {
   const c = document.createElement('canvas'); c.width = c.height = 120; const x = c.getContext('2d');
@@ -461,8 +550,8 @@ function portrait(col, extra) {
 const TI_COL = { nenek: '#a9d474', berudu: '#7fcf6a', bangau: '#f2f2ec' };
 function papan3() {
   const used = Object.values(S.rel);
-  const vols = NF.RELAWAN.map(v => `<div class="vol ${used.includes(v.id) ? 'used' : ''} ${relSel === v.id ? 'sel' : ''}" data-v="${v.id}"><img src="${portrait(G.CR[v.kind])}"><b>${v.nama}</b><small>${v.sifat}</small></div>`).join('');
-  const posts = Object.entries(NF.POS).map(([id, p]) => {
+  const vols = NF.RELAWAN.slice(0, LV.relawan).map(v => `<div class="vol ${used.includes(v.id) ? 'used' : ''} ${relSel === v.id ? 'sel' : ''}" data-v="${v.id}"><img src="${portrait(G.CR[v.kind])}"><b>${v.nama}</b><small>${v.sifat}</small></div>`).join('');
+  const posts = LV.pos.map(id => [id, NF.POS[id]]).map(([id, p]) => {
     const r = NF.RELAWAN.find(v => v.id === S.rel[id]);
     const who = r ? (r.cocok === id ? `<span class="who ok">${r.sifat.split(' ')[0]} ${r.nama} ✔ cocok!</span>` : `<span class="who meh">${r.sifat.split(' ')[0]} ${r.nama} 🙂 boleh</span>`) : '<span class="who">ketuk di sini</span>';
     return `<div class="pos" data-p="${id}"><span class="e">${p.e}</span><div>${p.nama}<small>${p.ket}</small></div>${who}</div>`;
@@ -496,12 +585,14 @@ function buildMap() {
 }
 CAMS.peta = { tx: MO + 2.5, tz: 1.5, yaw: 0, pitch: 0.86, dist: 50 };
 function screenPeta() {
+  setLevel(1);
   S.screen = 'peta'; document.body.className = 's-peta'; clearUI(); setCam('peta'); sunAt(MO + 2, 0);
   el(`<b>🗺️ Kerajaan Telaga</b><small>Pilih festival</small>`, 'card title');
-  const best = SAVE.best[S.hero] || 0;
   const card = (x, z, html, cls, fn) => { const p = project(x, 0, z); const d = el(html, 'tcard ' + cls, `left:${p.x}px;top:${p.y + 50}px`); if (fn) { d.classList.add('tap'); d.onclick = fn; } return d; };
-  card(MO - 9, 3, `<b>1 · ${LV.nama}</b><small>siang · ${LV.targetTamu} tamu</small><div class="st">${'⭐'.repeat(best)}${'☆'.repeat(3 - best)}</div><div class="btn" style="font-size:18px;padding:6px 18px;margin-top:6px">Main ▶</div>`, '', () => { A.sfx('good'); screenPapan(); });
-  card(MO + 1, -2, `<b>🔒 2 · Pasar Malam Kunang-kunang</b><small>malam · 30 tamu · 2 daun</small><small>segera hadir</small>`, 'lock', () => helper('Pasar Malam sedang dibangun Tiko & teman-teman. Segera hadir! 🌙', 3000));
+  const L1 = NF.LEVELS[0], L2 = NF.LEVELS[1], b1 = bestOf(S.hero, 1), b2 = bestOf(S.hero, 2), st = n => `${'⭐'.repeat(n)}${'☆'.repeat(3 - n)}`;
+  card(MO - 9, 3, `<b>1 · ${L1.nama}</b><small>siang · ${L1.targetTamu} tamu</small><div class="st">${st(b1)}</div><div class="btn" style="font-size:18px;padding:6px 18px;margin-top:6px">Main ▶</div>`, '', () => { A.sfx('good'); setLevel(1); screenPapan(); });
+  if (tahap2Open()) card(MO + 1, -2, `<b>2 · ${L2.nama}</b><small>malam · ${L2.targetTamu} tamu · 2 daun · lampion</small><div class="st">${st(b2)}</div><div class="btn" style="font-size:18px;padding:6px 18px;margin-top:6px">Main ▶</div>`, '', () => { A.sfx('good'); setLevel(2); if (!SAVE.cerita2) screenCerita2(); else screenPapan(); });
+  else card(MO + 1, -2, `<b>🔒 2 · ${L2.nama}</b><small>malam · ${L2.targetTamu} tamu · 2 daun</small><small>Selesaikan Tahap 1 dulu (⭐ 1)</small>`, 'lock', () => helper('Selesaikan Bazar Daun Teratai dulu, minimal ⭐ 1, ya!', 3000));
   card(MO + 11.5, 4.5, `<b>🔒 3 · Festival Sungai Pelangi</b><small>segera hadir</small>`, 'lock');
   const bk = el('<button class="btn abu" style="font-size:18px;padding:8px 16px">◀ Ganti tokoh</button>', '', 'position:absolute;left:136px;top:14px'); bk.querySelector('button').onclick = () => { A.sfx('tap'); screenTokoh(); };
   const sb = el('<button class="btn kuning">📒 Buku Stiker</button>', '', 'position:absolute;right:24px;bottom:20px'); sb.querySelector('button').onclick = () => { A.sfx('tap'); bukuStiker(); };
@@ -526,7 +617,7 @@ function bukuStiker() {
 // ================= layar: menata =================
 const T = { tab: 'kue', ghost: null, menu: null };
 function screenTata() {
-  S.screen = 'tata'; document.body.className = 's-tata'; clearUI(); setCam('venue', false); sunAt(1, -1);
+  S.screen = 'tata'; document.body.className = 's-tata'; clearUI(); setCam(LV.id === 2 ? 'venue2' : 'venue', false); sunAt(1, -1);
   if (!heroM.obj) placeHero(-1.8, 4.8, 0.4);
   T.ghost = null; T.menu = null; slotMarks.visible = true;
   renderTata();
@@ -537,7 +628,7 @@ function tataHud() {
   const cur = evaluate(S.placed).total;
   const prev = T.ghost ? evaluate(previewList()).total : cur;
   const box = el('', 'tata-hud');
-  el(`<small>Festival 1 · Kerajaan Telaga</small><b>${LV.nama}</b>`, 'lv', '', box);
+  el(`<small>Festival ${LV.id} · Kerajaan Telaga</small><b>${LV.nama}</b>`, 'lv', '', box);
   el(`<b>${prev}<span> / ${LV.targetTamu}</span></b><small>🐸 perkiraan tamu ${T.ghost && prev !== cur ? `(${prev > cur ? '+' : ''}${prev - cur})` : ''}</small><div class="nb"><i style="width:${Math.min(100, prev / LV.targetTamu * 100)}%"></i></div>`, 'score' + (prev >= LV.targetTamu ? ' ok' : ''), '', box);
   el(`<div class="pill">👛 Kas <b>${kas()}</b> 🪙</div><div class="pill" style="font-size:16px">🎯 Target untung ${LV.targetUntung} 🪙</div>`, 'hud-r', '', box);
   // daftar cek
@@ -547,8 +638,9 @@ function tataHud() {
     [lap >= need, `Lapak jajanan ${lap}/${need}`],
     [true, 'Jalan masuk tetap lega'],
     [binOk, 'Keranjang sampah dekat lapak'],
-    [countKind('talas') > 0, 'Tempat berteduh (sore hujan)'],
+    ...(LV.malam ? [] : [[countKind('talas') > 0, 'Tempat berteduh (sore hujan)']]),
     [countKind('info') > 0, 'Pos informasi (anak hilang)'],
+    ...(LV.malam ? [[lapakList().length > 0 && lapakList().every(l => isLit(l)), 'Semua lapak terang 🏮']] : []),
     [prev >= LV.targetTamu, `Perkiraan tamu ≥ ${LV.targetTamu}`],
   ];
   T.rows = rows;
@@ -557,7 +649,7 @@ function tataHud() {
 function renderTata() {
   [...UI.querySelectorAll('.tabs,.tray,.go')].forEach(x => x.remove());
   tataHud();
-  const tabs = el(NF.TABS.map(([id, l]) => `<div class="tab ${T.tab === id ? 'on' : ''}" data-t="${id}">${l}</div>`).join(''), 'tabs');
+  const tabs = el(NF.TABS.filter(([id]) => id !== 'lampu' || LV.malam).map(([id, l]) => `<div class="tab ${T.tab === id ? 'on' : ''}" data-t="${id}">${l}</div>`).join(''), 'tabs');
   tabs.querySelectorAll('.tab').forEach(t => t.onclick = () => { A.sfx('tap'); T.tab = t.dataset.t; renderTata(); });
   const kinds = Object.keys(NF.ITEMS).filter(k => (NF.ITEMS[k].tab || NF.ITEMS[k].cat) === T.tab);
   const tray = el(kinds.map(k => {
@@ -663,6 +755,7 @@ function tataTip() {
   if (t.startsWith('Lapak')) helper(`Kita butuh <b>${LV.targetTamu / LV.porsi} lapak</b>. Ada 10 jajanan di tab Kue & Minuman — lihat ❤ dan harganya!`);
   else if (t.startsWith('Keranjang')) helper('Taruh <b>keranjang sampah</b> dekat lapak (tab Fasilitas) supaya telaga tetap bersih.');
   else if (t.startsWith('Tempat')) helper('Sore nanti hujan. Pasang <b>Daun Talas</b> untuk berteduh (tab Fasilitas).');
+  else if (t.startsWith('Semua lapak')) helper('Ada lapak yang <b>gelap</b>. Pasang <b>Lampion</b> di dekatnya (tab Lampu) 🏮');
   else if (t.startsWith('Pos')) helper('Pasang <b>Pos Informasi</b> untuk membantu anak yang terpisah dari ibunya.');
   else helper('Tamu masih kurang. Coba <b>Poster Daun</b> (Promosi) atau <b>Pemusik</b> (Hiburan)!');
 }
@@ -701,10 +794,11 @@ function startFestival() {
     nextBoat: 1.5, nextTrash: 10, done: false, ending: 0,
   };
   const P = F.dur;
-  F.events = [
-    { at: P * 0.3, type: 'berudu' }, { at: P * 0.44, type: 'tamu' }, { at: P * 0.56, type: 'raja' }, { at: P * 0.74, type: 'hujan' },
-  ];
-  S.acara.forEach((k, i) => { if (k) F.events.push({ at: P * (0.06 + i * 0.2), type: 'acara', k, i }); });
+  const AT = { berudu: 0.3, tamu: 0.44, raja: 0.56, hujan: 0.74, jatuh: 0.68 };
+  F.events = LV.kejadian.map(k => ({ at: P * AT[k], type: k }));
+  const gap = 0.8 / LV.jam.length;
+  S.acara.forEach((k, i) => { if (k) F.events.push({ at: P * (0.05 + i * gap), type: 'acara', k, i }); });
+  F.fw = [];
   placeHero(-1.8, 4.8, 0.4);
   festHud();
   helper(`Festival dibuka! 🎉 Ketuk gelembung <b>merah</b> kalau ada masalah.`, 5000);
@@ -713,7 +807,7 @@ function festHud() {
   [...UI.querySelectorAll('.fest-hud')].forEach(x => x.remove());
   const box = el('', 'fest-hud');
   const untung = F.income - S.spent - F.extraCost;
-  el(`<small>Festival 1 · Kerajaan Telaga</small><b>${LV.nama}</b>`, 'lv', '', box);
+  el(`<small>Festival ${LV.id} · Kerajaan Telaga</small><b>${LV.nama}</b>`, 'lv', '', box);
   el(`<b>${F.arrived}<span> / ${LV.targetTamu}</span></b><small>🐸 tamu datang</small><div class="nb"><i style="width:${Math.min(100, F.arrived / LV.targetTamu * 100)}%"></i></div>`, 'score' + (F.arrived >= LV.targetTamu ? ' ok' : ''), '', box);
   const tm = Math.min(1, F.t / F.dur);
   el(`<div class="pill">💰 Masuk <b>${F.income}</b> · 🪙 Untung <b style="color:${untung >= LV.targetUntung ? '#3a9a3a' : untung < 0 ? '#d9603f' : '#3d4a52'}">${untung}</b> / ${LV.targetUntung}</div>
@@ -751,6 +845,11 @@ function newVisitor(kind, x, z, opts = {}) {
   const v = { kind, obj, x, z, path: [], state: 'walk', t: 0, speed: rnd(1.3, 1.8), stall: null, patience: 0, bob: Math.random() * 6, counted: false, ...opts };
   F.visitors.push(v); return v;
 }
+function via(from, pts) {   // sisipkan titik jembatan bila berpindah daun
+  const out = []; let cur = from;
+  for (const p of pts) { const a = onPad2(cur), b = onPad2(p); if (a !== b) { out.push(...(a ? [BR2, BR1] : [BR1, BR2])); } out.push(p); cur = p; }
+  return out;
+}
 function goPath(v, pts, then) { v.path = pts.map(p => ({ x: p.x, z: p.z })); v.then = then; v.state = 'walk'; }
 function chooseStall(v) {
   const open = F.stalls.filter(s => s.stock > 0);
@@ -767,20 +866,21 @@ function queuePos(s, k) { const d = 1.0 + k * 0.42; return { x: s.x + Math.sin(s
 function joinQueue(v) {
   const s = v.stall; if (!s) return wander(v);
   s.queue.push(v); const p = queuePos(s, s.queue.length - 1);
-  goPath(v, [{ x: ENTRY.x, z: ENTRY.z }, p], () => { v.state = 'queue'; v.t = 0; v.patience = (S.hero === 'bebi' ? 16 : 9) + (S.rel.gerbang ? (relCocok('gerbang') ? 7 : 4) : 0); });
+  goPath(v, via(v, [{ x: ENTRY.x, z: ENTRY.z }, p]), () => { v.state = 'queue'; v.t = 0; v.patience = (S.hero === 'bebi' ? 16 : 9) + (S.rel.gerbang ? (relCocok('gerbang') ? 7 : 4) : 0); });
 }
 function wander(v) {
   const spots = S.placed.filter(p => p.kind === 'bangku' || p.kind === 'talas');
   let p;
   if (F.raining && F.log.teduh) { const t = S.placed.find(q => q.kind === 'talas'); p = { x: t.x + rnd(-0.7, 0.7), z: t.z + rnd(-0.7, 0.7) }; }
   else if (spots.length && Math.random() < 0.6) { const s = pick(spots); p = { x: s.x + rnd(-0.6, 0.6), z: s.z + rnd(-0.6, 0.6) }; }
+  else if (LV.id === 2 && Math.random() < 0.4) { const a = Math.random() * 6.28, d = rnd(1.0, 4.4); p = { x: PAD2.x + Math.cos(a) * d, z: PAD2.z + Math.sin(a) * d }; if (Math.hypot(p.x - STAGE2.x, p.z - STAGE2.z) < 2) p.z += 3; }
   else { const a = Math.random() * 6.28, d = rnd(2.2, 6.6); p = { x: Math.cos(a) * d, z: Math.sin(a) * d }; }
-  goPath(v, [p], () => { v.state = 'idle'; v.t = 0; v.stay = rnd(5, 9); });
+  goPath(v, via(v, [p]), () => { v.state = 'idle'; v.t = 0; v.stay = rnd(5, 9); });
 }
 function leave(v, sad) {
   if (v.stall) { const q = v.stall.queue; const i = q.indexOf(v); if (i >= 0) q.splice(i, 1); }
   v.stall = null; v.sad = sad;
-  goPath(v, [{ x: ENTRY.x, z: ENTRY.z }, GATE, DOCK], () => { v.state = 'gone'; });
+  goPath(v, via(v, [{ x: ENTRY.x, z: ENTRY.z }, GATE, DOCK]), () => { v.state = 'gone'; });
 }
 function stepVisitor(v, dt) {
   v.bob += dt * 8;
@@ -887,6 +987,35 @@ function rajaEvent() {
       timeout() { F.happy = Math.max(0, F.happy - 10); F.log.raja = 'kecewa'; A.sfx('bad'); leave(king); helper('Raja menunggu terlalu lama dan pulang 😟', 4000); } });
   });
 }
+function fireworks(n, bright) {
+  const cols = ['#ff5a7a', '#ffd24a', '#7fe0ff', '#b6ff7a', '#ff9de0'];
+  for (let k = 0; k < n; k++) setTimeout(() => {
+    if (!F || F.done) return;
+    const c = cols[k % cols.length], o = { x: rnd(-3, 18), y: rnd(6, 9), z: rnd(-6, 0) };
+    const mat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: bright ? 1 : 0.25 });
+    for (let i = 0; i < 30; i++) { const m = new THREE.Mesh(G.sph(0.2), mat); m.position.set(o.x, o.y, o.z); const a = Math.random() * 6.28, b = Math.random() * 3.14;
+      F.fw.push({ m, v: new THREE.Vector3(Math.cos(a) * Math.sin(b), Math.cos(b), Math.sin(a) * Math.sin(b)).multiplyScalar(rnd(3, 5)), t: 0, mat }); fx.add(m); }
+    A.sfx('boat');
+  }, k * 450 / (F ? F.speed : 1));
+}
+function stepFireworks(dt) {
+  if (!F || !F.fw) return;
+  for (const p of F.fw.slice()) { p.t += dt; p.m.position.addScaledVector(p.v, dt); p.v.y -= 2.5 * dt; p.m.scale.setScalar(Math.max(0.05, 1 - p.t / 2));
+    if (p.t > 2) { fx.remove(p.m); F.fw.splice(F.fw.indexOf(p), 1); } }
+}
+function jatuhEvent() {
+  const vs = F.visitors.filter(v => v.counted && !v.isKing && !v.isKid && v.state !== 'gone' && !v.stall);
+  const v = vs.length ? pick(vs) : null; if (!v) return;
+  preWarn(() => ({ x: v.x, y: PADY + 1.2, z: v.z }), () => {
+    if (!F || F.done) return;
+    v.state = 'idle'; v.stay = 99; v.obj.rotation.z = 1.2; F.log.jatuh = 'ada';
+    const pr = addProblem({ type: 'jatuh', label: '🤕 Aduh, terjatuh!', pos: () => ({ x: v.x, y: PADY + 1.2, z: v.z }), t: 0, limit: S.hero === 'lumi' ? 16 : 12,
+      solve() { v.obj.rotation.z = 0; popAt(v.x, PADY + 1.6, v.z, '🩹 Sudah diobati'); A.sfx('good'); F.happy = Math.min(100, F.happy + 3); F.log.jatuh = 'tolong'; v.stay = 3; },
+      timeout() { v.obj.rotation.z = 0; F.happy = Math.max(0, F.happy - 8); F.log.jatuh = 'lama'; A.sfx('bad'); leave(v, true); helper('Tamu yang jatuh menunggu lama dan pulang 😢', 3500); } });
+    relawanBantu('p3k', pr, v.x, v.z, 'mengobati tamu 🩹');
+    helper('Ada tamu terjatuh! Ketuk untuk menolong 🩹', 3500);
+  });
+}
 function relawanBantu(pos, pr, x, z, kerja) {
   const id = S.rel[pos]; if (!id || !pr) return;
   const r = NF.RELAWAN.find(v => v.id === id), wait = relCocok(pos) ? 3 : 6;
@@ -903,7 +1032,8 @@ function acaraEvent(ev) {
   if (ev.k === 'pembukaan') msg = ok ? '👑 Raja membuka festival! Selamat datang semua!' : '👑 Lho, festivalnya sudah mulai, kok baru dibuka? 😅';
   else if (ev.k === 'hadiah') msg = ok ? '🏆 Hadiah untuk juara lomba perahu! 👏' : '🏆 Lombanya belum ada… hadiahnya untuk siapa? 🤔';
   else if (ev.k === 'musik') { ok = S.musik; msg = ok ? '🎵 Konser kodok dimulai! Semua berjoget!' : '🎵 Waktunya konser… tapi pemusiknya belum disewa 😢'; }
-  else { msg = '🛶 Lomba perahu daun! Tamu ramai menonton!'; F.total += 2; spawnBoat(2); }
+  else if (ev.k === 'lomba') { msg = ok ? '🛶 Lomba perahu daun! Tamu ramai menonton!' : '🛶 Lomba perahu… tapi sudah gelap, perahunya tidak kelihatan 😕'; if (ok) { F.total += 2; spawnBoat(2); } }
+  else if (ev.k === 'kembangapi') { msg = ok ? '🎆 Kembang api! Wah, indah sekali di langit malam!' : '🎆 Kembang api… tapi masih terang, tidak kelihatan 😅'; fireworks(ok ? 7 : 2, ok); }
   F.log.acara.push({ k: ev.k, ok });
   F.happy = Math.max(0, Math.min(100, F.happy + (ok ? 3 : -6)));
   popAt(STAGE.x, PADY + 3.6, STAGE.z, `${A2.e} ${LV.jam[ev.i]}`);
@@ -1024,7 +1154,9 @@ function stepFestival(dt) {
   F.nextTrash -= dt;
   if (F.nextTrash <= 0 && F.t > F.dur * 0.12 && F.t < F.dur * 0.88) { F.nextTrash = rnd(13, 17); trashEvent(); }
   // kejadian terjadwal
-  for (const ev of F.events) if (!ev.done && F.t >= ev.at) { ev.done = true; ({ berudu: beruduEvent, raja: rajaEvent, hujan: hujanEvent, tamu: tamuEvent, acara: () => acaraEvent(ev) })[ev.type](); }
+  for (const ev of F.events) if (!ev.done && F.t >= ev.at) { ev.done = true; ({ berudu: beruduEvent, raja: rajaEvent, hujan: hujanEvent, tamu: tamuEvent, jatuh: jatuhEvent, acara: () => acaraEvent(ev) })[ev.type](); }
+  if (LV.malam) { const f = Math.max(0.12, Math.min(1, (F.t / F.dur - 0.28) / 0.25)); if (Math.abs(f - nightF) > 0.01) setNight(f); }
+  stepFireworks(dt);
   // batas waktu masalah
   for (const pr of F.problems.slice()) {
     if (F.lumiGuard > 0 && pr.type !== 'telaga') { solveProblem(pr, true); continue; }
@@ -1059,7 +1191,8 @@ function screenLaporan() {
   const s1 = F.arrived >= LV.targetTamu, s2 = untung >= LV.targetUntung, s3 = F.happy >= 70;
   const stars = [s1, s2, s3].filter(Boolean).length;
   const prevBest = SAVE.best[S.hero] || 0;
-  SAVE.best[S.hero] = Math.max(prevBest, stars); SAVE.main = (SAVE.main || 0) + 1;
+  if (LV.id === 1) SAVE.best[S.hero] = Math.max(prevBest, stars); SAVE.main = (SAVE.main || 0) + 1;
+  SAVE.lv[`${S.hero}-${LV.id}`] = Math.max(bestOf(S.hero, LV.id), stars);
   // stiker
   const baru = [];
   const give = (id, val, e, n) => { const old = SAVE.stk[id]; if (val === 'emas' && old !== 'emas' || val === 'perak' && !old || val === true && !old) { SAVE.stk[id] = val; baru.push([e, n, val]); } };
@@ -1072,18 +1205,22 @@ function screenLaporan() {
   if (F.log.raja === 'bangku' || F.log.raja === 'beli') sp('raja');
   if (relawanPas()) sp('relawan');
   if (F.log.berudu === 'pos') sp('anak');
+  if (LV.malam && lapakList().length && lapakList().every(l => isLit(l))) sp('terang');
+  if (F.log.acara.some(a => a.k === 'kembangapi' && a.ok)) sp('kembangapi');
   save();
   // catatan Kiko
   const tips = [];
   F.log.habisKind.slice(0, 1).forEach(k => tips.push(`🍡 <b>${NF.ITEMS[k].nama} habis duluan</b>${F.unhappy ? ` — ${F.unhappy} tamu tidak kebagian` : ''}. Tambah lapak jajanan lain, atau siapkan koin untuk tambah penjual.`));
   const tiData = NF.TAMU_IST[S.tamuIst]; if (F.log.tamu === 'kecewa') tips.push(`${tiData.ikon} <b>${tiData.nama}</b> butuh ${tiData.butuh}. Siapkan sebelum festival!`);
   const backs = lapakList().filter(p => (p.rotK || 0) % 4 === 2); if (backs.length) tips.push(`↩️ Lapak <b>${NF.ITEMS[backs[0].kind].nama}</b> membelakangi tamu. Putar ⟳ menghadap tugu!`);
-  const bad = F.log.acara.find(a => !a.ok); if (bad) tips.push(bad.k === 'musik' ? '🎵 Konser kodok ada di jadwal, tapi <b>pemusiknya belum disewa</b> (tab Hiburan).' : bad.k === 'pembukaan' ? '👑 <b>Pembukaan</b> harus jadi acara paling awal.' : '🏆 <b>Bagi hadiah</b> sesudah lomba, ya.');
+  const gelapL = LV.malam ? lapakList().filter(l => !isLit(l)) : []; if (gelapL.length) tips.push(`🏮 Lapak <b>${NF.ITEMS[gelapL[0].kind].nama}</b> gelap, tamu takut ke sana. Pasang lampion di dekatnya.`);
+  const bad = F.log.acara.find(a => !a.ok); if (bad) tips.push(bad.k === 'lomba' ? '🛶 <b>Lomba perahu</b> harus saat masih terang (16.00/17.00).' : bad.k === 'kembangapi' ? '🎆 <b>Kembang api</b> baru kelihatan kalau langit gelap (19.00/20.00).' : bad.k === 'musik' ? '🎵 Konser kodok ada di jadwal, tapi <b>pemusiknya belum disewa</b> (tab Hiburan).' : bad.k === 'pembukaan' ? '👑 <b>Pembukaan</b> harus jadi acara paling awal.' : '🏆 <b>Bagi hadiah</b> sesudah lomba, ya.');
   if (!S.acara.every(Boolean)) tips.push('🎤 Masih ada jam acara yang kosong. Isi semua supaya tamu tidak bosan.');
   if (F.log.sampahTelaga) tips.push(S.rel.bersih ? '🧹 Sampah sempat jatuh ke telaga. Taruh keranjang lebih dekat ke lapak.' : '🧹 Sampah jatuh ke telaga. Beri teman tugas <b>Kebersihan</b> atau taruh keranjang dekat lapak.');
-  const kosong = Object.keys(NF.POS).filter(p => !S.rel[p]); if (kosong.length) tips.push(`👫 Pos <b>${NF.POS[kosong[0]].nama}</b> belum ada relawannya.`);
+  const kosong = LV.pos.filter(p => !S.rel[p]); if (kosong.length) tips.push(`👫 Pos <b>${NF.POS[kosong[0]].nama}</b> belum ada relawannya.`);
   else if (!relawanPas()) tips.push('👫 Coba tukar relawan: lihat sifatnya (ramah, rajin, sabar) dan pilih pos yang paling cocok.');
   if (F.log.hujan === 'basah') tips.push('☂️ Pasang <b>Daun Talas</b> sebelum hujan sore.');
+  if (F.log.jatuh === 'lama') tips.push('🩹 Tamu yang terjatuh tidak cepat ditolong. Beri teman tugas <b>P3K</b>.');
   if (F.log.raja === 'kecewa') tips.push('👑 Raja tidak dapat kursi. Siapkan <b>bangku kayu</b>.');
   if (untung < LV.targetUntung) { const mahal = lapakList().slice().sort((a, b) => b.cost - a.cost)[0], murah = NF.LAPAK.filter(k => S.hearts[k] === 3 && costOf(k) < (mahal ? mahal.cost : 9)).sort((a, b) => costOf(a) - costOf(b))[0];
     tips.push(`💡 Untung kurang ${LV.targetUntung - untung} 🪙.${mahal && murah ? ` ${NF.ITEMS[mahal.kind].nama} sewanya ${mahal.cost} 🪙 — ${NF.ITEMS[murah].nama} ❤❤❤ cuma ${costOf(murah)} 🪙!` : ' Kurangi barang yang tidak perlu.'}`); }
@@ -1103,7 +1240,7 @@ function screenLaporan() {
   const rinci = {};
   S.placed.forEach(p => { const k = NF.ITEMS[p.kind].cat; rinci[k] = (rinci[k] || 0) + p.cost; });
   if (S.musik) rinci.hiburan = (rinci.hiburan || 0) + costOf('musik');
-  const label = { lapak: '🌿 Sewa lapak jajanan', hiburan: '🎵 Bayar pemusik', fasilitas: '🪵 Fasilitas', promosi: '📜 Poster promosi' };
+  const label = { lapak: '🌿 Sewa lapak jajanan', hiburan: '🎵 Bayar pemusik', fasilitas: '🪵 Fasilitas', promosi: '📜 Poster promosi', lampu: '🏮 Lampion' };
   const subRows = Object.entries(rinci).map(([k, v]) => `<div class="sub"><span>${label[k]}</span><span>− ${v}</span></div>`).join('') + (F.extraCost ? `<div class="sub"><span>🧑‍🍳 Tambahan saat festival</span><span>− ${F.extraCost}</span></div>` : '') + (F.tip ? `<div class="sub"><span>❤️ Tip tamu istimewa (sudah termasuk uang masuk)</span><span>+ ${F.tip}</span></div>` : '');
   const st = [s1, s2, s3].map(x => `<span class="${x ? '' : 'off'}">⭐</span>`).join('');
   const r = el(`<h2>🎉 Festival Selesai!</h2><div class="stars">${st}</div>
@@ -1115,7 +1252,7 @@ function screenLaporan() {
     <div class="row" style="border:0"><span>😊 Tamu senang</span><b>${Math.round(F.happy)}% <small>/ target 70%</small> <span class="${s3 ? 'ok' : 'no'}">${s3 ? '✔' : '✖'}</span></b></div>
     <div class="says">${says.slice(0, 3).map(x => `<span>${x}</span>`).join('')}</div>
     <div class="catatan"><span class="f">${asisten().face}</span><div><b>📝 Catatan ${asisten().nama} untuk festival berikutnya</b><ul>${tips.slice(0, 3).map(t => `<li>${t}</li>`).join('')}</ul></div></div>
-    ${baru.length ? `<div class="stikerbaru ${baru.length > 4 ? 'banyak' : ''}">Stiker baru! ${baru.map(([e, n, v]) => `<div class="stk ${v === 'perak' ? 'silver' : ''}">${e}<span class="t">${n}</span></div>`).join('')}</div>` : ''}
+    ${baru.length ? `<div class="stikerbaru ${baru.length > 4 ? 'banyak' : ''}">Stiker baru! ${baru.slice(0, 6).map(([e, n, v]) => `<div class="stk ${v === 'perak' ? 'silver' : ''}">${e}<span class="t">${n}</span></div>`).join('')}${baru.length > 6 ? `<b>+${baru.length - 6} lagi</b>` : ''}</div>` : ''}
     <div class="btns"><button class="btn kuning" data-a="lagi">🔁 Main lagi</button><button class="btn abu" data-a="stiker">📒 Stiker</button><button class="btn abu" data-a="peta">🗺️ Peta</button><button class="btn abu" data-a="tokoh">🔄 Tokoh</button></div>`, 'report');
   r.querySelector('[data-a=lagi]').onclick = () => { A.sfx('tap'); screenPapan(); };
   r.querySelector('[data-a=tokoh]').onclick = () => { A.sfx('tap'); screenTokoh(); };
@@ -1185,7 +1322,9 @@ function mergeStatic(group) {
 // ================= mulai =================
 const LITE = /lite/.test(location.search);
 if (LITE) { renderer.shadowMap.enabled = false; renderer.setPixelRatio(1); }
-buildVenue(); mergeStatic(world); buildMap(); mergeStatic(mapG);
+buildVenue(1); mergeStatic(worldA); buildVenue(2); mergeStatic(worldB); buildMap(); mergeStatic(mapG);
+{ fireflies = new THREE.Group(); worldB.add(fireflies); const fm = new THREE.MeshBasicMaterial({ color: '#fff6a0' }); for (let k = 0; k < 70; k++) { const m = new THREE.Mesh(G.sph(0.06), fm); const a = Math.random() * 6.28, d = Math.random() * 18; m.position.set(7 + Math.cos(a) * d, 0.6 + Math.random() * 3.2, -1 + Math.sin(a) * d * 0.7); fireflies.add(m); } }
+setLevel(1);
 buildLineup();
 // lineup: gabungkan semua kecuali tokoh yang bisa melompat
 { const tmp = new THREE.Group(); scene.add(tmp); Object.values(lineupHeroes).forEach(h => { tmp.attach(h); }); mergeStatic(lineupG); Object.values(lineupHeroes).forEach(h => lineupG.attach(h)); scene.remove(tmp); }
@@ -1197,6 +1336,7 @@ requestAnimationFrame(loop);
 // ================= debug untuk pengujian =================
 window.NF.debug = {
   S, T, get F() { return F; }, SLOTS, evaluate, costOf,
+  level: id => setLevel(id), night: f => setNight(f),
   go: name => ({ judul: screenJudul, tokoh: screenTokoh, cerita: screenCerita, papan: screenPapan, tata: screenTata, festival: startFestival, laporan: screenLaporan, peta: screenPeta, stiker: bukuStiker })[name](),
   step: papanStep, SAVE,
   hero: h => { S.hero = SAVE.hero = h; },

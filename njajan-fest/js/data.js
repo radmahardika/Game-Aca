@@ -1,6 +1,6 @@
 // Njajan Fest — data permainan (versi, tokoh, barang, tahap)
 export const NF = {
-  VERSION: 4,
+  VERSION: 5,
   SAVE_KEY: 'njajan-fest-v1',
 
   // Tokoh pemain: bakat (selalu aktif) + jurus (sekali per festival)
@@ -46,9 +46,10 @@ export const NF = {
     sampah: { cat: 'fasilitas', nama: 'Keranjang Sampah', ikon: '🧺', harga: 1, slot: true, maks: 2 },
     talas:  { cat: 'fasilitas', nama: 'Daun Talas', ikon: '☂️', harga: 1, slot: true, maks: 1 },
     info:   { cat: 'fasilitas', nama: 'Pos Informasi', ikon: '🐚', harga: 1, slot: true, maks: 1 },
+    lampion: { cat: 'lampu', nama: 'Lampion', ikon: '🏮', harga: 1, slot: true, maks: 6, malam: true },
     poster: { cat: 'promosi', nama: 'Poster Daun', ikon: '📜', harga: 1, slot: true, maks: 2, tamu: 2 },
   },
-  TABS: [['kue', '🍡 Kue'], ['minum', '🥤 Minuman'], ['hiburan', '🪷 Hiburan'], ['fasilitas', '🪵 Fasilitas'], ['promosi', '📣 Promosi']],
+  TABS: [['kue', '🍡 Kue'], ['minum', '🥤 Minuman'], ['hiburan', '🪷 Hiburan'], ['fasilitas', '🪵 Fasilitas'], ['promosi', '📣 Promosi'], ['lampu', '🏮 Lampu']],
   LAPAK: ['klepon', 'putu', 'lemper', 'serabi', 'getuk', 'cincin', 'gemblong', 'cendol', 'tehtarik', 'wedang'],
   HEARTS: [3, 3, 3, 2, 2, 2, 1, 1, 1, 1],   // dibagikan acak ke 10 jajanan tiap main
 
@@ -58,17 +59,20 @@ export const NF = {
     musik:     { e: '🎵', nama: 'Konser Kodok', ket: 'perlu pemusik' },
     lomba:     { e: '🛶', nama: 'Lomba Perahu Daun', ket: 'tamu suka menonton' },
     hadiah:    { e: '🏆', nama: 'Bagi Hadiah', ket: 'sesudah lomba' },
+    kembangapi: { e: '🎆', nama: 'Kembang Api', ket: 'saat langit gelap' },
   },
   // ---- Relawan (langkah 3) ----
   RELAWAN: [
     { id: 'bubu', nama: 'Bubu', sifat: '😊 ramah', kind: 'bebek', cocok: 'gerbang' },
     { id: 'oto', nama: 'Oto', sifat: '💪 rajin', kind: 'berang', cocok: 'bersih' },
     { id: 'pakkur', nama: 'Pak Kur', sifat: '🧘 sabar', kind: 'kura', cocok: 'bantu' },
+    { id: 'udi', nama: 'Udi', sifat: '⚡ cekatan', kind: 'udang', cocok: 'p3k' },
   ],
   POS: {
     gerbang: { e: '🎟️', nama: 'Jaga Gerbang', ket: 'tamu lebih sabar mengantre' },
     bersih:  { e: '🧹', nama: 'Kebersihan', ket: 'sampah cepat diangkat' },
     bantu:   { e: '🤝', nama: 'Penolong Anak Hilang', ket: 'anak cepat ketemu ibunya' },
+    p3k:     { e: '🩹', nama: 'P3K', ket: 'menolong tamu yang terjatuh' },
   },
   // ---- Tamu istimewa (satu per festival, diumumkan di langkah 3) ----
   TAMU_IST: {
@@ -81,12 +85,18 @@ export const NF = {
     ['nenek', '👵', 'Nenek senang'], ['berudu', '🐸', 'Joget berudu'], ['bangau', '🐦', 'Pak Bangau senang'],
     ['acara', '🎤', 'Acara tepat'], ['telaga', '🐟', 'Telaga bersih'], ['raja', '👑', 'Raja senang'],
     ['relawan', '👫', 'Relawan pas'], ['anak', '❤️', 'Anak ketemu ibu'],
+    ['terang', '🏮', 'Pasar terang'], ['kembangapi', '🎆', 'Kembang api indah'],
   ],
 
   // Tahap 1
   LEVELS: [
     { id: 1, nama: 'Bazar Daun Teratai', modal: 18, targetTamu: 20, targetUntung: 6, porsi: 5, durasi: 90,
-      jam: ['09.00', '10.00', '11.00', '12.00'], acara: ['pembukaan', 'musik', 'lomba', 'hadiah'] },
+      jam: ['09.00', '10.00', '11.00', '12.00'], langit: ['🌤️', '🌤️', '☀️', '☀️'], acara: ['pembukaan', 'musik', 'lomba', 'hadiah'],
+      relawan: 3, pos: ['gerbang', 'bersih', 'bantu'], base: 4, kejadian: ['berudu', 'tamu', 'raja', 'hujan'] },
+    { id: 2, nama: 'Pasar Malam Kunang-kunang', malam: true, modal: 26, targetTamu: 30, targetUntung: 6, porsi: 5, durasi: 105,
+      jam: ['16.00', '17.00', '18.00', '19.00', '20.00'], langit: ['☀️', '⛅', '🌅', '🌙', '🌙'], gelap: 3, terangSampai: 1,
+      acara: ['pembukaan', 'lomba', 'musik', 'hadiah', 'kembangapi'],
+      relawan: 4, pos: ['gerbang', 'bersih', 'bantu', 'p3k'], base: 8, kejadian: ['berudu', 'tamu', 'raja', 'jatuh'] },
   ],
 };
 window.NF = NF;

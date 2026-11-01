@@ -198,6 +198,13 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
   Nenek Kura-kura butuh bangku dekat gerbang, Rombongan Berudu butuh Pemusik, Pak Bangau butuh 2 keranjang; puas = senang + tip
   2 🪙). Laporan: **Catatan Kiko** (≤3 saran dari log festival) + **Stiker** (`SAVE.stk`: `hero-tahap` emas/perak + spesial
   `NF.STIKER`) + **Buku Stiker** (tombol di judul, tokoh, peta, laporan).
+- v5 (pratinjau v27): **Tahap 2 "Pasar Malam Kunang-kunang"** (`NF.LEVELS[1]`, `setLevel(id)`, `let LV`): terbuka bila ada tokoh
+  ⭐≥1 di Tahap 1 (`SAVE.lv['hero-id']`, `tahap2Open`); cerita Raja sekali (`SAVE.cerita2`). Dunia per tahap: `worldA`/`worldB`
+  (daun kedua `PAD2` + jembatan `BR1`/`BR2`, panggung `STAGE2`, tamu lewat jembatan via `via()`), slot per tahap (`buildSlots`).
+  **Malam** (`setNight(f)`, langit sore→gelap saat festival): lapak gelap −2 (`isLit`: lampu tetap tugu/gerbang/panggung +
+  barang **Lampion** tab Lampu, radius 3,4, lingkaran cahaya `glowMat`), kunang-kunang. Acara 16.00–20.00 + **Kembang Api**
+  (harus 19/20 → kembang api partikel) & lomba harus terang (16/17). Relawan ke-4 **Udi ⚡ cekatan → P3K** (kejadian `jatuh`).
+  Modal 26, target 30 tamu & untung 6, 6 lapak (soal hitung 5/6/7). Stiker baru: Pasar terang, Kembang api indah.
 - Kamera: geser 1 jari = putar sedikit, cubit = zoom (layar menata & festival).
 - Simpanan `localStorage` kunci `njajan-fest-v1` (`{cerita, best:{tiko,bebi,lumi}, main, hero, muted}`).
   Tes: buka `njajan-fest/?lite` (tanpa bayangan, render pelan — perlu untuk Playwright/swiftshader) lalu `NF.debug`
@@ -208,6 +215,7 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Status & yang sedang dibahas
 
+- Pratinjau **versi 27** (branch `pratinjau-v27`) = **Njajan Fest versi 5** (Tahap 2 Pasar Malam).
 - Rilis terakhir di `main`: **versi 26** = **Njajan Fest versi 4** (peta, susun acara, relawan, tamu istimewa, catatan,
   stiker; Tahap 2 Pasar Malam menyusul di pratinjau berikutnya, mockup `mockup-festival/tahap2.html`) + versi 3: model Raja Kura-kura baru (kura-kura berkaki empat,
   tempurung kubah bermotif heksagon + pinggiran krem, leher & kepala menjulur, mahkota emas, kerah merah).
