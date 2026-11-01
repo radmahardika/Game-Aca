@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
 <style>
+  .tabs { bottom: 160px !important; }
   body { font-family: 'Nunito', 'Fredoka', sans-serif; color: #3d4a52; background: #cdeeea; }
   #tilt-top, #tilt-bot { position: absolute; left: 0; right: 0; pointer-events: none; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
   #tilt-top { top: 0; height: 200px; mask-image: linear-gradient(#000, transparent); -webkit-mask-image: linear-gradient(#000, transparent); }
@@ -159,7 +160,81 @@ function twig(x1, y1, z1, x2, y2, z2, r = 0.035, parent = scene, mat = twigM) {
   return m;
 }
 function log(x, y, z, len, r, rotY = 0, parent = scene) { const m = add(cyl(r, r, len, 12), bark, x, y, z, parent); m.rotation.z = Math.PI / 2; m.rotation.y = rotY; m.rotation.order = 'YXZ'; const e1 = add(cyl(r * 0.85, r * 0.85, 0.02, 12), M('#d9b07a'), 0, 0, 0, parent); return m; }
-const FOOD = { jagung: ['🌽', '#ff6b6b'], es: ['🍧', '#ffb43a'], serabi: ['🥞', '#4fb3e8'], sate: ['🍢', '#b26bff'], klepon: ['🍡', '#ff7ab8'] };
+const FOOD = { klepon: ['Klepon', '#5cb84f'], putu: ['Putu Bambu', '#e09a3a'], lemper: ['Lemper', '#3f9a62'], serabi: ['Serabi', '#f08a5a'], cendol: ['Es Cendol', '#4fb3e8'] };
+// ikon jajanan digambar sendiri (tidak ada emoji putu/lemper/cendol)
+function drawFood(x, kind, S = 128) {
+  const k = S / 128; x.save(); x.scale(k, k);
+  const leaf = (cx, cy, w, h) => { x.fillStyle = '#5aa845'; x.beginPath(); x.ellipse(cx, cy, w, h, 0, 0, 7); x.fill(); x.strokeStyle = '#8fd06a'; x.lineWidth = 3; x.beginPath(); x.moveTo(cx - w + 6, cy); x.lineTo(cx + w - 6, cy); x.stroke(); };
+  if (kind === 'klepon') {
+    leaf(64, 86, 46, 16);
+    for (const [cx, cy] of [[46, 74], [82, 74], [64, 58]]) {
+      x.fillStyle = '#3f9d3a'; x.beginPath(); x.arc(cx, cy, 17, 0, 7); x.fill();
+      x.fillStyle = '#6cc35a'; x.beginPath(); x.arc(cx - 5, cy - 5, 8, 0, 7); x.fill();
+      x.fillStyle = '#fff'; for (let i = 0; i < 9; i++) { const a = i * 2.4, r = 6 + (i % 3) * 4; x.fillRect(cx + Math.cos(a) * r - 2, cy + Math.sin(a) * r - 1, 4, 2); }
+    }
+  }
+  if (kind === 'putu') {
+    // tabung bambu + putu hijau bertabur kelapa, gula merah di tengah
+    x.fillStyle = '#e8cf8a'; x.fillRect(20, 46, 26, 54); x.fillStyle = '#c9a85e'; x.fillRect(20, 62, 26, 4); x.fillRect(20, 84, 26, 4);
+    x.fillStyle = '#d9bd72'; x.beginPath(); x.ellipse(33, 46, 13, 5, 0, 0, 7); x.fill();
+    for (const cx of [62, 92]) {
+      x.fillStyle = '#4fae49'; x.fillRect(cx - 13, 52, 26, 44); x.beginPath(); x.ellipse(cx, 96, 13, 5, 0, 0, 7); x.fill();
+      x.fillStyle = '#6cc35a'; x.beginPath(); x.ellipse(cx, 52, 13, 5, 0, 0, 7); x.fill();
+      x.fillStyle = '#8a4a22'; x.fillRect(cx - 13, 68, 26, 9);
+      x.fillStyle = '#fff'; x.beginPath(); x.ellipse(cx, 49, 12, 6, 0, 0, 7); x.fill();
+    }
+  }
+  if (kind === 'lemper') {
+    for (const [cx, cy, r] of [[64, 82, 0.1], [56, 54, -0.15]]) {
+      x.save(); x.translate(cx, cy); x.rotate(r);
+      x.fillStyle = '#4f9d3f'; x.beginPath(); x.roundRect(-40, -15, 80, 30, 12); x.fill();
+      x.fillStyle = '#7cc35a'; x.beginPath(); x.moveTo(-40, -15); x.lineTo(0, 15); x.lineTo(40, -15); x.closePath(); x.globalAlpha = .5; x.fill(); x.globalAlpha = 1;
+      x.fillStyle = '#fbf6e8'; x.beginPath(); x.ellipse(40, 0, 7, 14, 0, 0, 7); x.fill();
+      x.fillStyle = '#c98b55'; x.beginPath(); x.arc(40, 0, 4, 0, 7); x.fill();
+      x.strokeStyle = '#c9a85e'; x.lineWidth = 3; x.beginPath(); x.moveTo(-46, -2); x.lineTo(30, -2); x.stroke();
+      x.restore();
+    }
+  }
+  if (kind === 'serabi') {
+    x.fillStyle = '#d9a35a'; x.beginPath(); x.ellipse(64, 74, 46, 30, 0, 0, 7); x.fill();
+    x.fillStyle = '#f6e3b0'; x.beginPath(); x.ellipse(64, 70, 42, 26, 0, 0, 7); x.fill();
+    x.fillStyle = '#e9cf92'; for (let i = 0; i < 14; i++) { x.beginPath(); x.arc(40 + (i * 37) % 50, 58 + (i * 13) % 24, 2.5, 0, 7); x.fill(); }
+    x.fillStyle = '#8a4a22'; x.beginPath(); x.ellipse(64, 72, 18, 11, 0, 0, 7); x.fill();
+    x.fillStyle = '#b06a32'; x.beginPath(); x.ellipse(60, 69, 7, 4, 0, 0, 7); x.fill();
+  }
+  if (kind === 'cendol') {
+    const glass = () => { x.beginPath(); x.moveTo(30, 34); x.lineTo(98, 34); x.lineTo(88, 112); x.lineTo(40, 112); x.closePath(); };
+    x.save(); glass(); x.clip();
+    x.fillStyle = '#e8f6fb'; x.fillRect(20, 30, 90, 90);
+    x.fillStyle = '#9a5426'; x.fillRect(20, 92, 90, 24);            // gula merah
+    x.fillStyle = '#fbf3df'; x.fillRect(20, 56, 90, 36);            // santan
+    x.strokeStyle = '#3fa63c'; x.lineWidth = 7; x.lineCap = 'round'; // cendol
+    for (let i = 0; i < 14; i++) { const cx = 38 + (i * 13) % 52, cy = 62 + (i * 17) % 40; x.beginPath(); x.moveTo(cx, cy); x.quadraticCurveTo(cx + 6, cy + 3, cx + 3, cy + 10); x.stroke(); }
+    x.fillStyle = 'rgba(255,255,255,.85)'; x.fillRect(36, 38, 16, 14); x.fillRect(58, 42, 16, 14); x.fillRect(78, 37, 14, 14); // es batu
+    x.restore();
+    glass(); x.lineWidth = 4; x.strokeStyle = '#7fb3c9'; x.stroke();
+    x.strokeStyle = '#ff6b6b'; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(80, 40); x.lineTo(100, 8); x.stroke();
+  }
+  x.restore();
+}
+function foodTex(kind) {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d');
+  const col = FOOD[kind][1]; x.fillStyle = '#fff'; x.beginPath(); x.arc(64, 64, 58, 0, 7); x.fill(); x.lineWidth = 8; x.strokeStyle = col; x.stroke();
+  x.save(); x.translate(64, 64); x.scale(1.0, 1.0); x.translate(-64, -70); drawFood(x, kind); x.restore();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+function foodURL(kind, S = 96) { const c = document.createElement('canvas'); c.width = c.height = S; const x = c.getContext('2d'); x.translate(S / 2, S / 2); x.scale(1.3, 1.3); x.translate(-S / 2, -S * 0.56); drawFood(x, kind, S); return c.toDataURL(); }
+function tableFood(g, kind) {
+  for (let k = 0; k < 3; k++) {
+    const x = -0.36 + k * 0.36, y = 0.56, z = 0.3;
+    if (kind === 'klepon') for (let i = 0; i < 3; i++) add(sph(0.05), M('#4fae49'), x + (i - 1) * 0.07, y + (i === 1 ? 0.04 : 0), z, g);
+    if (kind === 'putu') { add(cyl(0.05, 0.05, 0.14, 7), M(k ? '#5cb84f' : '#e8cf8a'), x, y + 0.04, z, g); add(cyl(0.05, 0.05, 0.02, 7), M('#fbf6e8'), x, y + 0.12, z, g); }
+    if (kind === 'lemper') { const l = add(cyl(0.05, 0.05, 0.22, 6), M('#5aa845'), x, y, z, g); l.rotation.z = Math.PI / 2; }
+    if (kind === 'serabi') { add(cyl(0.11, 0.11, 0.03, 9), M('#f3d9a0'), x, y - 0.01, z, g); add(cyl(0.05, 0.05, 0.035, 7), M('#8a4a22'), x, y, z, g); }
+    if (kind === 'cendol') { add(cyl(0.06, 0.05, 0.18, 8), M('#dff4ff', { transparent: true, opacity: 0.8 }), x, y + 0.06, z, g); add(cyl(0.052, 0.047, 0.06, 8), M('#4fae49'), x, y + 0.02, z, g); add(cyl(0.056, 0.052, 0.05, 8), M('#fbf6e8'), x, y + 0.08, z, g); }
+  }
+}
+
 const ROOF = { daun: '#7cc35a', kelopak: '#f7a6bd', keringdaun: '#f0c46a', talas: '#5aae74' };
 function leafRoof(parent, col, w = 1.7, y = 1.25) {
   const g = new THREE.SphereGeometry(1, 8, 3, 0, Math.PI * 2, 0, Math.PI / 2.4);
@@ -171,7 +246,7 @@ function leafRoof(parent, col, w = 1.7, y = 1.25) {
 }
 function stall(x, z, food, roofKind = 'daun', rot = 0, ghost = false) {
   const g = new THREE.Group(); g.position.set(x, PADY, z); g.rotation.y = rot; g.scale.setScalar(1.45); scene.add(g);
-  const [e, col] = FOOD[food];
+  const col = FOOD[food][1];
   // meja dari dua batang kayu + papan kulit kayu
   log(0, 0.13, 0.25, 1.3, 0.13, 0, g); log(0, 0.37, 0.25, 1.3, 0.12, 0, g);
   add(box(1.36, 0.05, 0.45), barkL, 0, 0.51, 0.25, g);
@@ -181,10 +256,10 @@ function stall(x, z, food, roofKind = 'daun', rot = 0, ghost = false) {
   twig(-0.62, 1.22, 0.18, 0.62, 1.22, 0.18, 0.03, g);
   leafRoof(g, ROOF[roofKind]);
   // makanan di meja
-  for (let k = 0; k < 3; k++) add(sph(0.07), M(col), -0.3 + k * 0.3, 0.58, 0.3, g);
+  tableFood(g, food);
   if (ghost) g.traverse(o => { if (o.material) { o.material = o.material.clone(); o.material.transparent = true; o.material.opacity = 0.45; } });
   // papan nama: cangkang kerang air tawar
-  sprite(e, x, PADY + 2.75, z, 0.8, col);
+  { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: foodTex(food), depthWrite: false })); sp.position.set(x, PADY + 2.8, z); sp.scale.setScalar(0.95); scene.add(sp); }
   return g;
 }
 function stageLotus(x, z, s = 1.6) {
@@ -386,10 +461,10 @@ function venue(mode) {
   ripple(-2, 9, 0.6); ripple(9, 10, 0.9);
 
   // lapak dari ranting & daun di daun utama
-  stall(-3.4, -2.6, 'jagung', 'daun', 0.5);
-  stall(0, -3.8, 'es', 'kelopak', 0);
+  stall(-3.4, -2.6, 'putu', 'daun', 0.5);
+  stall(0, -3.8, 'cendol', 'kelopak', 0);
   stall(3.4, -2.6, 'serabi', 'keringdaun', -0.5);
-  stall(-4.0, 1.0, 'sate', 'talas', 1.2);
+  stall(-4.0, 1.0, 'lemper', 'talas', 1.2);
   if (mode !== 'tata') stall(4.0, 1.0, 'klepon', 'kelopak', -1.2);
   dewdrop(0, -0.2, 1.4);
   basketBin(-2.2, -1.4, mode === 'festival'); basketBin(2.4, 2.4);
@@ -459,11 +534,11 @@ if (SCREEN === 'tata') {
   pt(3.4, PADY + 3.6, -2.6, '−1', 'terlalu dekat lapak lain', true);
   { const p = project(gx, PADY + 3.4, gz); el('+4', 'pt big', `left:${p.x}px;top:${p.y}px`); }
   el(`<div class="tab on">🌿 Lapak</div><div class="tab">🪷 Hiburan</div><div class="tab">🪵 Fasilitas</div><div class="tab">📣 Promosi</div>`, 'tabs');
-  el(`<div class="item"><div class="e">🌽</div><div class="n">Jagung</div><div class="p">3 🪙</div></div>
-      <div class="item sel"><div class="e">🍡</div><div class="n">Klepon</div><div class="p">3 🪙</div></div>
-      <div class="item"><div class="e">☂️</div><div class="n">Daun Talas</div><div class="p">2 🪙</div></div>
-      <div class="item"><div class="e">🐚</div><div class="n">Pos Info</div><div class="p">2 🪙</div></div>
-      <div class="item"><div class="e">🪵</div><div class="n">Bangku</div><div class="p">1 🪙</div></div>`, 'tray');
+  el(`<div class="item sel"><div class="e"><img src="${foodURL('klepon')}" style="width:62px;height:62px"></div><div class="n">Klepon</div><div class="p">3 🪙</div></div>
+      <div class="item"><div class="e"><img src="${foodURL('putu')}" style="width:62px;height:62px"></div><div class="n">Putu Bambu</div><div class="p">3 🪙</div></div>
+      <div class="item"><div class="e"><img src="${foodURL('lemper')}" style="width:62px;height:62px"></div><div class="n">Lemper</div><div class="p">2 🪙</div></div>
+      <div class="item"><div class="e"><img src="${foodURL('serabi')}" style="width:62px;height:62px"></div><div class="n">Serabi</div><div class="p">2 🪙</div></div>
+      <div class="item"><div class="e"><img src="${foodURL('cendol')}" style="width:62px;height:62px"></div><div class="n">Es Cendol</div><div class="p">2 🪙</div></div>`, 'tray');
   kikoSay('Lingkaran putih = jangkauan lapak. Cari tempat dengan angka <b>+</b> paling besar!');
   el('Siap ✔', 'go');
 }
@@ -481,7 +556,7 @@ if (SCREEN === 'festival') {
   render();
   hud(17, 20, 7, 10, 21);
   el(`☀️ Siang <span class="bar" style="width:160px"><i style="width:62%;background:linear-gradient(#ffe48a,#ffb43a)"></i></span> 🌙`, 'pill', 'right:18px;top:118px');
-  bub(-2.4, PADY + 2.6, -2.0, '😣 Antre panjang!', true);
+  bub(-2.4, PADY + 2.6, -2.0, '😣 Antre putu panjang!', true);
   bub(0.6, PADY + 1.6, 4.0, '👑 Raja datang! Kursinya?', true);
   bub(-4.4, PADY + 0.8, 3.2, '😢 Aku terpisah dari ibu…', true);
   bub(9.0, 0.6, 4.4, '🐟 Sampah di telaga!', true);
@@ -524,7 +599,7 @@ if (SCREEN === 'jurus') {
     heroOtter(-1.6, -1.2, 2.2).rotation.y = 0.6;
     // jembatan baru ke daun baru (bersinar) + lapak rusak yang diperbaiki
     pad(-0.9, -9.4, 2.2, Math.PI * 1.4, '#69bf55'); twigBridge([-1.6, -5.6], [-1.4, -7.1]);
-    stall(-1.0, -9.8, 'jagung', 'keringdaun', 0);
+    stall(-1.0, -9.8, 'putu', 'keringdaun', 0);
     for (let k = 0; k < 14; k++) add(sph(0.09), M('#fff3a0', { emissive: '#fff08a', emissiveIntensity: 1 }), -1.4 + Math.cos(k) * 1.4, 0.9 + (k % 4) * 0.3, -7.3 + Math.sin(k * 1.7) * 1.0).castShadow = false;
     render();
     hud(15, 20, 9, 10, 18);
@@ -559,6 +634,20 @@ if (SCREEN === 'jurus') {
     el(`<svg width="84" height="70" viewBox="0 0 84 70"><ellipse cx="26" cy="22" rx="22" ry="8" fill="#bfefff" opacity=".85" transform="rotate(-15 26 22)"/><ellipse cx="58" cy="22" rx="22" ry="8" fill="#bfefff" opacity=".85" transform="rotate(15 58 22)"/><ellipse cx="28" cy="36" rx="18" ry="6" fill="#d9f6ff" opacity=".85" transform="rotate(12 28 36)"/><ellipse cx="56" cy="36" rx="18" ry="6" fill="#d9f6ff" opacity=".85" transform="rotate(-12 56 36)"/><rect x="38" y="24" width="8" height="40" rx="4" fill="#3fb6a8"/><circle cx="42" cy="20" r="9" fill="#3fb6a8"/><circle cx="38" cy="18" r="3.4" fill="#fff"/><circle cx="46" cy="18" r="3.4" fill="#fff"/><circle cx="38.5" cy="18.5" r="1.6" fill="#222"/><circle cx="46.5" cy="18.5" r="1.6" fill="#222"/></svg><div class="say"><b>Capung Cici:</b> Tiga masalah beres sekaligus! Tamu makin senang ⭐</div>`, 'kiko');
     btn('⚡', 'Lompat Kilat', 'terpakai ✔');
   }
+}
+if (SCREEN === 'jajan') {
+  scene.fog = null;
+  pad(0, 0, 6.2, -Math.PI / 2 + 0.3);
+  cattail(-7, -2, 3.2, 0.1); cattail(7.2, -1.5, 2.8, -0.1); reeds(-7.4, -1, 8, 2); reeds(7.6, -2, 7, 5); lotus(-6.5, 3.5, 1.2, 0.05); lotus(6.8, 3.2, 1.0, 0.05);
+  const L = [['klepon', 'kelopak'], ['putu', 'daun'], ['lemper', 'talas'], ['serabi', 'keringdaun'], ['cendol', 'kelopak']];
+  const xs = [-4.4, -2.2, 0, 2.2, 4.4], zs = [0.6, -0.6, 0.9, -0.6, 0.6];
+  L.forEach(([f, r], k) => stall(xs[k], zs[k], f, r, 0));
+  heroOtter(-1.1, 2.6, 2.0); critter('bebek', 1.2, PADY, 2.4, 1.8); critter('kodok', 3.2, PADY, 2.2, 1.8); critter('kura', -3.3, PADY, 2.4, 1.8);
+  cam.fov = 30; cam.updateProjectionMatrix(); cam.position.set(0, 8.5, 15.5); cam.lookAt(0, 0.6, 0); cam.updateMatrixWorld();
+  render();
+  el(`<b>🪷 Jajanan Festival Telaga</b><small>Lapak jajanan khas Indonesia</small>`, 'card title');
+  const info = [['Klepon', 'bola hijau isi gula merah, tabur kelapa'], ['Putu Bambu', 'dikukus dalam bambu, gula merah & kelapa'], ['Lemper', 'nasi ketan isi ayam, dibungkus daun pisang'], ['Serabi', 'kue bundar dengan kuah gula merah (kinca)'], ['Es Cendol', 'cendol hijau, santan & gula merah']];
+  info.forEach(([n, d], k) => { const p = project(xs[k], 0, zs[k] + 1.2); el(`<img src="${foodURL(L[k][0], 72)}" style="width:60px;height:60px;display:block;margin:0 auto"><b>${n}</b><small>${d}</small>`, 'mat', `left:${p.x}px;top:625px;width:200px;white-space:normal;text-align:center;transform:translate(-50%,0)`); });
 }
 document.body.dataset.ready = '1';
 </script>
