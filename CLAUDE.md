@@ -224,8 +224,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Status & yang sedang dibahas
 
-- Pratinjau **versi 28** (branch `pratinjau-v28`) = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
-- Rilis terakhir di `main`: **versi 27** = **Njajan Fest versi 5** (Tahap 2 Pasar Malam; fitur hitung lapak dihapus).
+- Rilis terakhir di `main`: **versi 28** = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
+- Versi 27 = **Njajan Fest versi 5** (Tahap 2 Pasar Malam; fitur hitung lapak dihapus).
 - Versi 26 = **Njajan Fest versi 4** (peta, susun acara, relawan, tamu istimewa, catatan,
   stiker; Tahap 2 Pasar Malam menyusul di pratinjau berikutnya, mockup `mockup-festival/tahap2.html`) + versi 3: model Raja Kura-kura baru (kura-kura berkaki empat,
   tempurung kubah bermotif heksagon + pinggiran krem, leher & kepala menjulur, mahkota emas, kerah merah).
