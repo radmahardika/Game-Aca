@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Njajan Fest: Stok porsi & Relawan digeser</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800;900&display=swap">
+<link rel="stylesheet" href="../njajan-fest/css/style.css">
+<style>
+  #stage { position: fixed; left: 0; top: 0; transform: none; }
+  .night .lv, .night .score { text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .steps { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; }
+  .steps .s { background: rgba(255,255,255,.55); border-radius: 999px; padding: 6px 14px; font-weight: 800; font-size: 16px; color: #5a6a72; }
+  .steps .s.on { background: #fff; color: #2d7f95; box-shadow: 0 0 0 4px #7fcf6a; }
+  .steps .s.ok { background: #e2f4d8; color: #3a7a30; }
+  .panel { position: absolute; left: 40px; right: 40px; top: 74px; background: rgba(255,255,255,.96); border-radius: 24px; box-shadow: 0 8px 26px rgba(40,90,95,.25); padding: 18px 24px; }
+  .panel h2 { font-size: 26px; color: #2d7f95; margin-bottom: 4px; }
+  .panel .sub { font-size: 17px; font-weight: 700; color: #6b7b84; margin-bottom: 12px; }
+  .timeline { display: flex; gap: 12px; align-items: stretch; margin: 6px 0 14px; }
+  .slot { flex: 1; border-radius: 18px; padding: 8px; text-align: center; min-height: 170px; position: relative; }
+  .slot .jam { font-size: 20px; font-weight: 900; }
+  .slot .langit { font-size: 34px; line-height: 40px; }
+  .slot.siang { background: linear-gradient(#bfe9ff, #eaf8ff); } .slot.senja { background: linear-gradient(#ffc89a, #ffe9d4); } .slot.malam { background: linear-gradient(#3b4a7a, #6a77a8); color: #fff; }
+  .slot .kartu { margin-top: 8px; background: #fff; border-radius: 14px; padding: 8px 6px; font-weight: 800; font-size: 16px; color: #3d4a52; box-shadow: 0 4px 0 #d9c49c; }
+  .slot .kartu .e { font-size: 34px; display: block; line-height: 40px; }
+  .slot .kosong { margin-top: 8px; border: 3px dashed rgba(61,74,82,.35); border-radius: 14px; padding: 18px 4px; font-weight: 800; font-size: 15px; color: rgba(61,74,82,.55); }
+  .slot.malam .kosong { border-color: rgba(255,255,255,.6); color: rgba(255,255,255,.8); }
+  .slot .ok, .slot .no { position: absolute; top: -10px; right: -6px; font-size: 26px; }
+  .slot .warnTxt { position: absolute; left: 6px; right: 6px; bottom: -34px; font-size: 14px; font-weight: 900; color: #d9603f; }
+  .pilihan { display: flex; gap: 12px; justify-content: center; margin-top: 30px; }
+  .pilihan .kartu { width: 140px; background: #fff; border-radius: 16px; padding: 10px; text-align: center; font-weight: 800; font-size: 16px; box-shadow: 0 6px 18px rgba(40,90,95,.2); }
+  .pilihan .kartu .e { font-size: 40px; display: block; }
+  .pilihan .kartu small { display: block; font-size: 13px; color: #6b7b84; font-weight: 700; margin-top: 4px; }
+  .pilihan .kartu.sel { box-shadow: 0 0 0 4px #fff, 0 0 0 8px #ffc94a; transform: translateY(-6px); }
+  .aturan { background: #eef8ff; border-radius: 14px; padding: 8px 14px; font-size: 16px; font-weight: 700; margin-top: 14px; }
+  .vgrid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; }
+  .vols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .vol { background: #f6f8f9; border-radius: 16px; padding: 8px; text-align: center; }
+  .vol canvas { width: 76px; height: 76px; display: block; margin: 0 auto; }
+  .vol b { font-size: 17px; display: block; } .vol small { font-size: 13.5px; font-weight: 800; color: #2d7f95; display: block; }
+  .vol.used { opacity: .4; } .vol.sel { box-shadow: 0 0 0 4px #ffc94a; background: #fff8e0; }
+  .pos { display: flex; align-items: center; gap: 10px; background: #f6f8f9; border-radius: 14px; padding: 8px 12px; margin-bottom: 8px; font-size: 18px; font-weight: 800; }
+  .pos .e { font-size: 30px; } .pos small { display: block; font-size: 13.5px; color: #6b7b84; font-weight: 700; }
+  .pos .who { margin-left: auto; min-width: 140px; text-align: center; border: 3px dashed #c3ccd0; border-radius: 12px; padding: 4px 8px; color: #a0aab0; font-size: 15px; }
+  .pos .who.ok { border: 0; background: #e2f4d8; color: #3a7a30; }
+  .pos .who.meh { border: 0; background: #fff1c2; color: #8a5a1a; }
+  .tamuis { background: linear-gradient(#fff6dc, #ffeccc); border-radius: 18px; padding: 12px 14px; margin-top: 10px; display: flex; gap: 12px; align-items: center; }
+  .tamuis canvas { width: 86px; height: 86px; flex: none; }
+  .tamuis b { font-size: 19px; } .tamuis div { font-size: 16px; font-weight: 700; }
+  .nav { position: absolute; right: 40px; bottom: 26px; display: flex; gap: 12px; }
+  .catatan { background: #fff8e0; border-radius: 16px; padding: 10px 14px; margin-top: 10px; display: flex; gap: 10px; align-items: flex-start; }
+  .catatan .f { font-size: 44px; line-height: 1; }
+  .catatan b { font-size: 17px; color: #8a5a1a; } .catatan li { font-size: 16px; font-weight: 700; margin-left: 18px; margin-top: 3px; }
+  .stikerbaru { display: flex; gap: 10px; justify-content: center; margin-top: 10px; align-items: center; font-weight: 900; color: #e0703a; font-size: 17px; }
+  .stk { width: 74px; height: 74px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 38px; box-shadow: 0 0 0 4px #ffd84f, 0 4px 10px rgba(0,0,0,.2); position: relative; }
+  .stk.silver { box-shadow: 0 0 0 4px #cfd8dc, 0 4px 10px rgba(0,0,0,.2); }
+  .stk.off { background: #eef1f2; box-shadow: 0 0 0 3px #dfe4e6; filter: grayscale(1); opacity: .45; }
+  .stk .t { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 11.5px; font-weight: 900; color: #3d4a52; white-space: nowrap; }
+  .book { position: absolute; left: 60px; right: 60px; top: 90px; display: grid; grid-template-columns: 1fr 1fr; background: #f7efe0; border-radius: 26px; box-shadow: 0 10px 30px rgba(0,0,0,.3), inset 0 0 0 10px #e3a35a; padding: 26px 30px; gap: 40px; }
+  .book .pg h3 { font-size: 22px; margin-bottom: 14px; color: #8a4e22; }
+  .book .row { display: grid; grid-template-columns: 110px repeat(3, 1fr); align-items: center; margin-bottom: 30px; }
+  .book .row .h { font-weight: 900; font-size: 16px; display: flex; align-items: center; gap: 6px; }
+  .book .row .h canvas { width: 46px; height: 46px; }
+  .book .grid2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 34px 10px; justify-items: center; }
+  .map { position: absolute; inset: 0; }
+  .tcard { position: absolute; transform: translate(-50%, 0); background: rgba(255,255,255,.95); border-radius: 18px; padding: 10px 16px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  .tcard b { font-size: 20px; display: block; } .tcard small { font-size: 14px; font-weight: 800; color: #6b7b84; display: block; }
+  .tcard .st { font-size: 22px; letter-spacing: 2px; }
+  .tcard.lock { background: rgba(230,234,236,.92); color: #8a959b; }
+
+  .stokpanel { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); background: rgba(255,255,255,.96); border-radius: 22px; padding: 12px 18px; box-shadow: 0 8px 24px rgba(40,90,95,.28); text-align: center; pointer-events: auto; }
+  .stokpanel h4 { font-size: 19px; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; justify-content: center; }
+  .stokpanel h4 img { width: 40px; height: 40px; }
+  .porsi { display: flex; gap: 12px; justify-content: center; }
+  .porsi div { width: 120px; border-radius: 16px; background: #f3f6f7; padding: 8px 6px; font-weight: 800; box-shadow: 0 4px 0 #d5dde0; }
+  .porsi div.sel { background: #e2f4d8; box-shadow: 0 0 0 4px #7fcf6a; }
+  .porsi .dots { font-size: 15px; letter-spacing: -2px; min-height: 22px; }
+  .porsi b { display: block; font-size: 22px; } .porsi small { font-size: 15px; color: #e0a020; font-weight: 900; }
+  .stokpanel .tip { margin-top: 8px; font-size: 15px; font-weight: 700; color: #5a6a72; }
+  .badge { position: absolute; transform: translate(-50%, -50%); background: #fff; border-radius: 99px; padding: 2px 10px; font-weight: 900; font-size: 16px; box-shadow: 0 3px 8px rgba(0,0,0,.2); white-space: nowrap; }
+  .badge.low { background: #ffe1d6; color: #b8432a; } .badge.ok { background: #e2f4d8; color: #3a7a30; }
+  .team { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(255,255,255,.85); border-radius: 22px; padding: 8px 12px; box-shadow: 0 6px 20px rgba(40,90,95,.22); align-items: center; }
+  .team > b { font-size: 16px; margin-right: 4px; }
+  .mem { width: 92px; text-align: center; border-radius: 14px; padding: 4px; background: #f3f6f7; }
+  .mem canvas { width: 50px; height: 50px; display: block; margin: 0 auto; }
+  .mem b { font-size: 14px; display: block; } .mem small { font-size: 12px; font-weight: 800; display: block; }
+  .mem.busy { background: #fff1c2; } .mem.drag { box-shadow: 0 0 0 4px #ffc94a; transform: translateY(-6px); }
+  .mem.siaga small { color: #3a9a3a; } .mem.busy small { color: #8a5a1a; }
+  svg.arrow { position: absolute; inset: 0; pointer-events: none; }
+  .hand { position: absolute; font-size: 46px; transform: translate(-30%, -10%); filter: drop-shadow(0 3px 4px rgba(0,0,0,.3)); }
+  .tbl { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 16px; font-weight: 700; }
+  .tbl td, .tbl th { padding: 3px 6px; text-align: center; border-bottom: 2px dashed #e3e9ec; }
+  .tbl th { font-size: 14px; color: #7a8a92; } .tbl td:first-child { text-align: left; }
+  .tbl img { width: 28px; height: 28px; vertical-align: middle; margin-right: 4px; }
+  .tbl .no { color: #d9603f; } .tbl .ok { color: #3a9a3a; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c"></canvas><div id="tilt-top"></div><div id="tilt-bot"></div><div id="vig"></div><div id="ui"></div></div>
+<script type="module">
+import * as THREE from '../njajan-fest/vendor/three.module.min.js';
+import * as G from '../njajan-fest/js/models.js';
+const W = 1180, H = 820, PADY = G.PADY;
+const S = new URLSearchParams(location.search).get('s') || 'stok';
+const UI = document.getElementById('ui'), cv = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio || 1); renderer.setSize(W, H, false);
+renderer.shadowMap.enabled = false; renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene(); G.setParent(scene);
+const cam = new THREE.PerspectiveCamera(30, W / H, 0.1, 300);
+const night = false;
+function el(html, cls, style) { const d = document.createElement('div'); if (cls) d.className = cls; if (style) d.style.cssText = style; d.innerHTML = html; UI.appendChild(d); return d; }
+function project(x, y, z) { const v = new THREE.Vector3(x, y, z).project(cam); return { x: (v.x + 1) / 2 * W, y: (1 - v.y) / 2 * H }; }
+function bub(x, y, z, html, cls = '') { const p = project(x, y, z); el(html, 'bubble ' + cls, `left:${p.x}px;top:${p.y}px`); }
+// potret 2D kecil warga (relawan / tamu istimewa)
+function portrait(cvs, col, extra) {
+  cvs.width = cvs.height = 120; const x = cvs.getContext('2d');
+  x.fillStyle = col; x.beginPath(); x.arc(60, 80, 34, 0, 7); x.fill(); x.beginPath(); x.arc(60, 48, 30, 0, 7); x.fill();
+  x.fillStyle = '#fff'; x.beginPath(); x.arc(49, 44, 8, 0, 7); x.arc(71, 44, 8, 0, 7); x.fill();
+  x.fillStyle = '#222'; x.beginPath(); x.arc(50, 45, 4, 0, 7); x.arc(72, 45, 4, 0, 7); x.fill();
+  x.fillStyle = 'rgba(255,120,140,.6)'; x.beginPath(); x.arc(38, 58, 5, 0, 7); x.arc(82, 58, 5, 0, 7); x.fill();
+  extra && extra(x);
+}
+
+function dayLights() { scene.background = new THREE.Color('#cdeeea'); scene.fog = new THREE.Fog('#cdeeea', 44, 92); scene.add(new THREE.HemisphereLight('#ffffff', '#7fbfb6', 1.6)); const s = new THREE.DirectionalLight('#fff4e0', 2.6); s.position.set(-16, 20, 6); scene.add(s); }
+function nightLights() {
+  scene.background = new THREE.Color('#1c2a4a'); scene.fog = new THREE.Fog('#1c2a4a', 40, 95);
+  scene.add(new THREE.HemisphereLight('#7f8fd8', '#1c3a4a', 0.75));
+  const moon = new THREE.DirectionalLight('#b8c8ff', 0.7); moon.position.set(-10, 20, -8); scene.add(moon);
+  document.body.classList.add('night'); document.getElementById('vig').style.background = 'radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(5,10,30,.5))';
+}
+function water(col) { const w = new THREE.Mesh(new THREE.CircleGeometry(220, 48), G.M(col)); w.rotation.x = -Math.PI / 2; scene.add(w); }
+function lampion(x, z, col = '#ffb347') {
+  G.cattail(x, z, 2.8, 0);
+  const l = G.add(G.sph(0.22), G.M(col, { emissive: col, emissiveIntensity: 1.4 }), x + 0.25, 2.3, z); l.scale.set(1, 1.25, 1);
+  G.add(G.cyl(0.1, 0.1, 0.06, 7), G.M('#8a4e22'), x + 0.25, 2.6, z); G.add(G.cyl(0.1, 0.1, 0.06, 7), G.M('#8a4e22'), x + 0.25, 2.02, z);
+  const pl = new THREE.PointLight(col, 9, 7, 1.6); pl.position.set(x + 0.25, 2.1, z); scene.add(pl);
+  const glow = G.add(new THREE.CircleGeometry(2.4, 24), G.M(col, { transparent: true, opacity: 0.16, emissive: col, emissiveIntensity: 0.6, depthWrite: false }), x, PADY + 0.03, z); glow.rotation.x = -Math.PI / 2;
+}
+function fireflies(n, cx, cz, r) { for (let k = 0; k < n; k++) { const a = Math.random() * 6.28, d = Math.random() * r; G.add(G.sph(0.06), G.M('#fff6a0', { emissive: '#fff08a', emissiveIntensity: 2 }), cx + Math.cos(a) * d, 0.6 + Math.random() * 3, cz + Math.sin(a) * d); } }
+function crowd(n, cx, cz, r) { const k = Object.keys(G.CR); for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, d = 2 + Math.random() * r; G.critter(k[i % 6], cx + Math.cos(a) * d, PADY, cz + Math.sin(a) * d, 2.0).rotation.y = Math.random() * 6; } }
+const rotTo = (x, z, cx, cz) => Math.atan2(cx - x, cz - z);
+
+function venue2() {
+  water(night ? '#24506a' : '#47b8bd');
+  G.inGroup(0, -5, () => G.shore());
+  G.pad(0, 0, 8.6, -Math.PI / 2 + 0.17);
+  G.pad(16.5, -1.2, 6.2, Math.PI);
+  G.pad(-12.4, 2.4, 3.0, Math.PI * 1.9);
+  G.twigBridge([8.4, -0.8], [10.6, -1.0]);
+  G.stageLotus(17.5, -4.2, 1.5);
+  G.dewdrop(0, -0.3, 1.5); G.reedGate(0.8, 6.7);
+  const st = [['putu', -3.4, -2.4], ['tehtarik', 0, -4.8], ['getuk', 3.6, -2.6], ['wedang', -4.4, 2.2], ['cendol', 15.0, 1.8], ['klepon', 18.4, 1.6]];
+  st.forEach(([k, x, z]) => G.inGroup(x, z, () => G.stall(0, 0, k, ['kelopak', 'daun', 'keringdaun', 'talas'][Math.abs(Math.round(x)) % 4], rotTo(x, z, x > 9 ? 16.5 : 0, x > 9 ? -1.2 : -0.3))));
+  if (night) {
+    [[-6.5, -4], [5.6, -5.5], [-5.8, 4.8], [5.2, 4.2], [9.4, -2.6], [13.2, 3.8], [20, 2.4], [16.5, -6.2]].forEach(([x, z], i) => lampion(x, z, i % 3 === 1 ? '#ff7a9a' : '#ffb347'));
+    fireflies(60, 6, -1, 16);
+    // satu sudut gelap (belum ada lampion)
+  }
+  crowd(night ? 34 : 20, 0, -0.3, 5.5); crowd(14, 16.5, -1.2, 3.5);
+}
+
+
+function venue1() {
+  water('#47b8bd');
+  G.inGroup(0, -5, () => G.shore());
+  G.pad(0, 0, 8.6, -Math.PI / 2 + 0.17);
+  G.pad(12.4, -4.4, 3.2, Math.PI * 0.95); G.twigBridge([8.3, -2.2], [9.4, -3.1]); G.stageLotus(12.6, -4.6, 1.5);
+  G.dewdrop(0, -0.3, 1.5); G.reedGate(0.8, 6.7);
+  G.berryLights([-6.6, -1.6], [-1.8, -6.6]); G.berryLights([1.8, -6.6], [6.6, -1.6]);
+}
+const STALLS = [['putu', -3.4, -2.4, 'daun'], ['getuk', 3.6, -2.6, 'kelopak'], ['wedang', -4.4, 2.2, 'talas']];
+function stalls(list = STALLS) { list.forEach(([k, x, z, r]) => G.inGroup(x, z, () => G.stall(0, 0, k, r, rotTo(x, z, 0, -0.3)))); }
+function setCam() { cam.position.set(-1, 27, 24); cam.lookAt(1.8, 0, -0.6); cam.updateMatrixWorld(); }
+function hud(t, tg, extra) {
+  el(`<small>Festival 1 · Kerajaan Telaga</small><b>Bazar Daun Teratai</b>`, 'lv');
+  el(`<b>${t}<span> / ${tg}</span></b><small>🐸 ${extra}</small><div class="nb"><i style="width:${t / tg * 100}%"></i></div>`, 'score');
+}
+function badge(x, z, html, cls = '') { const p = project(x, PADY + 3.5, z); el(html, 'badge ' + cls, `left:${p.x}px;top:${p.y}px`); }
+const FP = k => G.foodURL(k, 72);
+
+if (S === 'stok') {
+  dayLights(); venue1(); stalls();
+  G.inGroup(3.4, 3.0, () => G.stall(0, 0, 'klepon', 'kelopak', rotTo(3.4, 3.0, 0, -0.3)));
+  const disc = G.add(new THREE.CircleGeometry(3.4, 40), G.M('#ffffff', { transparent: true, opacity: 0.22 }), 3.4, PADY + 0.03, 3.0); disc.rotation.x = -Math.PI / 2;
+  G.heroOtter(-1.8, 4.8, 2.2).rotation.y = 0.4;
+  setCam(); renderer.render(scene, cam);
+  hud(17, 20, 'perkiraan tamu');
+  el(`<div class="pill">👛 Kas <b>9</b> 🪙</div><div class="pill" style="font-size:16px">🎯 Target untung 6 🪙</div>`, 'hud-r');
+  badge(-3.4, -2.4, '🍡 8 porsi', 'ok'); badge(3.6, -2.6, '🍡 5 porsi'); badge(-4.4, 2.2, '🍡 3 porsi', 'low');
+  el(`<h4><img src="${FP('klepon')}"> Klepon ❤️❤️❤️ — berapa porsi dibawa?</h4>
+    <div class="porsi">
+      <div><div class="dots">🟢🟢🟢</div><b>3 porsi</b><small>bahan 1 🪙</small></div>
+      <div class="sel"><div class="dots">🟢🟢🟢🟢🟢</div><b>5 porsi</b><small>bahan 2 🪙</small></div>
+      <div><div class="dots">🟢🟢🟢🟢🟢🟢🟢🟢</div><b>8 porsi</b><small>bahan 3 🪙</small></div>
+    </div>
+    <div class="tip">1 porsi laku = +1 🪙 · Kurang → habis, tamu kecewa · Kebanyakan → sisa, bahan terbuang</div>`, 'stokpanel');
+  el(`<button class="btn merah">✖</button><button class="btn kuning">⟳ Putar</button><button class="btn">✔ Taruh</button>`, 'ghostbtn', 'bottom:24px');
+  el(`<div class="face">🐸</div><div class="say">Klepon ❤❤❤ banyak yang mau. <b>5 atau 8 porsi</b> ya, jangan 3!</div>`, 'helper', 'bottom:330px');
+}
+
+if (S === 'relawan') {
+  dayLights(); venue1(); stalls();
+  G.inGroup(3.4, 3.0, () => G.stall(0, 0, 'klepon', 'kelopak', rotTo(3.4, 3.0, 0, -0.3)));
+  crowd(22, 0, -0.3, 5.5);
+  // relawan di daun
+  const R = [['bebek', 1.9, 5.6], ['berang', 0.2, 3.4], ['kura', 5.6, 0.6], ['udang', -5.4, -0.4]];
+  R.forEach(([k, x, z]) => { const c = G.critter(k, x, PADY, z, 2.5); c.rotation.y = 0.3; G.add(G.cyl(0.32, 0.32, 0.02, 14), G.M('#ffc94a'), x, PADY + 0.02, z); });
+  // masalah: sampah dekat lapak putu, tamu jatuh
+  G.add(G.sph(0.14), G.M('#d9b35c'), -3.0, PADY + 0.09, -0.8); G.add(G.sph(0.1), G.M('#e9d7a4'), -2.8, PADY + 0.08, -0.6);
+  const f = G.critter('kodok', -5.6, PADY, 3.8, 2.0); f.rotation.z = 1.2;
+  G.heroOtter(-1.8, 4.8, 2.2).rotation.y = 0.4;
+  setCam(); renderer.render(scene, cam);
+  hud(14, 20, 'tamu datang');
+  el(`<div class="pill">💰 Masuk <b>12</b> · 🪙 Untung <b>3</b> / 6</div><div class="pill">😊 Senang <b>90%</b></div>`, 'hud-r');
+  bub(-3.6, PADY + 1.2, -1.0, '🗑️ Sampah!', 'warn');
+  bub(-5.6, PADY + 1.5, 3.8, '🤕 Terjatuh!', 'warn');
+  // panah seret Oto → sampah, Udi → tamu jatuh (sedang berjalan)
+  const a = project(0.2, PADY + 0.6, 3.4), b = project(-3.0, PADY + 0.2, -0.8);
+  const c = project(-5.4, PADY + 0.6, -0.4), d = project(-5.6, PADY + 0.3, 3.4);
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'arrow'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = `<defs><marker id="m" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ffc94a"/></marker></defs>
+    <path d="M${a.x},${a.y} Q${(a.x + b.x) / 2},${Math.min(a.y, b.y) - 60} ${b.x},${b.y}" stroke="#ffc94a" stroke-width="6" stroke-dasharray="12 9" fill="none" marker-end="url(#m)"/>
+    <path d="M${c.x},${c.y} L${d.x},${d.y}" stroke="#fff" stroke-width="4" stroke-dasharray="4 8" fill="none" opacity=".9"/>`;
+  UI.appendChild(svg);
+  el('👆', 'hand', `left:${(a.x + b.x) / 2}px;top:${Math.min(a.y, b.y) - 50}px`);
+  const lab = (x, z, t) => { const p = project(x, PADY + 2.0, z); el(t, 'badge', `left:${p.x}px;top:${p.y}px;font-size:14px`); };
+  lab(1.9, 5.6, '🦆 Bubu'); lab(5.6, 0.6, '🐢 Pak Kur'); lab(-5.4, -0.4, '🦐 Udi → 🩹');
+  const team = el(`<b>👫 Tim</b>
+    <div class="mem siaga"><canvas data-c="#ffe27a"></canvas><b>Bubu</b><small>😊 siaga</small></div>
+    <div class="mem drag"><canvas data-c="#c49270"></canvas><b>Oto</b><small>💪 diseret…</small></div>
+    <div class="mem siaga"><canvas data-c="#a7dc8e"></canvas><b>Pak Kur</b><small>🧘 siaga</small></div>
+    <div class="mem busy"><canvas data-c="#ffa3a3"></canvas><b>Udi</b><small>⚡ menolong</small></div>`, 'team');
+  team.querySelectorAll('canvas').forEach(cv2 => portrait(cv2, cv2.dataset.c));
+  el(`<div class="face">🐸</div><div class="say"><b>Seret Oto</b> ke sampah! Oto rajin, sampah cepat bersih 🧹</div>`, 'helper');
+}
+
+if (S === 'laporan') {
+  dayLights(); venue1(); stalls(); setCam(); renderer.render(scene, cam);
+  el('', 'dim', 'pointer-events:none');
+  el(`<h2>🎉 Festival Selesai!</h2><div class="stars">⭐⭐<span class="off">⭐</span></div>
+    <div style="font-weight:900;font-size:18px;margin-top:4px">📦 Stok jajanan</div>
+    <table class="tbl"><tr><th>Lapak</th><th>Dibawa</th><th>Terjual</th><th>Sisa</th><th></th></tr>
+      <tr><td><img src="${FP('putu')}">Putu Bambu ❤❤❤</td><td>8</td><td>8</td><td>0</td><td class="ok">pas ✔</td></tr>
+      <tr><td><img src="${FP('getuk')}">Getuk ❤❤</td><td>5</td><td>5</td><td>0</td><td class="no">habis! 3 tamu kecewa</td></tr>
+      <tr><td><img src="${FP('wedang')}">Wedang Uwuh ❤</td><td>3</td><td>3</td><td>0</td><td class="ok">pas ✔</td></tr>
+      <tr><td><img src="${FP('serabi')}">Serabi ❤</td><td>8</td><td>3</td><td>5</td><td class="no">sisa 5, terbuang</td></tr></table>
+    <div class="row"><span>💰 Uang masuk (19 jajan terjual)</span><b>19 🪙</b></div>
+    <div class="sub"><span>🌿 Sewa lapak</span><span>− 8</span></div>
+    <div class="sub"><span>📦 Bahan jajanan (24 porsi)</span><span>− 9</span></div>
+    <div class="row"><span><b>😊 Untung</b> = 19 − 17</span><b class="no">2 🪙 <small>/ target 6</small> ✖</b></div>
+    <div class="catatan"><span class="f">🐸</span><div><b>📝 Catatan Kiko</b><ul>
+      <li>🍡 Serabi cuma ❤ tapi dibawa 8 porsi — <b>5 sisa</b>. Cukup 3 porsi saja.</li>
+      <li>🍡 Getuk ❤❤ habis duluan. Lain kali bawa 5 → <b>8 porsi</b>.</li></ul></div></div>`, 'report', 'width:760px');
+}
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>
