@@ -219,8 +219,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
   Tes: buka `njajan-fest/?lite` (tanpa bayangan, render pelan — perlu untuk Playwright/swiftshader) lalu `NF.debug`
   (`go(nama)`, `hero(id)`, `place(kind, slotIdx)`, `SLOTS`, `speed(n)`, `jurus()`, `problems()`, `F`), `NF.S` = keadaan.
   Chromium headless perlu `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`.
-- Ide tahap berikutnya (belum dibuat): Pasar Malam Kunang-kunang → Festival Sungai Pelangi → Pesta Panen Danau Raya →
-  Festival Agung (lebih banyak daun dihubungkan jembatan ranting), susun acara & tugas relawan, tamu istimewa.
+- Ide tahap berikutnya (belum dibuat): Festival Sungai Pelangi → Pesta Panen Danau Raya → Festival Agung (lebih banyak
+  daun dihubungkan jembatan ranting). **Jangan buat lagi fitur susun acara** (pengguna: tidak perlu).
 
 ## Status & yang sedang dibahas
 
