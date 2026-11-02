@@ -205,6 +205,15 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
   barang **Lampion** tab Lampu, radius 3,4, lingkaran cahaya `glowMat`), kunang-kunang. Acara 16.00–20.00 + **Kembang Api**
   (harus 19/20 → kembang api partikel) & lomba harus terang (16/17). Relawan ke-4 **Udi ⚡ cekatan → P3K** (kejadian `jatuh`).
   Modal 26, target 30 tamu & untung 6, 6 lapak. Stiker baru: Pasar terang, Kembang api indah.
+- v6 (pratinjau v28, masukan pengguna: susun acara & bagi pos relawan "belum relevan"): **keduanya dihapus**. Papan Persiapan
+  jadi **1 layar** (tanya warga, target, ramalan + tamu istimewa). Gantinya: (1) **Stok porsi per lapak** — saat menaruh lapak
+  panel `.stokpanel` pilih 3/5/8 porsi (`NF.PORSI`, bahan 1/2/3 🪙, `it.porsi`/`it.bahan`, label 📦 di atas lapak, ubah lewat
+  menu barang); jual **2 🪙 per porsi** (`JUAL`); tamu memilih lapak menurut ❤ (`DEMAND`, `stallW`); habis → tamu kecewa
+  (`s.kecewa`), tambah 3 porsi 1 🪙; laporan tabel Stok (dibawa/terjual/sisa) + saran porsi. (2) **Relawan diseret saat
+  festival** — tokoh di daun + bar **Tim** (`.team`), seret kartu ke gelembung masalah (atau ketuk kartu lalu ketuk masalah);
+  relawan berjalan, bekerja, kembali (`sendRelawan`, `stepRelawan`); cocok (`NF.RELAWAN[].cocok` = jenis masalah) lebih cepat.
+  **Kembang Api** jadi barang tab Hiburan (Tahap 2). Stiker baru: Tim hebat (≥3 tugas relawan), Porsi pas. Modal/target:
+  T1 24 / 20 tamu / untung 14; T2 40 / 30 tamu / untung 22.
 - Kamera: geser 1 jari = putar sedikit, cubit = zoom (layar menata & festival).
 - Simpanan `localStorage` kunci `njajan-fest-v1` (`{cerita, best:{tiko,bebi,lumi}, main, hero, muted}`).
   Tes: buka `njajan-fest/?lite` (tanpa bayangan, render pelan — perlu untuk Playwright/swiftshader) lalu `NF.debug`
@@ -215,6 +224,7 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Status & yang sedang dibahas
 
+- Pratinjau **versi 28** (branch `pratinjau-v28`) = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
 - Rilis terakhir di `main`: **versi 27** = **Njajan Fest versi 5** (Tahap 2 Pasar Malam; fitur hitung lapak dihapus).
 - Versi 26 = **Njajan Fest versi 4** (peta, susun acara, relawan, tamu istimewa, catatan,
   stiker; Tahap 2 Pasar Malam menyusul di pratinjau berikutnya, mockup `mockup-festival/tahap2.html`) + versi 3: model Raja Kura-kura baru (kura-kura berkaki empat,

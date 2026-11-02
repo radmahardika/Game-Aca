@@ -244,3 +244,33 @@ body.s-tata .helper { bottom: 170px; max-width: 300px; }
   .stikerbaru.banyak .stk { width: 52px; height: 52px; font-size: 26px; }
   #ui .bukuwrap { z-index: 7; }
   .stikerbaru.banyak .stk .t { display: none; } .stikerbaru.banyak { margin-bottom: 8px; }
+
+/* ---------- v6: stok porsi & relawan diseret ---------- */
+.stokpanel { position: absolute; left: 670px; bottom: 12px; transform: translateX(-50%); background: rgba(255,255,255,.97); border-radius: 22px; padding: 10px 18px; box-shadow: 0 8px 24px rgba(40,90,95,.28); text-align: center; pointer-events: auto; }
+.stokpanel h4 { font-size: 18px; margin-bottom: 6px; display: flex; gap: 8px; align-items: center; justify-content: center; }
+.stokpanel h4 img { width: 36px; height: 36px; }
+.porsi { display: flex; gap: 12px; justify-content: center; }
+.porsi > div { width: 124px; border-radius: 16px; background: #f3f6f7; padding: 6px; font-weight: 800; box-shadow: 0 4px 0 #d5dde0; cursor: pointer; }
+.porsi > div.sel { background: #e2f4d8; box-shadow: 0 0 0 4px #7fcf6a; }
+.porsi .dots { font-size: 13px; letter-spacing: -2px; min-height: 20px; line-height: 1.1; }
+.porsi b { display: block; font-size: 20px; } .porsi small { font-size: 14px; color: #e0a020; font-weight: 900; }
+.stokpanel .tip { margin-top: 6px; font-size: 14px; font-weight: 700; color: #5a6a72; }
+.badge { position: absolute; transform: translate(-50%, -50%); background: #fff; border-radius: 99px; padding: 2px 10px; font-weight: 900; font-size: 15px; box-shadow: 0 3px 8px rgba(0,0,0,.2); white-space: nowrap; }
+.badge.low { background: #ffe1d6; color: #b8432a; } .badge.ok { background: #e2f4d8; color: #3a7a30; }
+.team { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(255,255,255,.88); border-radius: 22px; padding: 6px 10px; box-shadow: 0 6px 20px rgba(40,90,95,.22); align-items: center; pointer-events: auto; }
+.team > b { font-size: 15px; margin-right: 2px; }
+.mem { width: 88px; text-align: center; border-radius: 14px; padding: 4px; background: #f3f6f7; touch-action: none; }
+.mem img { width: 46px; height: 46px; display: block; margin: 0 auto; pointer-events: none; }
+.mem b { font-size: 14px; display: block; } .mem small { font-size: 11.5px; font-weight: 800; display: block; }
+.mem.busy { background: #fff1c2; opacity: .8; } .mem.drag { box-shadow: 0 0 0 4px #ffc94a; transform: translateY(-6px); }
+.mem.siaga small { color: #3a9a3a; } .mem.busy small { color: #8a5a1a; }
+.dragicon { position: absolute; transform: translate(-50%, -60%); pointer-events: none; z-index: 8; }
+.dragicon img { width: 70px; height: 70px; filter: drop-shadow(0 6px 8px rgba(0,0,0,.35)); }
+.tbl { width: 100%; border-collapse: collapse; margin: 2px 0; font-size: 14.5px; font-weight: 700; }
+.tbl td, .tbl th { padding: 1px 6px; text-align: center; border-bottom: 2px dashed #e3e9ec; }
+.tbl th { font-size: 12.5px; color: #7a8a92; } .tbl td:first-child { text-align: left; }
+.tbl img { width: 22px; height: 22px; vertical-align: middle; margin-right: 4px; }
+.tbl .no { color: #d9603f; } .tbl .ok { color: #3a9a3a; }
+.report .row { padding: 3px 4px; font-size: 18px; } .report .sub { font-size: 14px; }
+body.s-festival .helper { bottom: 110px; }
+.report { max-height: 808px; overflow: hidden; padding-top: 12px; padding-bottom: 12px; } .report h2 { font-size: 28px; } .report .catatan { margin-top: 6px; padding: 6px 12px; } .report .catatan li { font-size: 15px; } .report .btns { margin-top: 8px; }
