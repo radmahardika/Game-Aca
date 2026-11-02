@@ -184,14 +184,14 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 - v2: **venue lebih luas** (daun utama r 8,6, `PAD_R`; slot berjarak 2,25; jangkauan 3,4) dan **⟳ Putar** barang (`rotK`, 90°):
   lapak menghadap tugu +1, ke samping 0, membelakangi −1; antrean mengikuti arah lapak. Tombol hantu/menu barang di tengah bawah.
 - Alur Tahap 1 "Bazar Daun Teratai" (`NF.LEVELS`): judul → pilih tokoh → cerita Raja (sekali) → **Papan Persiapan** (hasil tanya
-  warga ❤ acak tiap main, soal hitung "20 tamu, 1 lapak = 5 tamu → berapa lapak?" pilihan 3/4/5, ramalan hujan/anak hilang/Raja)
+  warga ❤ acak tiap main, kartu **Target festival** — soal hitung lapak **dihapus** di v5 atas permintaan pengguna, ramalan hujan/anak hilang/Raja)
   → **Menata** (kartu per tab Lapak/Hiburan/Fasilitas/Promosi, barang hantu digeser di titik slot, **angka +/− ala Islanders** +
   perkiraan tamu, daftar Cek Kiko; ketuk barang = Pindah/Bongkar) → **Festival** (tamu datang naik perahu daun, antre & beli 1 🪙
   per jajan; masalah diketuk: sampah → kalau lama jatuh ke telaga, jajanan habis → tambah penjual 1 🪙, anak berudu terpisah →
   Pos Informasi, Raja datang → bangku, hujan → daun talas; ⏩ 2×) → **Laporan** (tamu, uang masuk − biaya rinci = untung, senang
   ≥70% → 3 bintang, komentar tamu). Modal 18, target 20 tamu & untung 6.
 - v4 (pratinjau v26): **Peta Kerajaan Telaga** setelah pilih tokoh (`screenPeta`, Tahap 2–3 terkunci "segera hadir");
-  **Papan Persiapan 3 langkah** (`papanStep`): 1 Tanya warga & hitung → 2 **Susun Acara** (`NF.ACARA`, jam di `LV.jam`; aturan
+  **Papan Persiapan 3 langkah** (`papanStep`): 1 Tanya warga & target → 2 **Susun Acara** (`NF.ACARA`, jam di `LV.jam`; aturan
   pembukaan paling awal, hadiah sesudah lomba, konser butuh Pemusik; `acaraCek`, kejadian acara saat festival `acaraEvent`) →
   3 **Relawan** (`NF.RELAWAN` Bubu ramah/Oto rajin/Pak Kur sabar → `NF.POS` gerbang/bersih/bantu; cocok = lebih cepat; gerbang
   menambah kesabaran antre, bersih & bantu otomatis membereskan masalah, `relawanBantu`) + **Tamu istimewa** (`NF.TAMU_IST`:
@@ -204,7 +204,7 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
   **Malam** (`setNight(f)`, langit sore→gelap saat festival): lapak gelap −2 (`isLit`: lampu tetap tugu/gerbang/panggung +
   barang **Lampion** tab Lampu, radius 3,4, lingkaran cahaya `glowMat`), kunang-kunang. Acara 16.00–20.00 + **Kembang Api**
   (harus 19/20 → kembang api partikel) & lomba harus terang (16/17). Relawan ke-4 **Udi ⚡ cekatan → P3K** (kejadian `jatuh`).
-  Modal 26, target 30 tamu & untung 6, 6 lapak (soal hitung 5/6/7). Stiker baru: Pasar terang, Kembang api indah.
+  Modal 26, target 30 tamu & untung 6, 6 lapak. Stiker baru: Pasar terang, Kembang api indah.
 - Kamera: geser 1 jari = putar sedikit, cubit = zoom (layar menata & festival).
 - Simpanan `localStorage` kunci `njajan-fest-v1` (`{cerita, best:{tiko,bebi,lumi}, main, hero, muted}`).
   Tes: buka `njajan-fest/?lite` (tanpa bayangan, render pelan — perlu untuk Playwright/swiftshader) lalu `NF.debug`
@@ -215,8 +215,8 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Status & yang sedang dibahas
 
-- Pratinjau **versi 27** (branch `pratinjau-v27`) = **Njajan Fest versi 5** (Tahap 2 Pasar Malam).
-- Rilis terakhir di `main`: **versi 26** = **Njajan Fest versi 4** (peta, susun acara, relawan, tamu istimewa, catatan,
+- Rilis terakhir di `main`: **versi 27** = **Njajan Fest versi 5** (Tahap 2 Pasar Malam; fitur hitung lapak dihapus).
+- Versi 26 = **Njajan Fest versi 4** (peta, susun acara, relawan, tamu istimewa, catatan,
   stiker; Tahap 2 Pasar Malam menyusul di pratinjau berikutnya, mockup `mockup-festival/tahap2.html`) + versi 3: model Raja Kura-kura baru (kura-kura berkaki empat,
   tempurung kubah bermotif heksagon + pinggiran krem, leher & kepala menjulur, mahkota emas, kerah merah).
 - Versi 25 = **Njajan Fest versi 2** (area lebih luas, putar barang, 10 jajanan).

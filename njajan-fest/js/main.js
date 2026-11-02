@@ -471,27 +471,20 @@ function papanNav(back, nextLabel, onNext, enabled = true) {
 function papan1() {
   const order = [...NF.LAPAK].sort((a, b) => S.hearts[b] - S.hearts[a]);
   const wish = order.map(k => `<div class="r"><img src="${G.foodURL(k, 72)}">${NF.ITEMS[k].nama}<small class="hg">${costOf(k)}🪙</small><span class="h">${'❤️'.repeat(S.hearts[k])}</span></div>`).join('');
-  const groups = Array.from({ length: LV.targetTamu / LV.porsi }, () => `<span class="g">${'🐸'.repeat(LV.porsi)}</span>`).join('');
   const board = el(`
     <div class="col wish"><h3>📋 Hasil tanya warga</h3><div style="font-size:15px;font-weight:700;color:#6b7b84;margin-bottom:6px">Jajanan yang paling disukai warga telaga:</div>${wish}
       <div class="mini">💡 ❤❤❤ = lebih banyak tamu datang. Ada yang murah, ada yang mahal — pilih yang paling pas!</div></div>
-    <div class="col"><h3>🧮 Hitung lapak</h3>
-      <div style="font-size:17px;font-weight:700">Target: <b>${LV.targetTamu} tamu</b>. Satu lapak bisa melayani <b>${LV.porsi} tamu</b>.<br>Butuh berapa lapak?</div>
-      <div class="groups">${groups}</div>
-      <div class="ans">${(LV.id === 2 ? [5, 6, 7] : [3, 4, 5]).map(n => `<button data-n="${n}" class="${S.hitungOk && n === LV.targetTamu / LV.porsi ? 'ok' : ''}">${n}</button>`).join('')}</div>
-      <div class="fb"></div></div>
+    <div class="col"><h3>🎯 Target festival</h3>
+      <div class="mini" style="margin-top:0;font-size:19px">🐸 Datangkan <b>${LV.targetTamu} tamu</b></div>
+      <div class="mini" style="font-size:19px">🪙 Dapatkan <b>untung ${LV.targetUntung}</b></div>
+      <div class="mini" style="font-size:19px">😊 Buat tamu <b>senang</b></div>
+      <div class="mini">👛 Modalmu <b>${LV.modal} 🪙</b>. Satu lapak bisa melayani sekitar ${LV.porsi} tamu.</div></div>
     <div class="col"><h3>🌦️ Ramalan & persiapan</h3>
       ${LV.malam ? '<div class="mini" style="margin-top:0">🌙 <b>Pasar malam!</b> Langit gelap jam 19.00. Pasang lampion 🏮 di dekat lapak.</div><div class="mini">🤕 Jalan malam licin, kadang ada tamu terjatuh.</div>' : '<div class="mini" style="margin-top:0">🌧️ <b>Sore nanti hujan sebentar.</b> Siapkan tempat berteduh!</div>'}
       <div class="mini">👶 Di festival ramai, kadang ada anak yang terpisah dari ibunya.</div>
       <div class="mini">👑 Raja juga akan datang berkunjung!</div></div>`, 'board');
-  const nx = papanNav(false, 'Lanjut ▶', () => papanStep(2), S.hitungOk);
-  board.querySelectorAll('.ans button').forEach(b => b.onclick = () => {
-    const n = +b.dataset.n, ok = n === LV.targetTamu / LV.porsi, fb = board.querySelector('.fb');
-    board.querySelectorAll('.ans button').forEach(x => x.className = '');
-    if (ok) { b.className = 'ok'; fb.innerHTML = `✔ Betul! ${n} kelompok × ${LV.porsi} tamu = ${LV.targetTamu} tamu. Siapkan <b>${n} lapak</b>.`; fb.style.color = '#3a9a3a'; A.sfx('good'); S.hitungOk = true; nx.disabled = false; }
-    else { b.className = 'no'; fb.innerHTML = 'Hmm, coba hitung kotak hijaunya lagi 🙂'; fb.style.color = '#d9603f'; A.sfx('bad'); }
-  });
-  helper('Baca hasil tanya warga, lalu hitung butuh berapa lapak!');
+  papanNav(false, 'Lanjut ▶', () => papanStep(2));
+  helper('Baca hasil tanya warga dan target festivalnya, lalu lanjut!');
 }
 // aturan acara: pembukaan paling awal, hadiah sesudah lomba
 function acaraCek(list = S.acara) {
@@ -632,7 +625,7 @@ function tataHud() {
   el(`<b>${prev}<span> / ${LV.targetTamu}</span></b><small>🐸 perkiraan tamu ${T.ghost && prev !== cur ? `(${prev > cur ? '+' : ''}${prev - cur})` : ''}</small><div class="nb"><i style="width:${Math.min(100, prev / LV.targetTamu * 100)}%"></i></div>`, 'score' + (prev >= LV.targetTamu ? ' ok' : ''), '', box);
   el(`<div class="pill">👛 Kas <b>${kas()}</b> 🪙</div><div class="pill" style="font-size:16px">🎯 Target untung ${LV.targetUntung} 🪙</div>`, 'hud-r', '', box);
   // daftar cek
-  const lap = lapakList().length, need = LV.targetTamu / LV.porsi;
+  const lap = lapakList().length, need = Math.ceil(LV.targetTamu / LV.porsi);
   const binOk = S.placed.some(p => p.kind === 'sampah' && lapakList().some(l => dist(l, p) <= 3.4));
   const rows = [
     [lap >= need, `Lapak jajanan ${lap}/${need}`],
