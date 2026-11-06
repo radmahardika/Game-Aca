@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mockup — Ata dan Pohon Madu Legendaris</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&display=swap">
+<style>
+  html, body { margin: 0; height: 100%; background: #12100e; overflow: hidden; font-family: 'Pixelify Sans', monospace; }
+  #stage { position: absolute; left: 50%; top: 50%; width: 1200px; height: 840px; transform-origin: 0 0; }
+  canvas { position: absolute; inset: 0; width: 1200px; height: 840px; image-rendering: pixelated; }
+  .ui { position: absolute; color: #f7ecd2; text-shadow: 0 2px 0 #1a120c; }
+  /* panel kayu-perkamen */
+  .box { background: linear-gradient(#3b2a1e, #2a1d15); border: 3px solid #d8b56a; border-radius: 6px;
+         box-shadow: 0 0 0 3px #2a1d15, inset 0 0 0 2px #6e5131, 0 6px 0 3px rgba(0,0,0,.35); }
+  .lbl { font-size: 18px; color: #e9c879; letter-spacing: 1px; }
+  /* bar giliran */
+  #turn { left: 24px; top: 18px; padding: 8px 14px 8px 12px; display: flex; align-items: center; gap: 10px; }
+  #turn .face { width: 54px; height: 54px; border-radius: 6px; background: #1d1510; border: 2px solid #6e5131; position: relative;
+                display: grid; place-items: center; overflow: hidden; }
+  #turn .face img { width: 50px; image-rendering: pixelated; }
+  #turn .face.now { border-color: #ffd86b; box-shadow: 0 0 0 3px #ffd86b55, 0 0 14px #ffd86b; width: 66px; height: 66px; }
+  #turn .face.now img { width: 62px; }
+  #turn .face.foe { background: #3a1716; border-color: #8e3b33; }
+  #turn .arrow { color: #b99a63; font-size: 20px; }
+  #turn .face .mv { position: absolute; right: -2px; bottom: -2px; font-size: 16px; }
+  /* musuh */
+  #foes { right: 24px; top: 18px; padding: 10px 16px; min-width: 250px; }
+  #foes .row { display: flex; justify-content: space-between; font-size: 24px; gap: 18px; margin-top: 4px; }
+  #foes .tp { font-size: 17px; color: #cdb88d; }
+  /* tim */
+  #party { left: 24px; bottom: 16px; display: flex; gap: 12px; }
+  .card { flex: 0 0 214px; padding: 10px 12px; display: flex; gap: 12px; align-items: center; }
+  .card .por { flex: none; width: 70px; height: 84px; background: #6d8f4e; border: 2px solid #1a120c; border-radius: 4px; display: grid; place-items: center; overflow: hidden; }
+  .card .por img { width: 84px; image-rendering: pixelated; margin-top: 10px; }
+  .card .nm { font-size: 24px; font-weight: 700; display: flex; justify-content: space-between; }
+  .card .nm small { font-size: 17px; color: #e9c879; font-weight: 500; }
+  .card .job { font-size: 15px; white-space: nowrap; color: #cdb88d; margin-top: -2px; }
+  .bar { margin-top: 5px; display: flex; align-items: center; gap: 6px; font-size: 18px; }
+  .bar b { width: 32px; color: #ffcf6e; }
+  .bar .t { flex: 1; height: 10px; background: #1a120c; border-radius: 3px; border: 1px solid #000; overflow: hidden; }
+  .bar .t i { display: block; height: 100%; }
+  .bar span { width: 62px; text-align: right; }
+  .hp i { background: linear-gradient(#8ee66a, #3ea83a); } .mp i { background: linear-gradient(#a98af2, #6a46c9); }
+  .card.now { border-color: #ffd86b; box-shadow: 0 0 0 3px #2a1d15, 0 0 0 6px #ffd86b88, 0 6px 0 3px rgba(0,0,0,.35); }
+  .card.lock { opacity: .78; filter: saturate(.4); }
+  .card.lock .por { background: #2a221b; color: #6e5a40; font-size: 54px; font-weight: 700; }
+  /* menu aksi */
+  #menu { right: 24px; bottom: 16px; padding: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 342px; }
+  .btn { background: #4a3626; border: 2px solid #8a6a40; border-radius: 6px; padding: 4px 2px 6px; font-size: 20px; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .btn .ic { font-size: 30px; }
+  .btn.sel { background: #7a5a2c; border-color: #ffd86b; box-shadow: 0 0 10px #ffd86b88; }
+  .btn.sel::before { content: '▶'; color: #ffd86b; font-size: 16px; position: absolute; left: 6px; top: 6px; }
+  /* daftar jurus */
+  #jurus { right: 24px; bottom: 192px; width: 372px; padding: 12px 14px; }
+  #jurus .j { display: grid; grid-template-columns: 1fr auto; padding: 7px 10px; border-radius: 5px; margin-top: 6px; }
+  #jurus .j b { font-size: 24px; } #jurus .j i { font-style: normal; font-size: 17px; color: #e9c879; }
+  #jurus .j .mpc { grid-row: span 2; align-self: center; font-size: 20px; color: #c3adff; }
+  #jurus .j.sel { background: #6a4c25; outline: 2px solid #ffd86b; }
+  #jurus .j.off { opacity: .45; }
+  #jurus .desc { margin-top: 10px; font-size: 18px; color: #f1e3c2; background: #1d1510; padding: 8px 10px; border-radius: 4px; line-height: 1.25; }
+  /* niat musuh */
+  .intent { position: absolute; transform: translate(-50%, -100%); background: #fff7e0; color: #2a1d15; border: 3px solid #2a1d15;
+            border-radius: 18px; padding: 3px 10px 3px 8px; font-size: 22px; font-weight: 700; text-shadow: none; white-space: nowrap; }
+  .intent::after { content: ''; position: absolute; left: 50%; bottom: -11px; margin-left: -7px; border: 7px solid transparent; border-top-color: #2a1d15; }
+  .intent.big { background: #ffd0b8; animation: pulse .8s infinite alternate; }
+  @keyframes pulse { to { transform: translate(-50%, -100%) scale(1.08); } }
+  .tipe { position: absolute; transform: translate(-50%, 0); font-size: 16px; background: #1a120cdd; padding: 1px 7px; border-radius: 8px; color: #f1e3c2; text-shadow: none; }
+  /* pesan */
+  #msg { left: 24px; top: 108px; padding: 10px 18px; font-size: 23px; max-width: 760px; }
+  #msg em { color: #ffd86b; font-style: normal; }
+  .dmg { position: absolute; font-size: 54px; font-weight: 700; color: #fff; text-shadow: 0 3px 0 #2a1d15, 3px 0 0 #2a1d15, -3px 0 0 #2a1d15, 0 -3px 0 #2a1d15; }
+  .dmg small { display: block; font-size: 24px; color: #ffd86b; text-align: center; margin-top: -8px; }
+  /* jelajah */
+  #area { left: 24px; top: 18px; padding: 10px 18px; font-size: 26px; }
+  #area small { display: block; font-size: 17px; color: #cdb88d; }
+  #dompet { right: 24px; top: 18px; padding: 10px 16px; font-size: 26px; display: flex; gap: 18px; align-items: center; }
+  .tag { position: absolute; transform: translate(-50%, -100%); font-size: 18px; padding: 6px 12px; border-radius: 8px; white-space: nowrap; }
+  #stick { left: 120px; bottom: 90px; width: 150px; height: 150px; border-radius: 50%; border: 4px solid #ffffff55; background: #ffffff18; }
+  #stick::after { content: ''; position: absolute; left: 70px; top: 30px; width: 64px; height: 64px; border-radius: 50%; background: #ffffff66; border: 3px solid #ffffffaa; }
+  #btnA { right: 70px; bottom: 80px; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(#ffcf6e, #c98a2a); border: 5px solid #fff3d1;
+          display: grid; place-items: center; font-size: 52px; font-weight: 700; color: #4a2a0c; text-shadow: none; box-shadow: 0 0 20px #ffcf6e; }
+  #btnTim { right: 24px; top: 96px; padding: 8px 14px; font-size: 22px; }
+  #label { position: fixed; left: 8px; bottom: 6px; color: #fff8; font: 13px monospace; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv" width="400" height="280"></canvas></div>
+<script src="pix.js"></script>
+<script src="sprites.js"></script>
+<script src="scene.js"></script>
+<script>
+const SC = 3, stage = document.getElementById('stage'), g = cv.getContext('2d');
+const q = new URLSearchParams(location.search).get('s') || 'pilih';
+const sp = { ata: SPR.ataStance(), kick: SPR.ataKick(), face: SPR.ataFace(), kb: SPR.kumbang(), tw: SPR.tawon() };
+const url = (S) => S.canvas().toDataURL();
+function draw(S, x, y, flip, k = 2) {
+  const c = S.canvas(); g.imageSmoothingEnabled = false;
+  if (flip) { g.save(); g.translate(x + c.width * k, y); g.scale(-1, 1); g.drawImage(c, 0, 0, c.width * k, c.height * k); g.restore(); }
+  else g.drawImage(c, x, y, c.width * k, c.height * k);
+}
+function ui(html, cls, style) { const d = document.createElement('div'); d.className = 'ui ' + (cls || ''); d.innerHTML = html; if (style) Object.assign(d.style, style); stage.appendChild(d); return d; }
+const at = (x, y) => ({ left: x * SC + 'px', top: y * SC + 'px' });
+
+function fit() {
+  const s = Math.min(innerWidth / 1200, innerHeight / 840);
+  stage.style.transform = `scale(${s}) translate(-50%, -50%)`;
+}
+addEventListener('resize', fit); fit();
+
+function partyCards(now) {
+  const p = ui('', '', {}); p.id = 'party';
+  p.innerHTML = `
+  <div class="box card ${now ? 'now' : ''}"><div class="por"><img src="${url(sp.face)}"></div>
+    <div style="flex:1"><div class="nm">Ata <small>Lv 4</small></div><div class="job">Pelari Kilat · Taekwondoin</div>
+    <div class="bar hp"><b>HP</b><div class="t"><i style="width:78%"></i></div><span>39/50</span></div>
+    <div class="bar mp"><b>MP</b><div class="t"><i style="width:${now === 'hit' ? 50 : 75}%"></i></div><span>${now === 'hit' ? 6 : 9}/12</span></div></div></div>
+  <div class="box card lock"><div class="por">?</div><div style="flex:1"><div class="nm">? ? ?</div><div class="job">Bergabung di Bab 1</div>
+    <div class="bar hp"><b>HP</b><div class="t"></div><span>--</span></div><div class="bar mp"><b>MP</b><div class="t"></div><span>--</span></div></div></div>
+  <div class="box card lock"><div class="por">?</div><div style="flex:1"><div class="nm">? ? ?</div><div class="job">Bergabung di Bab 2</div>
+    <div class="bar hp"><b>HP</b><div class="t"></div><span>--</span></div><div class="bar mp"><b>MP</b><div class="t"></div><span>--</span></div></div></div>`;
+}
+
+function battleBase(hit) {
+  SCN.battle(g);
+  // musuh (kiri) — Kumbang 1 bersiap pukulan besar, Kumbang 2 menyerang, Tawon terbang
+  const tx = hit ? 92 : 112, ty = hit ? 96 : 64;
+  SCN.shadow(g, 52, 146, 30); draw(sp.kb, 16, 96);
+  SCN.shadow(g, 88, 211, 30); draw(sp.kb, 52, 161);
+  SCN.shadow(g, tx + 30, hit ? 150 : 132, 18); draw(sp.tw, tx, ty);
+  // Ata (kanan)
+  if (hit) { SCN.shadow(g, 208, 156, 26); draw(sp.kick, 148, 70); }
+  else { SCN.shadow(g, 204, 196, 26); draw(sp.ata, 170, 108); }
+  // ikon niat & tipe
+  ui('💥 Kumpul tenaga', 'intent big', at(52, 94));
+  ui('⚔️', 'intent', at(88, 160));
+  if (!hit) ui('⚔️', 'intent', at(tx + 30, ty - 2));
+  ui('🪨 Keras', 'tipe', at(52, 150)); ui('🪨 Keras', 'tipe', at(88, 215)); ui('🪶 Lincah', 'tipe', at(tx + 30, hit ? 152 : 136));
+  const faces = { a: url(sp.face), k: url(sp.kb), t: url(sp.tw) };
+  const order = hit ? [['k', 1, 'now'], ['k', 2], ['a'], ['t', 0, '', '⬇']] : [['a', 0, 'now'], ['t'], ['k', 1], ['k', 2]];
+  ui('<span class="lbl">GILIRAN</span>' + order.map(([k, n, c, mv], i) =>
+    (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${k !== 'a' ? 'foe' : ''}"><img src="${faces[k]}">${mv ? `<span class="mv">${mv}</span>` : ''}</div>`).join(''), 'box', {}).id = 'turn';
+  ui('<div class="lbl">MUSUH</div><div class="row"><span>Tawon Nakal</span><span>×1</span></div><div class="row"><span>Kumbang Batu</span><span>×2</span></div>', 'box', {}).id = 'foes';
+}
+
+if (q === 'pilih') {
+  battleBase(false);
+  partyCards(true);
+  ui(`<div class="btn"><span class="ic">⚔️</span>Serang</div><div class="btn sel"><span class="ic">✨</span>Jurus</div><div class="btn"><span class="ic">🛡️</span>Bertahan</div><div class="btn"><span class="ic">🎒</span>Bekal</div><div class="btn"><span class="ic">🔄</span>Tukar</div><div class="btn"><span class="ic">🏃</span>Kabur</div>`, 'box', {}).id = 'menu';
+  ui(`<div class="lbl">JURUS ATA</div>
+    <div class="j"><b>Tendangan Depan</b><span class="mpc">2 MP</span><i>Ap Chagi · 앞차기</i></div>
+    <div class="j sel"><b>Tendangan Samping</b><span class="mpc">3 MP</span><i>Yeop Chagi · 옆차기</i></div>
+    <div class="j off"><b>Tendangan Putar</b><span class="mpc">Lv 7</span><i>Dollyeo Chagi · 돌려차기</i></div>
+    <div class="desc">Tendang musuh sampai <b style="color:#ffd86b">mundur di urutan giliran</b>. Cocok untuk menunda musuh yang 💥 kumpul tenaga!</div>`, 'box', {}).id = 'jurus';
+  ui('Kumbang Batu sedang <em>💥 kumpul tenaga</em>! Pukulannya besar giliran depan.', 'box', {}).id = 'msg';
+} else if (q === 'serang') {
+  battleBase(true);
+  partyCards('hit');
+  // efek tendangan
+  g.save(); g.globalAlpha = .9; g.strokeStyle = '#fff6d6'; g.lineWidth = 2;
+  for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(200, 136, 34 + i * 7, Math.PI * 0.8, Math.PI * 1.25); g.stroke(); }
+  g.restore();
+  PX.disc(g, 152, 120, 10, 10, '#fff3b0'); PX.disc(g, 152, 120, 6, 6, '#ffffff');
+  ui('24<small>AMPUH!</small>', 'dmg', at(96, 66));
+  ui('Ata: <em>Tendangan Samping!</em> &nbsp;Tawon Nakal terdorong ke belakang antrean ⬇', 'box', {}).id = 'msg';
+} else if (q === 'jelajah') {
+  SCN.jelajah(g);
+  SCN.shadow(g, 300, 128, 30); draw(sp.kb, 264, 78);
+  SCN.shadow(g, 168, 196, 26); draw(sp.ata, 134, 108, true);
+  // madu berkilau
+  PX.disc(g, 120, 235, 5, 2, 'rgba(10,25,5,.4)');
+  PX.disc(g, 118, 229, 5, 5, '#c98a2a'); PX.disc(g, 117, 227, 3, 2.5, '#ffcf6e'); g.fillStyle = '#6b4a30'; g.fillRect(115, 222, 6, 2);
+  g.fillStyle = '#fff'; [[126, 222], [111, 224], [124, 232]].forEach(([x, y]) => { g.fillRect(x, y, 1, 3); g.fillRect(x - 1, y + 1, 3, 1); });
+  ui('Hutan Pinggir<small>Prolog · Desa Akar</small>', 'box', {}).id = 'area';
+  ui('<span>🪙 35</span><span>🍯 3</span>', 'box', {}).id = 'dompet';
+  ui('👥 Tim', 'box', {}).id = 'btnTim';
+  ui('🪨 Kumbang Batu · <b style="color:#ffd86b">Lv 2</b>', 'box tag', at(300, 72));
+  ui('Dekati dari belakang = <b style="color:#ffd86b">Serangan Kejutan!</b>', 'box tag', at(300, 168));
+  ui('', '', {}).id = 'stick';
+  ui('A', '', {}).id = 'btnA';
+}
+</script>
+</body>
+</html>
