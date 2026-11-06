@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<base href="../">
+<title>Mockup jelajah — Pohon Madu</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  #stage { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  #map { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  #map img.peta { position: absolute; left: 0; top: 0; }
+  .who { position: absolute; transform: translate(-50%, -100%); filter: drop-shadow(0 6px 4px rgba(0,0,0,.35)); }
+  .sh { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(rgba(15,25,8,.5), rgba(15,25,8,0) 70%); }
+  .hud { position: absolute; z-index: 10; }
+  #area { left: 24px; top: 18px; padding: 10px 18px; font-size: 26px; }
+  #area small { display: block; font-size: 17px; color: #cdb88d; }
+  #dompet { right: 24px; top: 18px; padding: 10px 16px; font-size: 26px; }
+  #btnTim { right: 24px; top: 92px; padding: 8px 14px; font-size: 22px; }
+  #stick { left: 120px; bottom: 90px; width: 150px; height: 150px; border-radius: 50%; border: 4px solid #ffffff55; background: #ffffff18; }
+  #stick::after { content: ''; position: absolute; left: 70px; top: 30px; width: 64px; height: 64px; border-radius: 50%; background: #ffffff66; border: 3px solid #ffffffaa; }
+  #btnA { right: 70px; bottom: 80px; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(#ffcf6e, #c98a2a); border: 5px solid #fff3d1;
+    display: grid; place-items: center; font-size: 52px; font-weight: 700; color: #4a2a0c; box-shadow: 0 0 26px #ffcf6e; }
+  .tag { position: absolute; transform: translate(-50%, -100%); z-index: 5; font-size: 20px; padding: 6px 12px; white-space: nowrap; }
+  .tag.ex { background: #fff7e0; color: #2a1d15; border: 3px solid #2a1d15; border-radius: 16px; text-shadow: none; font-weight: 700; }
+  #talk { left: 230px; right: 230px; bottom: 26px; padding: 14px 20px; font-size: 24px; display: flex; gap: 14px; align-items: center; }
+  #talk img { height: 90px; } #talk b { color: #ffd86b; }
+  #fullmap { position: absolute; inset: 0; z-index: 20; background: #12100eee; display: grid; place-items: center; }
+  #fullmap .wrap { position: relative; } #fullmap img { width: 1080px; display: block; border: 3px solid #d8b56a; }
+  #fullmap .pin { position: absolute; transform: translate(-50%, -50%); font-size: 18px; background: #2a1d15ee; border: 2px solid #ffd86b; border-radius: 10px; padding: 2px 8px; white-space: nowrap; color: #f7ecd2; }
+  #fullmap h3 { color: #ffd86b; font-size: 26px; margin: 0 0 8px; }
+  #fullmap svg { position: absolute; inset: 0; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="map"></div></div>
+<script src="js/data.js"></script>
+<script src="js/core.js"></script>
+<script>
+const q = new URLSearchParams(location.search).get('s') || 'desa';
+const stage = document.getElementById('stage'), map = document.getElementById('map');
+const ui = (html, cls, st) => { const d = document.createElement('div'); d.className = 'hud ' + (cls || ''); d.innerHTML = html; if (st) Object.assign(d.style, st); stage.appendChild(d); return d; };
+// koordinat dalam piksel gambar asli (1536×1024); zoom = besar tampil
+const M = {
+  desa: { img: 'desa-akar', zoom: 1.7, cam: [600, 500], area: 'Desa Akar', sub: 'Prolog · kampung halaman Ata', ata: [760, 560], dir: 'kanan', ataH: 62,
+    tags: [[300, 590, '🏠 Rumah Nenek', 'ex'], [745, 140, '🥋 Dojo'], [250, 180, '🌙 Penginapan']], a: true },
+  rumah: { img: 'rumah-nenek', zoom: 1.45, cam: [760, 560], area: 'Rumah Nenek', sub: 'Prolog', ata: [700, 700], dir: 'belakang', ataH: 72,
+    tags: [[655, 400, '❗ Peti kecil', 'ex'], [480, 120, '🖼️ Lukisan Tim Jelajah Legenda']], talk: true },
+  dojo: { img: 'dalam-dojo', zoom: 1.2, cam: [768, 560], area: 'Dojo', sub: 'Prolog · latihan & ujian sabuk', ata: [768, 780], dir: 'belakang', ataH: 92,
+    tags: [[470, 210, '🥋 Rak sabuk'], [790, 330, '❗ Guru Dojo (belum ada)', 'ex']] },
+};
+const m = M[q] || M.desa;
+PM.S = { lv: { ata: 1 } };
+Promise.all([PM.loadImg('peta/' + m.img + '.jpg'), PM.loadImg('ata/' + m.dir + '.png'), PM.loadImg('ata/wajah.png')]).then(() => {
+  if (q === 'peta') return;
+  const im = PM.IMG['peta/' + m.img + '.jpg'];
+  const W = im.width * m.zoom, H = im.height * m.zoom;
+  let cx = Math.max(0, Math.min(W - 1200, m.cam[0] * m.zoom - 600)), cy = Math.max(0, Math.min(H - 840, m.cam[1] * m.zoom - 420));
+  map.style.transform = `translate(${-cx}px, ${-cy}px)`;
+  const p = document.createElement('img'); p.className = 'peta'; p.src = im.src; p.style.width = W + 'px'; map.appendChild(p);
+  const P = (x, y) => [x * m.zoom, y * m.zoom];
+  const [ax, ay] = P(...m.ata), h = m.ataH * m.zoom;
+  const sh = document.createElement('div'); sh.className = 'sh'; Object.assign(sh.style, { left: ax + 'px', top: ay + 'px', width: h * 0.8 + 'px', height: h * 0.25 + 'px' }); map.appendChild(sh);
+  const a = document.createElement('img'); a.className = 'who'; a.src = PM.IMG['ata/' + m.dir + '.png'].src; Object.assign(a.style, { left: ax + 'px', top: ay + 'px', height: h + 'px' }); map.appendChild(a);
+  m.tags.forEach(([x, y, t, c]) => { const [tx, ty] = P(x, y); const d = document.createElement('div'); d.className = 'box tag ' + (c || ''); d.innerHTML = t; Object.assign(d.style, { left: tx + 'px', top: ty + 'px' }); map.appendChild(d); });
+  ui(`${m.area}<small>${m.sub}</small>`, 'box', {}).id = 'area';
+  ui('🪙 0 &nbsp; 🍯 3', 'box', {}).id = 'dompet';
+  ui('👥 Tim', 'box', {}).id = 'btnTim';
+  if (m.talk) {
+    ui(`<img src="${PM.IMG['ata/wajah.png'].src}"><div><b>Ata:</b> Nenek, ceritakan lagi tentang Pohon Madu Legendaris! <small style="color:#cdb88d">(Nenek belum ada gambarnya)</small></div>`, 'box', {}).id = 'talk';
+  } else { ui('', '', {}).id = 'stick'; ui('A', '', {}).id = 'btnA'; }
+});
+if (q === 'peta') {
+  PM.loadImg('peta/desa-akar.jpg').then((im) => {
+    const k = 1080 / 1536;
+    const pins = [[230, 600, '🏠 Rumah Nenek (pintu)'], [760, 210, '🥋 Dojo (pintu)'], [250, 250, '🌙 Penginapan'], [1350, 420, '🏪 Toko Madu'],
+      [820, 450, '⛲ Sumur & papan'], [1380, 120, '⛩️ Gerbang → Hutan Pinggir'], [650, 360, '⚔️ Halaman Dojo (bos)'], [1250, 720, '🥬 Kebun']];
+    const walk = 'M 300,330 L 560,300 L 1000,240 L 1330,150 L 1430,110 L 1470,170 L 1320,290 L 1130,430 L 1260,560 L 1000,640 L 960,720 L 700,930 L 520,930 L 420,780 L 300,740 L 250,720 L 420,640 L 500,560 L 380,470 L 300,400 Z';
+    stage.insertAdjacentHTML('beforeend', `<div id="fullmap"><div><h3>Desa Akar — area jalan (hijau) & tempat penting</h3><div class="wrap"><img src="${im.src}">
+      <svg viewBox="0 0 1536 1024" style="width:1080px;height:${1024 * k}px"><path d="${walk}" fill="#7dff6a33" stroke="#7dff6a" stroke-width="5" stroke-dasharray="14 8"/></svg>
+      ${pins.map(([x, y, t]) => `<div class="pin" style="left:${x * k}px;top:${y * k}px">${t}</div>`).join('')}</div></div></div>`);
+  });
+}
+</script>
+</body>
+</html>
