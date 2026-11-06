@@ -44,14 +44,14 @@ const ui = (html, cls, st) => { const d = document.createElement('div'); d.class
 const M = {
   desa: { img: 'desa-akar', zoom: 1.7, cam: [600, 500], area: 'Desa Akar', sub: 'Prolog · kampung halaman Ata', ata: [760, 560], dir: 'kanan', ataH: 62,
     tags: [[300, 590, '🏠 Rumah Nenek', 'ex'], [745, 140, '🥋 Dojo'], [250, 180, '🌙 Penginapan']], a: true },
-  rumah: { img: 'rumah-nenek', zoom: 1.45, cam: [760, 560], area: 'Rumah Nenek', sub: 'Prolog', ata: [700, 700], dir: 'belakang', ataH: 72,
-    tags: [[655, 400, '❗ Peti kecil', 'ex'], [480, 120, '🖼️ Lukisan Tim Jelajah Legenda']], talk: true },
-  dojo: { img: 'dalam-dojo', zoom: 1.2, cam: [768, 560], area: 'Dojo', sub: 'Prolog · latihan & ujian sabuk', ata: [768, 780], dir: 'belakang', ataH: 92,
-    tags: [[470, 210, '🥋 Rak sabuk'], [790, 330, '❗ Guru Dojo (belum ada)', 'ex']] },
+  rumah: { img: 'rumah-nenek', zoom: 1.45, cam: [760, 560], area: 'Rumah Nenek', sub: 'Prolog', ata: [740, 720], dir: 'kiri', ataH: 72,
+    tags: [[655, 400, '❗ Peti kecil', 'ex']], talk: true, npc: [['nenek/tunjuk', 560, 560, 78]] },
+  dojo: { img: 'dalam-dojo', zoom: 1.2, cam: [768, 560], area: 'Dojo', sub: 'Prolog · latihan & ujian sabuk', ata: [768, 700], dir: 'belakang', ataH: 92,
+    tags: [[470, 210, '🥋 Rak sabuk']], npc: [['guru/lipat', 0, 0, 0], ['guru/depan', 768, 420, 150]], ex: [768, 250, '❗ Guru Panda'] },
 };
 const m = M[q] || M.desa;
 PM.S = { lv: { ata: 1 } };
-Promise.all([PM.loadImg('peta/' + m.img + '.jpg'), PM.loadImg('ata/' + m.dir + '.png'), PM.loadImg('ata/wajah.png')]).then(() => {
+Promise.all([PM.loadImg('peta/' + m.img + '.jpg'), PM.loadImg('ata/' + m.dir + '.png'), PM.loadImg('ata/wajah.png'), PM.loadImg('nenek/tunjuk.png'), PM.loadImg('nenek/sapa.png'), PM.loadImg('guru/depan.png'), PM.loadImg('guru/lipat.png')]).then(() => {
   if (q === 'peta') return;
   const im = PM.IMG['peta/' + m.img + '.jpg'];
   const W = im.width * m.zoom, H = im.height * m.zoom;
@@ -62,12 +62,16 @@ Promise.all([PM.loadImg('peta/' + m.img + '.jpg'), PM.loadImg('ata/' + m.dir + '
   const [ax, ay] = P(...m.ata), h = m.ataH * m.zoom;
   const sh = document.createElement('div'); sh.className = 'sh'; Object.assign(sh.style, { left: ax + 'px', top: ay + 'px', width: h * 0.8 + 'px', height: h * 0.25 + 'px' }); map.appendChild(sh);
   const a = document.createElement('img'); a.className = 'who'; a.src = PM.IMG['ata/' + m.dir + '.png'].src; Object.assign(a.style, { left: ax + 'px', top: ay + 'px', height: h + 'px' }); map.appendChild(a);
+  (m.npc || []).forEach(([n, x, y, hh]) => { if (!hh) return; const [nx, ny] = P(x, y), H2 = hh * m.zoom;
+    const s2 = document.createElement('div'); s2.className = 'sh'; Object.assign(s2.style, { left: nx + 'px', top: ny + 'px', width: H2 * 0.8 + 'px', height: H2 * 0.25 + 'px' }); map.appendChild(s2);
+    const i2 = document.createElement('img'); i2.className = 'who'; i2.src = PM.IMG[n + '.png'].src; Object.assign(i2.style, { left: nx + 'px', top: ny + 'px', height: H2 + 'px', zIndex: Math.round(ny) }); map.appendChild(i2); });
+  if (m.ex) m.tags = m.tags.concat([[m.ex[0], m.ex[1], m.ex[2], 'ex']]);
   m.tags.forEach(([x, y, t, c]) => { const [tx, ty] = P(x, y); const d = document.createElement('div'); d.className = 'box tag ' + (c || ''); d.innerHTML = t; Object.assign(d.style, { left: tx + 'px', top: ty + 'px' }); map.appendChild(d); });
   ui(`${m.area}<small>${m.sub}</small>`, 'box', {}).id = 'area';
   ui('🪙 0 &nbsp; 🍯 3', 'box', {}).id = 'dompet';
   ui('👥 Tim', 'box', {}).id = 'btnTim';
   if (m.talk) {
-    ui(`<img src="${PM.IMG['ata/wajah.png'].src}"><div><b>Ata:</b> Nenek, ceritakan lagi tentang Pohon Madu Legendaris! <small style="color:#cdb88d">(Nenek belum ada gambarnya)</small></div>`, 'box', {}).id = 'talk';
+    ui(`<img src="${PM.IMG['nenek/sapa.png'].src}"><div><b>Nenek:</b> Ata, cucuku… dulu Nenek dan teman-teman mencari <b>Pohon Madu Legendaris</b>. Ambil peti kecil itu — ada sesuatu untukmu.</div>`, 'box', {}).id = 'talk';
   } else { ui('', '', {}).id = 'stick'; ui('A', '', {}).id = 'btnA'; }
 });
 if (q === 'peta') {
