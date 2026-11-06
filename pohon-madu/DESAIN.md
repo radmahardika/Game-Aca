@@ -3,7 +3,8 @@
 > Status: **disepakati** (diskusi mekanik). Visual & kode belum dibuat — langkah berikutnya mockup.
 > Judul game & nama folder (`pohon-madu/`) masih sementara.
 > Sprite Ata dari pengguna (latar hijau) → dipotong ke `pohon-madu/img/ata/*.png`. Mockup: `pohon-madu/mockup/?s=pilih|serang|jelajah|sabuk`.
-> Gaya visual: latar hutan lukisan-pixel miring dari atas (referensi pengguna), kamera agak jauh (zoom out).
+> Gaya visual: **low-poly lembut** menyamai sprite tokoh (bukan pixel), sudut pandang miring dari atas, kamera agak jauh.
+> Sprite tokoh dari pengguna (latar hijau → `img/ata`, `img/ladhia`, `img/bubunti`); musuh & latar digambar dengan kode (`mockup/lowpoly.js`).
 
 Game keenam. **Turn-based RPG** (genre seperti Dragon Quest), murni untuk **melatih strategi** anak 6 tahun.
 Dimainkan di iPad (Safari) lewat GitHub Pages, sama seperti game lain.

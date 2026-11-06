@@ -8,7 +8,7 @@
 <style>
   html, body { margin: 0; height: 100%; background: #12100e; overflow: hidden; font-family: 'Pixelify Sans', monospace; }
   #stage { position: absolute; left: 50%; top: 50%; width: 1200px; height: 840px; transform-origin: 0 0; }
-  canvas { position: absolute; inset: 0; width: 1200px; height: 840px; image-rendering: pixelated; }
+  canvas { position: absolute; inset: 0; width: 1200px; height: 840px; }
   .ui { position: absolute; color: #f7ecd2; text-shadow: 0 2px 0 #1a120c; }
   /* panel kayu-perkamen */
   .box { background: linear-gradient(#3b2a1e, #2a1d15); border: 3px solid #d8b56a; border-radius: 6px;
@@ -33,7 +33,7 @@
   .card { flex: 0 0 214px; padding: 10px 12px; display: flex; gap: 12px; align-items: center; }
   .card .por { flex: none; width: 70px; height: 84px; background: #6d8f4e; border: 2px solid #1a120c; border-radius: 4px; display: grid; place-items: center; overflow: hidden; }
   .card .por img { width: 84px; image-rendering: pixelated; margin-top: 10px; }
-  .card .nm { font-size: 24px; font-weight: 700; display: flex; justify-content: space-between; }
+  .card .nm { font-size: 22px; font-weight: 700; display: flex; justify-content: space-between; }
   .card .nm small { font-size: 17px; color: #e9c879; font-weight: 500; }
   .card .job { font-size: 15px; white-space: nowrap; color: #cdb88d; margin-top: -2px; }
   .bar { margin-top: 5px; display: flex; align-items: center; gap: 6px; font-size: 18px; }
@@ -95,18 +95,14 @@
 </style>
 </head>
 <body>
-<div id="stage"><canvas id="cv" width="400" height="280"></canvas></div>
-<script src="pix.js"></script>
-<script src="sprites.js"></script>
-<script src="scene.js"></script>
+<div id="stage"><canvas id="cv" width="1200" height="840"></canvas></div>
+<script src="lowpoly.js"></script>
 <script>
 const stage = document.getElementById('stage');
 const q = new URLSearchParams(location.search).get('s') || 'pilih';
-const K = 1.5, SC = 1200 / (400 * K);          // latar 600×420 → 2× (lebih jauh/zoom out)
-cv.width = 400 * K; cv.height = 280 * K; SCN.size(K);
 const g = cv.getContext('2d');
-const sp = { face: SPR.ataFace(), kb: SPR.kumbang(), tw: SPR.tawon() };
-const url = (S) => S.canvas().toDataURL();
+const KB = LP.icon((c, x, y, s) => LP.kumbang(c, x, y, s), 120, 90, 52, 82, 0.55);
+const TW = LP.icon((c, x, y, s, h) => LP.tawon(c, x, y, s, h), 120, 90, 56, 92, 0.85);
 
 // ---- sabuk: warna diganti saat runtime (piksel gelap netral di area sabuk) ----
 const BELT = {
@@ -118,7 +114,7 @@ const BELT_AREA = {   // kotak area sabuk per pose (koordinat gambar)
   kanan: [[57, 165, 178, 236]], depan: [[55, 165, 152, 258]],
 };
 const IMG = {};
-function load(n) { return new Promise(r => { const i = new Image(); i.onload = () => { IMG[n] = i; r(); }; i.src = '../img/ata/' + n + '.png'; }); }
+function load(n) { return new Promise(r => { const i = new Image(); i.onload = () => { IMG[n] = i; r(); }; i.src = '../img/' + (n.includes('/') ? n : 'ata/' + n) + '.png'; }); }
 function hex(h) { return [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16)); }
 function ata(pose, belt) {
   const im = IMG[pose], c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
@@ -134,7 +130,8 @@ function ata(pose, belt) {
   x.putImageData(d, 0, 0); return c.toDataURL();
 }
 function img(src, x, y, h, cls) { const i = document.createElement('img'); i.src = src; i.className = 'spr ' + (cls || ''); Object.assign(i.style, { left: x + 'px', top: y + 'px', height: h + 'px' }); stage.appendChild(i); return i; }
-function shadow(x, y, rx) { PX.disc(g, x / SC, y / SC, rx / SC, rx * 0.32 / SC, 'rgba(15,25,8,.45)'); }
+function shadow(x, y, rx) { LP.softShadow(g, x, y, rx, rx * 0.3, 0.45); }
+function char(n, fx, fy, h, flip) { const im = IMG[n], w = im.width * h / im.height; return img(n.includes('/') ? IMG[n].src : null, fx - w / 2, fy - h, h, flip ? 'flip' : ''); }
 function ui(html, cls, style) { const d = document.createElement('div'); d.className = 'ui ' + (cls || ''); d.innerHTML = html; if (style) Object.assign(d.style, style); stage.appendChild(d); return d; }
 const at = (x, y) => ({ left: x + 'px', top: y + 'px' });
 
@@ -142,43 +139,47 @@ function fit() { const s = Math.min(innerWidth / 1200, innerHeight / 840); stage
 addEventListener('resize', fit); fit();
 
 const BELT_NOW = 'kuning';
+function card(por, nm, lv, job, hp, hpm, mp, mpm, now) {
+  return `<div class="box card ${now ? 'now' : ''}"><div class="por"><img src="${por}" style="width:96px;margin-top:6px;image-rendering:auto"></div>
+    <div style="flex:1"><div class="nm">${nm} <small>Lv ${lv}</small></div><div class="job">${job}</div>
+    <div class="bar hp"><b>HP</b><div class="t"><i style="width:${hp / hpm * 100}%"></i></div><span>${hp}/${hpm}</span></div>
+    <div class="bar mp"><b>MP</b><div class="t"><i style="width:${mp / mpm * 100}%"></i></div><span>${mp}/${mpm}</span></div></div></div>`;
+}
 function partyCards(now, mp) {
   const p = ui('', '', {}); p.id = 'party';
-  p.innerHTML = `
-  <div class="box card ${now ? 'now' : ''}"><div class="por"><img src="${ata('wajah')}" style="width:96px;margin-top:6px;image-rendering:auto"></div>
-    <div style="flex:1"><div class="nm">Ata <small>Lv 6</small></div><div class="job">Taekwondoin · 🟨 Sabuk Kuning</div>
-    <div class="bar hp"><b>HP</b><div class="t"><i style="width:78%"></i></div><span>47/60</span></div>
-    <div class="bar mp"><b>MP</b><div class="t"><i style="width:${mp}%"></i></div><span>${Math.round(mp * 16 / 100)}/16</span></div></div></div>
-  <div class="box card lock"><div class="por">?</div><div style="flex:1"><div class="nm">? ? ?</div><div class="job">Bergabung di Bab 1</div>
-    <div class="bar hp"><b>HP</b><div class="t"></div><span>--</span></div><div class="bar mp"><b>MP</b><div class="t"></div><span>--</span></div></div></div>
-  <div class="box card lock"><div class="por">?</div><div style="flex:1"><div class="nm">? ? ?</div><div class="job">Bergabung di Bab 2</div>
-    <div class="bar hp"><b>HP</b><div class="t"></div><span>--</span></div><div class="bar mp"><b>MP</b><div class="t"></div><span>--</span></div></div></div>`;
+  p.innerHTML = card(ata('wajah'), 'Ata', 6, 'Taekwondoin · 🟨 Kuning', 47, 60, mp, 16, now)
+    + card(IMG['ladhia/wajah'].src, 'Ladhia', 6, 'Paladin', 88, 96, 4, 6)
+    + card(IMG['bubunti/wajah'].src, 'Bubunti', 5, 'Chef', 38, 44, 22, 30);
 }
 
 function battleBase(hit) {
-  SCN.battle(g);
-  // musuh (kiri, skala pixel 3×)
-  const tw = hit ? [300, 334] : [330, 238];
-  shadow(214, 405, 52); img(url(sp.kb), 160, 340, 78, 'px');
-  shadow(290, 548, 52); img(url(sp.kb), 236, 483, 78, 'px');
-  shadow(tw[0] + 45, hit ? 452 : 380, 30); img(url(sp.tw), tw[0], tw[1], 72, 'px');
-  if (hit) { shadow(540, 540, 46); img(ata('tendang', BELT_NOW), 389, 352, 190, 'flip'); }
-  else { shadow(625, 520, 48); img(ata('siaga', BELT_NOW), 560, 345, 180, 'flip'); }
-  ui('💥 Kumpul tenaga', 'intent big', at(214, 334));
-  ui('⚔️', 'intent', at(290, 478));
-  if (!hit) ui('⚔️', 'intent', at(tw[0] + 45, tw[1] - 6));
-  ui('🪨 Keras', 'tipe', at(214, 412)); ui('🪨 Keras', 'tipe', at(290, 556)); if (!hit) ui('🪶 Lincah', 'tipe', at(tw[0] + 45, 386));
-  const faces = { a: ata('wajah'), k: url(sp.kb), t: url(sp.tw) };
-  const order = hit ? [['k', 1, 'now'], ['k', 2], ['a'], ['t', 0, '', '⬇']] : [['a', 0, 'now'], ['t'], ['k', 1], ['k', 2]];
-  ui('<span class="lbl">GILIRAN</span>' + order.map(([k, n, c, mv], i) =>
-    (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${k !== 'a' ? 'foe' : ''}"><img src="${faces[k]}" style="${k === 'a' ? 'image-rendering:auto' : ''}">${mv ? `<span class="mv">${mv}</span>` : ''}</div>`).join(''), 'box', {}).id = 'turn';
+  LP.battle(g, 1200, 840);
+  // musuh (kiri, menghadap kanan)
+  LP.kumbang(g, 150, 410, 0.95);
+  LP.kumbang(g, 225, 590, 0.95);
+  const tw = hit ? [380, 380] : [330, 330];
+  LP.tawon(g, tw[0], tw[1], 1, 80);
+  // tim (kanan, menghadap kiri)
+  const lx = hit ? 640 : 500, ly = hit ? 585 : 505;
+  if (hit) { shadow(578, 433, 50); img(ata('tendang', BELT_NOW), 422, 433 - 178, 178, 'flip'); }
+  shadow(lx, ly, 66); img(IMG['ladhia/siaga'].src, lx - 100, ly - 205, 205, 'flip');
+  if (!hit) { shadow(645, 368, 44); img(ata('siaga', BELT_NOW), 645 - 68, 368 - 165, 165, 'flip'); }
+  const bx = hit ? 790 : 640; shadow(bx, 648, 48); img(IMG['bubunti/siaga'].src, bx - 95, 648 - 175, 175, 'flip');
+  ui('💥 Kumpul tenaga', 'intent big', at(155, 308));
+  ui('⚔️', 'intent', at(230, 489));
+  if (!hit) ui('⚔️', 'intent', at(tw[0] + 8, tw[1] - 150));
+  ui('🪨 Keras', 'tipe', at(150, 422)); ui('🪨 Keras', 'tipe', at(225, 602)); if (!hit) ui('🪶 Lincah', 'tipe', at(tw[0], tw[1] + 12));
+  const faces = { a: ata('wajah'), k: KB, t: TW, l: IMG['ladhia/wajah'].src, b: IMG['bubunti/wajah'].src };
+  const order = hit ? [['k', 'now'], ['b'], ['l'], ['k'], ['t', '', '⬇']] : [['a', 'now'], ['t'], ['b'], ['k'], ['l'], ['k']];
+  ui('<span class="lbl">GILIRAN</span>' + order.map(([k, c, mv], i) =>
+    (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${'ktb'.includes(k) && k !== 'b' ? 'foe' : ''}"><img src="${faces[k]}" style="image-rendering:auto">${mv ? `<span class="mv">${mv}</span>` : ''}</div>`).join(''), 'box', {}).id = 'turn';
   ui('<div class="lbl">MUSUH</div><div class="row"><span>Tawon Nakal</span><span>×1</span></div><div class="row"><span>Kumbang Batu</span><span>×2</span></div>', 'box', {}).id = 'foes';
 }
 
-Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah'].map(load)).then(() => {
+Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah', 'ladhia/siaga', 'ladhia/wajah', 'ladhia/kanan', 'bubunti/siaga', 'bubunti/wajah', 'bubunti/kanan'].map(load)).then(() => {
 if (q === 'pilih') {
   battleBase(false);
-  partyCards(true, 75);
+  partyCards(true, 12);
   ui(`<div class="btn"><span class="ic">⚔️</span>Serang</div><div class="btn sel"><span class="ic">✨</span>Jurus</div><div class="btn"><span class="ic">🛡️</span>Bertahan</div><div class="btn"><span class="ic">🎒</span>Bekal</div><div class="btn"><span class="ic">🔄</span>Tukar</div><div class="btn"><span class="ic">🏃</span>Kabur</div>`, 'box', {}).id = 'menu';
   ui(`<div class="lbl">JURUS ATA</div>
     <div class="j"><b>Tendangan Depan</b><span class="mpc">2 MP</span><i>Ap Chagi · 앞차기</i></div>
@@ -188,30 +189,31 @@ if (q === 'pilih') {
   ui('Kumbang Batu sedang <em>💥 kumpul tenaga</em>! Pukulannya besar giliran depan.', 'box', {}).id = 'msg';
 } else if (q === 'serang') {
   battleBase(true);
-  partyCards(false, 56);
+  partyCards(false, 9);
   const c2 = document.createElement('canvas'); c2.width = 1200; c2.height = 840; c2.style.pointerEvents = 'none'; stage.appendChild(c2);
   const h = c2.getContext('2d'); h.strokeStyle = '#fff6d6'; h.lineWidth = 5; h.globalAlpha = .85;
-  for (let i = 0; i < 3; i++) { h.beginPath(); h.arc(470, 395, 50 + i * 16, Math.PI * 0.78, Math.PI * 1.22); h.stroke(); }
-  h.globalAlpha = 1; h.fillStyle = '#fff3b0'; h.beginPath(); h.arc(392, 370, 24, 0, 7); h.fill(); h.fillStyle = '#fff'; h.beginPath(); h.arc(392, 370, 13, 0, 7); h.fill();
-  ui('24<small>AMPUH!</small>', 'dmg', at(345, 222));
+  for (let i = 0; i < 3; i++) { h.beginPath(); h.arc(490, 320, 50 + i * 16, Math.PI * 0.78, Math.PI * 1.22); h.stroke(); }
+  h.globalAlpha = 1; h.fillStyle = '#fff3b0'; h.beginPath(); h.arc(430, 282, 24, 0, 7); h.fill(); h.fillStyle = '#fff'; h.beginPath(); h.arc(430, 282, 13, 0, 7); h.fill();
+  ui('24<small>AMPUH!</small>', 'dmg', at(232, 180));
   ui('Ata: <em>Tendangan Samping!</em> &nbsp;Tawon Nakal terdorong ke belakang antrean ⬇', 'box', {}).id = 'msg';
 } else if (q === 'jelajah') {
-  SCN.jelajah(g);
-  shadow(965, 330, 52); img(url(sp.kb), 911, 252, 78, 'px');
-  shadow(592, 520, 40); img(ata('kanan', BELT_NOW), 540, 355, 170);
-  const mx = 300 / SC, my = 640 / SC;
-  PX.disc(g, mx, my + 6, 7, 3, 'rgba(10,25,5,.4)'); PX.disc(g, mx, my, 6, 6, '#c98a2a'); PX.disc(g, mx - 1, my - 2, 3.5, 2.8, '#ffcf6e');
-  g.fillStyle = '#6b4a30'; g.fillRect(mx - 3, my - 7, 6, 2);
-  g.fillStyle = '#fff'; [[mx + 9, my - 7], [mx - 9, my - 5], [mx + 7, my + 4]].forEach(([x, y]) => { g.fillRect(x, y, 1, 3); g.fillRect(x - 1, y + 1, 3, 1); });
-  ui('Hutan Pinggir<small>Prolog · Desa Akar</small>', 'box', {}).id = 'area';
+  LP.jelajah(g, 1200, 840);
+  LP.kumbang(g, 965, 330, 0.8);
+  shadow(335, 625, 36); img(IMG['bubunti/kanan'].src, 335 - 42, 625 - 150, 150);
+  shadow(475, 583, 46); img(IMG['ladhia/kanan'].src, 475 - 62, 583 - 170, 170);
+  shadow(640, 492, 36); img(ata('kanan', BELT_NOW), 640 - 46, 492 - 150, 150);
+  const mx = 400, my = 700;
+  LP.softShadow(g, mx, my + 12, 16, 5); LP.facet(g, mx, my, 13, 12, '#d0912e', { n: 8, k: .35 }); LP.facet(g, mx - 2, my - 13, 9, 4, '#7a5538', { n: 6 });
+  g.fillStyle = '#fff'; [[mx + 20, my - 16], [mx - 20, my - 8], [mx + 16, my + 8]].forEach(([x, y]) => { g.fillRect(x - 1, y - 5, 2, 10); g.fillRect(x - 5, y - 1, 10, 2); });
+  ui('Hutan Pinggir<small>Bab 2 · Menuju Desa Embun</small>', 'box', {}).id = 'area';
   ui('<span>🪙 35</span><span>🍯 3</span>', 'box', {}).id = 'dompet';
   ui('👥 Tim', 'box', {}).id = 'btnTim';
-  ui('🪨 Kumbang Batu · <b style="color:#ffd86b">Lv 2</b>', 'box tag', at(965, 240));
+  ui('🪨 Kumbang Batu · <b style="color:#ffd86b">Lv 2</b>', 'box tag', at(965, 230));
   ui('Dekati dari belakang = <b style="color:#ffd86b">Serangan Kejutan!</b>', 'box tag', at(930, 420));
   ui('', '', {}).id = 'stick';
   ui('A', '', {}).id = 'btnA';
 } else if (q === 'sabuk') {
-  SCN.jelajah(g); g.fillStyle = 'rgba(10,8,5,.55)'; g.fillRect(0, 0, cv.width, cv.height);
+  LP.jelajah(g, 1200, 840); g.fillStyle = 'rgba(10,8,5,.55)'; g.fillRect(0, 0, cv.width, cv.height);
   const L = [['putih', 'Sabuk Putih', 'Lv 1'], ['kuning', 'Sabuk Kuning', 'Lv 5'], ['hijau', 'Sabuk Hijau', 'Lv 10'],
              ['biru', 'Sabuk Biru', 'Lv 16'], ['merah', 'Sabuk Merah', 'Lv 23'], ['hitam', 'Sabuk Hitam', 'Lv 30']];
   ui(`<h2>🥋 Naik Sabuk</h2><div class="row">${L.map(([k, n, l]) => `<div class="it"><img src="${ata('depan', k)}"><b>${n}</b><span>${l}</span></div>`).join('')}</div>
