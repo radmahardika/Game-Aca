@@ -222,6 +222,21 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 - Ide tahap berikutnya (belum dibuat): Pasar Malam Kunang-kunang → Festival Sungai Pelangi → Pesta Panen Danau Raya →
   Festival Agung (lebih banyak daun dihubungkan jembatan ranting), susun acara & tugas relawan, tamu istimewa.
 
+## Game keenam (rencana): Ata dan Pohon Madu Legendaris (`pohon-madu/`)
+
+**Baru tahap desain mekanik** (disepakati), belum ada visual/kode. Dokumen lengkap: `pohon-madu/DESAIN.md`
+(judul & nama folder sementara). Turn-based RPG (genre ala Dragon Quest, bukan tiruan) untuk **melatih strategi**.
+
+- Status HP/MP/ATK/DEF/SPD. Musuh terlihat di peta, battle bergiliran dengan **ikon niat musuh**, **bar urutan giliran**,
+  3 tipe musuh (Keras/Lincah/Bayangan), Buku Monster, kombo, bos berpola 2 fase. **Tim aktif 3**, tukar di battle = 1 giliran.
+  Kalah → penginapan terakhir, **koin −¼**. Level maks 40, pilih 1 dari 2 jurus di Lv 10 & 25.
+- **Tim Jelajah Legenda**: Ata (honey badger, **Taekwondoin**, jurus tendangan nama **Indonesia + Korea**), Ladhia (badak,
+  Paladin), Bubunti (llama, **Chef**: menyembuhkan lewat masakan, satu-satunya serangan Sambal Super Pedas; Dapur Perkemahan),
+  Oumaldi (tupai, Pemanah), Tung Momon (jalak, Pemusik), Tung Yanto (kura-kura pendiam, Pertapa Batu), Uti Reni (rusa,
+  Penjaga Hutan), Uti Lilik (roh hewan, Pemanggil Roh). Tung = tetua laki-laki, Uti = tetua perempuan.
+- Cerita: Ata mencari Pohon Madu Legendaris dari dongeng Nenek; para tetua = tim lama Nenek, peta disobek 5 keping.
+  Prolog + 8 bab (lengkap), tiap bab panjang (desa, 2–3 area, misi warga, dungeon, bos tengah, rekrut, bos bab).
+
 ## Status & yang sedang dibahas
 
 - Rilis terakhir di `main`: **versi 28** = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
