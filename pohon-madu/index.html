@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pohon Madu">
+<meta name="theme-color" content="#2a1d15">
+<title>Ata dan Pohon Madu Legendaris</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&display=swap">
+<link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+<div id="safe"></div>
+<div id="stage">
+  <canvas id="bg" width="1200" height="840"></canvas>
+  <div id="world"></div>
+  <div id="fx"></div>
+  <div id="pick" class="hide"></div>
+  <div id="screen"></div>
+  <div id="battleHud" class="hide">
+    <div id="turn" class="box"></div>
+    <div id="bmsg" class="box"></div>
+    <div id="foes" class="box"></div>
+    <div id="party"></div>
+    <div id="jurus" class="box hide"></div>
+    <div id="menu" class="box hide"></div>
+  </div>
+  <div id="topBtns"><button id="fast" type="button" aria-label="Cepat">⏩</button><button id="soundBtn" type="button" aria-label="Suara">🔊</button></div>
+  <div id="loading">Memuat…</div>
+</div>
+<div id="rotate">Putar iPad ke posisi mendatar 🔄</div>
+<script src="js/data.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/core.js?v=1"></script>
+<script src="js/battle.js?v=1"></script>
+<script src="js/main.js?v=1"></script>
+</body>
+</html>

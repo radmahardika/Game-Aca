@@ -222,10 +222,21 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 - Ide tahap berikutnya (belum dibuat): Pasar Malam Kunang-kunang → Festival Sungai Pelangi → Pesta Panen Danau Raya →
   Festival Agung (lebih banyak daun dihubungkan jembatan ranting), susun acara & tugas relawan, tamu istimewa.
 
-## Game keenam (rencana): Ata dan Pohon Madu Legendaris (`pohon-madu/`)
+## Game keenam: Ata dan Pohon Madu Legendaris (`pohon-madu/`)
 
-**Baru tahap desain mekanik** (disepakati), belum ada visual/kode. Dokumen lengkap: `pohon-madu/DESAIN.md`
-(judul & nama folder sementara). Turn-based RPG (genre ala Dragon Quest, bukan tiruan) untuk **melatih strategi**.
+Link (setelah rilis): https://radmahardika.github.io/Game-Aca/pohon-madu/ · versi sendiri `PM.VERSION` di `pohon-madu/js/data.js`
++ `?v=N` di `pohon-madu/index.html`. Desain: `pohon-madu/DESAIN.md`, daftar aset: `pohon-madu/ASET.md`, mockup: `pohon-madu/mockup/`.
+**Versi 1 (pratinjau-v29) = pratinjau battle** tanpa peta jelajah: layar judul → **Pilih Pertarungan** (12 pertarungan Prolog–Bab 2,
+terbuka berurutan, bisa diulang untuk latihan) → battle → menang (EXP sama untuk tiap anggota, koin, 🍯 madu) → naik level / ujian sabuk /
+pilih jurus Lv 10 → Ladhia bergabung setelah bos Prolog, Bubunti setelah bos Bab 1. Layar Tim & Buku Monster.
+Aset: sprite tokoh/musuh/latar **dari pengguna** (latar hijau dipotong → `img/ata|ladhia|bubunti|musuh|latar`). Ukuran: Ata ¾ Bubunti,
+Ladhia terbesar. Warna sabuk Ata diganti saat runtime (`PM.BELT_AREA`). Battle: giliran per ronde menurut SPD (bar GILIRAN), ikon niat
+musuh (⚔️ / 💥 kumpul tenaga → pukulan besar giliran depan / 🛡️ / 💤 lengah / 🍄 spora tidur), tipe (`aff` per tokoh, `PM.ELEM` sambal),
+bos berpola + fase 2 (`pattern`, `phase2`), tips sekali (`S.tips`). Ketuk lingkaran untuk memilih sasaran. Simpanan `localStorage`
+kunci `pohon-madu-v1`. Tes: `PM.debug` (title, peta, tim, buku, fight(id), levelUp, joinScene), `PM.battleDebug()` = keadaan battle,
+`PM.toggleFast()`. Pemain otomatis acak bisa menamatkan semua pertarungan (cek keseimbangan).
+
+Ringkasan desain (disepakati): Turn-based RPG (genre ala Dragon Quest, bukan tiruan) untuk **melatih strategi**.
 
 - Status HP/MP/ATK/DEF/SPD. Musuh terlihat di peta, battle bergiliran dengan **ikon niat musuh**, **bar urutan giliran**,
   3 tipe musuh (Keras/Lincah/Bayangan), Buku Monster, kombo, bos berpola 2 fase. **Tim aktif 3**, tukar di battle = 1 giliran.
