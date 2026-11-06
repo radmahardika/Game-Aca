@@ -2,6 +2,8 @@
 
 > Status: **disepakati** (diskusi mekanik). Visual & kode belum dibuat — langkah berikutnya mockup.
 > Judul game & nama folder (`pohon-madu/`) masih sementara.
+> Sprite Ata dari pengguna (latar hijau) → dipotong ke `pohon-madu/img/ata/*.png`. Mockup: `pohon-madu/mockup/?s=pilih|serang|jelajah|sabuk`.
+> Gaya visual: latar hutan lukisan-pixel miring dari atas (referensi pengguna), kamera agak jauh (zoom out).
 
 Game keenam. **Turn-based RPG** (genre seperti Dragon Quest), murni untuk **melatih strategi** anak 6 tahun.
 Dimainkan di iPad (Safari) lewat GitHub Pages, sama seperti game lain.
@@ -83,7 +85,8 @@ Kekuatan awal (★1–5):
 *Tung* = sebutan tetua laki-laki, *Uti* = sebutan tetua perempuan.
 
 ### 🦡 Ata — Taekwondoin (kecepatan)
-Senjata: **sepatu & sabuk** (Sabuk Putih → Kuning → Hijau → Biru → Merah → Hitam; naik sabuk = senjata baru).
+Senjata: **sabuk** — **naik sabuk** (disepakati): Putih Lv 1 → Kuning Lv 5 → Hijau Lv 10 → Biru Lv 16 → Merah Lv 23 → Hitam Lv 30
+(ujian sabuk di dojo; ATK & SPD naik). Warna sabuk di sprite diganti saat runtime (`BELT`, `BELT_AREA` di mockup).
 Serangan biasa: **Pukulan Lurus (Jireugi 지르기)**. Bakat bawaan **Gesit**: kadang dapat giliran tambahan; kabur selalu berhasil.
 Nama jurus tampil **Indonesia + istilah Korea** (latin; hangul di dokumen ini saja).
 

@@ -82,6 +82,16 @@
           display: grid; place-items: center; font-size: 52px; font-weight: 700; color: #4a2a0c; text-shadow: none; box-shadow: 0 0 20px #ffcf6e; }
   #btnTim { right: 24px; top: 96px; padding: 8px 14px; font-size: 22px; }
   #label { position: fixed; left: 8px; bottom: 6px; color: #fff8; font: 13px monospace; }
+  .spr { position: absolute; image-rendering: auto; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)); }
+  .spr.px { image-rendering: pixelated; }
+  .spr.flip { transform: scaleX(-1); }
+  #sabuk { left: 50%; top: 50%; transform: translate(-50%,-50%); padding: 20px 26px; text-align: center; }
+  #sabuk h2 { margin: 0 0 6px; font-size: 34px; color: #ffd86b; }
+  #sabuk .row { display: flex; gap: 14px; align-items: flex-end; }
+  #sabuk .it { width: 150px; }
+  #sabuk .it img { height: 210px; }
+  #sabuk .it b { display: block; font-size: 24px; } #sabuk .it span { font-size: 18px; color: #cdb88d; }
+  #sabuk p { font-size: 20px; color: #f1e3c2; margin: 14px 0 0; }
 </style>
 </head>
 <body>
@@ -90,31 +100,55 @@
 <script src="sprites.js"></script>
 <script src="scene.js"></script>
 <script>
-const SC = 3, stage = document.getElementById('stage'), g = cv.getContext('2d');
+const stage = document.getElementById('stage');
 const q = new URLSearchParams(location.search).get('s') || 'pilih';
-const sp = { ata: SPR.ataStance(), kick: SPR.ataKick(), face: SPR.ataFace(), kb: SPR.kumbang(), tw: SPR.tawon() };
+const K = 1.5, SC = 1200 / (400 * K);          // latar 600×420 → 2× (lebih jauh/zoom out)
+cv.width = 400 * K; cv.height = 280 * K; SCN.size(K);
+const g = cv.getContext('2d');
+const sp = { face: SPR.ataFace(), kb: SPR.kumbang(), tw: SPR.tawon() };
 const url = (S) => S.canvas().toDataURL();
-function draw(S, x, y, flip, k = 2) {
-  const c = S.canvas(); g.imageSmoothingEnabled = false;
-  if (flip) { g.save(); g.translate(x + c.width * k, y); g.scale(-1, 1); g.drawImage(c, 0, 0, c.width * k, c.height * k); g.restore(); }
-  else g.drawImage(c, x, y, c.width * k, c.height * k);
-}
-function ui(html, cls, style) { const d = document.createElement('div'); d.className = 'ui ' + (cls || ''); d.innerHTML = html; if (style) Object.assign(d.style, style); stage.appendChild(d); return d; }
-const at = (x, y) => ({ left: x * SC + 'px', top: y * SC + 'px' });
 
-function fit() {
-  const s = Math.min(innerWidth / 1200, innerHeight / 840);
-  stage.style.transform = `scale(${s}) translate(-50%, -50%)`;
+// ---- sabuk: warna diganti saat runtime (piksel gelap netral di area sabuk) ----
+const BELT = {
+  putih: ['#9f9a90', '#f3efe6'], kuning: ['#a47410', '#ffd84a'], hijau: ['#2c6a22', '#79c95a'],
+  biru: ['#1d3f8a', '#5f95ec'], merah: ['#7a1414', '#e24a3e'], hitam: null,
+};
+const BELT_AREA = {   // kotak area sabuk per pose (koordinat gambar)
+  siaga: [[66, 138, 160, 248]], tendang: [[97, 122, 174, 166], [100, 160, 130, 212]],
+  kanan: [[57, 165, 178, 236]], depan: [[55, 165, 152, 258]],
+};
+const IMG = {};
+function load(n) { return new Promise(r => { const i = new Image(); i.onload = () => { IMG[n] = i; r(); }; i.src = '../img/ata/' + n + '.png'; }); }
+function hex(h) { return [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16)); }
+function ata(pose, belt) {
+  const im = IMG[pose], c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+  const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+  const ramp = BELT[belt]; if (!ramp || !BELT_AREA[pose]) return c.toDataURL();
+  const d = x.getImageData(0, 0, c.width, c.height), a = d.data, lo = hex(ramp[0]), hi = hex(ramp[1]);
+  for (const [x0, y0, x1, y1] of BELT_AREA[pose]) for (let y = y0; y < y1; y++) for (let xx = x0; xx < x1; xx++) {
+    const i = (y * c.width + xx) * 4, r = a[i], gg = a[i + 1], b = a[i + 2];
+    if (a[i + 3] < 60 || Math.max(r, gg, b) >= 92 || r - b > 5 || Math.abs(r - gg) >= 12) continue;
+    const t = Math.min(1, Math.max(0, ((r + gg + b) / 3 - 28) / 55));
+    for (let k = 0; k < 3; k++) a[i + k] = lo[k] + (hi[k] - lo[k]) * t;
+  }
+  x.putImageData(d, 0, 0); return c.toDataURL();
 }
+function img(src, x, y, h, cls) { const i = document.createElement('img'); i.src = src; i.className = 'spr ' + (cls || ''); Object.assign(i.style, { left: x + 'px', top: y + 'px', height: h + 'px' }); stage.appendChild(i); return i; }
+function shadow(x, y, rx) { PX.disc(g, x / SC, y / SC, rx / SC, rx * 0.32 / SC, 'rgba(15,25,8,.45)'); }
+function ui(html, cls, style) { const d = document.createElement('div'); d.className = 'ui ' + (cls || ''); d.innerHTML = html; if (style) Object.assign(d.style, style); stage.appendChild(d); return d; }
+const at = (x, y) => ({ left: x + 'px', top: y + 'px' });
+
+function fit() { const s = Math.min(innerWidth / 1200, innerHeight / 840); stage.style.transform = `scale(${s}) translate(-50%, -50%)`; }
 addEventListener('resize', fit); fit();
 
-function partyCards(now) {
+const BELT_NOW = 'kuning';
+function partyCards(now, mp) {
   const p = ui('', '', {}); p.id = 'party';
   p.innerHTML = `
-  <div class="box card ${now ? 'now' : ''}"><div class="por"><img src="${url(sp.face)}"></div>
-    <div style="flex:1"><div class="nm">Ata <small>Lv 4</small></div><div class="job">Pelari Kilat · Taekwondoin</div>
-    <div class="bar hp"><b>HP</b><div class="t"><i style="width:78%"></i></div><span>39/50</span></div>
-    <div class="bar mp"><b>MP</b><div class="t"><i style="width:${now === 'hit' ? 50 : 75}%"></i></div><span>${now === 'hit' ? 6 : 9}/12</span></div></div></div>
+  <div class="box card ${now ? 'now' : ''}"><div class="por"><img src="${ata('wajah')}" style="width:96px;margin-top:6px;image-rendering:auto"></div>
+    <div style="flex:1"><div class="nm">Ata <small>Lv 6</small></div><div class="job">Taekwondoin · 🟨 Sabuk Kuning</div>
+    <div class="bar hp"><b>HP</b><div class="t"><i style="width:78%"></i></div><span>47/60</span></div>
+    <div class="bar mp"><b>MP</b><div class="t"><i style="width:${mp}%"></i></div><span>${Math.round(mp * 16 / 100)}/16</span></div></div></div>
   <div class="box card lock"><div class="por">?</div><div style="flex:1"><div class="nm">? ? ?</div><div class="job">Bergabung di Bab 1</div>
     <div class="bar hp"><b>HP</b><div class="t"></div><span>--</span></div><div class="bar mp"><b>MP</b><div class="t"></div><span>--</span></div></div></div>
   <div class="box card lock"><div class="por">?</div><div style="flex:1"><div class="nm">? ? ?</div><div class="job">Bergabung di Bab 2</div>
@@ -123,29 +157,28 @@ function partyCards(now) {
 
 function battleBase(hit) {
   SCN.battle(g);
-  // musuh (kiri) — Kumbang 1 bersiap pukulan besar, Kumbang 2 menyerang, Tawon terbang
-  const tx = hit ? 92 : 112, ty = hit ? 96 : 64;
-  SCN.shadow(g, 52, 146, 30); draw(sp.kb, 16, 96);
-  SCN.shadow(g, 88, 211, 30); draw(sp.kb, 52, 161);
-  SCN.shadow(g, tx + 30, hit ? 150 : 132, 18); draw(sp.tw, tx, ty);
-  // Ata (kanan)
-  if (hit) { SCN.shadow(g, 208, 156, 26); draw(sp.kick, 148, 70); }
-  else { SCN.shadow(g, 204, 196, 26); draw(sp.ata, 170, 108); }
-  // ikon niat & tipe
-  ui('💥 Kumpul tenaga', 'intent big', at(52, 94));
-  ui('⚔️', 'intent', at(88, 160));
-  if (!hit) ui('⚔️', 'intent', at(tx + 30, ty - 2));
-  ui('🪨 Keras', 'tipe', at(52, 150)); ui('🪨 Keras', 'tipe', at(88, 215)); ui('🪶 Lincah', 'tipe', at(tx + 30, hit ? 152 : 136));
-  const faces = { a: url(sp.face), k: url(sp.kb), t: url(sp.tw) };
+  // musuh (kiri, skala pixel 3×)
+  const tw = hit ? [300, 334] : [330, 238];
+  shadow(214, 405, 52); img(url(sp.kb), 160, 340, 78, 'px');
+  shadow(290, 548, 52); img(url(sp.kb), 236, 483, 78, 'px');
+  shadow(tw[0] + 45, hit ? 452 : 380, 30); img(url(sp.tw), tw[0], tw[1], 72, 'px');
+  if (hit) { shadow(540, 540, 46); img(ata('tendang', BELT_NOW), 389, 352, 190, 'flip'); }
+  else { shadow(625, 520, 48); img(ata('siaga', BELT_NOW), 560, 345, 180, 'flip'); }
+  ui('💥 Kumpul tenaga', 'intent big', at(214, 334));
+  ui('⚔️', 'intent', at(290, 478));
+  if (!hit) ui('⚔️', 'intent', at(tw[0] + 45, tw[1] - 6));
+  ui('🪨 Keras', 'tipe', at(214, 412)); ui('🪨 Keras', 'tipe', at(290, 556)); if (!hit) ui('🪶 Lincah', 'tipe', at(tw[0] + 45, 386));
+  const faces = { a: ata('wajah'), k: url(sp.kb), t: url(sp.tw) };
   const order = hit ? [['k', 1, 'now'], ['k', 2], ['a'], ['t', 0, '', '⬇']] : [['a', 0, 'now'], ['t'], ['k', 1], ['k', 2]];
   ui('<span class="lbl">GILIRAN</span>' + order.map(([k, n, c, mv], i) =>
-    (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${k !== 'a' ? 'foe' : ''}"><img src="${faces[k]}">${mv ? `<span class="mv">${mv}</span>` : ''}</div>`).join(''), 'box', {}).id = 'turn';
+    (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${k !== 'a' ? 'foe' : ''}"><img src="${faces[k]}" style="${k === 'a' ? 'image-rendering:auto' : ''}">${mv ? `<span class="mv">${mv}</span>` : ''}</div>`).join(''), 'box', {}).id = 'turn';
   ui('<div class="lbl">MUSUH</div><div class="row"><span>Tawon Nakal</span><span>×1</span></div><div class="row"><span>Kumbang Batu</span><span>×2</span></div>', 'box', {}).id = 'foes';
 }
 
+Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah'].map(load)).then(() => {
 if (q === 'pilih') {
   battleBase(false);
-  partyCards(true);
+  partyCards(true, 75);
   ui(`<div class="btn"><span class="ic">⚔️</span>Serang</div><div class="btn sel"><span class="ic">✨</span>Jurus</div><div class="btn"><span class="ic">🛡️</span>Bertahan</div><div class="btn"><span class="ic">🎒</span>Bekal</div><div class="btn"><span class="ic">🔄</span>Tukar</div><div class="btn"><span class="ic">🏃</span>Kabur</div>`, 'box', {}).id = 'menu';
   ui(`<div class="lbl">JURUS ATA</div>
     <div class="j"><b>Tendangan Depan</b><span class="mpc">2 MP</span><i>Ap Chagi · 앞차기</i></div>
@@ -155,30 +188,36 @@ if (q === 'pilih') {
   ui('Kumbang Batu sedang <em>💥 kumpul tenaga</em>! Pukulannya besar giliran depan.', 'box', {}).id = 'msg';
 } else if (q === 'serang') {
   battleBase(true);
-  partyCards('hit');
-  // efek tendangan
-  g.save(); g.globalAlpha = .9; g.strokeStyle = '#fff6d6'; g.lineWidth = 2;
-  for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(200, 136, 34 + i * 7, Math.PI * 0.8, Math.PI * 1.25); g.stroke(); }
-  g.restore();
-  PX.disc(g, 152, 120, 10, 10, '#fff3b0'); PX.disc(g, 152, 120, 6, 6, '#ffffff');
-  ui('24<small>AMPUH!</small>', 'dmg', at(96, 66));
+  partyCards(false, 56);
+  const c2 = document.createElement('canvas'); c2.width = 1200; c2.height = 840; c2.style.pointerEvents = 'none'; stage.appendChild(c2);
+  const h = c2.getContext('2d'); h.strokeStyle = '#fff6d6'; h.lineWidth = 5; h.globalAlpha = .85;
+  for (let i = 0; i < 3; i++) { h.beginPath(); h.arc(470, 395, 50 + i * 16, Math.PI * 0.78, Math.PI * 1.22); h.stroke(); }
+  h.globalAlpha = 1; h.fillStyle = '#fff3b0'; h.beginPath(); h.arc(392, 370, 24, 0, 7); h.fill(); h.fillStyle = '#fff'; h.beginPath(); h.arc(392, 370, 13, 0, 7); h.fill();
+  ui('24<small>AMPUH!</small>', 'dmg', at(345, 222));
   ui('Ata: <em>Tendangan Samping!</em> &nbsp;Tawon Nakal terdorong ke belakang antrean ⬇', 'box', {}).id = 'msg';
 } else if (q === 'jelajah') {
   SCN.jelajah(g);
-  SCN.shadow(g, 300, 128, 30); draw(sp.kb, 264, 78);
-  SCN.shadow(g, 168, 196, 26); draw(sp.ata, 134, 108, true);
-  // madu berkilau
-  PX.disc(g, 120, 235, 5, 2, 'rgba(10,25,5,.4)');
-  PX.disc(g, 118, 229, 5, 5, '#c98a2a'); PX.disc(g, 117, 227, 3, 2.5, '#ffcf6e'); g.fillStyle = '#6b4a30'; g.fillRect(115, 222, 6, 2);
-  g.fillStyle = '#fff'; [[126, 222], [111, 224], [124, 232]].forEach(([x, y]) => { g.fillRect(x, y, 1, 3); g.fillRect(x - 1, y + 1, 3, 1); });
+  shadow(965, 330, 52); img(url(sp.kb), 911, 252, 78, 'px');
+  shadow(592, 520, 40); img(ata('kanan', BELT_NOW), 540, 355, 170);
+  const mx = 300 / SC, my = 640 / SC;
+  PX.disc(g, mx, my + 6, 7, 3, 'rgba(10,25,5,.4)'); PX.disc(g, mx, my, 6, 6, '#c98a2a'); PX.disc(g, mx - 1, my - 2, 3.5, 2.8, '#ffcf6e');
+  g.fillStyle = '#6b4a30'; g.fillRect(mx - 3, my - 7, 6, 2);
+  g.fillStyle = '#fff'; [[mx + 9, my - 7], [mx - 9, my - 5], [mx + 7, my + 4]].forEach(([x, y]) => { g.fillRect(x, y, 1, 3); g.fillRect(x - 1, y + 1, 3, 1); });
   ui('Hutan Pinggir<small>Prolog · Desa Akar</small>', 'box', {}).id = 'area';
   ui('<span>🪙 35</span><span>🍯 3</span>', 'box', {}).id = 'dompet';
   ui('👥 Tim', 'box', {}).id = 'btnTim';
-  ui('🪨 Kumbang Batu · <b style="color:#ffd86b">Lv 2</b>', 'box tag', at(300, 72));
-  ui('Dekati dari belakang = <b style="color:#ffd86b">Serangan Kejutan!</b>', 'box tag', at(300, 168));
+  ui('🪨 Kumbang Batu · <b style="color:#ffd86b">Lv 2</b>', 'box tag', at(965, 240));
+  ui('Dekati dari belakang = <b style="color:#ffd86b">Serangan Kejutan!</b>', 'box tag', at(930, 420));
   ui('', '', {}).id = 'stick';
   ui('A', '', {}).id = 'btnA';
+} else if (q === 'sabuk') {
+  SCN.jelajah(g); g.fillStyle = 'rgba(10,8,5,.55)'; g.fillRect(0, 0, cv.width, cv.height);
+  const L = [['putih', 'Sabuk Putih', 'Lv 1'], ['kuning', 'Sabuk Kuning', 'Lv 5'], ['hijau', 'Sabuk Hijau', 'Lv 10'],
+             ['biru', 'Sabuk Biru', 'Lv 16'], ['merah', 'Sabuk Merah', 'Lv 23'], ['hitam', 'Sabuk Hitam', 'Lv 30']];
+  ui(`<h2>🥋 Naik Sabuk</h2><div class="row">${L.map(([k, n, l]) => `<div class="it"><img src="${ata('depan', k)}"><b>${n}</b><span>${l}</span></div>`).join('')}</div>
+     <p>Sabuk = senjata Ata. Naik level → ujian sabuk di dojo → ATK & SPD naik + jurus baru.</p>`, 'box', {}).id = 'sabuk';
 }
+});
 </script>
 </body>
 </html>
