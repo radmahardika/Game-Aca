@@ -5,7 +5,7 @@
   PM.wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
   // ---------- simpanan ----------
-  const FRESH = () => ({ v: 1, joined: ['ata'], lv: { ata: 1 }, exp: { ata: 0 }, koin: 0, madu: 3, done: {}, seen: {}, beaten: {}, pick: {}, tips: {}, muted: false });
+  const FRESH = () => ({ v: 1, story: { st: 0, map: 'rumah-nenek', x: 790, y: 760, beat: {} }, joined: ['ata'], lv: { ata: 1 }, exp: { ata: 0 }, koin: 0, madu: 3, done: {}, seen: {}, beaten: {}, pick: {}, tips: {}, muted: false });
   PM.load = function () {
     try { const s = JSON.parse(localStorage.getItem(PM.SAVE_KEY)); if (s && s.v === 1) { PM.S = Object.assign(FRESH(), s); return; } } catch (e) {}
     PM.S = FRESH();
@@ -22,7 +22,11 @@
   });
   PM.preload = function (onProgress) {
     const list = [];
-    ['siaga', 'tendang', 'pukul', 'depan', 'wajah', 'teriak', 'kedip', 'rendah'].forEach((p) => list.push('ata/' + p + '.png'));
+    ['siaga', 'tendang', 'pukul', 'depan', 'belakang', 'kiri', 'kanan', 'wajah', 'teriak', 'kedip', 'rendah'].forEach((p) => list.push('ata/' + p + '.png'));
+    ['depan', 'belakang', 'kiri', 'kanan'].forEach((p) => { list.push('ladhia/' + p + '.png', 'bubunti/' + p + '.png', 'nenek/' + p + '.png', 'guru/' + p + '.png'); });
+    ['sapa', 'baca', 'tunjuk', 'tongkat', 'tunduk'].forEach((p) => list.push('nenek/' + p + '.png'));
+    ['lipat', 'hormat', 'stop', 'siaga', 'kuda'].forEach((p) => list.push('guru/' + p + '.png'));
+    ['desa-akar', 'rumah-nenek', 'dalam-dojo'].forEach((p) => list.push('peta/' + p + '.jpg'));
     ['siaga', 'lempar', 'ayun', 'bertahan', 'depan', 'wajah'].forEach((p) => list.push('ladhia/' + p + '.png'));
     ['siaga', 'sorak', 'ayun', 'depan', 'wajah', 'senyum'].forEach((p) => list.push('bubunti/' + p + '.png'));
     Object.values(PM.ENEMIES).forEach((e) => { list.push('musuh/' + e.spr + '.png', 'musuh/' + e.face + '.png'); if (e.phase2 && e.phase2.spr) list.push('musuh/' + e.phase2.spr + '.png'); });

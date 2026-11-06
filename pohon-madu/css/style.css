@@ -175,3 +175,36 @@ button { font-family: inherit; }
 .buku .m b { font-size: 18px; } .buku .m span { font-size: 14px; color: #6b5338; } .buku .m .weak { color: #2f7a2a; font-weight: 700; }
 .buku .m.bos { border-color: #d0452f; background: #fff1e0; }
 .buku .m.no img { filter: brightness(0) opacity(.3); } .buku .m.no b { color: #9a8a70; }
+
+/* jelajah */
+#explore { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
+.wlayer { position: absolute; left: 0; top: 0; will-change: transform; }
+.wpeta { position: absolute; left: 0; top: 0; display: block; pointer-events: none; -webkit-user-drag: none; }
+.wspr { position: absolute; left: 0; top: 0; filter: drop-shadow(0 4px 3px rgba(0,0,0,.3)); pointer-events: none; }
+.wsh { position: absolute; left: 0; top: 0; border-radius: 50%; background: radial-gradient(rgba(15,25,8,.5), rgba(15,25,8,0) 70%); z-index: 1; pointer-events: none; }
+.wmark { position: absolute; left: 0; top: 0; font-size: 34px; text-shadow: 0 2px 0 #fff, 0 -2px 0 #fff, 2px 0 0 #fff, -2px 0 0 #fff; animation: hop .5s infinite alternate; pointer-events: none; }
+@keyframes hop { to { margin-top: -8px; } }
+.whud > * { position: absolute; z-index: 1500; }
+.warea { left: 24px; top: 18px; padding: 8px 16px; font-size: 24px; }
+.warea small { display: block; font-size: 16px; color: #cdb88d; }
+.wgoal { left: 24px; top: 96px; padding: 6px 14px; font-size: 19px; max-width: 520px; }
+.wwallet { right: 24px; top: 18px; padding: 8px 14px; font-size: 24px; }
+.wtim { right: 24px; top: 82px; } .wmenu { right: 120px; top: 82px; }
+.stick { position: absolute; width: 150px; height: 150px; border-radius: 50%; border: 4px solid #ffffff66; background: #ffffff1a; z-index: 1400; pointer-events: none; }
+.stick .knob { position: absolute; left: 43px; top: 43px; width: 64px; height: 64px; border-radius: 50%; background: #ffffff77; border: 3px solid #ffffffbb; }
+.btnA { position: absolute; right: 60px; bottom: 90px; width: 116px; height: 116px; border-radius: 50%; background: radial-gradient(#ffcf6e, #c98a2a); border: 5px solid #fff3d1;
+  display: grid; place-items: center; font-size: 54px; font-weight: 700; color: #4a2a0c; z-index: 1500; opacity: .75; }
+.btnA.glow { opacity: 1; box-shadow: 0 0 28px #ffcf6e; animation: pulseA .7s infinite alternate; }
+@keyframes pulseA { to { transform: scale(1.08); } }
+.whint { right: 200px; bottom: 120px; padding: 8px 14px; font-size: 21px; z-index: 1500; }
+.whint b { color: #ffd86b; }
+#fade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 2900; }
+#fade.on { opacity: 1; }
+.talk { position: absolute; left: 140px; right: 140px; bottom: 24px; min-height: 120px; padding: 14px 20px; font-size: 25px; display: flex; gap: 16px; align-items: center; z-index: 2600; line-height: 1.3; }
+.talk img { height: 120px; flex: none; }
+.talk b { color: #ffd86b; }
+.talk.sys { justify-content: center; text-align: center; }
+.talk .next { position: absolute; right: 14px; bottom: 6px; font-size: 15px; color: #cdb88d; animation: hop .5s infinite alternate; }
+.surp { font-size: 30px; font-weight: 700; margin-bottom: 8px; } .surp.ok { color: #9cff8a; } .surp.bad { color: #ff9a7a; }
+.title .gsub { position: absolute; left: 62px; top: 440px; font-size: 20px; background: #2a1d15cc; padding: 4px 12px; border-radius: 8px; }
+.title .arena { position: absolute; left: 60px; top: 490px; font-size: 26px; }

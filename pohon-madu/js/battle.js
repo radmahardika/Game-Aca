@@ -173,6 +173,10 @@
     const list = B.actors.filter((a) => a.hp > 0);
     list.forEach((a) => (a._r = a.spd * (a.st.spdUp ? 1.5 : 1) * (0.9 + R() * 0.2) - (a.st.slow ? 999 : 0)));
     B.order = list.sort((a, b) => b._r - a._r);
+    if (B.round === 1 && B.enc.surprise) {
+      const first = B.enc.surprise === 'party' ? 'p' : 'e';
+      B.order = B.order.filter((a) => a.side === first).concat(B.order.filter((a) => a.side !== first));
+    }
     list.forEach((a) => { a.st.slow = 0; a.gesit = false; });
     B.pos = 0;
     alive('e').forEach((e) => { e.intent = chooseIntent(e); e.st.guard = e.intent === 'defend'; });
@@ -480,7 +484,8 @@
     $('fast').classList.toggle('on', B.fast);
     PM.music(true);
     msg(enc.intro); await PM.wait(300);
-    await PM.dialog(`<div class="intro"><div class="ttl">${enc.bab} · ${enc.name}</div>${enc.intro}</div>`, [{ label: '⚔️ Mulai!', value: 1 }], 'small');
+    const sp = enc.surprise === 'party' ? '<div class="surp ok">⚡ SERANGAN KEJUTAN! Tim jalan duluan!</div>' : enc.surprise === 'foe' ? '<div class="surp bad">😱 Musuh menyergap! Musuh jalan duluan.</div>' : '';
+    await PM.dialog(`${sp}<div class="intro"><div class="ttl">${enc.bab} · ${enc.name}</div>${enc.intro}</div>`, [{ label: '⚔️ Mulai!', value: 1 }], 'small');
     const result = await run();
     PM.music(false);
     $('battleHud').classList.add('hide');

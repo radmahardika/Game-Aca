@@ -91,7 +91,8 @@ window.PM = window.PM || {};
   // kotak area sabuk per pose (koordinat gambar asli)
   PM.BELT_AREA = {
     siaga: [[66, 138, 160, 248]], tendang: [[97, 122, 174, 166], [100, 160, 130, 212]],
-    kanan: [[57, 165, 178, 236]], depan: [[55, 165, 152, 258]], pukul: [[80, 138, 162, 236]],
+    kanan: [[100, 168, 178, 190], [140, 185, 178, 236]], depan: [[55, 165, 152, 258]], pukul: [[80, 138, 162, 236]],
+    kiri: [[20, 168, 100, 190], [20, 185, 62, 240]], belakang: [[60, 176, 155, 198]],
   };
 
   PM.MAX_LV = 40;
@@ -140,24 +141,24 @@ window.PM = window.PM || {};
   PM.ENCOUNTERS = [
     { id: 'p1', bab: 'Prolog', name: 'Hutan Pinggir', bg: 'hutan-pinggir', foes: ['kumbang', 'tawon'], intro: 'Kumbang Batu dan Tawon Nakal menghadang di hutan!' },
     { id: 'p2', bab: 'Prolog', name: 'Semak Berduri', bg: 'hutan-pinggir', foes: ['siput', 'tawon', 'kumbang'], intro: 'Ada tiga musuh sekaligus! Pilih siapa yang dikalahkan dulu.' },
-    { id: 'p3', bab: 'Prolog', name: 'Bos: Raja Kumbang', bg: 'halaman-dojo', foes: ['raja-kumbang'], boss: true, join: 'ladhia',
+    { id: 'p3', bab: 'Prolog', name: 'Bos: Raja Kumbang', bg: 'halaman-dojo', foes: ['raja-kumbang'], boss: true,
       intro: 'Raja Kumbang mengamuk di halaman dojo! Perhatikan saat ia 💥 kumpul tenaga.' },
-    { id: 'b1a', bab: 'Bab 1', name: 'Lembah Kerikil', bg: 'lembah-kerikil', foes: ['kadal', 'kadal'], intro: 'Dua Kadal Kerikil bersisik batu. Ladhia ampuh melawan 🪨 Keras!' },
+    { id: 'b1a', bab: 'Bab 1', name: 'Lembah Kerikil', bg: 'lembah-kerikil', foes: ['kadal', 'kadal'], joinBefore: 'ladhia', intro: 'Dua Kadal Kerikil bersisik batu. Ladhia ampuh melawan 🪨 Keras!' },
     { id: 'b1b', bab: 'Bab 1', name: 'Jembatan Batu', bg: 'jembatan-batu', foes: ['kadal', 'kelelawar'], intro: 'Kelelawar 🪶 Lincah sulit dipukul Ladhia. Ata lebih cocok!' },
     { id: 'b1c', bab: 'Bab 1', name: 'Tambang Tua', bg: 'tambang-tua', foes: ['kelelawar', 'musang', 'kelelawar'], intro: 'Gerombolan Musang Bayangan bersembunyi di tambang!' },
     { id: 'b1d', bab: 'Bab 1', name: 'Bos tengah: Landak Baja', bg: 'tambang-tua', foes: ['landak'], boss: true,
       intro: 'Landak Baja! Saat ia 🛡️ menggulung, durinya membalas pukulan.' },
-    { id: 'b1e', bab: 'Bab 1', name: 'Bos: Kepala Musang', bg: 'tambang-tua', foes: ['kepala-musang'], boss: true, join: 'bubunti',
+    { id: 'b1e', bab: 'Bab 1', name: 'Bos: Kepala Musang', bg: 'tambang-tua', foes: ['kepala-musang'], boss: true,
       intro: 'Kepala Musang, ketua gerombolan pencuri, muncul dari bayangan!' },
-    { id: 'b2a', bab: 'Bab 2', name: 'Rawa Kabut', bg: 'rawa-kabut', foes: ['katak', 'nyamuk', 'jamur'], intro: 'Tiga tipe musuh sekaligus! Jamur Bayangan bisa membuat tim tertidur.' },
+    { id: 'b2a', bab: 'Bab 2', name: 'Rawa Kabut', bg: 'rawa-kabut', foes: ['katak', 'nyamuk', 'jamur'], joinBefore: 'bubunti', intro: 'Tiga tipe musuh sekaligus! Jamur Bayangan bisa membuat tim tertidur.' },
     { id: 'b2b', bab: 'Bab 2', name: 'Bos tengah: Belut Rawa', bg: 'rawa-kabut', foes: ['belut'], boss: true, intro: 'Belut Rawa muncul dari air keruh!' },
     { id: 'b2c', bab: 'Bab 2', name: 'Gua Embun', bg: 'gua-embun', foes: ['jamur', 'nyamuk', 'jamur'], intro: 'Gua penuh spora! Siapkan masakan Bubunti.' },
     { id: 'b2d', bab: 'Bab 2', name: 'Bos: Lumpur Raksasa', bg: 'gua-embun', foes: ['lumpur-raksasa'], boss: true,
       intro: 'Lumpur Raksasa menyumbat mata air! Bebaskan Desa Embun!' },
   ];
   PM.JOIN = {
-    ladhia: 'Ladhia si badak penjaga jembatan bergabung! Ia kuat & tangguh melindungi teman.',
-    bubunti: 'Bubunti si llama chef bergabung! Masakannya menyembuhkan tim.',
+    ladhia: 'Di Jembatan Batu, Ata bertemu Ladhia si badak penjaga jembatan. Ladhia bergabung! Ia kuat & tangguh melindungi teman. <small>(cerita lengkapnya menyusul bersama peta Bab 1)</small>',
+    bubunti: 'Di Desa Embun, Ata bertemu Bubunti si llama chef. Bubunti bergabung! Masakannya menyembuhkan tim. <small>(cerita lengkapnya menyusul bersama peta Bab 2)</small>',
   };
 
   // posisi kaki di panggung 1200×840 (tim menghadap kiri, musuh menghadap kanan)

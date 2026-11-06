@@ -226,14 +226,21 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 Link (setelah rilis): https://radmahardika.github.io/Game-Aca/pohon-madu/ · versi sendiri `PM.VERSION` di `pohon-madu/js/data.js`
 + `?v=N` di `pohon-madu/index.html`. Desain: `pohon-madu/DESAIN.md`, daftar aset: `pohon-madu/ASET.md`, mockup: `pohon-madu/mockup/`.
-**Versi 1 (pratinjau-v29) = pratinjau battle** tanpa peta jelajah: layar judul → **Pilih Pertarungan** (12 pertarungan Prolog–Bab 2,
+**Versi 1 (pratinjau-v29) = Prolog bisa dimainkan + Arena Latihan.** Cerita (`js/maps.js` data peta & naskah `PM.SCRIPT`,
+`js/world.js` mesin jelajah, `js/story.js` alur): rumah Nenek (cerita pembuka, peti → keping peta 1) → Desa Akar → Dojo (Guru Panda,
+latihan) → 3 kelompok musuh berkeliaran di desa (`PM.DESA_GROUPS`; dekati dari belakang = Serangan Kejutan, dikejar dari depan = disergap;
+`enc.surprise`) → Raja Kumbang di depan dojo → Prolog selesai (gerbang ⛩️ → Hutan Pinggir belum ada). `S.story = {st 0–4, map, x, y, beat}`.
+Peta = gambar pengguna 1536×1024 (`img/peta`) diperbesar `zoom`; area jalan = poligon `walk` + elips `block` (koordinat gambar asli);
+pintu otomatis; tombol A menyala dekat NPC/tempat; kalah → pulang ke rumah Nenek, koin −¼. Musuh yang dikalahkan hilang selama Prolog,
+muncul lagi tiap masuk desa setelah Prolog selesai (latihan). Teman mengikuti jejak (Bubunti dulu, Ladhia paling belakang).
+Arena Latihan (dulu "Pilih Pertarungan"): layar judul → **Pilih Pertarungan** (12 pertarungan Prolog–Bab 2,
 terbuka berurutan, bisa diulang untuk latihan) → battle → menang (EXP sama untuk tiap anggota, koin, 🍯 madu) → naik level / ujian sabuk /
-pilih jurus Lv 10 → Ladhia bergabung setelah bos Prolog, Bubunti setelah bos Bab 1. Layar Tim & Buku Monster.
+pilih jurus Lv 10 → Ladhia bergabung saat mulai Bab 1 di Arena (`joinBefore`), Bubunti saat mulai Bab 2 (cerita lengkap menyusul bersama peta). Layar Tim & Buku Monster.
 Aset: sprite tokoh/musuh/latar **dari pengguna** (latar hijau dipotong → `img/ata|ladhia|bubunti|musuh|latar`). Ukuran: Ata ¾ Bubunti,
 Ladhia terbesar. Warna sabuk Ata diganti saat runtime (`PM.BELT_AREA`). Battle: giliran per ronde menurut SPD (bar GILIRAN), ikon niat
 musuh (⚔️ / 💥 kumpul tenaga → pukulan besar giliran depan / 🛡️ / 💤 lengah / 🍄 spora tidur), tipe (`aff` per tokoh, `PM.ELEM` sambal),
 bos berpola + fase 2 (`pattern`, `phase2`), tips sekali (`S.tips`). Ketuk lingkaran untuk memilih sasaran. Simpanan `localStorage`
-kunci `pohon-madu-v1`. Tes: `PM.debug` (title, peta, tim, buku, fight(id), levelUp, joinScene), `PM.battleDebug()` = keadaan battle,
+kunci `pohon-madu-v1`. Tes: `PM.debug` (title, peta, tim, buku, fight(id), levelUp, joinScene), `PM.explore.W` = keadaan jelajah, `PM.battleDebug()` = keadaan battle,
 `PM.toggleFast()`. Pemain otomatis acak bisa menamatkan semua pertarungan (cek keseimbangan).
 
 Ringkasan desain (disepakati): Turn-based RPG (genre ala Dragon Quest, bukan tiruan) untuk **melatih strategi**.

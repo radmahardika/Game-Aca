@@ -11,15 +11,20 @@
     el('div', 'logo', '<small>Ata dan</small>Pohon Madu<br>Legendaris', s);
     const row = el('div', 'heroes', '', s);
     PM.party().forEach((k) => { const i = el('img', 'hero-' + k, null, row); i.src = PM.charSrc(k, 'depan'); });
-    const go = el('button', 'btn big go', '▶ Main', s);
-    PM.tap(go, () => { PM.sfx('pilih'); peta(); });
+    const st = PM.S.story.st;
+    const go = el('button', 'btn big go', st === 0 && !PM.S.story.intro ? '▶ Mulai Cerita' : '▶ Lanjut Cerita', s);
+    PM.tap(go, () => { PM.sfx('pilih'); clear(); PM.explore.start(); });
+    el('div', 'gsub', '🎯 ' + PM.goal(st), s);
+    const ar = el('button', 'btn arena', '⚔️ Arena Latihan', s);
+    PM.tap(ar, () => { PM.sfx('pilih'); peta(); });
     const rs = el('button', 'btn small reset', 'Mulai dari awal', s);
     PM.tap(rs, async () => {
       const ok = await PM.dialog('Hapus semua kemajuan dan mulai dari awal?', [{ label: 'Batal', value: false }, { label: 'Ya, ulangi', cls: 'red', value: true }], 'small');
       if (ok) { PM.reset(); title(); }
     });
-    el('div', 'ver', 'versi ' + PM.VERSION + ' · pratinjau battle', s);
+    el('div', 'ver', 'versi ' + PM.VERSION + ' · pratinjau Prolog', s);
   }
+  PM.toTitle = (to) => (to === 'tim' ? tim(true) : title());
 
   // ---------- pilih pertarungan ----------
   const unlocked = (i) => i === 0 || PM.S.done[PM.ENCOUNTERS[i - 1].id];
@@ -30,7 +35,7 @@
     el('div', 'box wallet', `🪙 ${PM.S.koin} &nbsp; 🍯 ${PM.S.madu}`, top);
     const bt = (t, fn) => { const b = el('button', 'btn', t, top); PM.tap(b, () => { PM.sfx('pilih'); fn(); }); };
     bt('👥 Tim', tim); bt('📖 Buku Monster', buku); bt('🏠', title);
-    el('div', 'box ptitle', '🗺️ Pilih Pertarungan <small>(peta jelajah menyusul)</small>', s);
+    el('div', 'box ptitle', '⚔️ Arena Latihan <small>pilih pertarungan · bisa diulang</small>', s);
     const cols = el('div', 'cols', '', s);
     ['Prolog', 'Bab 1', 'Bab 2'].forEach((bab) => {
       const col = el('div', 'box col', `<div class="lbl">${bab === 'Prolog' ? 'PROLOG · Ata sendirian' : bab === 'Bab 1' ? 'BAB 1 · bersama Ladhia' : 'BAB 2 · bersama Bubunti'}</div>`, cols);
@@ -39,35 +44,36 @@
         const ok = unlocked(i), done = PM.S.done[e.id];
         const faces = [...new Set(e.foes)].map((f) => `<img src="${PM.foeSrc(PM.ENEMIES[f].face)}">`).join('');
         const c = el('div', 'enc' + (ok ? '' : ' lock') + (e.boss ? ' boss' : '') + (done ? ' done' : ''), `<div class="faces">${ok ? faces : '🔒'}</div><div class="en">${e.name}</div><div class="st">${done ? '✓' : ok ? '⭐' : ''}</div>`, col);
-        if (ok) PM.tap(c, () => { PM.sfx('pilih'); fight(e); });
+        if (ok) PM.tap(c, async () => { PM.sfx('pilih'); if (e.joinBefore && !PM.S.joined.includes(e.joinBefore)) await joinScene(e.joinBefore); await fight(e); peta(); });
       });
     });
   }
 
-  // ---------- battle → hasil ----------
-  async function fight(enc) {
+  // ---------- battle → hasil (dipakai arena & cerita) ----------
+  async function fight(enc, story) {
     clear(); $('topBtns').classList.add('inbattle');
     const r = await PM.startBattle(enc);
     $('topBtns').classList.remove('inbattle');
-    if (r.result === 'flee') { PM.save(); return peta(); }
+    if (r.result === 'flee') { PM.save(); return 'flee'; }
     if (r.result === 'lose') {
       const lost = Math.floor(PM.S.koin / 4); PM.S.koin -= lost; PM.save();
-      await PM.dialog(`<div class="big-t">😵 Tim pingsan…</div>Semua kembali ke penginapan untuk beristirahat.<br>Koin berkurang ¼: <b>−${lost} 🪙</b><br><small>Coba lagi! Perhatikan ikon di atas musuh.</small>`, [{ label: 'Kembali', value: 1 }]);
-      return peta();
+      await PM.dialog(`<div class="big-t">😵 Tim pingsan…</div>${story ? 'Ata dibawa pulang ke rumah Nenek untuk beristirahat.' : 'Semua kembali ke penginapan untuk beristirahat.'}<br>Koin berkurang ¼: <b>−${lost} 🪙</b><br><small>Coba lagi! Perhatikan ikon di atas musuh.</small>`, [{ label: 'Kembali', value: 1 }]);
+      return 'lose';
     }
-    // menang
     PM.sfx('menang');
     PM.S.koin += r.koin;
     const drop = Math.random() < (enc.boss ? 1 : 0.3); if (drop) PM.S.madu++;
     const first = !PM.S.done[enc.id]; PM.S.done[enc.id] = true;
-    const party = PM.party(), events = [];
-    party.forEach((k) => events.push(...PM.gainExp(k, r.exp)));
+    const events = [];
+    PM.party().forEach((k) => events.push(...PM.gainExp(k, r.exp)));
     PM.save();
     await PM.dialog(`<div class="big-t">🎉 Menang!</div><div class="rew">✨ EXP +${r.exp} untuk setiap anggota<br>🪙 Koin +${r.koin}${drop ? '<br>🍯 Dapat Madu!' : ''}</div>`, [{ label: 'Lanjut', value: 1 }]);
     for (const ev of events) await levelUp(ev);
     if (first && enc.join) await joinScene(enc.join);
-    peta();
+    return 'win';
   }
+  PM.explore = PM.explore || {};
+  const storyFight = async (enc) => { PM.explore.pause(); const r = await fight(enc, true); clear(); PM.explore.resume(); return r; };
 
   async function levelUp(ev) {
     PM.sfx('naik');
@@ -98,10 +104,10 @@
   }
 
   // ---------- tim ----------
-  function tim() {
+  function tim(fromStory) {
     clear(); PM.bg('halaman-dojo', 0.5);
     const s = scr(); s.className = 'timscr';
-    const top = el('div', 'topbar', '', s); const b = el('button', 'btn', '↩ Kembali', top); PM.tap(b, () => { PM.sfx('batal'); peta(); });
+    const top = el('div', 'topbar', '', s); const b = el('button', 'btn', '↩ Kembali', top); PM.tap(b, () => { PM.sfx('batal'); if (fromStory) { clear(); PM.explore.start(); } else peta(); });
     el('div', 'box ptitle', '👥 Tim Jelajah Legenda', s);
     const row = el('div', 'tim', '', s);
     PM.party().forEach((k) => {
@@ -142,10 +148,11 @@
     const sb = $('soundBtn'); sb.textContent = PM.S.muted ? '🔇' : '🔊';
     PM.tap(sb, () => { PM.S.muted = !PM.S.muted; PM.setMuted(PM.S.muted); sb.textContent = PM.S.muted ? '🔇' : '🔊'; PM.save(); });
     PM.tap($('fast'), () => PM.toggleFast());
+    PM.explore.fight = storyFight;
     await PM.preload((p) => ($('loading').textContent = 'Memuat… ' + Math.round(p * 100) + '%'));
     $('loading').remove();
     title();
   }
-  PM.debug = { title, peta, tim, buku, fight: (id) => fight(PM.ENCOUNTERS.find((e) => e.id === id)), levelUp, joinScene };
+  PM.debug = { title, peta, tim, buku, fight: async (id) => { await fight(PM.ENCOUNTERS.find((e) => e.id === id)); peta(); }, levelUp, joinScene };
   boot();
 })();
