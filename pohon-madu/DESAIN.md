@@ -4,6 +4,8 @@
 > Judul game & nama folder (`pohon-madu/`) masih sementara.
 > Sprite Ata dari pengguna (latar hijau) → dipotong ke `pohon-madu/img/ata/*.png`. Mockup: `pohon-madu/mockup/?s=pilih|serang|jelajah|sabuk`.
 > Gaya visual: **low-poly lembut** menyamai sprite tokoh (bukan pixel), sudut pandang miring dari atas, kamera agak jauh.
+> Ukuran tokoh (disepakati): Bubunti = patokan, **Ata = ¾ Bubunti**, **Ladhia ±1,75× Bubunti** (1,5× dari mockup awal); tokoh diberi jarak, tidak bertumpuk.
+> Latar battle dari pengguna (gaya lukisan pixel) → `img/latar/*.jpg` (label di atas dibuang saat digambar).
 > Sprite tokoh dari pengguna (latar hijau → `img/ata`, `img/ladhia`, `img/bubunti`); musuh & latar digambar dengan kode (`mockup/lowpoly.js`).
 
 Game keenam. **Turn-based RPG** (genre seperti Dragon Quest), murni untuk **melatih strategi** anak 6 tahun.

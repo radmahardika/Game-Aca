@@ -60,13 +60,13 @@ Prioritas: ⭐ = dibutuhkan dulu (Prolog, Bab 1, Bab 2). Sisanya menyusul per ba
 
 | Prioritas | Latar | Dipakai di |
 |---|---|---|
-| ⭐ | Hutan Pinggir (rumput, tanah lapang, pohon di tepi) | Prolog |
-| ⭐ | Halaman Dojo (lantai kayu/tikar, untuk latihan & ujian sabuk) | Prolog, tiap naik sabuk |
-| ⭐ | Lembah Kerikil (tanah berbatu, tebing rendah) | Bab 1 |
-| ⭐ | Jembatan Batu (di atas jembatan, sungai di bawah) | Bab 1 (duel Ladhia) |
-| ⭐ | Tambang Tua (gua bertiang kayu, lentera, rel kecil) | Bab 1 |
-| ⭐ | Rawa Kabut (air dangkal, akar bakau, kabut) | Bab 2 |
-| ⭐ | Gua Embun (gua biru berembun, kristal, mata air) | Bab 2 |
+| ⭐✅ | Hutan Pinggir (rumput, tanah lapang, pohon di tepi) | Prolog |
+| ⭐✅ | Halaman Dojo (lantai kayu/tikar, untuk latihan & ujian sabuk) | Prolog, tiap naik sabuk |
+| ⭐✅ | Lembah Kerikil (tanah berbatu, tebing rendah) | Bab 1 |
+| ⭐✅ | Jembatan Batu (di atas jembatan, sungai di bawah) | Bab 1 (duel Ladhia) |
+| ⭐✅ | Tambang Tua (gua bertiang kayu, lentera, rel kecil) | Bab 1 |
+| ⭐✅ | Rawa Kabut (air dangkal, akar bakau, kabut) | Bab 2 |
+| ⭐✅ | Gua Embun (gua biru berembun, kristal, mata air) | Bab 2 |
 | | Hutan Kenari (pohon kenari, sarang tawon) | Bab 3 |
 | | Pasar Burung (gang pasar, tenda warna-warni, festival) | Bab 4 |
 | | Tepi Danau Sunyi / Pulau | Bab 5 |

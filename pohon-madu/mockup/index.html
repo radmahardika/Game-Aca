@@ -112,7 +112,12 @@ const BELT_AREA = {   // kotak area sabuk per pose (koordinat gambar)
   kanan: [[57, 165, 178, 236]], depan: [[55, 165, 152, 258]],
 };
 const IMG = {};
-function load(n) { return new Promise(r => { const i = new Image(); i.onload = () => { IMG[n] = i; r(); }; i.src = '../img/' + (n.includes('/') ? n : 'ata/' + n) + '.png'; }); }
+function load(n) { return new Promise(r => { const i = new Image(); i.onload = () => { IMG[n] = i; r(); }; i.src = '../img/' + (n.includes('/') ? n : 'ata/' + n) + (n.endsWith('.jpg') ? '' : '.png'); }); }
+// latar dari pengguna: buang label di atas, lalu isi penuh layar (cover)
+function bg(n, fy = 0.5, top = 58) {
+  const im = IMG['latar/' + n + '.jpg'], w = im.width, h = w * 840 / 1200, y = top + (im.height - top - h) * fy;
+  g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, y, w, h, 0, 0, 1200, 840);
+}
 function hex(h) { return [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16)); }
 function ata(pose, belt) {
   const im = IMG[pose], c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
@@ -151,22 +156,23 @@ function partyCards(now, mp) {
 }
 
 function battleBase(hit) {
-  LP.battle(g, 1200, 840);
+  bg('hutan-pinggir', 0.55);
   // musuh (kiri, menghadap kanan)
-  shadow(150, 412, 82); char('musuh/kumbang-2', 150, 420, 118);
-  shadow(225, 592, 82); char('musuh/kumbang-2', 225, 600, 118);
-  const tw = hit ? [380, 380] : [345, 405];
+  shadow(140, 412, 82); char('musuh/kumbang-2', 140, 420, 118);
+  shadow(190, 602, 82); char('musuh/kumbang-2', 190, 610, 118);
+  const tw = hit ? [340, 370] : [300, 380];
   shadow(tw[0], tw[1], 44); char('musuh/tawon-4', tw[0], tw[1] - 62, 140);
   // tim (kanan, menghadap kiri)
-  const lx = hit ? 640 : 500, ly = hit ? 585 : 505;
-  if (hit) { shadow(578, 433, 50); img(ata('tendang', BELT_NOW), 422, 433 - 178, 178, 'flip'); }
-  shadow(lx, ly, 66); img(IMG['ladhia/siaga'].src, lx - 100, ly - 205, 205, 'flip');
-  if (!hit) { shadow(645, 368, 44); img(ata('siaga', BELT_NOW), 645 - 68, 368 - 165, 165, 'flip'); }
-  const bx = hit ? 790 : 640; shadow(bx, 648, 48); img(IMG['bubunti/siaga'].src, bx - 95, 648 - 175, 175, 'flip');
-  ui('💥 Kumpul tenaga', 'intent big', at(155, 308));
-  ui('⚔️', 'intent', at(230, 489));
+  // ukuran: Bubunti 150, Ata = 3/4 Bubunti, Ladhia besar
+  if (hit) { shadow(482, 338, 40); img(ata('tendang', BELT_NOW), 400, 338 - 122, 122, 'flip'); }
+  else { shadow(700, 318, 34); img(ata('siaga', BELT_NOW), 700 - 47, 318 - 113, 113, 'flip'); }
+  const lx = hit ? 570 : 505, ly = hit ? 615 : 565;
+  shadow(lx, ly, 96); img(IMG['ladhia/siaga'].src, lx - 186, ly - 264, 264, 'flip');
+  const bx = hit ? 840 : 715, by = hit ? 520 : 690; shadow(bx, by, 44); img(IMG['bubunti/siaga'].src, bx - 82, by - 150, 150, 'flip');
+  ui('💥 Kumpul tenaga', 'intent big', at(145, 308));
+  ui('⚔️', 'intent', at(195, 499));
   if (!hit) ui('⚔️', 'intent', at(tw[0] + 100, tw[1] - 120));
-  ui('🪨 Keras', 'tipe', at(150, 422)); ui('🪨 Keras', 'tipe', at(225, 602)); if (!hit) ui('🪶 Lincah', 'tipe', at(tw[0], tw[1] + 12));
+  ui('🪨 Keras', 'tipe', at(140, 422)); ui('🪨 Keras', 'tipe', at(190, 612)); if (!hit) ui('🪶 Lincah', 'tipe', at(tw[0], tw[1] + 12));
   const faces = { a: ata('wajah'), k: IMG['musuh/kumbang-1'].src, t: IMG['musuh/tawon-1'].src, l: IMG['ladhia/wajah'].src, b: IMG['bubunti/wajah'].src };
   const order = hit ? [['k', 'now'], ['b'], ['l'], ['k'], ['t', '', '⬇']] : [['a', 'now'], ['t'], ['b'], ['k'], ['l'], ['k']];
   ui('<span class="lbl">GILIRAN</span>' + order.map(([k, c, mv], i) =>
@@ -174,7 +180,7 @@ function battleBase(hit) {
   ui('<div class="lbl">MUSUH</div><div class="row"><span>Tawon Nakal</span><span>×1</span></div><div class="row"><span>Kumbang Batu</span><span>×2</span></div>', 'box', {}).id = 'foes';
 }
 
-Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah', 'ladhia/siaga', 'ladhia/wajah', 'ladhia/kanan', 'bubunti/siaga', 'bubunti/wajah', 'bubunti/kanan', 'musuh/kumbang-1', 'musuh/kumbang-2', 'musuh/tawon-1', 'musuh/tawon-4', 'musuh/raja-kumbang-2', 'musuh/raja-kumbang-1', 'ladhia/bertahan'].map(load)).then(() => {
+Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah', 'ladhia/siaga', 'ladhia/wajah', 'ladhia/kanan', 'bubunti/siaga', 'bubunti/wajah', 'bubunti/kanan', 'musuh/kumbang-1', 'musuh/kumbang-2', 'musuh/tawon-1', 'musuh/tawon-4', 'musuh/raja-kumbang-2', 'musuh/raja-kumbang-1', 'ladhia/bertahan', 'latar/hutan-pinggir.jpg', 'latar/lembah-kerikil.jpg', 'latar/rawa-kabut.jpg'].map(load)).then(() => {
 if (q === 'pilih') {
   battleBase(false);
   partyCards(true, 12);
@@ -190,34 +196,34 @@ if (q === 'pilih') {
   partyCards(false, 9);
   const c2 = document.createElement('canvas'); c2.width = 1200; c2.height = 840; c2.style.pointerEvents = 'none'; stage.appendChild(c2);
   const h = c2.getContext('2d'); h.strokeStyle = '#fff6d6'; h.lineWidth = 5; h.globalAlpha = .85;
-  for (let i = 0; i < 3; i++) { h.beginPath(); h.arc(490, 320, 50 + i * 16, Math.PI * 0.78, Math.PI * 1.22); h.stroke(); }
-  h.globalAlpha = 1; h.fillStyle = '#fff3b0'; h.beginPath(); h.arc(430, 282, 24, 0, 7); h.fill(); h.fillStyle = '#fff'; h.beginPath(); h.arc(430, 282, 13, 0, 7); h.fill();
-  ui('24<small>AMPUH!</small>', 'dmg', at(232, 180));
+  for (let i = 0; i < 3; i++) { h.beginPath(); h.arc(450, 262, 34 + i * 12, Math.PI * 0.78, Math.PI * 1.22); h.stroke(); }
+  h.globalAlpha = 1; h.fillStyle = '#fff3b0'; h.beginPath(); h.arc(404, 236, 20, 0, 7); h.fill(); h.fillStyle = '#fff'; h.beginPath(); h.arc(404, 236, 11, 0, 7); h.fill();
+  ui('24<small>AMPUH!</small>', 'dmg', at(545, 200));
   ui('Ata: <em>Tendangan Samping!</em> &nbsp;Tawon Nakal terdorong ke belakang antrean ⬇', 'box', {}).id = 'msg';
 } else if (q === 'jelajah') {
-  LP.jelajah(g, 1200, 840);
-  shadow(965, 330, 62); char('musuh/kumbang-2', 965, 338, 92);
-  shadow(335, 625, 36); img(IMG['bubunti/kanan'].src, 335 - 42, 625 - 150, 150);
-  shadow(475, 583, 46); img(IMG['ladhia/kanan'].src, 475 - 62, 583 - 170, 170);
-  shadow(640, 492, 36); img(ata('kanan', BELT_NOW), 640 - 46, 492 - 150, 150);
-  const mx = 400, my = 700;
+  bg('hutan-pinggir', 0.55);
+  shadow(735, 215, 58); char('musuh/kumbang-2', 735, 222, 88);
+  shadow(455, 725, 40); img(IMG['bubunti/kanan'].src, 455 - 38, 725 - 140, 140);
+  shadow(565, 575, 58); img(IMG['ladhia/kanan'].src, 565 - 76, 575 - 238, 238);
+  shadow(705, 330, 28); img(ata('kanan', BELT_NOW), 705 - 31, 330 - 105, 105);
+  const mx = 330, my = 600;
   LP.softShadow(g, mx, my + 12, 16, 5); LP.facet(g, mx, my, 13, 12, '#d0912e', { n: 8, k: .35 }); LP.facet(g, mx - 2, my - 13, 9, 4, '#7a5538', { n: 6 });
   g.fillStyle = '#fff'; [[mx + 20, my - 16], [mx - 20, my - 8], [mx + 16, my + 8]].forEach(([x, y]) => { g.fillRect(x - 1, y - 5, 2, 10); g.fillRect(x - 5, y - 1, 10, 2); });
   ui('Hutan Pinggir<small>Bab 2 · Menuju Desa Embun</small>', 'box', {}).id = 'area';
   ui('<span>🪙 35</span><span>🍯 3</span>', 'box', {}).id = 'dompet';
   ui('👥 Tim', 'box', {}).id = 'btnTim';
-  ui('🪨 Kumbang Batu · <b style="color:#ffd86b">Lv 2</b>', 'box tag', at(965, 230));
-  ui('Dekati dari belakang = <b style="color:#ffd86b">Serangan Kejutan!</b>', 'box tag', at(930, 420));
+  ui('🪨 Kumbang Batu · <b style="color:#ffd86b">Lv 2</b>', 'box tag', at(735, 120));
+  ui('Dekati dari belakang = <b style="color:#ffd86b">Serangan Kejutan!</b>', 'box tag', at(940, 250));
   ui('', '', {}).id = 'stick';
   ui('A', '', {}).id = 'btnA';
 } else if (q === 'bos') {
-  LP.battle(g, 1200, 840);
-  shadow(240, 590, 170); char('musuh/raja-kumbang-2', 240, 600, 340, true);
-  shadow(690, 352, 44); img(ata('siaga', BELT_NOW), 690 - 68, 352 - 165, 165, 'flip');
-  shadow(540, 520, 66); img(IMG['ladhia/siaga'].src, 540 - 100, 520 - 205, 205, 'flip');
-  shadow(660, 648, 48); img(IMG['bubunti/siaga'].src, 660 - 95, 648 - 175, 175, 'flip');
-  ui('💥 Kumpul tenaga', 'intent big', at(240, 252));
-  ui('🪨 Keras · 👑 Bos', 'tipe', at(240, 606));
+  bg('lembah-kerikil', 0.6);
+  shadow(175, 590, 160); char('musuh/raja-kumbang-2', 175, 600, 310, true);
+  shadow(700, 318, 34); img(ata('siaga', BELT_NOW), 700 - 47, 318 - 113, 113, 'flip');
+  shadow(575, 585, 96); img(IMG['ladhia/siaga'].src, 575 - 186, 585 - 264, 264, 'flip');
+  shadow(700, 690, 44); img(IMG['bubunti/siaga'].src, 700 - 82, 690 - 150, 150, 'flip');
+  ui('💥 Kumpul tenaga', 'intent big', at(175, 272));
+  ui('🪨 Keras · 👑 Bos', 'tipe', at(175, 606));
   const faces = { a: ata('wajah'), r: IMG['musuh/raja-kumbang-1'].src, l: IMG['ladhia/wajah'].src, b: IMG['bubunti/wajah'].src };
   ui('<span class="lbl">GILIRAN</span>' + [['l', 'now'], ['r'], ['a'], ['b']].map(([k, c], i) =>
     (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${k === 'r' ? 'foe' : ''}"><img src="${faces[k]}" style="image-rendering:auto">`+'</div>').join(''), 'box', {}).id = 'turn';
