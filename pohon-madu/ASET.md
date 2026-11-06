@@ -1,6 +1,6 @@
 # Daftar aset gambar — Ata dan Pohon Madu Legendaris
 
-Prioritas: ⭐ = dibutuhkan dulu (Prolog, Bab 1, Bab 2). Sisanya menyusul per bab.
+Prioritas: ⭐ = dibutuhkan dulu (Prolog, Bab 1, Bab 2). Sisanya menyusul per bab. ✅ = sudah ada (`img/musuh/<nama>-N.png`; N = sudut pandang, pose serang/kena/kalah dibuat dengan animasi).
 
 ## Format umum
 - **Gaya** sama dengan sprite Ata/Ladhia/Bubunti (low-poly lembut), **sudut pandang miring 3/4** dari atas.
@@ -15,14 +15,14 @@ Prioritas: ⭐ = dibutuhkan dulu (Prolog, Bab 1, Bab 2). Sisanya menyusul per ba
 
 | Bab | Musuh | Tipe | Ide |
 |---|---|---|---|
-| ⭐ Prolog | Kumbang Batu | 🪨 Keras | kumbang bercangkang batu berlumut, cemberut |
-| ⭐ Prolog | Tawon Nakal | 🪶 Lincah | tawon jahil, alis nakal |
-| ⭐ Prolog | Siput Lendir | 🪨 Keras | siput lambat, cangkang tebal, malas |
-| ⭐ Prolog — Bos | **Raja Kumbang** | 🪨 Keras | kumbang batu besar bermahkota kerikil (ujian akhir Prolog) |
-| ⭐ Bab 1 | Kadal Kerikil | 🪨 Keras | kadal bersisik batu |
-| ⭐ Bab 1 | Kelelawar Tambang | 🪶 Lincah | kelelawar kecil membawa lentera kecil |
-| ⭐ Bab 1 | Musang Bayangan | 🌑 Bayangan | anggota gerombolan pencuri, berselendang gelap |
-| ⭐ Bab 1 — Bos tengah | **Landak Baja** | 🪨 Keras | landak berduri logam, menggulung |
+| ⭐ Prolog | Kumbang Batu ✅ | 🪨 Keras | kumbang bercangkang batu berlumut, cemberut |
+| ⭐ Prolog | Tawon Nakal ✅ | 🪶 Lincah | tawon jahil, alis nakal |
+| ⭐ Prolog | Siput Lendir ✅ | 🪨 Keras | siput lambat, cangkang tebal, malas |
+| ⭐ Prolog — Bos | **Raja Kumbang** ✅ | 🪨 Keras | kumbang batu besar bermahkota kerikil (ujian akhir Prolog) |
+| ⭐ Bab 1 | Kadal Kerikil ✅ | 🪨 Keras | kadal bersisik batu |
+| ⭐ Bab 1 | Kelelawar Tambang ✅ | 🪶 Lincah | kelelawar kecil membawa lentera kecil |
+| ⭐ Bab 1 | Musang Bayangan ✅ | 🌑 Bayangan | anggota gerombolan pencuri, berselendang gelap |
+| ⭐ Bab 1 — Bos tengah | **Landak Baja** ✅ | 🪨 Keras | landak berduri logam, menggulung |
 | ⭐ Bab 1 — Bos | **Kepala Musang** | 🌑 Bayangan | ketua gerombolan, jubah & karung curian; fase 2 memanggil bayangan |
 | ⭐ Bab 2 | Katak Lumpur | 🪨 Keras | katak berbalut lumpur kering |
 | ⭐ Bab 2 | Nyamuk Rawa | 🪶 Lincah | nyamuk gendut berdengung |

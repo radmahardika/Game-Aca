@@ -101,8 +101,6 @@
 const stage = document.getElementById('stage');
 const q = new URLSearchParams(location.search).get('s') || 'pilih';
 const g = cv.getContext('2d');
-const KB = LP.icon((c, x, y, s) => LP.kumbang(c, x, y, s), 120, 90, 52, 82, 0.55);
-const TW = LP.icon((c, x, y, s, h) => LP.tawon(c, x, y, s, h), 120, 90, 56, 92, 0.85);
 
 // ---- sabuk: warna diganti saat runtime (piksel gelap netral di area sabuk) ----
 const BELT = {
@@ -155,10 +153,10 @@ function partyCards(now, mp) {
 function battleBase(hit) {
   LP.battle(g, 1200, 840);
   // musuh (kiri, menghadap kanan)
-  LP.kumbang(g, 150, 410, 0.95);
-  LP.kumbang(g, 225, 590, 0.95);
-  const tw = hit ? [380, 380] : [330, 330];
-  LP.tawon(g, tw[0], tw[1], 1, 80);
+  shadow(150, 412, 82); char('musuh/kumbang-2', 150, 420, 118);
+  shadow(225, 592, 82); char('musuh/kumbang-2', 225, 600, 118);
+  const tw = hit ? [380, 380] : [345, 405];
+  shadow(tw[0], tw[1], 44); char('musuh/tawon-4', tw[0], tw[1] - 62, 140);
   // tim (kanan, menghadap kiri)
   const lx = hit ? 640 : 500, ly = hit ? 585 : 505;
   if (hit) { shadow(578, 433, 50); img(ata('tendang', BELT_NOW), 422, 433 - 178, 178, 'flip'); }
@@ -167,16 +165,16 @@ function battleBase(hit) {
   const bx = hit ? 790 : 640; shadow(bx, 648, 48); img(IMG['bubunti/siaga'].src, bx - 95, 648 - 175, 175, 'flip');
   ui('💥 Kumpul tenaga', 'intent big', at(155, 308));
   ui('⚔️', 'intent', at(230, 489));
-  if (!hit) ui('⚔️', 'intent', at(tw[0] + 8, tw[1] - 150));
+  if (!hit) ui('⚔️', 'intent', at(tw[0] + 100, tw[1] - 120));
   ui('🪨 Keras', 'tipe', at(150, 422)); ui('🪨 Keras', 'tipe', at(225, 602)); if (!hit) ui('🪶 Lincah', 'tipe', at(tw[0], tw[1] + 12));
-  const faces = { a: ata('wajah'), k: KB, t: TW, l: IMG['ladhia/wajah'].src, b: IMG['bubunti/wajah'].src };
+  const faces = { a: ata('wajah'), k: IMG['musuh/kumbang-1'].src, t: IMG['musuh/tawon-1'].src, l: IMG['ladhia/wajah'].src, b: IMG['bubunti/wajah'].src };
   const order = hit ? [['k', 'now'], ['b'], ['l'], ['k'], ['t', '', '⬇']] : [['a', 'now'], ['t'], ['b'], ['k'], ['l'], ['k']];
   ui('<span class="lbl">GILIRAN</span>' + order.map(([k, c, mv], i) =>
     (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${'ktb'.includes(k) && k !== 'b' ? 'foe' : ''}"><img src="${faces[k]}" style="image-rendering:auto">${mv ? `<span class="mv">${mv}</span>` : ''}</div>`).join(''), 'box', {}).id = 'turn';
   ui('<div class="lbl">MUSUH</div><div class="row"><span>Tawon Nakal</span><span>×1</span></div><div class="row"><span>Kumbang Batu</span><span>×2</span></div>', 'box', {}).id = 'foes';
 }
 
-Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah', 'ladhia/siaga', 'ladhia/wajah', 'ladhia/kanan', 'bubunti/siaga', 'bubunti/wajah', 'bubunti/kanan'].map(load)).then(() => {
+Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah', 'ladhia/siaga', 'ladhia/wajah', 'ladhia/kanan', 'bubunti/siaga', 'bubunti/wajah', 'bubunti/kanan', 'musuh/kumbang-1', 'musuh/kumbang-2', 'musuh/tawon-1', 'musuh/tawon-4', 'musuh/raja-kumbang-2', 'musuh/raja-kumbang-1', 'ladhia/bertahan'].map(load)).then(() => {
 if (q === 'pilih') {
   battleBase(false);
   partyCards(true, 12);
@@ -198,7 +196,7 @@ if (q === 'pilih') {
   ui('Ata: <em>Tendangan Samping!</em> &nbsp;Tawon Nakal terdorong ke belakang antrean ⬇', 'box', {}).id = 'msg';
 } else if (q === 'jelajah') {
   LP.jelajah(g, 1200, 840);
-  LP.kumbang(g, 965, 330, 0.8);
+  shadow(965, 330, 62); char('musuh/kumbang-2', 965, 338, 92);
   shadow(335, 625, 36); img(IMG['bubunti/kanan'].src, 335 - 42, 625 - 150, 150);
   shadow(475, 583, 46); img(IMG['ladhia/kanan'].src, 475 - 62, 583 - 170, 170);
   shadow(640, 492, 36); img(ata('kanan', BELT_NOW), 640 - 46, 492 - 150, 150);
@@ -212,6 +210,29 @@ if (q === 'pilih') {
   ui('Dekati dari belakang = <b style="color:#ffd86b">Serangan Kejutan!</b>', 'box tag', at(930, 420));
   ui('', '', {}).id = 'stick';
   ui('A', '', {}).id = 'btnA';
+} else if (q === 'bos') {
+  LP.battle(g, 1200, 840);
+  shadow(240, 590, 170); char('musuh/raja-kumbang-2', 240, 600, 340, true);
+  shadow(690, 352, 44); img(ata('siaga', BELT_NOW), 690 - 68, 352 - 165, 165, 'flip');
+  shadow(540, 520, 66); img(IMG['ladhia/siaga'].src, 540 - 100, 520 - 205, 205, 'flip');
+  shadow(660, 648, 48); img(IMG['bubunti/siaga'].src, 660 - 95, 648 - 175, 175, 'flip');
+  ui('💥 Kumpul tenaga', 'intent big', at(240, 252));
+  ui('🪨 Keras · 👑 Bos', 'tipe', at(240, 606));
+  const faces = { a: ata('wajah'), r: IMG['musuh/raja-kumbang-1'].src, l: IMG['ladhia/wajah'].src, b: IMG['bubunti/wajah'].src };
+  ui('<span class="lbl">GILIRAN</span>' + [['l', 'now'], ['r'], ['a'], ['b']].map(([k, c], i) =>
+    (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${k === 'r' ? 'foe' : ''}"><img src="${faces[k]}" style="image-rendering:auto">`+'</div>').join(''), 'box', {}).id = 'turn';
+  ui('<div class="lbl">BOS</div><div class="row"><span>Raja Kumbang</span><span>Fase 1</span></div><div class="bar hp" style="margin-top:6px"><b>HP</b><div class="t"><i style="width:64%;background:linear-gradient(#ff9a6a,#d0452f)"></i></div></div>', 'box', {}).id = 'foes';
+  const p = ui('', '', {}); p.id = 'party';
+  p.innerHTML = card(ata('wajah'), 'Ata', 7, 'Taekwondoin · 🟨 Kuning', 41, 64, 10, 17)
+    + card(IMG['ladhia/wajah'].src, 'Ladhia', 7, 'Paladin', 90, 104, 6, 7, true)
+    + card(IMG['bubunti/wajah'].src, 'Bubunti', 6, 'Chef', 30, 48, 19, 33);
+  ui(`<div class="btn"><span class="ic">⚔️</span>Serang</div><div class="btn sel"><span class="ic">✨</span>Jurus</div><div class="btn"><span class="ic">🛡️</span>Bertahan</div><div class="btn"><span class="ic">🎒</span>Bekal</div><div class="btn"><span class="ic">🔄</span>Tukar</div><div class="btn"><span class="ic">🏃</span>Kabur</div>`, 'box', {}).id = 'menu';
+  ui(`<div class="lbl">JURUS LADHIA</div>
+    <div class="j sel"><b>🛡️ Lindungi</b><span class="mpc">1 MP</span><i>Menerima pukulan untuk satu teman</i></div>
+    <div class="j"><b>☄️ Hantaman Meteor</b><span class="mpc">2 MP</span><i>Pukulan berat · ampuh ke 🪨 Keras</i></div>
+    <div class="j off"><b>📣 Tantang</b><span class="mpc">Lv 8</span><i>Semua musuh mengincar Ladhia</i></div>
+    <div class="desc">Raja Kumbang akan memukul keras! Lindungi <b style="color:#ffd86b">Bubunti</b> yang HP-nya paling sedikit.</div>`, 'box', {}).id = 'jurus';
+  ui('Raja Kumbang <em>💥 kumpul tenaga</em> untuk Hantaman Mahkota!', 'box', {}).id = 'msg';
 } else if (q === 'sabuk') {
   LP.jelajah(g, 1200, 840); g.fillStyle = 'rgba(10,8,5,.55)'; g.fillRect(0, 0, cv.width, cv.height);
   const L = [['putih', 'Sabuk Putih', 'Lv 1'], ['kuning', 'Sabuk Kuning', 'Lv 5'], ['hijau', 'Sabuk Hijau', 'Lv 10'],
