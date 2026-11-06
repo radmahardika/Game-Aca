@@ -33,7 +33,7 @@
   .card { flex: 0 0 214px; padding: 10px 12px; display: flex; gap: 12px; align-items: center; }
   .card .por { flex: none; width: 70px; height: 84px; background: #6d8f4e; border: 2px solid #1a120c; border-radius: 4px; display: grid; place-items: center; overflow: hidden; }
   .card .por img { width: 84px; image-rendering: pixelated; margin-top: 10px; }
-  .card .nm { font-size: 22px; font-weight: 700; display: flex; justify-content: space-between; }
+  .card .nm { font-size: 20px; font-weight: 700; display: flex; justify-content: space-between; }
   .card .nm small { font-size: 17px; color: #e9c879; font-weight: 500; }
   .card .job { font-size: 15px; white-space: nowrap; color: #cdb88d; margin-top: -2px; }
   .bar { margin-top: 5px; display: flex; align-items: center; gap: 6px; font-size: 18px; }
@@ -92,6 +92,14 @@
   #sabuk .it img { height: 210px; }
   #sabuk .it b { display: block; font-size: 24px; } #sabuk .it span { font-size: 18px; color: #cdb88d; }
   #sabuk p { font-size: 20px; color: #f1e3c2; margin: 14px 0 0; }
+  #buku { left: 40px; right: 40px; top: 30px; bottom: 30px; padding: 18px 22px; background: linear-gradient(#f3e6c4, #e6d3a6); color: #3b2a1e; text-shadow: none; border-color: #8a6a40; }
+  #buku h2 { margin: 0; font-size: 34px; color: #6a3f1c; } #buku .sub { font-size: 18px; color: #7a5a3a; margin-bottom: 10px; }
+  #buku .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  #buku .m { background: #fff8e6; border: 2px solid #c9a96c; border-radius: 8px; padding: 6px 8px; text-align: center; height: 196px; display: flex; flex-direction: column; }
+  #buku .m .pic { flex: 1; display: grid; place-items: center; min-height: 0; } #buku .m img { max-width: 170px; max-height: 108px; }
+  #buku .m b { font-size: 19px; } #buku .m span { font-size: 15px; color: #6b5338; }
+  #buku .m.bos { border-color: #d0452f; background: #fff1e0; }
+  #buku .m.no img { filter: brightness(0) opacity(.35); } #buku .m.no b { color: #9a8a70; }
 </style>
 </head>
 <body>
@@ -180,7 +188,7 @@ function battleBase(hit) {
   ui('<div class="lbl">MUSUH</div><div class="row"><span>Tawon Nakal</span><span>×1</span></div><div class="row"><span>Kumbang Batu</span><span>×2</span></div>', 'box', {}).id = 'foes';
 }
 
-Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah', 'ladhia/siaga', 'ladhia/wajah', 'ladhia/kanan', 'bubunti/siaga', 'bubunti/wajah', 'bubunti/kanan', 'musuh/kumbang-1', 'musuh/kumbang-2', 'musuh/tawon-1', 'musuh/tawon-4', 'musuh/raja-kumbang-2', 'musuh/raja-kumbang-1', 'ladhia/bertahan', 'latar/hutan-pinggir.jpg', 'latar/lembah-kerikil.jpg', 'latar/rawa-kabut.jpg'].map(load)).then(() => {
+Promise.all(['siaga', 'tendang', 'kanan', 'depan', 'wajah', 'ladhia/siaga', 'ladhia/wajah', 'ladhia/kanan', 'bubunti/siaga', 'bubunti/wajah', 'bubunti/kanan', 'musuh/kumbang-1', 'musuh/kumbang-2', 'musuh/tawon-1', 'musuh/tawon-4', 'musuh/raja-kumbang-2', 'musuh/raja-kumbang-1', 'ladhia/bertahan', 'latar/hutan-pinggir.jpg', 'latar/lembah-kerikil.jpg', 'latar/rawa-kabut.jpg', 'bubunti/sorak', 'musuh/katak-2', 'musuh/katak-1', 'musuh/nyamuk-2', 'musuh/nyamuk-1', 'musuh/jamur-4', 'musuh/jamur-1', 'musuh/siput-1', 'musuh/raja-kumbang-1', 'musuh/kadal-1', 'musuh/kelelawar-1', 'musuh/musang-1', 'musuh/landak-1', 'musuh/kepala-musang-1', 'musuh/belut-1', 'musuh/lumpur-raksasa-1'].map(load)).then(() => {
 if (q === 'pilih') {
   battleBase(false);
   partyCards(true, 12);
@@ -239,6 +247,40 @@ if (q === 'pilih') {
     <div class="j off"><b>📣 Tantang</b><span class="mpc">Lv 8</span><i>Semua musuh mengincar Ladhia</i></div>
     <div class="desc">Raja Kumbang akan memukul keras! Lindungi <b style="color:#ffd86b">Bubunti</b> yang HP-nya paling sedikit.</div>`, 'box', {}).id = 'jurus';
   ui('Raja Kumbang <em>💥 kumpul tenaga</em> untuk Hantaman Mahkota!', 'box', {}).id = 'msg';
+} else if (q === 'rawa') {
+  bg('rawa-kabut', 0.45);
+  shadow(150, 440, 75); char('musuh/katak-2', 150, 448, 112, true);
+  shadow(235, 640, 50); char('musuh/jamur-4', 235, 648, 125);
+  shadow(330, 420, 40); char('musuh/nyamuk-2', 330, 340, 120);
+  shadow(700, 318, 34); img(ata('siaga', BELT_NOW), 700 - 47, 318 - 113, 113, 'flip');
+  shadow(505, 565, 96); img(IMG['ladhia/siaga'].src, 505 - 186, 565 - 264, 264, 'flip');
+  shadow(715, 690, 44); img(IMG['bubunti/sorak'].src, 715 - 80, 690 - 160, 160, 'flip');
+  ui('⚔️', 'intent', at(150, 330)); ui('💤 Spora tidur', 'intent big', at(235, 518)); ui('⚔️', 'intent', at(400, 230));
+  ui('🪨 Keras', 'tipe', at(150, 452)); ui('🌑 Bayangan', 'tipe', at(235, 652)); ui('🪶 Lincah', 'tipe', at(330, 432));
+  const faces = { a: ata('wajah'), k: IMG['musuh/katak-1'].src, n: IMG['musuh/nyamuk-1'].src, j: IMG['musuh/jamur-1'].src, l: IMG['ladhia/wajah'].src, b: IMG['bubunti/wajah'].src };
+  ui('<span class="lbl">GILIRAN</span>' + [['b', 'now'], ['n'], ['a'], ['j'], ['l'], ['k']].map(([k, c], i) =>
+    (i ? '<span class="arrow">›</span>' : '') + `<div class="face ${c || ''} ${'knj'.includes(k) ? 'foe' : ''}"><img src="${faces[k]}" style="image-rendering:auto"></div>`).join(''), 'box', {}).id = 'turn';
+  ui('<div class="lbl">MUSUH</div><div class="row"><span>Nyamuk Rawa</span><span>×1</span></div><div class="row"><span>Jamur Bayangan</span><span>×1</span></div><div class="row"><span>Katak Lumpur</span><span>×1</span></div>', 'box', {}).id = 'foes';
+  const p = ui('', '', {}); p.id = 'party';
+  p.innerHTML = card(ata('wajah'), 'Ata', 12, 'Taekwondoin · 🟩 Hijau', 70, 98, 14, 24)
+    + card(IMG['ladhia/wajah'].src, 'Ladhia', 12, 'Paladin', 120, 150, 7, 10)
+    + card(IMG['bubunti/wajah'].src, 'Bubunti', 12, 'Chef', 52, 70, 38, 48, true);
+  ui(`<div class="btn"><span class="ic">⚔️</span>Serang</div><div class="btn sel"><span class="ic">🍲</span>Masak</div><div class="btn"><span class="ic">🛡️</span>Bertahan</div><div class="btn"><span class="ic">🎒</span>Bekal</div><div class="btn"><span class="ic">🔄</span>Tukar</div><div class="btn"><span class="ic">🏃</span>Kabur</div>`, 'box', {}).id = 'menu';
+  ui(`<div class="lbl">MASAKAN BUBUNTI</div>
+    <div class="j"><b>🍵 Sup Hangat</b><span class="mpc">3 MP</span><i>Menyembuhkan 1 teman</i></div>
+    <div class="j"><b>🍚 Nasi Liwet Bersama</b><span class="mpc">8 MP</span><i>Menyembuhkan seluruh tim</i></div>
+    <div class="j sel"><b>🥣 Bubur Lembut</b><span class="mpc">4 MP</span><i>Hapus efek buruk + tahan tidur 3 giliran</i></div>
+    <div class="j off"><b>🌶️ Sambal Super Pedas</b><span class="mpc">Lv 16</span><i>Serang semua · ampuh ke 🌑 Bayangan</i></div>`, 'box', {}).id = 'jurus';
+  ui('Jamur Bayangan akan menyebar <em>💤 spora tidur</em> ke seluruh tim!', 'box', {}).id = 'msg';
+} else if (q === 'buku') {
+  bg('hutan-pinggir', 0.55);
+  const M = [['kumbang-2', 'Kumbang Batu', '🪨 Keras', 'Hutan Pinggir'], ['tawon-4', 'Tawon Nakal', '🪶 Lincah', 'Hutan Pinggir'], ['siput-1', 'Siput Lendir', '🪨 Keras', 'Hutan Pinggir'],
+    ['raja-kumbang-1', 'Raja Kumbang', '🪨 Keras · 👑', 'Bos Prolog', 'bos'], ['kadal-1', 'Kadal Kerikil', '🪨 Keras', 'Lembah Kerikil'], ['kelelawar-1', 'Kelelawar Tambang', '🪶 Lincah', 'Tambang Tua'],
+    ['musang-1', 'Musang Bayangan', '🌑 Bayangan', 'Tambang Tua'], ['landak-1', 'Landak Baja', '🪨 Keras', 'Bos tengah Bab 1', 'bos'], ['kepala-musang-1', 'Kepala Musang', '🌑 Bayangan · 👑', 'Bos Bab 1', 'bos'],
+    ['katak-1', 'Katak Lumpur', '🪨 Keras', 'Rawa Kabut'], ['nyamuk-1', 'Nyamuk Rawa', '🪶 Lincah', 'Rawa Kabut'], ['jamur-1', 'Jamur Bayangan', '🌑 Bayangan', 'Gua Embun'],
+    ['belut-1', '? ? ?', '', 'Belum ditemukan', 'bos no'], ['lumpur-raksasa-1', '? ? ?', '', 'Belum ditemukan', 'bos no']];
+  ui(`<h2>📖 Buku Monster</h2><div class="sub">Ditemukan 12 / 14 · kelemahan tercatat setelah bertarung</div><div class="grid">${M.map(([f, n, t, w, c]) =>
+    `<div class="m ${c || ''}"><div class="pic"><img src="${IMG['musuh/' + f] ? IMG['musuh/' + f].src : '../img/musuh/' + f + '.png'}"></div><b>${n}</b><span>${t}${t ? '<br>' : ''}${w}</span></div>`).join('')}</div>`, 'box', {}).id = 'buku';
 } else if (q === 'sabuk') {
   LP.jelajah(g, 1200, 840); g.fillStyle = 'rgba(10,8,5,.55)'; g.fillRect(0, 0, cv.width, cv.height);
   const L = [['putih', 'Sabuk Putih', 'Lv 1'], ['kuning', 'Sabuk Kuning', 'Lv 5'], ['hijau', 'Sabuk Hijau', 'Lv 10'],
