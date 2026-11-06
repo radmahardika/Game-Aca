@@ -224,7 +224,7 @@ Game terpisah (link: https://radmahardika.github.io/Game-Aca/njajan-fest/), vers
 
 ## Game keenam: Ata dan Pohon Madu Legendaris (`pohon-madu/`)
 
-Link (setelah rilis): https://radmahardika.github.io/Game-Aca/pohon-madu/ · versi sendiri `PM.VERSION` di `pohon-madu/js/data.js`
+Link: https://radmahardika.github.io/Game-Aca/pohon-madu/ · versi sendiri `PM.VERSION` di `pohon-madu/js/data.js`
 + `?v=N` di `pohon-madu/index.html`. Desain: `pohon-madu/DESAIN.md`, daftar aset: `pohon-madu/ASET.md`, mockup: `pohon-madu/mockup/`.
 **Versi 1 (pratinjau-v29) = Prolog bisa dimainkan + Arena Latihan.** Cerita (`js/maps.js` data peta & naskah `PM.SCRIPT`,
 `js/world.js` mesin jelajah, `js/story.js` alur): rumah Nenek (cerita pembuka, peti → keping peta 1) → Desa Akar → Dojo (Guru Panda,
@@ -257,7 +257,9 @@ Ringkasan desain (disepakati): Turn-based RPG (genre ala Dragon Quest, bukan tir
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 28** = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
+- Rilis terakhir di `main`: **versi 29** = **Ata dan Pohon Madu versi 1** (game keenam: Prolog bisa dimainkan + Arena Latihan Prolog–Bab 2).
+  Peta Hutan Pinggir, Padang Ilalang, Desa Kerikil, Jembatan Batu sudah diterima (`img/peta`), belum dipasang (pratinjau berikutnya, v30).
+- Versi 28 = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
 - Versi 27 = **Njajan Fest versi 5** (Tahap 2 Pasar Malam; fitur hitung lapak dihapus).
 - Versi 26 = **Njajan Fest versi 4** (peta, susun acara, relawan, tamu istimewa, catatan,
   stiker; Tahap 2 Pasar Malam menyusul di pratinjau berikutnya, mockup `mockup-festival/tahap2.html`) + versi 3: model Raja Kura-kura baru (kura-kura berkaki empat,
