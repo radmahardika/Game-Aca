@@ -55,6 +55,16 @@ Game penyelamatan first person 3D pixel di hutan malam untuk **anak + orang tua 
 - **Main di satu iPad:** gantian peran dengan tombol ⇄.
 - Progres tersimpan di iPad pembuat ruangan.
 
+## Game ketujuh: Manasik Umroh 🕋
+
+Folder `manasik-umroh/` → `https://radmahardika.github.io/Game-Aca/manasik-umroh/`
+
+Simulasi 3D (Three.js, kamera orang ketiga) untuk latihan manasik umroh keluarga, berdasarkan materi Manasik Umroh rombongan.
+Alur: Hotel di Makkah (buku manasik: pilah syarat/rukun/wajib, harus benar untuk lanjut; mandi, wewangian, ruang ganti ihram) →
+Miqat **Qarnul Manazil** (Taif) → perjalanan Taif–Makkah (larangan ihram) → Masjidil Haram (wudhu, masuk, **thawaf 7 putaran**,
+Multazam, Maqam Ibrahim, zamzam) → **sa'i 7 kali** → tahallul → rapor. Bisa main sebagai jamaah pria atau wanita,
+grafis Halus/Ringan. Mohon bacaan doa dicek pembimbing.
+
 ## Main di iPad
 
 1. Buka link GitHub Pages: `https://radmahardika.github.io/Game-Aca/` di **Safari**.

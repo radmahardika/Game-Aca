@@ -255,6 +255,24 @@ Ringkasan desain (disepakati): Turn-based RPG (genre ala Dragon Quest, bukan tir
 - Cerita: Ata mencari Pohon Madu Legendaris dari dongeng Nenek; para tetua = tim lama Nenek, peta disobek 5 keping.
   Prolog + 8 bab (lengkap), tiap bab panjang (desa, 2–3 area, misi warga, dungeon, bos tengah, rekrut, bos bab).
 
+## Game ketujuh: Manasik Umroh (`manasik-umroh/`)
+
+Link: https://radmahardika.github.io/Game-Aca/manasik-umroh/ · versi sendiri (teks "versi N" di footer `manasik-umroh/index.html`
++ `?v=N` pada `src/style.css` & `src/main.js`). Dipindahkan dari repo `radmahardika/simulasi` (sumber awal & referensi visual ada di sana).
+Untuk **orang tua/keluarga** latihan umroh (bukan game anak 6 tahun), berdasarkan PDF "Manasik Umroh" rombongan.
+
+- Three.js r160 di `manasik-umroh/vendor/three/` (ES module + importmap), kamera **orang ketiga** (arah A, disetujui).
+  `src/engine.js` (renderer, joystick tetap kiri bawah, geser layar = putar kamera, tombol aksi emas, peta mini, mode
+  **Halus** = MSAA + bloom + RoomEnvironment / **Ringan**; turun otomatis ke Ringan bila <22 fps), `src/models.js`, `src/ui.js`
+  (HUD, soal, ruang ganti, rapor), `src/data.js` (bank soal), `src/levels/*.js`.
+- Alur (disepakati pengguna): **mulai dari Makkah**, miqat **Qarnul Manazil (Taif)** — bukan Bir Ali/Madinah.
+  Bab: hotel Makkah → miqat → perjalanan Taif–Makkah (cinematic, soal larangan ihram) → Masjidil Haram (thawaf: mulai garis
+  lampu hijau Hajar Aswad, Ka'bah di kiri; putaran batal bila arah terbalik/masuk Hijir Ismail/wudhu batal/aurat; tombol
+  "Ikuti arus") + ba'da thawaf → sa'i (lari kecil di lampu hijau, pria) + tahallul → rapor (bisa disalin ke WA).
+- Buku manasik (pilah kartu) **harus dijawab benar sebelum kartu berikutnya** (permintaan pengguna).
+- Tes: `window.__sim` = {E, S, ui}; `__sim.E.timeScale`, `__sim.E.noAuto=true` (cegah turun otomatis di swiftshader);
+  `window.__lv` (haram: T, st, finishThawaf, fin). Swiftshader sangat lambat di mode Halus → pakai Ringan untuk Playwright.
+
 ## Status & yang sedang dibahas
 
 - Rilis terakhir di `main`: **versi 29** = **Ata dan Pohon Madu versi 1** (game keenam: Prolog bisa dimainkan + Arena Latihan Prolog–Bab 2).

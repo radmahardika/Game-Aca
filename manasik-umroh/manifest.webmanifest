@@ -1,0 +1,9 @@
+{
+  "name": "Manasik Umroh",
+  "short_name": "Manasik",
+  "start_url": ".",
+  "display": "fullscreen",
+  "background_color": "#0c1526",
+  "theme_color": "#0c1526",
+  "icons": [{ "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" }, { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }]
+}
