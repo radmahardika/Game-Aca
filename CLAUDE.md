@@ -275,8 +275,10 @@ Untuk **orang tua/keluarga** latihan umroh (bukan game anak 6 tahun), berdasarka
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 29** = **Ata dan Pohon Madu versi 1** (game keenam: Prolog bisa dimainkan + Arena Latihan Prolog–Bab 2).
-  Peta Hutan Pinggir, Padang Ilalang, Desa Kerikil, Jembatan Batu sudah diterima (`img/peta`), belum dipasang (pratinjau berikutnya, v30).
+- Rilis terakhir di `main`: **versi 31** = **Manasik Umroh versi 1** (game ketujuh, `manasik-umroh/`, dari branch `pratinjau-v31`). Game lain tidak berubah.
+- Branch `pratinjau-v30` (peta Hutan Pinggir, Padang Ilalang, Desa Kerikil, Jembatan Batu untuk Pohon Madu, `img/peta`) **belum digabung** dan belum dipasang;
+  saat dirilis pakai nomor versi berikutnya (≥ 32) dan rebase ke `main` dulu.
+- Versi 29 = **Ata dan Pohon Madu versi 1** (game keenam: Prolog bisa dimainkan + Arena Latihan Prolog–Bab 2).
 - Versi 28 = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
 - Versi 27 = **Njajan Fest versi 5** (Tahap 2 Pasar Malam; fitur hitung lapak dihapus).
 - Versi 26 = **Njajan Fest versi 4** (peta, susun acara, relawan, tamu istimewa, catatan,
