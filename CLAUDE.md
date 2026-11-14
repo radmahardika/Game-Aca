@@ -292,11 +292,21 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   → Lari ke Bukit Batu (capai bendera) → Dapur Bubunti (Geng Musang, Bubunti bergabung) → Batu Singgasana (bos **Kepala Musang**,
   memanggil musang tiap 3 giliran). Tidak ada hyena lagi. Bot uji (tim Lv 2) menang 6/7; misi 7 butuh naik level di Markas.
   Peta = pulau 17×17 (`expandIslands` di `data.js`; `o` = laut, tidak digambar).
+- **Bab 2 Hutan Lembab (v2, misi 8–14, `chap: 2`, `pal: 'hutan'`):** Pintu Hutan (lumpur) → Jembatan Akar (belut di sungai)
+  → Kebun Jamur (spora tidur) → Pohon Oumaldi (lindungi, **Oumaldi bergabung**, tim jadi 4) → Rawa Lumpur (bos tengah **Lumpur
+  Raksasa**, terbelah jadi 2 Lumpur Kecil saat nyawa ≤ ½) → Lembah Kabut (`fog: true`) → Sarang Ular (bos **Ular Beracun**, memanggil belut).
+  Petak baru: `m` lumpur (biaya 2 langkah, kecuali `mudOk`/terbang), `J` jamur raksasa & `L` kayu tumbang (penghalang), sungai `w`
+  diperpanjang sampai tepi pulau. Status: 😴 `tidur` (jamur, lewati 1 giliran), 🤢 `racun` (ular, −2/giliran selama 3, tidak sampai
+  pingsan); Sup Hangat menyembuhkan keduanya & membangunkan. Kabut: musuh terlihat bila ≤3 petak dari teman (Oumaldi 4, dari tempat
+  tinggi 6) atau baru menyerang (`seen`, `reveal`). Musuh `swim` (belut, ular) berenang. Oumaldi: Pemanah jarak 2–4 (+1 dari tempat
+  lebih tinggi), Panah Jitu (tembus, jarak 5), Hujan Panah (sasaran + sebelahnya); sprite `pohon-madu/img/oumaldi/`, Ular di
+  `musuh/ular-1..8` (dipotong dari lembar hijau pengguna). Tamu/rekrut baru mendapat level rata-rata tim (`teamLv`).
+  Peta misi dikelompokkan per bab. Bot uji: tim Lv 3 menang 7/7; Lv 2 kalah di Rawa Lumpur & Sarang Ular.
 - Mekanik: arah hadap (belakang ×1,5), ketinggian, jangkauan senjata, Semangat ⭐ untuk jurus, musuh tidur 💤 sampai didekati,
   3 bintang per misi, madu 🍯 untuk naik level di Markas. Ata: Tendangan Kilat/Putar/Mode Sabuk Hitam + Refleks (hindar & balas);
   Ladhia: Tantang/Benteng Badak; Bubunti: Sup Hangat + **Masakan Pedas** (satu-satunya serangan, musuh tidak bisa bergerak 1 giliran).
 - Suara: **tanpa suara pembaca saat bertarung**; narasi suara (speechSynthesis id-ID) hanya di adegan cerita (permintaan pengguna).
-- Ke depan: Bab 2 Hutan Lembab (Ular Beracun, Oumaldi), Bab 3 Rawa (Buaya Serakah, Tung Momon & Tung Yanto),
+- Ke depan: Bab 3 Rawa (Buaya Serakah, Tung Momon & Tung Yanto),
   Bab 4 Gunung (Singa Penyiksa, Utireni & Utililik).
 - Ikon aplikasi (`icons/icon-180|512.png`, `manifest.webmanifest`, nama Layar Utama "ATA Tactics"): Ladhia, Ata menendang, Bubunti
   di petak rumput isometrik, latar biru tua berbingkai emas, tulisan "ATA Tactics".
@@ -305,6 +315,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 
 ## Status & yang sedang dibahas
 
+- Branch `pratinjau-v34` = **Ata Taktik versi 2 (Bab 2 Hutan Lembab)**, belum digabung.
 - Rilis terakhir di `main`: **versi 33** = ikon aplikasi Ata Taktik ("ATA Tactics"). Game lain tidak berubah.
 - Versi 32 = **Ata Taktik versi 1** (game kedelapan, `ata-taktik/`, dari branch `pratinjau-v32`;
   musuh sprite asli, bos Raja Kumbang & Kepala Musang). Game lain tidak berubah.

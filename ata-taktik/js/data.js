@@ -1,5 +1,5 @@
 'use strict';
-const AT = { VERSION: 1 };
+const AT = { VERSION: 2 };
 /* Data karakter, jurus, misi, dan cerita Bab 1. */
 
 const CHARS = {
@@ -9,10 +9,11 @@ const CHARS = {
     skills: ['tantang', 'benteng'], passive: 'Kulit Baja: serangan dari belakang tidak terlalu sakit. Rantai meteor menjangkau 2 petak.' },
   bubunti: { name: 'Bubunti', job: 'Koki', desc: 'Llama putih berhati lembut, jago masak.', hp: 20, atk: 4, def: 2, mov: 4, jump: 1, rmin: 1, rmax: 1,
     skills: ['sup', 'pedas'], passive: 'Hati Lembut: masakannya bikin teman semangat.' },
+  oumaldi: { name: 'Oumaldi', job: 'Pemanah', desc: 'Tupai pemanah yang gesit. Dulu suka bekerja sendirian.', hp: 20, atk: 7, def: 2, mov: 4, jump: 2, rmin: 2, rmax: 4,
+    skills: ['jitu', 'hujan'], passive: 'Mata Elang: dari tempat tinggi, panahnya +1 petak lebih jauh dan pandangannya menembus kabut. Tidak bisa memanah musuh yang menempel.' },
 };
 
 const FUTURE = [
-  { name: 'Oumaldi', desc: 'Tupai pemanah', bab: 'Bab 2' },
   { name: 'Tung Momon', desc: 'Jalak pemusik', bab: 'Bab 3' },
   { name: 'Tung Yanto', desc: 'Kura-kura penyihir', bab: 'Bab 3' },
   { name: 'Utireni', desc: 'Rusa penyerang', bab: 'Bab 4' },
@@ -28,6 +29,14 @@ const ENEMIES = {
   kelelawar: { name: 'Kelelawar Tambang', hp: 11, atk: 5, def: 1, mov: 3, jump: 9, rmin: 2, rmax: 3, madu: 2, ranged: true, fly: true },
   kadal: { name: 'Kadal Kerikil', hp: 20, atk: 7, def: 3, mov: 3, jump: 1, rmin: 1, rmax: 1, madu: 3 },
   landak: { name: 'Landak Baja', hp: 24, atk: 7, def: 5, mov: 2, jump: 1, rmin: 1, rmax: 1, madu: 4 },
+  // Bab 2 Hutan Lembab. mudOk = tidak melambat di lumpur, swim = bisa berenang, onHit = efek serangan
+  nyamuk: { name: 'Nyamuk Rawa', hp: 9, atk: 5, def: 1, mov: 5, jump: 9, rmin: 1, rmax: 1, madu: 2, fly: true },
+  katak: { name: 'Katak Lumpur', hp: 16, atk: 6, def: 3, mov: 3, jump: 2, rmin: 1, rmax: 1, madu: 3, mudOk: true },
+  jamur: { name: 'Jamur Spora', hp: 14, atk: 4, def: 2, mov: 2, jump: 1, rmin: 1, rmax: 2, madu: 3, onHit: 'tidur', proj: '🍄' },
+  belut: { name: 'Belut Listrik', hp: 13, atk: 6, def: 2, mov: 4, jump: 1, rmin: 1, rmax: 1, madu: 3, swim: true, mudOk: true },
+  lumpurRaksasa: { name: 'Lumpur Raksasa', hp: 46, atk: 8, def: 4, mov: 2, jump: 1, rmin: 1, rmax: 1, madu: 10, boss: true, mudOk: true, split: 'lumpurKecil' },
+  lumpurKecil: { name: 'Lumpur Kecil', hp: 12, atk: 5, def: 2, mov: 3, jump: 1, rmin: 1, rmax: 1, madu: 2, mudOk: true },
+  ular: { name: 'Ular Beracun', hp: 62, atk: 10, def: 5, mov: 3, jump: 1, rmin: 1, rmax: 2, madu: 15, boss: true, swim: true, mudOk: true, onHit: 'racun', summonKind: 'belut', call: 'Ssshh! Belut-belutku, keluarlah!' },
   kepalaMusang: { name: 'Kepala Musang', hp: 46, atk: 8, def: 4, mov: 3, jump: 2, rmin: 1, rmax: 1, madu: 12, boss: true, summonKind: 'musang', call: 'Geng Musang, serbu!' },
 };
 const NPCS = { zizi: { name: 'Zizi', hp: 28, atk: 0, def: 3, mov: 0, jump: 0, rmin: 0, rmax: 0 } };
@@ -38,7 +47,9 @@ const SKILLS = {
   sabuk: { name: 'Mode Sabuk Hitam', icon: '🥋', cost: 5, target: 'self', desc: 'Super kuat (+4) dan lebih cepat selama 3 giliran!' },
   tantang: { name: 'Tantang!', icon: '📣', cost: 2, target: 'self', desc: 'Musuh terpancing menyerang Ladhia saja.' },
   benteng: { name: 'Benteng Badak', icon: '🛡️', cost: 3, target: 'self', desc: 'Ladhia dan teman di sebelahnya: pertahanan +3.' },
-  sup: { name: 'Sup Hangat', icon: '🍲', cost: 2, target: 'ally', rmin: 0, rmax: 3, desc: 'Sembuhkan satu teman (jarak 3).' },
+  sup: { name: 'Sup Hangat', icon: '🍲', cost: 2, target: 'ally', rmin: 0, rmax: 3, desc: 'Sembuhkan satu teman (jarak 3). Juga membangunkan yang tertidur dan menyembuhkan racun.' },
+  jitu: { name: 'Panah Jitu', icon: '🎯', cost: 2, target: 'enemy', rmin: 2, rmax: 5, desc: 'Panah kuat yang menembus pertahanan musuh. Jangkauan 5!' },
+  hujan: { name: 'Hujan Panah', icon: '🌧️', cost: 4, target: 'enemy', rmin: 2, rmax: 4, desc: 'Kena musuh sasaran dan semua musuh di sebelahnya.' },
   pedas: { name: 'Masakan Pedas', icon: '🌶️', cost: 3, target: 'enemy', rmin: 1, rmax: 3, desc: 'Lempar masakan super pedas! Musuh kepedasan dan tidak bisa bergerak 1 giliran.' },
 };
 
@@ -52,6 +63,12 @@ const WHO = {
   musang: { name: 'Musang Bayangan', kind: 'musang', voice: [1.3, 1.15] },
   kelelawar: { name: 'Kelelawar Tambang', kind: 'kelelawar', voice: [1.8, 1.2] },
   kepala: { name: 'Kepala Musang', kind: 'kepalaMusang', voice: [0.6, 0.9] },
+  oumaldi: { name: 'Oumaldi', kind: 'oumaldi', voice: [1.6, 1.15] },
+  nyamuk: { name: 'Nyamuk Rawa', kind: 'nyamuk', voice: [1.9, 1.25] },
+  katak: { name: 'Katak Lumpur', kind: 'katak', voice: [0.6, 0.95] },
+  jamur: { name: 'Jamur Spora', kind: 'jamur', voice: [1.2, 0.9] },
+  lumpur: { name: 'Lumpur Raksasa', kind: 'lumpurRaksasa', voice: [0.3, 0.8] },
+  ular: { name: 'Ular Beracun', kind: 'ular', voice: [0.7, 0.85] },
   zizi: { name: 'Zizi', kind: 'zizi', voice: [1.9, 1.1] },
   narator: { name: '', kind: null, voice: [1, 0.95] },
 };
@@ -144,6 +161,86 @@ const STORY = {
     ['bubunti', 'Katanya di Hutan Lembab ada Ular Beracun yang licik sekali.'],
     ['ata', 'Kita hadapi bersama! Petualangan kita baru dimulai!'],
   ],
+  b1pre: [
+    ['narator', 'Ata, Ladhia, dan Bubunti memasuki Hutan Lembab. Udaranya basah dan berkabut.'],
+    ['bubunti', 'Brrr, tanahnya becek sekali. Kakiku tenggelam di lumpur!'],
+    ['ladhia', 'Hati-hati. Jalan di lumpur membuat langkah kita lebih pendek.'],
+    ['nyamuk', 'Nguuung! Ada tamu segar! Serbuuu!'],
+  ],
+  b1post: [
+    ['ata', 'Hutan ini banyak penjaganya. Siapa yang menyuruh mereka?'],
+    ['katak', 'Kwaak! Ular Beracun! Dia raja hutan sekarang. Semua takut padanya!'],
+    ['ladhia', 'Kalau begitu kita harus lebih hati-hati.'],
+  ],
+  b2pre: [
+    ['ata', 'Ada sungai! Kita harus menyeberang lewat jembatan akar itu.'],
+    ['bubunti', 'Lihat, ada yang berenang di dalam air!'],
+    ['ladhia', 'Belut Listrik. Mereka bisa berenang dan menyerang dari air. Jangan berdiri terlalu dekat sungai.'],
+  ],
+  b2post: [
+    ['narator', 'Tiba-tiba sebuah anak panah menancap di batang pohon, tepat di sebelah Ata.'],
+    ['oumaldi', 'Hei! Jangan berisik! Kalian membuat buruanku lari!'],
+    ['ata', 'Siapa itu? Ayo tunjukkan dirimu!'],
+    ['narator', 'Tapi sosok itu sudah melompat pergi di antara dahan pohon.'],
+  ],
+  b3pre: [
+    ['bubunti', 'Wah, jamurnya besar-besar! Bisa jadi sup jamur yang enak!'],
+    ['jamur', 'Pfffft! Siapa yang mau memasak kami? Rasakan spora tidur!'],
+    ['ladhia', 'Awas! Kalau kena sporanya, kita tertidur satu giliran.'],
+    ['bubunti', 'Tenang, Sup Hangatku bisa membangunkan teman yang tertidur!'],
+  ],
+  b3post: [
+    ['ata', 'Fiuh. Untung ada sup Bubunti.'],
+    ['narator', 'Dari kejauhan terdengar teriakan minta tolong.'],
+    ['oumaldi', 'Pergi kalian! Aku tidak butuh bantuan siapa pun!'],
+    ['ata', 'Itu suara si pemanah tadi! Dia dikepung!'],
+  ],
+  b4pre: [
+    ['oumaldi', 'Anak panahku tinggal sedikit... Tapi aku bisa sendiri!'],
+    ['ata', 'Kamu tidak sendirian! Kami datang membantu!'],
+    ['oumaldi', 'Hmph. Ya sudah, tapi jangan menghalangi panahku.'],
+    ['ladhia', 'Lindungi pemanah itu. Jangan biarkan musuh menempel padanya.'],
+  ],
+  b4post: [
+    ['oumaldi', 'Tadi aku hampir kalah... Terima kasih. Namaku Oumaldi.'],
+    ['ata', 'Aku Ata! Kami mencari Madu Legendaris dan sahabat-sahabat nenekku.'],
+    ['oumaldi', 'Madu Legendaris? Ibuku pernah bercerita tentang tim penjelajah hebat yang mencarinya.'],
+    ['oumaldi', 'Ternyata menang bersama lebih seru daripada menang sendirian. Boleh aku ikut?'],
+    ['bubunti', 'Tentu saja! Tim kita jadi berempat!'],
+  ],
+  b5pre: [
+    ['narator', 'Rawa penuh lumpur menghadang. Tiba-tiba lumpurnya bergerak dan berdiri!'],
+    ['lumpur', 'Gloook... Tidak ada yang boleh lewat rawaku...'],
+    ['oumaldi', 'Wah, lumpurnya hidup! Aku panah dari jauh saja!'],
+    ['ladhia', 'Hati-hati. Makhluk lumpur kadang bisa terbelah.'],
+  ],
+  b5post: [
+    ['lumpur', 'Gloook... aku... cuma ingin rawaku tenang...'],
+    ['ata', 'Kami tidak akan merusak rawamu. Kami hanya mau lewat.'],
+    ['narator', 'Lumpur Raksasa perlahan meleleh kembali ke rawa, dan jalan pun terbuka.'],
+  ],
+  b6pre: [
+    ['bubunti', 'Kabutnya tebal sekali. Aku tidak bisa melihat apa-apa!'],
+    ['oumaldi', 'Biar aku naik ke tempat tinggi. Mataku tajam, aku bisa melihat lebih jauh!'],
+    ['ladhia', 'Musuh bisa bersembunyi di dalam kabut. Bergerak pelan-pelan dan tetap bersama.'],
+  ],
+  b6post: [
+    ['oumaldi', 'Kabutnya mulai hilang. Lihat, di sana ada kolam besar!'],
+    ['ata', 'Pasti itu sarang Ular Beracun!'],
+  ],
+  b7pre: [
+    ['ular', 'Ssshh... Siapa berani masuk ke sarangku?'],
+    ['ata', 'Kami mau lewat ke Rawa Bulan! Berhenti mengganggu penghuni hutan!'],
+    ['ular', 'Hutan ini milikku. Gigitanku beracun, sssh! Kalian akan lemas pelan-pelan.'],
+    ['bubunti', 'Kalau ada yang keracunan, aku sembuhkan dengan Sup Hangat!'],
+  ],
+  b7post: [
+    ['ular', 'Ssshh... aku kalah. Baiklah, aku tidak akan menakut-nakuti hutan lagi.'],
+    ['oumaldi', 'Hore! Hutan Lembab aman!'],
+    ['ata', 'Ini, ada sesuatu di sarang ular. Sobekan peta yang mirip punya Nenek!'],
+    ['ladhia', 'Peta itu menunjuk ke Rawa Bulan. Tempat tinggal Tung Momon dan Tung Yanto.'],
+    ['ata', 'Ayo teman-teman, petualangan kita berlanjut!'],
+  ],
 };
 
 /* Tipe: rout = kalahkan semua, boss = kalahkan bos, survive = bertahan n giliran, reach = capai bendera */
@@ -228,11 +325,91 @@ const MISSIONS = [
     star3: { type: 'turns', n: 10, text: 'Menang dalam 10 giliran' },
     t: ['rr.....rr', 'r.......r', '...b.b...', '.........', '.t.....t.', '.........', '..b...b..', '.r.....r.', '.........'],
     h: ['332222233', '322222223', '211111112', '111000111', '100000001', '000000000', '000000000', '000000000', '000000000'],
-    players: [['ata', 4, 7], ['ladhia', 3, 8], ['bubunti', 5, 8]],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7]],
     enemies: [['kepalaMusang', 4, 1, 3], ['musang', 2, 2, 5], ['musang', 6, 2, 5], ['landak', 4, 3, 4], ['kelelawar', 7, 1, 5]],
     summon: { every: 3, max: 4, at: [[2, 0], [6, 0]] },
     tips: ['Kepala Musang memanggil anak buah setiap 3 giliran. Kalahkan dia secepat mungkin!', 'Jangan biarkan Ata maju sendirian. Bergerak bersama Ladhia dan Bubunti!'],
     pre: 'm7pre', post: 'm7post', final: true,
+  },
+  // ---------------- Bab 2: Hutan Lembab ----------------
+  {
+    id: 'b2m1', no: 8, chap: 2, name: 'Pintu Hutan Lembab', sub: 'Tanah lumpur', type: 'rout', team: ['ata', 'ladhia', 'bubunti'], pal: 'hutan', music: 'adventure', elv: 2,
+    desc: 'Udara lembab dan berkabut. Hati-hati, tanah lumpur membuat langkah lebih pendek!',
+    star3: { type: 'turns', n: 7, text: 'Menang dalam 7 giliran' },
+    t: ['t..J..tb.', '..mm...b.', '.mmwwm...', '.bmwwm.J.', 'b..mm....', '...L..t..', '.J.....m.', '...,,,.mm', 't..,,,..t'],
+    h: ['000000111', '000000011', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7]],
+    enemies: [['nyamuk', 2, 1, 5], ['nyamuk', 6, 2, 5], ['katak', 1, 4, 4], ['katak', 6, 4, 4]],
+    tips: ['Tanah lumpur 🟫 membuat langkah lebih pendek: satu petak lumpur dihitung 2 langkah. Katak tidak melambat di lumpur!'],
+    pre: 'b1pre', post: 'b1post',
+  },
+  {
+    id: 'b2m2', no: 9, chap: 2, name: 'Jembatan Akar', sub: 'Belut di sungai', type: 'rout', team: ['ata', 'ladhia', 'bubunti'], pal: 'hutan', music: 'adventure', elv: 2,
+    desc: 'Seberangi sungai lewat jembatan akar. Belut Listrik bisa berenang dan menyerang dari air!',
+    star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['t..J...t.', '.b.....b.', '...m..m..', 'ww,wwww,w', 'ww,wwww,w', '..m....m.', '.J..t....', '...,,,..b', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7]],
+    enemies: [['belut', 4, 4, 99], ['belut', 5, 3, 99], ['katak', 2, 1, 4], ['katak', 7, 1, 4], ['nyamuk', 4, 0, 5]],
+    tips: ['Belut Listrik berenang di air 🌊. Teman-teman hanya bisa menyeberang lewat jembatan akar.'],
+    pre: 'b2pre', post: 'b2post',
+  },
+  {
+    id: 'b2m3', no: 10, chap: 2, name: 'Kebun Jamur', sub: 'Spora tidur', type: 'rout', team: ['ata', 'ladhia', 'bubunti'], pal: 'hutan', music: 'adventure', elv: 2,
+    desc: 'Jamur Spora melempar spora tidur. Siapa yang kena akan tertidur satu giliran!',
+    star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['J.J...J.t', '...m.....', 'J...J..mJ', '..m......', '.J...J.b.', '...m.....', 'b.....J..', '...,,,...', 't..,,,..J'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7]],
+    enemies: [['jamur', 2, 1, 3], ['jamur', 6, 1, 3], ['jamur', 4, 3, 4], ['katak', 1, 3, 4], ['nyamuk', 7, 3, 5]],
+    tips: ['Jamur Spora bisa membuat temanmu tertidur 😴 satu giliran. Sup Hangat Bubunti membangunkannya!'],
+    pre: 'b3pre', post: 'b3post',
+  },
+  {
+    id: 'b2m4', no: 11, chap: 2, name: 'Pohon Oumaldi', sub: 'Bertemu Oumaldi', type: 'rout', protect: 'oumaldi', team: ['ata', 'ladhia', 'bubunti', 'oumaldi'], guests: ['oumaldi'], pal: 'hutan', music: 'adventure', elv: 3,
+    desc: 'Oumaldi si pemanah dikepung di atas bukit akar. Selamatkan dia, dan jangan biarkan musuh menempel padanya!',
+    star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['t..J...Jt', '.m.....m.', '.........', '..m...m..', '.b.....b.', 'J..m.....', '......m.J', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000222000', '001222100', '000222000', '000010000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 4, 2]],
+    enemies: [['nyamuk', 1, 1, 99], ['nyamuk', 7, 1, 99], ['katak', 2, 3, 99], ['katak', 6, 4, 99], ['jamur', 4, 0, 99]],
+    waves: [{ turn: 3, units: [['nyamuk', 0, 0], ['nyamuk', 8, 0]] }],
+    tips: ['Oumaldi memanah dari jarak 2 sampai 4 petak, tapi tidak bisa memanah musuh yang menempel. Dari tempat tinggi, panahnya lebih jauh!'],
+    pre: 'b4pre', post: 'b4post', recruit: 'oumaldi',
+  },
+  {
+    id: 'b2m5', no: 12, chap: 2, name: 'Rawa Lumpur', sub: 'Lawan Lumpur Raksasa', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi'], pal: 'hutan', music: 'boss', elv: 3,
+    desc: 'Lumpur Raksasa menjaga rawa. Kalau nyawanya tinggal setengah, dia bisa terbelah!',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['mmm.J.mmm', 'm.mmmmm.m', '.mw.m.wm.', '..mmmmm..', 't.m...m.t', '...m.m...', 'J.......J', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8]],
+    enemies: [['lumpurRaksasa', 4, 1, 99], ['katak', 1, 3, 4], ['katak', 7, 3, 4], ['belut', 2, 2, 4], ['belut', 6, 2, 4]],
+    tips: ['Lumpur Raksasa tidak melambat di lumpur. Saat nyawanya tinggal setengah, dia terbelah jadi lumpur kecil!'],
+    pre: 'b5pre', post: 'b5post',
+  },
+  {
+    id: 'b2m6', no: 13, chap: 2, name: 'Lembah Kabut', sub: 'Musuh tersembunyi', type: 'rout', fog: true, team: ['ata', 'ladhia', 'bubunti', 'oumaldi'], pal: 'hutan', music: 'adventure', elv: 3,
+    desc: 'Kabut tebal menutupi lembah. Musuh baru terlihat kalau sudah dekat. Oumaldi di tempat tinggi bisa melihat lebih jauh!',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['t..J..t..', '.b....m.J', '...t.....', 'J.m...b..', '....J...t', '.m.......', '...b..m..', '.,,,,....', '.,,,,..t.'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000011', '000000122', '000000122', '000000011'],
+    players: [['ata', 2, 8], ['ladhia', 3, 7], ['bubunti', 1, 7], ['oumaldi', 7, 7]],
+    enemies: [['nyamuk', 2, 1, 4], ['nyamuk', 6, 2, 4], ['katak', 4, 3, 3], ['jamur', 1, 4, 3], ['jamur', 6, 4, 3], ['katak', 4, 0, 3]],
+    tips: ['Musuh di dalam kabut tidak terlihat. Teman-teman melihat 3 petak; Oumaldi melihat lebih jauh, apalagi dari tempat tinggi!'],
+    pre: 'b6pre', post: 'b6post',
+  },
+  {
+    id: 'b2m7', no: 14, chap: 2, name: 'Sarang Ular', sub: 'Lawan Ular Beracun', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi'], pal: 'hutan', music: 'boss', elv: 3, elv: 2,
+    desc: 'Ular Beracun bersembunyi di kolam sarangnya. Gigitannya beracun dan dia bisa memanggil belut!',
+    star3: { type: 'turns', n: 10, text: 'Menang dalam 10 giliran' },
+    t: ['t..J...Jt', '..m...m..', '.m.www.m.', '..wwwww..', 'J.ww,ww.J', '..wwwww..', '.b.www.b.', '...,,,...', 't..,,,..t'],
+    h: ['110000011', '100000001', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8]],
+    enemies: [['ular', 4, 3, 99], ['belut', 3, 2, 99], ['belut', 5, 5, 99], ['nyamuk', 1, 1, 5], ['nyamuk', 7, 1, 5]],
+    summon: { every: 3, max: 5, at: [[2, 3], [6, 3]] },
+    tips: ['Gigitan Ular Beracun membuat keracunan 🤢: nyawa berkurang 2 tiap giliran selama 3 giliran. Sup Hangat menyembuhkannya!', 'Ular bisa berenang. Serang dia saat mendekat ke tepi kolam!'],
+    pre: 'b7pre', post: 'b7post', final: true,
   },
 ];
 
@@ -251,18 +428,19 @@ const MISSIONS = [
         if (cx >= 0 && cy >= 0 && cx < n && cy < n) { rt += m.t[cy][cx]; rh += m.h[cy][cx]; continue; }
         const corner = (x < 3 || x > S - 4) && (y < 3 || y > S - 4) && (Math.min(x, S - 1 - x) + Math.min(y, S - 1 - y) < 3);
         if (edge === 0 || corner) { rt += 'o'; rh += '0'; continue; }
-        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : 'y'; rh += '0'; continue; }
+        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : 'y'); rh += '0'; continue; }
         const kx = Math.max(0, Math.min(n - 1, cx)), ky = Math.max(0, Math.min(n - 1, cy));
         const d = Math.max(Math.abs(cx - kx), Math.abs(cy - ky));
         const tc = m.t[ky][kx], hc = +m.h[ky][kx];
         rh += String(Math.max(0, hc - Math.floor(d / 2)));
         if (tc === ',' && (cx === kx || cy === ky)) { rt += ','; continue; }
+        if (tc === 'w' && m.pal === 'hutan' && (cx === kx || cy === ky) && (kx === 0 || kx === n - 1 || ky === 0 || ky === n - 1)) { rt += 'w'; continue; }
         const r = hsh(x, y, mi + 11);
         let c = '.';
         if (r < 0.07) c = 'b';
-        else if (r < 0.14) c = m.pal === 'savana' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
-        else if (r < 0.17) c = 'r';
-        else if (r < 0.24) c = 'q';
+        else if (r < 0.14) c = m.pal === 'savana' || m.pal === 'hutan' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
+        else if (r < 0.17) c = m.pal === 'hutan' ? 'J' : 'r';
+        else if (r < 0.24) c = m.pal === 'hutan' ? 'm' : 'q';
         else if (r < 0.55) c = 'g';
         rt += c;
       }

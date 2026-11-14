@@ -16,6 +16,9 @@ const SPR = (() => {
     bubunti: { h: 70, ref: 'depan', face: 'wajah', poses: {
       idle: ['siaga', 'R'], walk: ['kanan', 'R'], walkL: ['kiri', 'L'], back: ['belakang', 'N'],
       attack: ['ayun', 'L'], pedas: ['ayun', 'L'], sup: ['sorak', 'R'] } },
+    oumaldi: { h: 58, ref: 'depan', face: 'wajah', poses: {
+      idle: ['kanan', 'R'], walk: ['lari', 'R'], back: ['belakang', 'N'],
+      attack: ['jongkok', 'R'], jitu: ['panah', 'R'], hujan: ['loncat-panah', 'R'] } },
     nenek: { h: 52, ref: 'depan', face: 'depan', poses: { idle: ['kanan', 'R'], back: ['belakang', 'N'] } },
     // musuh (folder musuh/, file <nama>-N): idle = sprite battle Pohon Madu (menghadap kanan kecuali L)
     kumbang: { dir: 'musuh', h: 30, ref: 'kumbang-2', face: 'kumbang-1', poses: { idle: ['kumbang-2', 'R'], back: ['kumbang-3', 'R'] } },
@@ -27,6 +30,14 @@ const SPR = (() => {
     kadal: { dir: 'musuh', h: 28, ref: 'kadal-3', face: 'kadal-1', poses: { idle: ['kadal-3', 'R'], back: ['kadal-4', 'R'] } },
     landak: { dir: 'musuh', h: 34, ref: 'landak-4', face: 'landak-1', poses: { idle: ['landak-4', 'R'], back: ['landak-3', 'N'] } },
     kepalaMusang: { dir: 'musuh', h: 66, ref: 'kepala-musang-4', face: 'kepala-musang-1', poses: { idle: ['kepala-musang-4', 'R'], back: ['kepala-musang-2', 'N'], attack: ['kepala-musang-4', 'R'] } },
+    // Bab 2 Hutan Lembab
+    nyamuk: { dir: 'musuh', h: 30, lift: 22, ref: 'nyamuk-2', face: 'nyamuk-1', poses: { idle: ['nyamuk-2', 'R'], back: ['nyamuk-4', 'N'] } },
+    katak: { dir: 'musuh', h: 30, ref: 'katak-3', face: 'katak-1', poses: { idle: ['katak-3', 'L'], back: ['katak-4', 'N'] } },
+    jamur: { dir: 'musuh', h: 40, ref: 'jamur-3', face: 'jamur-1', poses: { idle: ['jamur-3', 'R'], back: ['jamur-4', 'N'] } },
+    belut: { dir: 'musuh', h: 22, ref: 'belut-2', face: 'belut-1', poses: { idle: ['belut-2', 'R'], back: ['belut-1', 'L'] } },
+    lumpurKecil: { dir: 'musuh', h: 34, ref: 'lumpur-raksasa-2', face: 'lumpur-raksasa-1', poses: { idle: ['lumpur-raksasa-2', 'R'], back: ['lumpur-raksasa-3', 'N'] } },
+    ular: { dir: 'musuh', h: 62, ref: 'ular-4', face: 'ular-1', poses: { idle: ['ular-4', 'R'], back: ['ular-7', 'N'], attack: ['ular-8', 'R'] } },
+    lumpurRaksasa: { dir: 'musuh', h: 70, ref: 'lumpur-raksasa-2', face: 'lumpur-raksasa-1', poses: { idle: ['lumpur-raksasa-2', 'R'], back: ['lumpur-raksasa-3', 'N'], attack: ['lumpur-raksasa-1', 'N'] } },
   };
   const VEC_SCALE = 1.8;           // skala gambar vektor Art
   const store = {};                // kind -> {pose -> processed}

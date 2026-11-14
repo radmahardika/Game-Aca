@@ -3,7 +3,7 @@
 (() => {
   const TW = 64, TH = 32, HS = 16;
   const DIRS = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // 0 depan-kanan, 1 depan-kiri, 2 belakang-kiri, 3 belakang-kanan
-  const BLOCK = new Set(['w', 'o', 't', 'p', 'r', 'h', 'k', 's']);
+  const BLOCK = new Set(['w', 'o', 't', 'p', 'r', 'h', 'k', 's', 'J', 'L']);
   const $ = s => document.querySelector(s);
   const cv = $('#cv'), ctx = cv.getContext('2d');
   const scr = $('#scr'), hud = $('#hud'), panel = $('#panel'), dlg = $('#dlg'), bannerEl = $('#banner'), tipEl = $('#tip');
@@ -17,15 +17,17 @@
 
   /* ---------------- Simpan & muat ---------------- */
   const SKEY = 'ata-taktik-v1';
-  function defSave() { return { cleared: {}, stars: {}, madu: 0, lvl: { ata: 1, ladhia: 1, bubunti: 1 }, seen: {}, snd: { voice: true, sfx: true, music: true } }; }
+  function defSave() { return { cleared: {}, stars: {}, madu: 0, lvl: { ata: 1, ladhia: 1, bubunti: 1, oumaldi: 1 }, seen: {}, snd: { voice: true, sfx: true, music: true } }; }
   let S = defSave();
   try { const r = localStorage.getItem(SKEY); if (r) { const o = JSON.parse(r); S = Object.assign(defSave(), o); S.lvl = Object.assign(defSave().lvl, o.lvl || {}); } } catch (e) {}
   function persist() { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) {} }
   Object.assign(Sound.st, S.snd);
-  const recruited = k => k === 'ata' || (k === 'ladhia' && !!S.cleared.m3) || (k === 'bubunti' && !!S.cleared.m6);
+  const JOIN = { ladhia: 'm3', bubunti: 'm6', oumaldi: 'b2m4' };
+  const recruited = k => k === 'ata' || !!S.cleared[JOIN[k]];
   const unlockedIdx = () => { let i = 0; while (i < MISSIONS.length && S.cleared[MISSIONS[i].id]) i++; return Math.min(i, MISSIONS.length - 1); };
   function charStats(k, l) { const b = CHARS[k]; return { hp: b.hp + 3 * (l - 1), atk: b.atk + (l - 1), def: b.def + Math.floor((l - 1) / 2), mov: b.mov }; }
   const lvlCost = l => 6 + l * 6;
+  function teamLv() { const ks = Object.keys(CHARS).filter(recruited); return Math.max(1, Math.floor(ks.reduce((a, k) => a + (S.lvl[k] || 1), 0) / (ks.length || 1))); }
 
   /* ---------------- Helper DOM ---------------- */
   function h(tag, attrs = {}, ...kids) {
@@ -64,21 +66,31 @@
   const iso = (x, y, hh) => [(x - y) * TW / 2, (x + y) * TH / 2 - hh * HS];
   const T = (x, y) => G.map.tiles[y] && G.map.tiles[y][x];
   const walkable = t => t && !BLOCK.has(t.t);
+  const canStand = (u, t) => t && (walkable(t) || (u && u.swim && t.t === 'w'));
+  const stepCost = (u, t) => (t.t === 'm' && !u.fly && !u.mudOk ? 2 : 1);
   const unitAt = (x, y) => G.units.find(u => !u.gone && u.x === x && u.y === y);
   const dist = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   const isFoe = (a, b) => a.team === 'e' ? b.team !== 'e' : b.team === 'e';
-  const foesOf = u => G.units.filter(v => v.alive && isFoe(u, v));
+  const foesOf = u => G.units.filter(v => v.alive && isFoe(u, v) && (u.team === 'e' || seen(v)));
+  function sightOf(u) { if (u.key !== 'oumaldi') return 3; return T(u.x, u.y).h >= 1 ? 6 : 4; }
+  function seen(v) { // kabut: musuh terlihat bila dekat dengan teman atau baru saja menyerang
+    if (!G.m.fog || v.team !== 'e') return true;
+    if (v.reveal >= G.turn) return true;
+    return G.units.some(p => p.team === 'p' && p.alive && dist(p, v) <= sightOf(p));
+  }
+  function fogTile(x, y) { return G.m.fog && !G.units.some(p => p.team === 'p' && p.alive && Math.abs(p.x - x) + Math.abs(p.y - y) <= sightOf(p)); }
+  function reveal(e) { if (G.m.fog) e.reveal = G.turn + 1; }
   const pteam = () => G.units.filter(u => u.team === 'p');
 
   let UID = 0;
   function mkUnit(k, team, x, y, opt = {}) {
     const b = team === 'p' ? CHARS[k] : team === 'e' ? ENEMIES[k] : NPCS[k];
-    const lv = team === 'p' ? (S.lvl[k] || 1) : (opt.lv || 1);
+    const lv = team === 'p' ? (recruited(k) ? (S.lvl[k] || 1) : teamLv()) : (opt.lv || 1);
     const u = {
       id: ++UID, key: k, team, name: b.name, x, y, lv, maxhp: b.hp, hp: 0, atk: b.atk, def: b.def, mov: b.mov, jump: b.jump,
-      rmin: b.rmin, rmax: b.rmax, fly: !!b.fly, skills: b.skills || [], boss: !!b.boss, ranged: !!b.ranged, madu: b.madu || 0,
+      rmin: b.rmin, rmax: b.rmax, fly: !!b.fly, swim: !!b.swim, mudOk: !!b.mudOk, skills: b.skills || [], boss: !!b.boss, ranged: !!b.ranged, madu: b.madu || 0,
       sp: team === 'p' ? 2 : 0, facing: 0, done: false, moved: false, alive: true, gone: false, item: team === 'p' ? 1 : 0,
-      buffs: { sabuk: 0, benteng: 0, taunt: 0 }, status: { pedas: 0 }, aggro: opt.aggro ?? 99, aggroOn: false,
+      buffs: { sabuk: 0, benteng: 0, taunt: 0 }, status: { pedas: 0, tidur: 0, racun: 0 }, aggro: opt.aggro ?? 99, aggroOn: false,
       anim: 'idle', a0: 0, adur: 1, ox: 0, oy: 0, alpha: 1, tw: null, spin: false,
     };
     if (team === 'p') { const s = charStats(k, lv); u.maxhp = s.hp; u.atk = s.atk; u.def = s.def; }
@@ -93,18 +105,21 @@
     const all = new Map(); all.set(key(u.x, u.y), { x: u.x, y: u.y, c: 0, prev: null });
     const q = [[u.x, u.y]];
     while (q.length) {
-      const [x, y] = q.shift(); const cur = all.get(key(x, y)); if (cur.c >= mov) continue;
+      let bi = 0; for (let i = 1; i < q.length; i++) if (all.get(key(...q[i])).c < all.get(key(...q[bi])).c) bi = i;
+      const [x, y] = q.splice(bi, 1)[0]; const cur = all.get(key(x, y)); if (cur.c >= mov) continue;
       const t0 = T(x, y);
       for (const [dx, dy] of DIRS) {
         const nx = x + dx, ny = y + dy, t = T(nx, ny); if (!t) continue;
-        const k = key(nx, ny); if (all.has(k)) continue;
-        if (!u.fly) { if (!walkable(t) || Math.abs(t.h - t0.h) > u.jump) continue; } else if (t.t === 'h') continue;
+        const k = key(nx, ny);
+        if (!u.fly) { if (!canStand(u, t) || Math.abs(t.h - t0.h) > u.jump) continue; } else if (t.t === 'h' || t.t === 'o') continue;
         const o = unitAt(nx, ny); if (o && o.alive && isFoe(u, o)) continue;
-        all.set(k, { x: nx, y: ny, c: cur.c + 1, prev: key(x, y) }); q.push([nx, ny]);
+        const c = cur.c + stepCost(u, t); if (c > mov) continue;
+        const old = all.get(k); if (old && old.c <= c) continue;
+        all.set(k, { x: nx, y: ny, c, prev: key(x, y) }); q.push([nx, ny]);
       }
     }
     const out = new Map();
-    for (const [k, v] of all) { if ((v.x === u.x && v.y === u.y) || (walkable(T(v.x, v.y)) && !unitAt(v.x, v.y))) out.set(k, v); }
+    for (const [k, v] of all) { if ((v.x === u.x && v.y === u.y) || (canStand(u, T(v.x, v.y)) && !unitAt(v.x, v.y))) out.set(k, v); }
     out.all = all;
     return out;
   }
@@ -112,7 +127,7 @@
   function canHitFrom(u, fx, fy, tg, rmin = u.rmin, rmax = u.rmax) {
     const d = Math.abs(fx - tg.x) + Math.abs(fy - tg.y);
     const hu = T(fx, fy).h, ht = T(tg.x, tg.y).h;
-    let rx = rmax; if (rmax >= 2 && hu - ht >= 2) rx += 1;
+    let rx = rmax; if (rmax >= 2 && hu - ht >= (u.key === 'oumaldi' ? 1 : 2)) rx += 1;
     if (d < rmin || d > rx) return false;
     if (d === 1 && !u.fly && Math.abs(hu - ht) > 1) return false;
     return true;
@@ -187,7 +202,7 @@
   async function projectile(from, to, emoji, dur = 320) {
     const a = unitWorld(from), b = unitWorld(to);
     Sound.play('throw');
-    G.projs.push({ ax: a.sx, ay: a.sy - 36, bx: b.sx, by: b.sy - 28, t0: now(), dur: dur / 1000, e: emoji });
+    G.projs.push({ ax: a.sx, ay: a.sy - 36, bx: b.sx, by: b.sy - 28, t0: now(), dur: dur / 1000, e: emoji, arc: emoji === 'arrow' ? 20 : 48 });
     await wait(dur);
   }
 
@@ -202,6 +217,10 @@
     playAnim(def, 'hurt', 280);
     if (def.team === 'e') { def.aggroOn = true; G.units.forEach(e => { if (e.team === 'e' && e.alive && dist(e, def) <= 4) e.aggroOn = true; }); }
     if (def.hp <= 0) faint(def);
+    else if (def.team === 'e' && ENEMIES[def.key].split && !def.didSplit && def.hp <= def.maxhp / 2) {
+      def.didSplit = true; addText(def, 'Terbelah!', '#e0c890', 10, 0.3); Sound.play('roar');
+      setTimeout(() => { if (!G || G.ended) return; for (let i = 0; i < 2; i++) { const n = spawnUnit(ENEMIES[def.key].split, def.x, def.y); if (n) { burst(n, ['#6e5034', '#9a7a58'], 8); n.fresh = G.phase === 'enemy'; } } renderPanel(); }, 450);
+    }
   }
   function faint(u) {
     u.alive = false; u.anim = 'faint'; u.a0 = now(); u.adur = 0.6;
@@ -238,7 +257,7 @@
     faceTo(u, t.x, t.y); u.pose = null;
     const far = dist(u, t) > 1;
     const p = playAnim(u, 'attack', 420);
-    if (far) { await wait(140); await projectile(u, t, u.key === 'ladhia' ? '⚙️' : '🪨', 280); } else await wait(250);
+    if (far) { await wait(140); await projectile(u, t, u.key === 'ladhia' ? '⚙️' : u.key === 'oumaldi' ? 'arrow' : (ENEMIES[u.key] && ENEMIES[u.key].proj) || '🪨', 280); } else await wait(250);
     await hit(u, t, { basic: true, melee: !far });
     await p;
   }
@@ -286,6 +305,22 @@
         const amt = 10 + 2 * (u.lv - 1);
         const real = Math.min(amt, tg.maxhp - tg.hp); tg.hp += real;
         Sound.play('heal'); addText(tg, '+' + real, '#8cff8c', 12); burst(tg, ['#8cff8c', '#e8ffe0', '#ffffff'], 10);
+        if (tg.status.tidur > 0 || tg.status.racun > 0) { tg.status.tidur = 0; tg.status.racun = 0; addText(tg, 'Segar kembali!', '#c8ffb8', 8, 0.3); if (tg.sleeping) { tg.sleeping = false; if (tg !== u && !tg.moved) tg.done = false; } }
+        await p; break;
+      }
+      case 'jitu': {
+        faceTo(u, tg.x, tg.y);
+        const p = playAnim(u, 'skill', 560); await wait(220);
+        await projectile(u, tg, 'arrow', 260);
+        applyDamage(u, tg, calcDmg(u, tg, { mult: 1.3, pierce: true }));
+        await p; break;
+      }
+      case 'hujan': {
+        faceTo(u, tg.x, tg.y);
+        const p = playAnim(u, 'skill', 760); await wait(240);
+        const list = [tg, ...foesOf(u).filter(f => f !== tg && dist(f, tg) === 1)];
+        await Promise.all(list.map((f, i) => wait(i * 70).then(() => projectile(u, f, 'arrow', 300))));
+        list.forEach(f => applyDamage(u, f, calcDmg(u, f, { mult: f === tg ? 1 : 0.7 })));
         await p; break;
       }
       case 'pedas': {
@@ -328,6 +363,12 @@
       u.done = !u.alive || u.team === 'n'; u.moved = false;
       if (G.turn > 1 && u.alive) { u.sp = Math.min(5, u.sp + 1); if (u.buffs.sabuk > 0) u.buffs.sabuk--; }
       u.buffs.benteng = 0; u.buffs.taunt = 0;
+      if (u.team === 'p' && u.alive && u.status.racun > 0) {
+        u.status.racun--; const d = Math.min(2, u.hp - 1);
+        if (d > 0) { u.hp -= d; addText(u, '-' + d + ' 🤢', '#b8ff7a', 10); }
+      }
+      if (u.team === 'p' && u.alive && u.status.tidur > 0) { u.status.tidur--; u.done = true; u.sleeping = true; addText(u, 'Zzz... 😴', '#d8c8ff', 10, 0.2); }
+      else u.sleeping = false;
     }
     G.sel = null; G.info = null; G.mode = 'idle';
     Sound.play('turn');
@@ -423,7 +464,8 @@
     const live = u && u.alive ? u : null;
     switch (G.mode) {
       case 'idle':
-        if (live && live.team === 'p' && !live.done) { Sound.play('tap'); selectUnit(live); }
+        if (live && live.team === 'p' && live.sleeping && live.done) { Sound.play('tap'); G.info = live; renderPanel(); toast(live.name + ' sedang tertidur 😴. Bangunkan dengan Sup Hangat Bubunti!'); }
+        else if (live && live.team === 'p' && !live.done) { Sound.play('tap'); selectUnit(live); }
         else if (live) { Sound.play('tap'); G.info = live; renderPanel(); }
         else clearSel();
         break;
@@ -474,17 +516,17 @@
     G.turn++;
     beginPlayerPhase();
   }
-  function freeNear(x, y) {
-    const seen = new Set([key(x, y)]), q = [[x, y]];
+  function freeNear(x, y, k) {
+    const seen = new Set([key(x, y)]), q = [[x, y]], who = k ? ENEMIES[k] : null;
     while (q.length) {
       const [cx, cy] = q.shift(); const t = T(cx, cy);
-      if (t && walkable(t) && !unitAt(cx, cy)) return [cx, cy];
+      if (t && canStand(who, t) && !unitAt(cx, cy)) return [cx, cy];
       for (const [dx, dy] of DIRS) { const k = key(cx + dx, cy + dy); if (!seen.has(k) && T(cx + dx, cy + dy)) { seen.add(k); q.push([cx + dx, cy + dy]); } }
     }
     return null;
   }
   function spawnUnit(k, x, y) {
-    const p = freeNear(x, y); if (!p) return null;
+    const p = freeNear(x, y, k); if (!p) return null;
     const u = mkUnit(k, 'e', p[0], p[1], { lv: G.m.elv || 1 });
     u.aggroOn = true; u.fresh = true; u.dropIn = now(); faceNearestFoe(u);
     G.units.push(u); burst(u, ['#ffffff', '#e8d9b5'], 8);
@@ -517,7 +559,7 @@
       for (const [dx, dy] of DIRS) {
         const nx = x + dx, ny = y + dy, t = T(nx, ny); if (!t) continue;
         const k = key(nx, ny); if (f.has(k)) continue;
-        if (!e.fly && (!walkable(t) || Math.abs(t.h - t0.h) > e.jump)) continue;
+        if (!e.fly && (!canStand(e, t) || Math.abs(t.h - t0.h) > e.jump)) continue;
         f.set(k, d + 1); q.push([nx, ny]);
       }
     }
@@ -530,7 +572,7 @@
     }
     const targets = foesOf(e); if (!targets.length) return;
     if (!e.aggroOn) { if (targets.some(t => dist(t, e) <= e.aggro) || e.hp < e.maxhp) e.aggroOn = true; else return; }
-    focus(e); await wait(260);
+    if (seen(e)) { focus(e); await wait(260); } else await wait(60);
     const R = reach(e);
     const taunters = targets.filter(t => t.buffs.taunt > 0);
     let best = null;
@@ -545,15 +587,23 @@
       }
     }
     if (best) {
+      reveal(e);
       if (best.p.x !== e.x || best.p.y !== e.y) await walk(e, pathTo(R, best.p.x, best.p.y));
+      focus(e);
       G.focus.set(best.t.id, (G.focus.get(best.t.id) || 0) + 1);
       await basicAttack(e, best.t);
+      reveal(e);
+      const oh = ENEMIES[e.key].onHit, t = best.t;
+      if (oh && t.alive && t.team !== 'e') {
+        if (oh === 'tidur') { t.status.tidur = 1; addText(t, 'Tertidur! 😴', '#d8c8ff', 9, 0.3); burst(t, ['#c8a0f0', '#ffffff'], 8); }
+        if (oh === 'racun') { t.status.racun = 3; addText(t, 'Keracunan! 🤢', '#b8ff7a', 9, 0.3); burst(t, ['#9be05a', '#5a2a7a'], 8); }
+      }
       return;
     }
     const field = distField(e, taunters.length ? taunters : targets);
     let mv = null;
     for (const [k, p] of R) { const d = field.get(k); if (d == null) continue; if (!mv || d < mv.d || (d === mv.d && p.c < mv.c)) mv = { d, c: p.c, p }; }
-    if (mv && (mv.p.x !== e.x || mv.p.y !== e.y)) await walk(e, pathTo(R, mv.p.x, mv.p.y));
+    if (mv && (mv.p.x !== e.x || mv.p.y !== e.y)) { if (seen(e)) await walk(e, pathTo(R, mv.p.x, mv.p.y)); else { e.x = mv.p.x; e.y = mv.p.y; } }
     faceNearestFoe(e);
   }
 
@@ -596,6 +646,7 @@
     const prev = S.stars[m.id] || 0;
     const bonus = (first ? 10 : 4) + Math.max(0, n - prev) * 3;
     const total = G.madu + bonus;
+    if (first && m.recruit) S.lvl[m.recruit] = Math.max(S.lvl[m.recruit] || 1, teamLv());
     S.madu += total; S.cleared[m.id] = true; S.stars[m.id] = Math.max(prev, n); persist();
     const conds = ['Menang', 'Tidak ada teman yang pingsan', m.star3.text];
     overlay(h('div', { class: 'card result' },
@@ -607,7 +658,7 @@
         closeOverlay();
         if (first && m.post) await playStory(STORY[m.post]);
         if (first && m.recruit) await recruitPopup(m.recruit);
-        if (first && m.final) { await chapterEnd(); return; }
+        if (first && m.final) { await chapterEnd(m); return; }
         goMap();
       }, 'pri'))));
   }
@@ -654,7 +705,7 @@
   }
   /* ---------------- Memilih dengan tap ---------------- */
   function pickUnit(wx, wy) {
-    const list = G.units.filter(u => !u.gone && u.alive).map(u => [u, unitWorld(u)]).sort((a, b) => (b[1].rx + b[1].ry) - (a[1].rx + a[1].ry));
+    const list = G.units.filter(u => !u.gone && u.alive && seen(u)).map(u => [u, unitWorld(u)]).sort((a, b) => (b[1].rx + b[1].ry) - (a[1].rx + a[1].ry));
     const hits = [];
     for (const [u, p] of list) {
       const hh = SPR.height(u.key), hw = SPR.width(u.key) / 2;
@@ -725,6 +776,7 @@
   const isSea = t => !t || t.t === 'o';
   const GRASS = {
     kebun: ['#456f2c', '#8cb653', '#a9c46a'], desa: ['#4a742e', '#90b856', '#b0c870'], savana: ['#5f7a2c', '#a8b456', '#c9c070'],
+    hutan: ['#1f3d22', '#4a7a3a', '#7aa84e'],
   };
   function stoneTop(X, Y, sc) {
     let su = X * sc, sv = Y * sc; const row = Math.floor(sv); if (row % 2) su += 0.5;
@@ -747,6 +799,9 @@
       case 'q': { let c = grass(X, Y, gp); const fx = X * 9, fy = Y * 9, id = hash(Math.floor(fx), Math.floor(fy), 21);
         if (id > 0.86) { const d = Math.hypot(fx - Math.floor(fx) - 0.5, fy - Math.floor(fy) - 0.5); if (d < 0.22) c = mix(c, C(['#f2a0b8', '#ffe27a', '#ffffff', '#c8a0f0'][Math.floor(id * 40) % 4]), sm(0.22, 0.12, d)); } return c; }
       case ',': case 's': { const n = fbm(X * 3, Y * 3, 8); let c = mix(C('#7d5a3e'), C('#b48d62'), 0.3 + n * 0.6); return mix(c, C('#c9ae84'), sm(0.7, 0.9, fbm(X * 8, Y * 8, 9)) * 0.4); }
+      case 'm': { const n = fbm(X * 2.2, Y * 2.2, 44); let c = mix(C('#3e2c1e'), C('#6e5034'), 0.2 + n * 0.7);
+        const pd = fbm(X * 1.4, Y * 1.4, 45); c = mix(c, C('#2a2a26'), sm(0.6, 0.66, pd) * 0.55); c = mix(c, C('#a7b8a0'), sm(0.66, 0.7, pd) * sm(0.8, 0.95, fbm(X * 9, Y * 9, 46)) * 0.6);
+        return mix(c, C('#4a6a2c'), sm(0.72, 0.9, fbm(X * 4, Y * 4, 47)) * 0.35); }
       case 'y': { const n = fbm(X * 2.5, Y * 2.5, 31); let c = mix(C('#d9bf86'), C('#f0dcaa'), 0.3 + n * 0.6); return mul(c, 0.96 + 0.06 * fbm(X * 14, Y * 14, 32)); }
       case 'c': { const r = (X + Y) * 4, f = r - Math.floor(r); let c = mix(C('#5e3e26'), C('#8a6040'), sm(0.1, 0.5, Math.abs(f - 0.5) * 2) * 0.8 + fbm(X * 6, Y * 6, 33) * 0.2);
         if (Math.abs(f - 0.5) < 0.14 && hash(Math.floor(r), Math.floor((X - Y) * 5), 34) > 0.35) { const k = vn((X - Y) * 14, r, 35); if (k > 0.45) c = mix(C('#3f7a2a'), C('#8cc458'), k); } return c; }
@@ -754,6 +809,7 @@
       case 'w': {
         if (G.m.mud) { const n = fbm(X * 2, Y * 2, 40); let c = mix(C('#4e3826'), C('#7a5a3c'), n); return mix(c, C('#9a7a58'), sm(0.75, 0.9, fbm(X * 6, Y * 6, 41)) * 0.5); }
         const r = 0.5 + 0.5 * Math.sin(X * 7 + Y * 2.5 + fbm(X * 1.5, Y * 1.5, 10) * 5);
+        if (G.m.pal === 'hutan') { let c = mix(mix(C('#123a34'), C('#2e6a5a'), 0.35 + r * 0.4), C('#bfe8d0'), sm(0.94, 0.99, r) * 0.5); const ld = fbm(X * 3, Y * 3, 48); return mix(c, C('#4a8a3a'), sm(0.72, 0.78, ld) * 0.8); }
         return mix(mix(C('#18469a'), C('#3c86d8'), 0.35 + r * 0.4), C('#cfe9ff'), sm(0.93, 0.99, r) * 0.7);
       }
       default: return grass(X, Y, gp);
@@ -874,6 +930,41 @@
       if (seed % 3 === 0) for (let k = 0; k < 5; k++) { c.fillStyle = '#e8473a'; c.beginPath(); c.arc(-26 + hash(k, seed, 7) * 52, -120 + hash(k, seed, 8) * 50, 4, 0, 7); c.fill(); }
     }
   }
+  function drJungle(c, seed) { // pohon hutan lembab: akar banir, batang berlumut, tajuk lebat gelap, sulur
+    const tr = c.createLinearGradient(-12, 0, 12, 0); tr.addColorStop(0, '#5a4630'); tr.addColorStop(1, '#241a10');
+    c.fillStyle = tr; c.beginPath(); c.moveTo(-26, 4); c.quadraticCurveTo(-10, -6, -9, -40); c.lineTo(-7, -110); c.lineTo(7, -110); c.lineTo(9, -40); c.quadraticCurveTo(10, -6, 28, 6); c.lineTo(10, 2); c.lineTo(0, 8); c.lineTo(-10, 2); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(110,150,70,0.55)'; c.beginPath(); c.ellipse(-5, -50, 5, 16, 0.1, 0, 7); c.fill(); c.beginPath(); c.ellipse(4, -88, 4, 10, -0.2, 0, 7); c.fill();
+    blobs(c, [[0, -150, 46], [-38, -124, 34], [38, -122, 34], [-16, -178, 30], [20, -172, 30], [0, -112, 30]], seed, ['#6f9a4a', '#2f5a2e', '#0e2414']);
+    for (let k = 0; k < 4; k++) { const x0 = -34 + hash(k, seed, 61) * 68, len = 30 + hash(k, seed, 62) * 50, y0 = -118 + hash(k, seed, 63) * 12;
+      c.strokeStyle = '#3a6a2a'; c.lineWidth = 2.2; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(x0 + 6, y0 + len * 0.5, x0 - 2, y0 + len); c.stroke();
+      c.fillStyle = '#5a8a3a'; for (let q = 0; q < 4; q++) { c.beginPath(); c.ellipse(x0 + 2 - q % 2 * 4, y0 + len * (q + 1) / 5, 3.5, 2, q, 0, 7); c.fill(); } }
+  }
+  function drShroom(c, seed) { // jamur raksasa bercahaya
+    const caps = [[-16, -6, 1], [14, -2, 0.75], [0, 8, 0.55]];
+    for (const [x, y, k] of caps) {
+      const hgt = 46 * k, r = 26 * k;
+      const st = c.createLinearGradient(x - 5, 0, x + 5, 0); st.addColorStop(0, '#efe4cc'); st.addColorStop(1, '#a89a80');
+      c.fillStyle = st; c.fillRect(x - 5 * k, y - hgt, 10 * k, hgt);
+      const g = c.createRadialGradient(x - r * 0.4, y - hgt - r * 0.5, 2, x, y - hgt, r * 1.2); g.addColorStop(0, '#ffb07a'); g.addColorStop(0.5, '#d2562e'); g.addColorStop(1, '#6a1e18');
+      c.fillStyle = g; c.beginPath(); c.ellipse(x, y - hgt, r, r * 0.62, 0, Math.PI, 0); c.quadraticCurveTo(x, y - hgt + r * 0.3, x - r, y - hgt); c.fill();
+      c.fillStyle = 'rgba(255,240,210,0.85)'; for (let q = 0; q < 4; q++) { c.beginPath(); c.arc(x - r * 0.5 + hash(q, seed, x | 0) * r, y - hgt - r * 0.15 - hash(q, seed, 9) * r * 0.35, 2.4 * k + 1, 0, 7); c.fill(); }
+    }
+  }
+  function drFern(c, seed) {
+    for (let k = 0; k < 7; k++) { const a = -2.6 + k * 0.36 + (hash(k, seed, 70) - 0.5) * 0.2, L = 28 + hash(k, seed, 71) * 14;
+      const ex = Math.cos(a) * L, ey = Math.sin(a) * L * 0.9;
+      c.strokeStyle = k % 2 ? '#3f7a32' : '#5c9a3e'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(ex * 0.5, ey - 10, ex, ey); c.stroke();
+      c.fillStyle = c.strokeStyle; for (let q = 1; q < 6; q++) { const t = q / 6, px = ex * t, py = ey * t - 10 * t * (1 - t) * 2; c.beginPath(); c.ellipse(px, py, 5 * (1 - t * 0.5), 2, a + 1.2, 0, 7); c.fill(); c.beginPath(); c.ellipse(px, py, 5 * (1 - t * 0.5), 2, a - 1.2, 0, 7); c.fill(); } }
+  }
+  function drLog(c, seed) { // batang kayu tumbang berlumut
+    const A = Q(-0.42, 0.1, 0), B = Q(0.42, -0.1, 0);
+    c.save(); c.translate(0, -10);
+    const g = c.createLinearGradient(0, -22, 0, 12); g.addColorStop(0, '#8a6a46'); g.addColorStop(1, '#3a2818');
+    c.strokeStyle = g; c.lineCap = 'round'; c.lineWidth = 26; c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke();
+    c.strokeStyle = 'rgba(120,170,70,0.7)'; c.lineWidth = 9; c.beginPath(); c.moveTo(A[0] + 6, A[1] - 10); c.lineTo(B[0] - 10, B[1] - 10); c.stroke();
+    c.fillStyle = '#c8a878'; c.beginPath(); c.ellipse(B[0] + 4, B[1], 9, 12, 0, 0, 7); c.fill(); c.strokeStyle = '#8a6a46'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(B[0] + 4, B[1], 5, 7, 0, 0, 7); c.stroke();
+    c.restore();
+  }
   function drPine(c, seed) {
     c.fillStyle = '#4a3020'; c.fillRect(-5, -16, 10, 16);
     for (let k = 0; k < 4; k++) { const w = 38 - k * 8, y0 = -12 - k * 26, y1 = y0 - 44;
@@ -914,9 +1005,11 @@
     poly(c, [[0, -hh - s / 2], [s, -hh], [0, s / 2 - hh], [-s, -hh]], '#d6a266');
   }
   const DECOR = {
-    t: { draw: (c, s) => drTree(c, s, G.m.pal === 'savana'), w: 200, h: 220, sh: [16, 6, 34, 15] },
+    t: { draw: (c, s) => G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
+    J: { draw: drShroom, w: 120, h: 110, sh: [8, 4, 26, 10] },
+    L: { draw: drLog, w: 150, h: 80, sh: [6, 6, 34, 12] },
     p: { draw: drPine, w: 120, h: 180, sh: [14, 6, 28, 12] },
-    b: { draw: drBush, w: 110, h: 80, sh: [8, 4, 26, 10] },
+    b: { draw: (c, s) => G.m.pal === 'hutan' ? drFern(c, s) : drBush(c, s), w: 110, h: 80, sh: [8, 4, 26, 10] },
     r: { draw: drRock, w: 100, h: 80, sh: [10, 4, 26, 10] },
     h: { draw: drHouse, w: 150, h: 190, sh: [20, 8, 34, 18] },
     k: { draw: drStove, w: 120, h: 120, sh: [10, 6, 24, 10] },
@@ -961,18 +1054,20 @@
   const W2S = (wx, wy) => [cam.x + wx * cam.z, cam.y + wy * cam.z];
   let BG = null;
   function bgCanvas() {
-    if (BG && BG.w === VW && BG.h === VH) return BG;
+    const pal = G && G.m.pal === 'hutan' ? 'hutan' : 'x';
+    if (BG && BG.w === VW && BG.h === VH && BG.pal === pal) return BG;
     const back = mkCanvas(Math.round(VW * DPR), Math.round(VH * DPR)), b = back.getContext('2d');
     b.scale(DPR, DPR);
     const g = b.createRadialGradient(VW * 0.5, VH * 0.35, 0, VW * 0.5, VH * 0.5, Math.max(VW, VH) * 0.8);
-    g.addColorStop(0, '#2f5ea8'); g.addColorStop(0.55, '#14336e'); g.addColorStop(1, '#050d26'); b.fillStyle = g; b.fillRect(0, 0, VW, VH);
+    if (pal === 'hutan') { g.addColorStop(0, '#2c5a4c'); g.addColorStop(0.55, '#0f2e2a'); g.addColorStop(1, '#030c0c'); }
+    else { g.addColorStop(0, '#2f5ea8'); g.addColorStop(0.55, '#14336e'); g.addColorStop(1, '#050d26'); } b.fillStyle = g; b.fillRect(0, 0, VW, VH);
     const front = mkCanvas(Math.round(VW * DPR), Math.round(VH * DPR)), f = front.getContext('2d');
     f.scale(DPR, DPR);
     const lg = f.createLinearGradient(0, 0, VW, VH); lg.addColorStop(0, 'rgba(255,214,150,0.10)'); lg.addColorStop(0.55, 'rgba(255,214,150,0)'); lg.addColorStop(1, 'rgba(30,50,130,0.14)');
     f.fillStyle = lg; f.fillRect(0, 0, VW, VH);
     const vg = f.createRadialGradient(VW / 2, VH / 2, Math.min(VW, VH) * 0.4, VW / 2, VH / 2, Math.max(VW, VH) * 0.78);
     vg.addColorStop(0, 'rgba(0,0,12,0)'); vg.addColorStop(1, 'rgba(0,0,12,0.55)'); f.fillStyle = vg; f.fillRect(0, 0, VW, VH);
-    return (BG = { w: VW, h: VH, back, front });
+    return (BG = { w: VW, h: VH, pal, back, front });
   }
   function diamond(c, cx, cy, s = 0.92) { const hw = TW / 2 * R * s, hh = TH / 2 * R * s; c.beginPath(); c.moveTo(cx, cy - hh); c.lineTo(cx + hw, cy); c.lineTo(cx, cy + hh); c.lineTo(cx - hw, cy); c.closePath(); }
   function drawHighlight(c, cx, cy, hl, tm) {
@@ -1042,7 +1137,7 @@
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     G.hl = buildHighlights();
     const m = G.map, maxD = m.w + m.h - 2, buckets = [];
-    for (const u of G.units) { if (u.gone) continue; const p = unitWorld(u); const d = Math.ceil(p.rx + p.ry - 0.001); (buckets[d] = buckets[d] || []).push([u, p]); }
+    for (const u of G.units) { if (u.gone || !seen(u)) continue; const p = unitWorld(u); const d = Math.ceil(p.rx + p.ry - 0.001); (buckets[d] = buckets[d] || []).push([u, p]); }
     for (let d = 0; d <= maxD; d++) {
       const x0 = Math.max(0, d - (m.h - 1)), x1 = Math.min(m.w - 1, d);
       for (let x = x0; x <= x1; x++) {
@@ -1051,6 +1146,7 @@
         ctx.drawImage(G.tileC[t.y * m.w + x], (cx - TW / 2) * R, (cy - TH / 2) * R);
         const hl = G.hl.get(key(t.x, t.y));
         if (hl) drawHighlight(ctx, cx * R, cy * R, hl, tm);
+        if (G.m.fog && fogTile(t.x, t.y)) { diamond(ctx, cx * R, cy * R, 1.02); ctx.fillStyle = 'rgba(196,214,206,0.62)'; ctx.fill(); }
       }
       for (let x = x0; x <= x1; x++) {
         const t = m.tiles[d - x][x]; if (isSea(t)) continue;
@@ -1067,9 +1163,27 @@
       ctx.globalAlpha = 1 - k / q.life; ctx.fillStyle = q.c; ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill();
     }
     ctx.globalAlpha = 1;
+    if (G.m.pal === 'hutan') drawForestAir(ctx, tm);
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bg.front, 0, 0);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     drawOverlays(ctx, tm);
+  }
+  function drawForestAir(c, tm) { // kabut tipis melayang, berkas cahaya, kunang-kunang
+    const m = G.map, [ax, ay] = iso(0, 0, 0), [bx, by] = iso(m.w - 1, m.h - 1, 0), [lx] = iso(0, m.h - 1, 0), [rx] = iso(m.w - 1, 0, 0);
+    const cx = (lx + rx) / 2 * R, cy = (ay + by) / 2 * R, W = (rx - lx) * R, H = (by - ay) * R;
+    c.save(); c.globalCompositeOperation = 'screen';
+    for (let k = 0; k < 3; k++) { const x0 = cx - W * 0.5 + ((k * 0.37 + tm * 0.008) % 1) * W * 1.2 - W * 0.1;
+      const g = c.createLinearGradient(x0, cy - H, x0 + W * 0.18, cy + H * 0.2); g.addColorStop(0, 'rgba(220,255,200,0.10)'); g.addColorStop(1, 'rgba(220,255,200,0)');
+      c.fillStyle = g; c.beginPath(); c.moveTo(x0, cy - H); c.lineTo(x0 + W * 0.08, cy - H); c.lineTo(x0 + W * 0.24, cy + H * 0.3); c.lineTo(x0 + W * 0.12, cy + H * 0.3); c.fill(); }
+    c.globalCompositeOperation = 'source-over';
+    for (let k = 0; k < (G.m.fog ? 12 : 7); k++) { const sp = 0.012 + hash(k, 1, 80) * 0.01, ph = hash(k, 2, 80);
+      const x = cx - W * 0.6 + ((ph + tm * sp) % 1) * W * 1.2, y = cy - H * 0.35 + hash(k, 3, 80) * H * 0.8 + Math.sin(tm * 0.3 + k) * 20;
+      const r = W * (0.12 + hash(k, 4, 80) * 0.1), g = c.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, 'rgba(210,235,215,0.16)'); g.addColorStop(1, 'rgba(210,235,215,0)'); c.fillStyle = g; c.beginPath(); c.ellipse(x, y, r, r * 0.38, 0, 0, 7); c.fill(); }
+    for (let k = 0; k < 18; k++) { const x = cx + (hash(k, 5, 81) - 0.5) * W * 0.9 + Math.sin(tm * 0.7 + k * 1.7) * 26, y = cy + (hash(k, 6, 81) - 0.6) * H * 0.9 + Math.cos(tm * 0.9 + k) * 18;
+      const a = 0.35 + 0.65 * Math.max(0, Math.sin(tm * 2.2 + k * 2.3)); const g = c.createRadialGradient(x, y, 0, x, y, 14);
+      g.addColorStop(0, `rgba(240,255,150,${a})`); g.addColorStop(1, 'rgba(240,255,150,0)'); c.fillStyle = g; c.beginPath(); c.arc(x, y, 14, 0, 7); c.fill(); }
+    c.restore();
   }
   function txt(c, s, x, y, size, color, stroke = 'rgba(8,10,30,0.9)') {
     c.font = `700 ${size}px Fredoka, sans-serif`; c.textAlign = 'center'; c.lineJoin = 'round';
@@ -1078,7 +1192,7 @@
   function drawOverlays(c, tm) {
     const z = cam.z;
     for (const u of G.units) {
-      if (u.gone || (!u.alive && u.team === 'e')) continue;
+      if (u.gone || (!u.alive && u.team === 'e') || !seen(u)) continue;
       const p = unitWorld(u), hh = SPR.height(u.key);
       const [sx, sy] = W2S(p.sx, p.sy - p.hop - hh - 14);
       if (!u.alive) { c.font = `${Math.round(clamp(9 * z, 14, 26))}px sans-serif`; c.textAlign = 'center'; c.fillText('💫', ...W2S(p.sx + Math.sin(tm * 3) * 5, p.sy - 20)); continue; }
@@ -1086,6 +1200,8 @@
       if (u.buffs.benteng > 0) icons.push('🛡️');
       if (u.buffs.taunt > 0) icons.push('📣');
       if (u.status.pedas > 0) icons.push('🥵');
+      if (u.status.tidur > 0 || u.sleeping) icons.push('😴');
+      if (u.status.racun > 0) icons.push('🤢');
       if (u.buffs.sabuk > 0) icons.push('🥋');
       if (u.team === 'e' && !u.aggroOn && u.aggro < 50) icons.push('💤');
       if (u.boss) icons.push('👑');
@@ -1099,6 +1215,8 @@
           let r;
           if (G.tkind === 'attack') r = calcDmg(G.sel, tg);
           else if (G.skill === 'kilat') { const one = calcDmg(G.sel, tg, { mult: 0.75 }); r = { dmg: one.dmg * 2, side: one.side }; }
+          else if (G.skill === 'jitu') r = calcDmg(G.sel, tg, { mult: 1.3, pierce: true });
+          else if (G.skill === 'hujan') r = calcDmg(G.sel, tg, { mult: 1 });
           else r = calcDmg(G.sel, tg, { flat: effAtk(G.sel) + 5 + (G.sel.lv - 1), pierce: true });
           label = (r.dmg >= tg.hp ? '💥 ' : '') + '-' + r.dmg + (r.side === 'back' ? ' ↩' : '');
           color = r.dmg >= tg.hp ? '#ffe14d' : '#ffffff';
@@ -1110,7 +1228,14 @@
     G.projs = G.projs.filter(pr => tm - pr.t0 < pr.dur + 0.05);
     for (const pr of G.projs) {
       const k = clamp((tm - pr.t0) / pr.dur, 0, 1);
-      const [x, y] = W2S(pr.ax + (pr.bx - pr.ax) * k, pr.ay + (pr.by - pr.ay) * k - Math.sin(k * Math.PI) * 48);
+      const arc = pr.arc || 48, [x, y] = W2S(pr.ax + (pr.bx - pr.ax) * k, pr.ay + (pr.by - pr.ay) * k - Math.sin(k * Math.PI) * arc);
+      if (pr.e === 'arrow') {
+        const vx = pr.bx - pr.ax, vy = (pr.by - pr.ay) - Math.cos(k * Math.PI) * Math.PI * arc, L = clamp(10 * z, 14, 30), an = Math.atan2(vy, vx);
+        c.save(); c.translate(x, y); c.rotate(an); c.lineCap = 'round';
+        c.strokeStyle = '#5a3a20'; c.lineWidth = Math.max(2, z * 1.2); c.beginPath(); c.moveTo(-L, 0); c.lineTo(L * 0.7, 0); c.stroke();
+        c.fillStyle = '#d8d8e0'; c.beginPath(); c.moveTo(L, 0); c.lineTo(L * 0.6, -L * 0.18); c.lineTo(L * 0.6, L * 0.18); c.fill();
+        c.fillStyle = '#e8473a'; c.beginPath(); c.moveTo(-L, 0); c.lineTo(-L * 0.7, -L * 0.22); c.lineTo(-L * 0.55, 0); c.lineTo(-L * 0.7, L * 0.22); c.fill(); c.restore(); continue;
+      }
       c.save(); c.translate(x, y); c.rotate(k * 8); c.font = `${Math.round(clamp(12 * z, 16, 34))}px sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(pr.e, 0, 0); c.restore();
     }
     G.texts = G.texts.filter(tx => tm - tx.t0 < tx.dur);
@@ -1196,6 +1321,9 @@
     if (u.buffs.benteng > 0) chips.push('🛡️ Benteng');
     if (u.buffs.taunt > 0) chips.push('📣 Menantang');
     if (u.status.pedas > 0) chips.push('🥵 Kepedasan');
+    if (u.status.tidur > 0 || u.sleeping) chips.push('😴 Tertidur');
+    if (u.status.racun > 0) chips.push(`🤢 Racun ${u.status.racun}`);
+    if (u.team === 'p' && T(u.x, u.y).t === 'm') chips.push('🟫 Di lumpur');
     const range = u.rmax > 1 ? `${u.rmin}-${u.rmax}` : '1';
     return h('div', { class: 'ucard ' + u.team },
       portrait(u.key, 46),
@@ -1339,18 +1467,24 @@
         btn('Hore! ▶', () => { closeOverlay(); res(); }, 'pri')));
     });
   }
-  async function chapterEnd() {
+  const CHAPTERS = {
+    1: { name: 'Savana', icon: '🌾', end: 'Ata, Ladhia, dan Bubunti siap melanjutkan perjalanan ke Hutan Lembab.', team: ['ladhia', 'ata', 'bubunti'] },
+    2: { name: 'Hutan Lembab', icon: '🌿', end: 'Oumaldi bergabung, Ular Beracun kalah, dan sobekan peta menunjuk ke Rawa Bulan.', team: ['ladhia', 'ata', 'bubunti', 'oumaldi'] },
+  };
+  const NEXT = { 1: 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah.', 2: 'Bab 3: Rawa Bulan dan Buaya Serakah. Teman baru: Tung Momon & Tung Yanto. Segera hadir!' };
+  async function chapterEnd(m) {
+    const ch = m.chap || 1, C_ = CHAPTERS[ch];
     G = null; hud.hidden = true; panel.hidden = true;
     Sound.startMusic('calm');
     scr.innerHTML = ''; scr.classList.add('on');
     scr.append(h('div', { class: 'title end' },
-      h('div', { class: 'tsmall' }, 'Bab 1 selesai!'),
-      h('h1', {}, 'Savana'),
-      h('div', { class: 'trio' }, portrait('ladhia', 90), portrait('ata', 100), portrait('bubunti', 90)),
-      h('p', {}, 'Ata, Ladhia, dan Bubunti siap melanjutkan perjalanan ke Hutan Lembab.'),
-      h('p', { class: 'muted' }, 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah. Segera hadir!'),
+      h('div', { class: 'tsmall' }, 'Bab ' + ch + ' selesai!'),
+      h('h1', {}, C_.name),
+      h('div', { class: 'trio' }, C_.team.map(k => portrait(k, k === 'ata' ? 100 : 86))),
+      h('p', {}, C_.end),
+      h('p', { class: 'muted' }, NEXT[ch]),
       btn('🗺️ Kembali ke peta', goMap, 'pri big')));
-    Sound.speak('Bab satu selesai! Petualangan berlanjut di Hutan Lembab.', 1.2);
+    Sound.speak('Bab ' + (ch === 1 ? 'satu' : 'dua') + ' selesai! Petualangan berlanjut!', 1.2);
   }
 
   /* ---------------- Layar menu ---------------- */
@@ -1364,7 +1498,7 @@
     screen(h('div', { class: 'title' },
       h('div', { class: 'tsmall' }, 'Petualangan Dunia Satwa'),
       h('h1', {}, 'Ata dan Madu Legendaris', h('span', {}, 'Taktik')),
-      h('div', { class: 'trio' }, portrait('ladhia', 96), portrait('ata', 120), portrait('bubunti', 96)),
+      h('div', { class: 'trio' }, portrait('ladhia', 96), portrait('ata', 120), portrait('bubunti', 96), recruited('oumaldi') ? portrait('oumaldi', 90) : null),
       h('div', { class: 'col' },
         btn(started ? '▶ Lanjutkan' : '▶ Mulai Petualangan', async () => {
           Sound.resume(); Sound.startMusic('calm');
@@ -1372,24 +1506,28 @@
           goMap();
         }, 'pri big'),
         btn('⚙️ Pengaturan', goSettings)),
-      h('p', { class: 'muted small' }, 'Bab 1: Savana · 7 misi'),
+      h('p', { class: 'muted small' }, 'Bab 1 Savana · Bab 2 Hutan Lembab · 14 misi'),
       h('div', { class: 'ver' }, 'versi ' + AT.VERSION)));
   }
   function goMap() {
     Sound.resume(); if (Sound.kind !== 'calm') Sound.startMusic('calm');
     const ui = unlockedIdx();
     const path = h('div', { class: 'path' });
+    let lastCh = 0;
     MISSIONS.forEach((m, i) => {
+      const ch = m.chap || 1;
+      if (ch !== lastCh) { lastCh = ch; path.append(h('div', { class: 'chap' }, CHAPTERS[ch].icon + ' Bab ' + ch + ' · ' + CHAPTERS[ch].name)); }
       const open = i <= ui, cleared = !!S.cleared[m.id];
       path.append(h('div', { class: 'node ' + (i % 2 ? 'r' : 'l') + (open ? '' : ' locked') + (cleared ? ' done' : '') + (i === ui && !cleared ? ' cur' : ''),
         onclick: () => { if (!open) { Sound.play('tap'); return; } Sound.play('tap'); missionSheet(m); } },
         h('div', { class: 'dot' }, open ? (m.type === 'boss' ? '👑' : m.no) : '🔒'),
         h('div', { class: 'ninfo' }, h('b', {}, m.name), h('small', {}, m.sub), h('span', { class: 'nst' }, open ? stars(S.stars[m.id] || 0) : ''))));
     });
-    path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '🌿'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 2: Hutan Lembab'), h('small', {}, 'Segera hadir'))));
-    screen(topbar('Peta Savana', goTitle),
+    path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '🌙'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 3: Rawa Bulan'), h('small', {}, 'Segera hadir'))));
+    screen(topbar('Peta Petualangan', goTitle),
       h('div', { class: 'maphead' }, btn('🏠 Markas', goBase, 'pri2'), btn('⚙️', goSettings, 'icon')),
       path);
+    requestAnimationFrame(() => { const c = scr.querySelector('.node.cur'); if (c) c.scrollIntoView({ block: 'center' }); });
   }
   function missionSheet(m) {
     const team = m.team.map(k => h('div', { class: 'tm' }, portrait(k, 54), h('small', {}, CHARS[k].name + (recruited(k) ? '' : ' (tamu)'))));
@@ -1403,7 +1541,7 @@
   function goBase() {
     const cards = h('div', { class: 'cards' });
     for (const k of Object.keys(CHARS)) {
-      if (!recruited(k)) { cards.append(h('div', { class: 'ccard locked' }, h('div', { class: 'silh' }, '?'), h('div', {}, h('b', {}, '???'), h('small', {}, k === 'ladhia' ? 'Bergabung di Misi 3' : 'Bergabung di Misi 6')))); continue; }
+      if (!recruited(k)) { const jm = MISSIONS.find(m => m.id === JOIN[k]); cards.append(h('div', { class: 'ccard locked' }, h('div', { class: 'silh' }, '?'), h('div', {}, h('b', {}, '???'), h('small', {}, 'Bergabung di Misi ' + jm.no)))); continue; }
       const l = S.lvl[k], s = charStats(k, l), n = charStats(k, l + 1), cost = lvlCost(l), b = CHARS[k];
       cards.append(h('div', { class: 'ccard' },
         portrait(k, 72),
@@ -1441,7 +1579,7 @@
 
   /* ---------------- Mulai ---------------- */
   document.addEventListener('pointerdown', () => Sound.resume(), { once: true });
-  window.__ata = { get G() { return G; }, S: () => S, startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
+  window.__ata = { get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
   scr.classList.add('on'); scr.innerHTML = '<div class="title"><div class="tsmall">Memuat gambar…</div></div>';
   requestAnimationFrame(frame);
   window.__ata.ready = SPR.load().then(goTitle);
