@@ -1,5 +1,5 @@
 'use strict';
-const AT = { VERSION: 5 };
+const AT = { VERSION: 6 };
 /* Data karakter, jurus, misi, dan cerita Bab 1. */
 
 const CHARS = {
@@ -124,6 +124,9 @@ const WHO = {
   singa: { name: 'Singa Penyiksa', kind: 'singa', voice: [0.3, 0.8] },
   rajaElang: { name: 'Raja Elang', kind: 'rajaElang', voice: [1.2, 1.0] },
   serigala: { name: 'Serigala Kabut', kind: 'serigala', voice: [0.7, 1.0] },
+  kelinci: { name: 'Bu Kelinci', voice: [1.5, 1.0] },
+  kurir: { name: 'Pak Kumbang Kurir', voice: [1.0, 1.1] },
+  warga: { name: 'Warga Rawa', voice: [1.2, 1.0] },
   zizi: { name: 'Zizi', kind: 'zizi', voice: [1.9, 1.1] },
   narator: { name: '', kind: null, voice: [1, 0.95] },
 };
@@ -445,6 +448,92 @@ const STORY = {
     ['lilik', 'Ata, ini sobekan peta keempat. Tinggal satu lagi menuju Gunung Sarang Emas.'],
     ['ata', 'Madu Legendaris, tunggu kami! Ayo teman-teman!'],
   ],
+  // ---- Perkemahan (adegan api unggun di antara bab) ----
+  camp1: [
+    ['narator', 'Malam pertama di perjalanan. Ata, Ladhia, dan Bubunti berkemah di bawah langit penuh bintang.'],
+    ['bubunti', 'Sup jagung hangat sudah matang! Ayo makan selagi panas.'],
+    ['ata', 'Hmm, enak sekali! Rasanya seperti masakan Nenek.'],
+    ['ladhia', 'Ata... kamu kangen nenekmu, ya?'],
+    ['ata', 'Iya. Nenek dulu selalu bercerita tentang Pohon Madu Legendaris sebelum aku tidur.'],
+    ['nenek', '(Kenangan) Madu itu bukan untuk disimpan sendiri, Ata. Madu terbaik adalah madu yang dibagi.'],
+    ['ladhia', 'Nenekmu bijak. Aku akan menjagamu sampai kita menemukan pohon itu.'],
+    ['bubunti', 'Dan aku akan memastikan kalian tidak kelaparan! Hihi.'],
+    ['narator', 'Malam itu mereka tertidur sambil tersenyum. Perjalanan panjang baru saja dimulai.'],
+  ],
+  camp2: [
+    ['narator', 'Tim berkemah di tepi Hutan Lembab. Kunang-kunang menari di sekitar api unggun.'],
+    ['oumaldi', 'Dulu aku selalu sendirian. Aku pikir minta tolong itu tanda lemah.'],
+    ['ladhia', 'Minta tolong itu justru tanda berani. Berani mengakui kita butuh teman.'],
+    ['oumaldi', 'Hmm... Ladhia, wajahmu galak tapi kata-katamu lembut sekali.'],
+    ['ladhia', '...Jangan bilang siapa-siapa.'],
+    ['bubunti', 'Hahaha! Ini, wedang jahe hangat untuk semua!'],
+    ['ata', 'Teman-teman, terima kasih sudah ikut berpetualang bersamaku.'],
+    ['oumaldi', 'Besok aku berjaga dari pohon paling tinggi. Kalian tidur saja yang nyenyak.'],
+  ],
+  camp3: [
+    ['narator', 'Di pulau kecil Rawa Bulan, Tung Momon bersenandung pelan di dekat api unggun.'],
+    ['ata', 'Tung Momon, ceritakan tentang Nenek waktu masih muda!'],
+    ['momon', 'Hohoho! Nenekmu dulu pemimpin tim kami. Paling berani, paling cepat, dan paling suka berbagi bekal.'],
+    ['yanto', '...Dan paling keras kepala.'],
+    ['momon', 'Hahaha! Betul, betul!'],
+    ['narator', '(Kenangan) Dahulu, lima sahabat menemukan Pohon Madu Legendaris di balik Gunung Sarang Emas.'],
+    ['yanto', 'Ada hewan-hewan rakus yang ingin menguasai pohon itu. Jadi petanya kami sobek menjadi lima keping.'],
+    ['momon', 'Masing-masing menyimpan satu keping. Supaya hanya yang mau bekerja sama yang bisa menemukannya.'],
+    ['ata', 'Jadi... kita harus bekerja sama, seperti kalian dulu!'],
+    ['yanto', 'Ya. Itulah ujian yang sebenarnya.'],
+  ],
+  camp4: [
+    ['narator', 'Di Pos Gunung, api unggun menyala hangat di tengah udara yang dingin.'],
+    ['leni', 'Ata, kuda-kudamu sudah lebih kuat. Besok kita latihan lagi.'],
+    ['ata', 'Siap, Uti Leni! Hiyaaat!'],
+    ['lilik', 'Lenteraku menunjukkan sesuatu... Keping peta kelima ada di dalam Gunung Sarang Emas.'],
+    ['momon', 'Di dalam gunung? Bagaimana caranya masuk ke sana?'],
+    ['lilik', 'Ada keluarga tikus tanah yang menjaga akar Pohon Madu sejak dulu. Nenek mereka sahabat kami juga.'],
+    ['yanto', '...Nenek Pupuk. Penggali terhebat yang pernah kukenal.'],
+    ['bubunti', 'Semoga cucunya juga baik hati!'],
+    ['narator', 'Malam itu, jauh di bawah tanah, seekor tikus tanah kecil berkacamata sedang menggali... dan mendengar langkah kaki mereka.'],
+  ],
+  // ---- Misi sampingan ----
+  s1apre: [
+    ['kelinci', 'Tolong! Kumbang dan siput memakan wortel di kebunku! Padahal wortelnya untuk anak-anakku.'],
+    ['ata', 'Tenang, Bu Kelinci! Kami usir mereka!'],
+  ],
+  s1apost: [['kelinci', 'Terima kasih! Ini, ada madu untuk bekal perjalanan kalian.']],
+  s1bpre: [
+    ['kurir', 'Aku harus mengantar guci madu ke desa seberang, tapi Geng Musang menghadang jalan!'],
+    ['ladhia', 'Kami antar sampai bendera di ujung jalan. Ayo cepat!'],
+  ],
+  s1bpost: [['kurir', 'Sampai dengan selamat! Kalian pengawal terbaik!']],
+  s2apre: [
+    ['bubunti', 'Aku butuh jamur hutan untuk sup penyembuh. Tapi jamur di sini... bisa berjalan sendiri!'],
+    ['oumaldi', 'Itu Jamur Spora! Hati-hati jangan sampai tertidur.'],
+  ],
+  s2apost: [['bubunti', 'Dapat jamur biasa yang tidak berjalan! Sup penyembuh siap!']],
+  s2bpre: [
+    ['narator', 'Banjir kecil menghanyutkan jembatan warga hutan. Tim harus menjaga jembatan yang tersisa sampai air surut.'],
+    ['ladhia', 'Bertahan 5 giliran. Jangan biarkan musuh menyeberang!'],
+  ],
+  s2bpost: [['narator', 'Air surut dan warga hutan bisa menyeberang lagi. Mereka bersorak gembira!']],
+  s3apre: [
+    ['warga', 'Perahu-perahu kami dikepung capung dan kepiting. Kami tidak bisa mencari ikan!'],
+    ['momon', 'Serahkan pada kami, kawan!'],
+  ],
+  s3apost: [['warga', 'Hore! Kami bisa berlayar lagi. Terima kasih!']],
+  s3bpre: [
+    ['narator', 'Kabut menutupi rawa. Lampu kunang-kunang di ujung rawa padam, dan perahu warga tersesat.'],
+    ['yanto', '...Nyalakan lagi lampunya. Sampai ke bendera di sana.'],
+  ],
+  s3bpost: [['narator', 'Lampu kunang-kunang menyala lagi. Perahu-perahu warga bisa pulang dengan selamat.']],
+  s4apre: [
+    ['leni', 'Latihan hari ini: kalahkan serigala dan kambing di lereng. Pakai ketinggian untuk keuntunganmu!'],
+    ['ata', 'Siap, Guru!'],
+  ],
+  s4apost: [['leni', 'Bagus! Kalian makin kompak. Nenekmu pasti bangga.']],
+  s4bpre: [
+    ['narator', 'Elang-elang suruhan Singa mencuri telur-telur burung gunung. Ayo rebut kembali!'],
+    ['lilik', 'Lenteraku akan menuntun kita ke sarang mereka.'],
+  ],
+  s4bpost: [['narator', 'Telur-telur kembali ke sarang ibunya. Burung-burung gunung bernyanyi riang.']],
 };
 
 /* Tipe: rout = kalahkan semua, boss = kalahkan bos, survive = bertahan n giliran, reach = capai bendera */
@@ -784,10 +873,66 @@ const MISSIONS = [
 ];
 
 /* Perluas setiap peta inti menjadi pulau: daratan 13x13 + pantai + laut. */
+/* ---------------- Misi sampingan (opsional, untuk mencari madu) ----------------
+   after = misi utama yang harus selesai dulu. Posisi tim memakai SIDE_SLOTS sesuai urutan team. */
+const SIDE_SLOTS = [[4, 8], [3, 7], [5, 7], [6, 8], [2, 8], [3, 8], [5, 8], [4, 7]];
+const SIDE = [
+  { id: 's1a', after: 'm3', chap: 1, name: 'Kebun Wortel Bu Kelinci', sub: 'Usir hama', type: 'rout', team: ['ata', 'ladhia'], pal: 'desa', music: 'adventure', elv: 1, reward: 15,
+    desc: 'Kumbang dan siput memakan wortel di kebun Bu Kelinci.', star3: { type: 'turns', n: 6, text: 'Menang dalam 6 giliran' },
+    t: ['t..ccc..t', '..ccccc..', '.cc...cc.', '.c..r..c.', '.cc...cc.', '..ccccc..', '.........', '...,,,...', 't..,,,..t'],
+    enemies: [['kumbang', 3, 1, 4], ['kumbang', 5, 1, 4], ['siput', 6, 3, 4], ['siput', 4, 5, 3]], pre: 's1apre', post: 's1apost' },
+  { id: 's1b', after: 'm6', chap: 1, name: 'Kurir Madu', sub: 'Capai bendera', type: 'reach', limit: 7, team: ['ata', 'ladhia', 'bubunti'], pal: 'savana', music: 'adventure', elv: 2, reward: 15,
+    desc: 'Kawal kurir madu sampai ke bendera di ujung jalan.', star3: { type: 'turns', n: 5, text: 'Sampai dalam 5 giliran' },
+    t: ['f..t...b.', '.,......t', '..,......', '...,.....', 'b...,..t.', '.....,...', '..t...,..', '...,,,.,.', 't..,,,..t'],
+    enemies: [['musang', 2, 0, 5], ['musang', 6, 2, 4], ['musang', 1, 4, 4], ['kelelawar', 4, 1, 5], ['kelelawar', 7, 3, 5]], pre: 's1bpre', post: 's1bpost' },
+  { id: 's2a', after: 'b2m3', chap: 2, name: 'Jamur untuk Bubunti', sub: 'Kebun jamur', type: 'rout', team: ['ata', 'ladhia', 'bubunti'], pal: 'hutan', music: 'adventure', elv: 2, reward: 18,
+    desc: 'Bubunti butuh jamur untuk sup penyembuh, tapi jamurnya bisa berjalan!', star3: { type: 'turns', n: 7, text: 'Menang dalam 7 giliran' },
+    t: ['t.J...J.t', '..m...m..', '.J..J..J.', '...m.m...', '.b.....b.', '..J...J..', '.........', '...,,,...', 't..,,,..t'],
+    enemies: [['jamur', 1, 1, 4], ['jamur', 4, 1, 4], ['jamur', 7, 1, 4], ['katak', 3, 3, 4], ['katak', 5, 3, 4]], pre: 's2apre', post: 's2apost' },
+  { id: 's2b', after: 'b2m5', chap: 2, name: 'Jembatan Hanyut', sub: 'Bertahan 5 giliran', type: 'survive', n: 5, team: ['ata', 'ladhia', 'bubunti', 'oumaldi'], pal: 'hutan', music: 'adventure', elv: 3, reward: 18,
+    desc: 'Jaga jembatan yang tersisa sampai air sungai surut.', star3: { type: 'kills', n: 5, text: 'Kalahkan 5 musuh' },
+    t: ['t...b...t', '.........', 'ww,www,ww', 'ww,www,ww', '.........', '..b...b..', '.........', '...,,,...', 't..,,,..t'],
+    enemies: [['belut', 4, 2, 99], ['belut', 5, 3, 99], ['nyamuk', 1, 0, 99], ['nyamuk', 7, 0, 99]],
+    waves: [{ turn: 2, units: [['nyamuk', 0, 1], ['nyamuk', 8, 1]] }, { turn: 4, units: [['katak', 2, 0], ['katak', 6, 0]] }], pre: 's2bpre', post: 's2bpost' },
+  { id: 's3a', after: 'b3m2', chap: 3, name: 'Perahu Warga Rawa', sub: 'Usir pengganggu', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon'], pal: 'rawa', music: 'adventure', elv: 3, reward: 20,
+    desc: 'Capung dan kepiting mengganggu perahu warga rawa.', star3: { type: 'turns', n: 7, text: 'Menang dalam 7 giliran' },
+    t: ['t.ww.ww.t', '..wdwdw..', '...ww....', '.d.....d.', '.ww...ww.', '..w.d.w..', '.........', '...,,,...', 't..,,,..t'],
+    enemies: [['capung', 1, 0, 5], ['capung', 4, 0, 5], ['capung', 7, 2, 5], ['kepiting', 3, 2, 4], ['kepiting', 5, 5, 4]], pre: 's3apre', post: 's3apost' },
+  { id: 's3b', after: 'b3m5', chap: 3, name: 'Lampu Kunang-kunang', sub: 'Capai bendera di kabut', type: 'reach', limit: 8, fog: true, team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto'], pal: 'rawa', music: 'adventure', elv: 4, reward: 20,
+    desc: 'Nyalakan lagi lampu kunang-kunang di ujung rawa yang berkabut.', star3: { type: 'turns', n: 6, text: 'Sampai dalam 6 giliran' },
+    t: ['b...f...b', '.w.....w.', '.wd.r.dw.', '..w...w..', 'm..w.w..m', '.........', '..b...b..', '...,,,...', 't..,,,..t'],
+    enemies: [['anakBuaya', 1, 1, 4], ['anakBuaya', 7, 1, 4], ['capung', 3, 3, 4], ['capung', 5, 3, 4], ['kepiting', 4, 1, 4]], pre: 's3bpre', post: 's3bpost' },
+  { id: 's4a', after: 'b4m2', chap: 4, name: 'Latihan Uti Leni', sub: 'Pakai ketinggian', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni'], pal: 'gunung', music: 'adventure', elv: 4, reward: 22,
+    desc: 'Uti Leni melatih tim di lereng gunung. Serang dari tempat yang lebih tinggi!', star3: { type: 'turns', n: 7, text: 'Menang dalam 7 giliran' },
+    t: ['p..z.z..p', '.........', '..r...r..', '.z.....z.', '.........', '..p...p..', '.........', '...,,,...', 'p..,,,..p'],
+    h: ['333333333', '222222222', '222222222', '111111111', '111111111', '000000000', '000000000', '000000000', '000000000'],
+    enemies: [['serigala', 2, 1, 4], ['serigala', 6, 1, 4], ['serigala', 4, 0, 4], ['kambing', 1, 3, 4], ['kambing', 7, 3, 4]], pre: 's4apre', post: 's4apost' },
+  { id: 's4b', after: 'b4m5', chap: 4, name: 'Telur Burung Gunung', sub: 'Usir elang pencuri', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'], pal: 'gunung', music: 'adventure', elv: 5, reward: 25,
+    desc: 'Elang suruhan Singa mencuri telur burung gunung. Rebut kembali!', star3: { type: 'kills', n: 6, text: 'Kalahkan 6 musuh' },
+    t: ['pz.....zp', 'z.......z', '..r...r..', '.........', '.z..p..z.', '.........', '..r...r..', '...,,,...', 'p..,,,..p'],
+    h: ['444444444', '433333334', '333333333', '222222222', '222222222', '111111111', '000000000', '000000000', '000000000'],
+    enemies: [['elang', 2, 0, 5], ['elang', 6, 0, 5], ['elang', 1, 2, 5], ['elang', 7, 2, 5], ['serigala', 3, 3, 4], ['serigala', 5, 3, 4]], pre: 's4bpre', post: 's4bpost' },
+];
+SIDE.forEach(m => {
+  m.side = true; m.no = '★';
+  m.h = m.h || m.t.map(r => '0'.repeat(r.length));
+  m.players = m.team.map((k, i) => [k, SIDE_SLOTS[i][0], SIDE_SLOTS[i][1]]);
+});
+
+/* ---------------- Perkemahan: api unggun di antara bab ---------------- */
+const CAMP_TEAM = { 1: ['ata', 'ladhia', 'bubunti'], 2: ['ata', 'ladhia', 'bubunti', 'oumaldi'], 3: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto'], 4: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'] };
+const CAMP_SLOTS = [[4, 5], [3, 4], [5, 4], [4, 3], [3, 5], [5, 3], [3, 3], [5, 5]];
+const CAMPS = [1, 2, 3, 4].map(ch => ({
+  id: 'camp' + ch, chap: ch, camp: true, no: '🔥', name: 'Perkemahan', pal: 'kemah', story: 'camp' + ch, team: CAMP_TEAM[ch],
+  t: ['t...p...t', '..b...b..', '.........', '.........', '....F....', '.........', '.........', '..b...b..', 't...p...t'],
+  h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+  players: CAMP_TEAM[ch].map((k, i) => [k, CAMP_SLOTS[i][0], CAMP_SLOTS[i][1]]), enemies: [],
+}));
+
 (function expandIslands() {
   const LAND = 13;
   const hsh = (x, y, s) => { let h = (x * 374761393 + y * 668265263 + s * 1442695041) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
-  MISSIONS.forEach((m, mi) => {
+  [...MISSIONS, ...SIDE, ...CAMPS].forEach((m, mi) => {
     const n = m.t.length, pad = Math.max(0, Math.floor((LAND - n) / 2)), o = pad + 2, S = n + 2 * o;
     const T = [], H = [];
     for (let y = 0; y < S; y++) {
@@ -798,7 +943,7 @@ const MISSIONS = [
         if (cx >= 0 && cy >= 0 && cx < n && cy < n) { rt += m.t[cy][cx]; rh += m.h[cy][cx]; continue; }
         const corner = (x < 3 || x > S - 4) && (y < 3 || y > S - 4) && (Math.min(x, S - 1 - x) + Math.min(y, S - 1 - y) < 3);
         if (edge === 0 || corner) { rt += 'o'; rh += '0'; continue; }
-        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : m.pal === 'rawa' ? (hsh(x, y, mi + 5) > 0.55 ? 'w' : 'g') : m.pal === 'gunung' ? (hsh(x, y, mi + 5) > 0.5 ? 'z' : 'g') : 'y'); rh += '0'; continue; }
+        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : m.pal === 'rawa' ? (hsh(x, y, mi + 5) > 0.55 ? 'w' : 'g') : m.pal === 'gunung' ? (hsh(x, y, mi + 5) > 0.5 ? 'z' : 'g') : m.pal === 'kemah' ? 'g' : 'y'); rh += '0'; continue; }
         const kx = Math.max(0, Math.min(n - 1, cx)), ky = Math.max(0, Math.min(n - 1, cy));
         const d = Math.max(Math.abs(cx - kx), Math.abs(cy - ky));
         const tc = m.t[ky][kx], hc = +m.h[ky][kx];
@@ -808,7 +953,7 @@ const MISSIONS = [
         const r = hsh(x, y, mi + 11);
         let c = '.';
         if (r < 0.07) c = 'b';
-        else if (r < 0.14) c = m.pal === 'savana' || m.pal === 'hutan' || m.pal === 'rawa' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
+        else if (r < 0.14) c = m.pal === 'savana' || m.pal === 'hutan' || m.pal === 'rawa' || m.pal === 'kemah' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
         else if (r < 0.17) c = m.pal === 'hutan' ? 'J' : m.pal === 'rawa' ? 'b' : m.pal === 'gunung' ? 'r' : 'r';
         else if (r < 0.24) c = m.pal === 'hutan' || m.pal === 'rawa' ? 'm' : m.pal === 'gunung' ? 'z' : 'q';
         else if (r < 0.55) c = 'g';

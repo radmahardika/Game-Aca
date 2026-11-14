@@ -3,7 +3,7 @@
 (() => {
   const TW = 64, TH = 32, HS = 16;
   const DIRS = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // 0 depan-kanan, 1 depan-kiri, 2 belakang-kiri, 3 belakang-kanan
-  const BLOCK = new Set(['w', 'o', 't', 'p', 'r', 'h', 'k', 's', 'J', 'L']);
+  const BLOCK = new Set(['w', 'o', 't', 'p', 'r', 'h', 'k', 's', 'J', 'L', 'F']);
   const $ = s => document.querySelector(s);
   const cv = $('#cv'), ctx = cv.getContext('2d');
   const scr = $('#scr'), hud = $('#hud'), panel = $('#panel'), dlg = $('#dlg'), bannerEl = $('#banner'), tipEl = $('#tip');
@@ -448,9 +448,31 @@
     showBattleUI(); fitCam();
     Sound.startMusic(m.music || 'adventure');
     if (!opts.skipStory && m.pre && !S.seen[m.id + 'pre']) { await playStory(STORY[m.pre]); S.seen[m.id + 'pre'] = true; persist(); }
-    await banner('Misi ' + m.no + ': ' + m.name, 'mission');
+    await banner((m.side ? 'Sampingan' : 'Misi ' + m.no) + ': ' + m.name, 'mission');
     for (const t of (m.tips || [])) await showTip(t);
     beginPlayerPhase();
+  }
+  async function startCamp(ch) {
+    const m = CAMPS[ch - 1]; UID = 0;
+    G = {
+      m, map: buildMap(m), units: [], turn: 1, phase: 'camp', sel: null, info: null, mode: 'idle', reach: null,
+      targets: null, tkind: null, skill: null, texts: [], parts: [], projs: [], busy: true, ended: false, madu: 0,
+      stats: { faint: 0 }, waves: [], tipsSeen: {}, moveFrom: null, walls: new Map(),
+    };
+    for (const row of G.map.tiles) for (const t of row) if (t.t === 'F') G.fire = { x: t.x, y: t.y };
+    for (const [k, x, y] of m.players) { const u = mkUnit(k, 'p', x, y); u.done = true; faceTo(u, G.fire.x, G.fire.y); G.units.push(u); }
+    showBattleUI(); panel.hidden = true; fitCam();
+    Sound.startMusic('calm');
+    await wait(500);
+    await playStory(STORY[m.story]);
+    const first = !S.seen[m.id]; S.seen[m.id] = true;
+    if (first) { S.madu += 10; G.units.forEach(u => addText(u, '+💤 Segar!', '#ffe08a', 8)); }
+    persist();
+    overlay(h('div', { class: 'card result' },
+      h('div', { class: 'rtitle' }, '🔥 Istirahat selesai'),
+      h('p', {}, 'Tim sudah segar kembali dan siap melanjutkan perjalanan.'),
+      first ? h('div', { class: 'madu' }, '🍯 ', h('b', {}, '+10 madu'), ' dari bekal perkemahan') : null,
+      h('div', { class: 'row' }, btn('🔁 Dengar lagi', () => { closeOverlay(); startCamp(ch); }), btn('🗺️ Ke peta', () => { closeOverlay(); goMap(); }, 'pri'))));
   }
   function beginPlayerPhase() {
     G.phase = 'player'; G.busy = false;
@@ -770,7 +792,7 @@
     const st = computeStars(), n = st.filter(Boolean).length;
     const first = !S.cleared[m.id];
     const prev = S.stars[m.id] || 0;
-    const bonus = (first ? 10 : 4) + Math.max(0, n - prev) * 3;
+    const bonus = (first ? (m.reward || 10) : 4) + Math.max(0, n - prev) * 3;
     const total = G.madu + bonus;
     if (first && m.recruit) S.lvl[m.recruit] = Math.max(S.lvl[m.recruit] || 1, teamLv());
     S.madu += total; S.cleared[m.id] = true; S.stars[m.id] = Math.max(prev, n); persist();
@@ -905,6 +927,7 @@
     hutan: ['#1f3d22', '#4a7a3a', '#7aa84e'],
     rawa: ['#203a34', '#4a7458', '#7c9e76'],
     gunung: ['#4a5a30', '#93a45c', '#c8c48a'],
+    kemah: ['#33502a', '#6f9448', '#94b464'],
   };
   function stoneTop(X, Y, sc) {
     let su = X * sc, sv = Y * sc; const row = Math.floor(sv); if (row % 2) su += 0.5;
@@ -1161,6 +1184,25 @@
     c.fillStyle = '#5a3c24'; c.fillRect(-28, -76, 5, 56); c.fillRect(23, -76, 5, 56);
     gradPoly(c, [[-40, -70], [0, -96], [40, -70], [0, -62]], '#c2583a', '#8a3626', [0, -96], [0, -62]);
   }
+  function drCampfire(c) { // lingkar batu + kayu bakar (api digambar bergerak di drawCampAir)
+    for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2, x = Math.cos(a) * 24, y = Math.sin(a) * 12;
+      const g = c.createRadialGradient(x - 2, y - 3, 1, x, y, 8); g.addColorStop(0, '#b8b0a0'); g.addColorStop(1, '#5a5448'); c.fillStyle = g; c.beginPath(); c.ellipse(x, y - 2, 8, 6, 0, 0, 7); c.fill(); }
+    c.lineCap = 'round';
+    [[-16, 4, 14, -6], [-14, -6, 16, 4], [-4, 8, 4, -10]].forEach(([a, b, d, e]) => { c.strokeStyle = '#5a3a20'; c.lineWidth = 7; c.beginPath(); c.moveTo(a, b); c.lineTo(d, e); c.stroke(); c.strokeStyle = '#8a5a30'; c.lineWidth = 3; c.beginPath(); c.moveTo(a, b - 1); c.lineTo(d, e - 1); c.stroke(); });
+    const g = c.createRadialGradient(0, -2, 1, 0, -2, 14); g.addColorStop(0, '#ffd27a'); g.addColorStop(1, 'rgba(255,120,40,0)'); c.fillStyle = g; c.beginPath(); c.ellipse(0, -2, 16, 9, 0, 0, 7); c.fill();
+  }
+  function drawCampAir(c, tm) { // api unggun bergerak + cahaya hangat
+    const f = G.fire; if (!f) return;
+    const t = T(f.x, f.y), [x0, y0] = iso(f.x, f.y, t.h), x = x0 * R, y = y0 * R, fl = 0.85 + 0.15 * Math.sin(tm * 9) + 0.08 * Math.sin(tm * 23);
+    c.save(); c.globalCompositeOperation = 'lighter';
+    const g = c.createRadialGradient(x, y - 20, 10, x, y - 20, 420 * fl); g.addColorStop(0, 'rgba(255,170,70,0.38)'); g.addColorStop(0.4, 'rgba(255,120,40,0.12)'); g.addColorStop(1, 'rgba(255,120,40,0)');
+    c.fillStyle = g; c.beginPath(); c.ellipse(x, y - 10, 460 * fl, 260 * fl, 0, 0, 7); c.fill();
+    for (let k = 0; k < 5; k++) { const ph = tm * 2.2 + k * 1.3, hh = (60 + 26 * Math.sin(ph * 1.7)) * fl, ww = 22 - k * 3, xx = x + Math.sin(ph) * 8 + (k - 2) * 7;
+      const fg = c.createLinearGradient(xx, y, xx, y - hh); fg.addColorStop(0, 'rgba(255,90,20,0.9)'); fg.addColorStop(0.5, 'rgba(255,190,60,0.8)'); fg.addColorStop(1, 'rgba(255,240,180,0)');
+      c.fillStyle = fg; c.beginPath(); c.moveTo(xx - ww, y - 6); c.quadraticCurveTo(xx - ww * 0.6, y - hh * 0.6, xx + Math.sin(ph * 2) * 6, y - hh); c.quadraticCurveTo(xx + ww * 0.6, y - hh * 0.6, xx + ww, y - 6); c.fill(); }
+    for (let k = 0; k < 8; k++) { const p = (tm * 0.6 + k / 8) % 1; c.fillStyle = `rgba(255,200,90,${1 - p})`; c.beginPath(); c.arc(x + Math.sin(k * 5 + tm * 3) * 20 * p, y - 40 - p * 160, 3 * (1 - p) + 1, 0, 7); c.fill(); }
+    c.restore();
+  }
   function drCrate(c) {
     const s = 26, hh = 36;
     gradPoly(c, [[-s, 0], [0, s / 2], [0, s / 2 - hh], [-s, -hh]], '#b07c46', '#8a5e34', [-s, -hh], [-s, 0]);
@@ -1168,7 +1210,7 @@
     poly(c, [[0, -hh - s / 2], [s, -hh], [0, s / 2 - hh], [-s, -hh]], '#d6a266');
   }
   const DECOR = {
-    t: { draw: (c, s) => G.m.pal === 'gunung' ? drPine(c, s) : G.m.pal === 'rawa' ? drMangrove(c, s) : G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
+    t: { draw: (c, s) => G.m.pal === 'gunung' || G.m.pal === 'kemah' ? drPine(c, s) : G.m.pal === 'rawa' ? drMangrove(c, s) : G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
     J: { draw: drShroom, w: 120, h: 110, sh: [8, 4, 26, 10] },
     L: { draw: drLog, w: 150, h: 80, sh: [6, 6, 34, 12] },
     p: { draw: drPine, w: 120, h: 180, sh: [14, 6, 28, 12] },
@@ -1178,6 +1220,7 @@
     k: { draw: drStove, w: 120, h: 120, sh: [10, 6, 24, 10] },
     s: { draw: drWell, w: 120, h: 150, sh: [12, 6, 26, 11] },
     X: { draw: drCrate, w: 80, h: 80, sh: [10, 6, 24, 10] },
+    F: { draw: drCampfire, w: 120, h: 120, sh: [6, 4, 22, 9] },
     W: { draw: drWall, w: 110, h: 140, sh: [10, 6, 28, 12] },
   };
   function renderDecor(t) {
@@ -1218,14 +1261,14 @@
   const W2S = (wx, wy) => [cam.x + wx * cam.z, cam.y + wy * cam.z];
   let BG = null;
   function bgCanvas() {
-    const pal = G && (G.m.pal === 'hutan' || G.m.pal === 'rawa' || G.m.pal === 'gunung') ? G.m.pal : 'x';
+    const pal = G && (G.m.pal === 'hutan' || G.m.pal === 'rawa' || G.m.pal === 'gunung' || G.m.pal === 'kemah') ? G.m.pal : 'x';
     if (BG && BG.w === VW && BG.h === VH && BG.pal === pal) return BG;
     const back = mkCanvas(Math.round(VW * DPR), Math.round(VH * DPR)), b = back.getContext('2d');
     b.scale(DPR, DPR);
     const g = b.createRadialGradient(VW * 0.5, VH * 0.35, 0, VW * 0.5, VH * 0.5, Math.max(VW, VH) * 0.8);
     if (pal === 'hutan') { g.addColorStop(0, '#2c5a4c'); g.addColorStop(0.55, '#0f2e2a'); g.addColorStop(1, '#030c0c'); }
     else if (pal === 'gunung') { g.addColorStop(0, '#f2c4a0'); g.addColorStop(0.4, '#9a8ec0'); g.addColorStop(1, '#2a2c58'); }
-    else if (pal === 'rawa') { g.addColorStop(0, '#2a3e78'); g.addColorStop(0.55, '#121c44'); g.addColorStop(1, '#03060f'); }
+    else if (pal === 'rawa' || pal === 'kemah') { g.addColorStop(0, '#2a3e78'); g.addColorStop(0.55, '#121c44'); g.addColorStop(1, '#03060f'); }
     else { g.addColorStop(0, '#2f5ea8'); g.addColorStop(0.55, '#14336e'); g.addColorStop(1, '#050d26'); } b.fillStyle = g; b.fillRect(0, 0, VW, VH);
     if (pal === 'gunung') { // siluet pegunungan berkabut saat fajar
       [[0.62, '#7a72a8', 0.55], [0.72, '#5c5890', 0.7], [0.82, '#3e3e72', 0.85]].forEach(([base, col, a], li) => {
@@ -1235,7 +1278,7 @@
       b.globalAlpha = 1;
       const sg = b.createRadialGradient(VW * 0.2, VH * 0.18, 4, VW * 0.2, VH * 0.18, VH * 0.35); sg.addColorStop(0, 'rgba(255,240,200,0.8)'); sg.addColorStop(1, 'rgba(255,240,200,0)'); b.fillStyle = sg; b.fillRect(0, 0, VW, VH);
     }
-    if (pal === 'rawa') { // bulan purnama & bintang
+    if (pal === 'rawa' || pal === 'kemah') { // bulan purnama & bintang
       const mx = VW * 0.82, my = VH * 0.16, mr = Math.min(VW, VH) * 0.07;
       const hg = b.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 4); hg.addColorStop(0, 'rgba(220,230,255,0.35)'); hg.addColorStop(1, 'rgba(220,230,255,0)'); b.fillStyle = hg; b.fillRect(0, 0, VW, VH);
       const mg = b.createRadialGradient(mx - mr * 0.3, my - mr * 0.3, 2, mx, my, mr); mg.addColorStop(0, '#fffbe8'); mg.addColorStop(1, '#d8dcc8'); b.fillStyle = mg; b.beginPath(); b.arc(mx, my, mr, 0, 7); b.fill();
@@ -1345,7 +1388,8 @@
       ctx.globalAlpha = 1 - k / q.life; ctx.fillStyle = q.c; ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    if (G.m.pal === 'hutan' || G.m.pal === 'rawa' || G.m.pal === 'gunung') drawForestAir(ctx, tm);
+    if (G.m.pal === 'hutan' || G.m.pal === 'rawa' || G.m.pal === 'gunung' || G.m.pal === 'kemah') drawForestAir(ctx, tm);
+    if (G.m.camp) drawCampAir(ctx, tm);
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bg.front, 0, 0);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     drawOverlays(ctx, tm);
@@ -1373,6 +1417,7 @@
   }
   function drawOverlays(c, tm) {
     const z = cam.z;
+    if (G.m.camp) return;
     for (const u of G.units) {
       if (u.gone || (!u.alive && u.team === 'e') || !seen(u)) continue;
       const p = unitWorld(u), hh = SPR.height(u.key);
@@ -1497,9 +1542,9 @@
     hud.innerHTML = '';
     hud.append(
       btn('☰', openBattleMenu, 'icon'),
-      h('div', { class: 'hmid' }, h('div', { class: 'htitle' }, `Misi ${G.m.no} · ${G.m.name}`), h('div', { class: 'hobj' }, '🎯 ' + objText())),
+      h('div', { class: 'hmid' }, h('div', { class: 'htitle' }, G.m.camp ? '🔥 Perkemahan · Bab ' + G.m.chap : `${G.m.side ? 'Sampingan' : 'Misi ' + G.m.no} · ${G.m.name}`), G.m.camp ? null : h('div', { class: 'hobj' }, '🎯 ' + objText())),
       h('div', { class: 'hsp' }),
-      h('div', { class: 'hturn' }, h('small', {}, 'Giliran'), h('b', {}, G.turn)),
+      G.m.camp ? null : h('div', { class: 'hturn' }, h('small', {}, 'Giliran'), h('b', {}, G.turn)),
       h('div', { class: 'zoom' }, btn('−', () => zoomAt(VW / 2, VH / 2, cam.z / 1.2), 'icon sm'), btn('+', () => zoomAt(VW / 2, VH / 2, cam.z * 1.2), 'icon sm'), btn('⌖', () => fitCam(), 'icon sm')),
     );
   }
@@ -1681,7 +1726,7 @@
       h('div', { class: 'trio' }, C_.team.map(k => portrait(k, k === 'ata' ? 100 : 86))),
       h('p', {}, C_.end),
       h('p', { class: 'muted' }, NEXT[ch]),
-      btn('🗺️ Kembali ke peta', goMap, 'pri big')));
+      CAMPS[ch - 1] ? btn('🔥 Berkemah dulu', () => startCamp(ch), 'pri big') : btn('🗺️ Kembali ke peta', goMap, 'pri big')));
     Sound.speak('Bab ' + ['', 'satu', 'dua', 'tiga', 'empat'][ch] + ' selesai! Petualangan berlanjut!', 1.2);
   }
 
@@ -1721,6 +1766,20 @@
         onclick: () => { if (!open) { Sound.play('tap'); return; } Sound.play('tap'); missionSheet(m); } },
         h('div', { class: 'dot' }, open ? (m.type === 'boss' ? '👑' : m.no) : '🔒'),
         h('div', { class: 'ninfo' }, h('b', {}, m.name), h('small', {}, m.sub), h('span', { class: 'nst' }, open ? stars(S.stars[m.id] || 0) : ''))));
+      for (const sm of SIDE.filter(x => x.after === m.id)) {
+        const so = !!S.cleared[m.id];
+        path.append(h('div', { class: 'node side ' + (i % 2 ? 'l' : 'r') + (so ? '' : ' locked') + (S.cleared[sm.id] ? ' done' : ''),
+          onclick: () => { Sound.play('tap'); if (so) missionSheet(sm); else toast('Selesaikan misi ' + m.no + ' dulu.'); } },
+          h('div', { class: 'dot' }, so ? '★' : '🔒'),
+          h('div', { class: 'ninfo' }, h('b', {}, m.no + '★ ' + sm.name), h('small', {}, 'Sampingan · ' + sm.sub), h('span', { class: 'nst' }, so ? stars(S.stars[sm.id] || 0) : ''))));
+      }
+      if (m.final && CAMPS[ch - 1]) {
+        const co = !!S.cleared[m.id];
+        path.append(h('div', { class: 'node camp ' + (i % 2 ? 'l' : 'r') + (co ? '' : ' locked') + (S.seen['camp' + ch] ? ' done' : ''),
+          onclick: () => { Sound.play('tap'); if (co) startCamp(ch); else toast('Kalahkan bos Bab ' + ch + ' dulu.'); } },
+          h('div', { class: 'dot' }, co ? '🔥' : '🔒'),
+          h('div', { class: 'ninfo' }, h('b', {}, 'Perkemahan'), h('small', {}, 'Cerita di api unggun'))));
+      }
     });
     path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '🍯'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 5: Gunung Sarang Emas'), h('small', {}, 'Segera hadir'))));
     screen(topbar('Peta Petualangan', goTitle),
@@ -1757,7 +1816,8 @@
     };
     draw();
     overlay(h('div', { class: 'card sheet' },
-      h('div', { class: 'rtitle sm' }, `Misi ${m.no}: ${m.name}`),
+      h('div', { class: 'rtitle sm' }, (m.side ? '★ Misi Sampingan: ' : 'Misi ' + m.no + ': ') + m.name),
+      m.side ? h('p', { class: 'muted small' }, 'Misi pilihan untuk mencari madu 🍯 tambahan. Hadiah pertama +' + m.reward + ' madu.') : null,
       h('p', {}, m.desc),
       pick ? info : null,
       teamBox,
@@ -1873,7 +1933,7 @@
 
   /* ---------------- Mulai ---------------- */
   document.addEventListener('pointerdown', () => Sound.resume(), { once: true });
-  window.__ata = { goChars, sel: u => selectUnit(u), get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
+  window.__ata = { goChars, startCamp: c => startCamp(c), startSide: id => startMission(SIDE.find(m => m.id === id)), sel: u => selectUnit(u), get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
   scr.classList.add('on'); scr.innerHTML = '<div class="title"><div class="tsmall">Memuat gambar…</div></div>';
   requestAnimationFrame(frame);
   window.__ata.ready = SPR.load().then(goTitle);
