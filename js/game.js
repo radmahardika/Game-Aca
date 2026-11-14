@@ -5,7 +5,7 @@
   const R = Math.round;
 
   // ---------- Simpan progres ----------
-  G.VERSION = 31;
+  G.VERSION = 32;
   const KEY = 'aksa-pemadam-v2';
   const fresh = () => ({ solved: {}, stars: {}, acc: {}, equip: {}, intro: false, tut: false, music: true, sfx: true, pos: null });
   function load() {
