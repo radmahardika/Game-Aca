@@ -371,6 +371,17 @@
     }
   }
 
+  /* ---------------- Pilih tim (maks 4) ---------------- */
+  const MAXTEAM = 4;
+  const mustGo = m => m.team.filter(k => k === 'ata' || (m.guests || []).includes(k) || m.protect === k);
+  function defaultParty(m) { const out = mustGo(m); for (const k of m.team) { if (out.length >= MAXTEAM) break; if (!out.includes(k)) out.push(k); } return out; }
+  function partyOf(m) {
+    if (m.team.length <= MAXTEAM) return m.team.slice();
+    const saved = (S.party || {})[m.id], must = mustGo(m);
+    if (saved && saved.length && saved.every(k => m.team.includes(k)) && must.every(k => saved.includes(k))) return saved.slice(0, MAXTEAM);
+    return defaultParty(m);
+  }
+
   /* ---------------- Mulai misi ---------------- */
   async function startMission(m, opts = {}) {
     UID = 0;
@@ -379,7 +390,8 @@
       targets: null, tkind: null, skill: null, texts: [], parts: [], projs: [], busy: true, ended: false, madu: 0,
       stats: { faint: 0 }, waves: (m.waves || []).map(w => ({ ...w, done: false })), tipsSeen: {}, moveFrom: null, walls: new Map(),
     };
-    for (const [k, x, y] of m.players) G.units.push(mkUnit(k, 'p', x, y));
+    const party = opts.party || partyOf(m);
+    for (const [k, x, y] of m.players) if (party.includes(k)) G.units.push(mkUnit(k, 'p', x, y));
     for (const [k, x, y] of (m.npcs || [])) { const u = mkUnit(k, 'n', x, y); u.done = true; G.units.push(u); }
     for (const [k, x, y, ag] of m.enemies) G.units.push(mkUnit(k, 'e', x, y, { lv: m.elv || 1, aggro: ag ?? 99 }));
     G.units.forEach(faceNearestFoe);
@@ -1632,13 +1644,40 @@
     requestAnimationFrame(() => { const c = scr.querySelector('.node.cur'); if (c) c.scrollIntoView({ block: 'center' }); });
   }
   function missionSheet(m) {
-    const team = m.team.map(k => h('div', { class: 'tm' }, portrait(k, 54), h('small', {}, CHARS[k].name + (recruited(k) ? '' : ' (tamu)'))));
+    const pick = m.team.length > MAXTEAM, must = mustGo(m);
+    let party = partyOf(m);
+    const teamBox = h('div', { class: 'team' }), info = h('div', { class: 'pickinfo' });
+    const go = btn('⚔️ Mulai!', () => {
+      if (pick && party.length !== MAXTEAM) { toast('Pilih ' + MAXTEAM + ' tokoh dulu.'); return; }
+      if (pick) { S.party = S.party || {}; S.party[m.id] = party.slice(); persist(); }
+      closeOverlay(); startMission(m, { party: party.slice() });
+    }, 'pri');
+    const draw = () => {
+      teamBox.innerHTML = '';
+      for (const k of m.team) {
+        const on = party.includes(k), req = must.includes(k);
+        const tag = !recruited(k) ? ' (tamu)' : req ? ' (wajib)' : '';
+        teamBox.append(h('button', { class: 'tm' + (pick ? ' pk' : '') + (on ? ' on' : ' off'), onclick: () => {
+          if (!pick) return;
+          if (req) { toast(CHARS[k].name + ' wajib ikut di misi ini.'); return; }
+          Sound.play('tap');
+          if (on) party = party.filter(x => x !== k);
+          else if (party.length < MAXTEAM) party.push(k);
+          else { toast('Tim penuh! Lepas satu tokoh dulu (maksimal ' + MAXTEAM + ').'); return; }
+          draw();
+        } }, portrait(k, 54), h('small', {}, CHARS[k].name + tag), pick ? h('span', { class: 'chk' }, on ? '✔' : '') : null));
+      }
+      info.textContent = pick ? `Pilih ${MAXTEAM} tokoh yang ikut: ${party.length}/${MAXTEAM}` : '';
+      go.classList.toggle('dim', pick && party.length !== MAXTEAM);
+    };
+    draw();
     overlay(h('div', { class: 'card sheet' },
       h('div', { class: 'rtitle sm' }, `Misi ${m.no}: ${m.name}`),
       h('p', {}, m.desc),
-      h('div', { class: 'team' }, team),
+      pick ? info : null,
+      teamBox,
       h('ul', { class: 'conds' }, ['Menang', 'Tidak ada teman yang pingsan', m.star3.text].map((c, i) => h('li', { class: (S.stars[m.id] || 0) > i ? 'ok' : '' }, '★ ' + c))),
-      h('div', { class: 'row' }, btn('Tutup', closeOverlay), btn('⚔️ Mulai!', () => { closeOverlay(); startMission(m); }, 'pri'))));
+      h('div', { class: 'row' }, btn('Tutup', closeOverlay), go)));
   }
   function goBase() {
     const cards = h('div', { class: 'cards' });

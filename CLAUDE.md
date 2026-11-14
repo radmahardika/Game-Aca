@@ -312,6 +312,9 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   2 giliran, `drWall`), Masuk Cangkang (+5 tahan). Musuh: capung (terbang), kepiting (tahan 6), anak buaya, Raja Kepiting
   (sprite kepiting bermahkota), Buaya Serakah (`dive`). Sprite `pohon-madu/img/momon|yanto/`, `musuh/buaya-1..6`,
   `anak-buaya-1..3`, `kepiting-1..3`, `capung-1..3`. Bot uji: Lv 4 hampir semua menang, Lv 3 banyak kalah (perlu naik level).
+- **Tim maksimal 4 tokoh** (permintaan pengguna, `MAXTEAM`): kalau `m.team` > 4, lembar misi menampilkan pemilih tokoh (Ata,
+  tamu & yang dilindungi = wajib), pilihan disimpan per misi di `S.party`; `partyOf(m)` / `defaultParty(m)`. Bab 3 diseimbangkan
+  ulang untuk 4 tokoh: bot Lv 4 menang sebagian besar, bos akhir Buaya Serakah butuh Lv 5.
 - **Halaman Tokoh (v3, `goChars(key, back)`):** dari tombol 👥 Tokoh di judul & peta, atau ketuk potret di Markas. Panggung
   isometrik dengan sprite besar + tombol pose (Siaga/Jalan/Serang/Jurus bergilir/Putar arah), kartu info (hewan, `bio`, batang
   kemampuan, jangkauan, jurus, kemampuan khusus, `tip` cara main), deretan potret untuk memilih tokoh (yang belum bergabung = ?).
@@ -327,15 +330,15 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 
 ## Status & yang sedang dibahas
 
-- Branch `pratinjau-v36` = **Ata Taktik versi 4 (Bab 3 Rawa Bulan)**, belum digabung.
-- Rilis terakhir di `main`: **versi 35** = **Ata Taktik versi 3** (Halaman Tokoh). Game lain tidak berubah.
+- Rilis terakhir di `main`: **versi 36** = **Ata Taktik versi 4** (Bab 3 Rawa Bulan + tim maksimal 4). Game lain tidak berubah.
+- Versi 35 = **Ata Taktik versi 3** (Halaman Tokoh).
 - Versi 34 = **Ata Taktik versi 2** (Bab 2 Hutan Lembab, Oumaldi, Ular Beracun).
 - Versi 33 = ikon aplikasi Ata Taktik ("ATA Tactics").
 - Versi 32 = **Ata Taktik versi 1** (game kedelapan, `ata-taktik/`, dari branch `pratinjau-v32`;
   musuh sprite asli, bos Raja Kumbang & Kepala Musang). Game lain tidak berubah.
 - Versi 31 = **Manasik Umroh versi 1** (game ketujuh, `manasik-umroh/`).
 - Branch `pratinjau-v30` (peta Hutan Pinggir, Padang Ilalang, Desa Kerikil, Jembatan Batu untuk Pohon Madu, `img/peta`) **belum digabung** dan belum dipasang;
-  saat dirilis pakai nomor versi berikutnya (≥ 36) dan rebase ke `main` dulu.
+  saat dirilis pakai nomor versi berikutnya (≥ 37) dan rebase ke `main` dulu.
 - Versi 29 = **Ata dan Pohon Madu versi 1** (game keenam: Prolog bisa dimainkan + Arena Latihan Prolog–Bab 2).
 - Versi 28 = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
 - Versi 27 = **Njajan Fest versi 5** (Tahap 2 Pasar Malam; fitur hitung lapak dihapus).
