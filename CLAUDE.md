@@ -328,10 +328,23 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   tidak memengaruhi urutan misi utama; tim = tokoh yang sudah bergabung (posisi `SIDE_SLOTS`), `m.side` → judul "Sampingan".
   Kebun Wortel Bu Kelinci, Kurir Madu, Jamur untuk Bubunti, Jembatan Hanyut, Perahu Warga Rawa, Lampu Kunang-kunang,
   Latihan Uti Leni, Telur Burung Gunung. Semua dimenangkan bot di level sesuai bab.
-- **Rencana disetujui (belum dibuat, menunggu sprite):** **Papot** (tikus tanah betina, Penggali: Gali Terowongan = pindah jauh
-  menembus rintangan, Lubang Jebakan = musuh terperosok 1 giliran, Telinga Tanah = merasakan musuh di kabut), cucu **Nenek Pupuk**
-  penjaga akar Pohon Madu. Bab 5 "Terowongan Sarang Emas" (gua gelap, batu jatuh, Papot bergabung di tengah bab) dan Bab 6
-  "Pohon Madu Legendaris" (penutup, **Ratu Tawon Emas** yang mengira tim pencuri; tema berbagi madu untuk semua).
+- **Bab 5 Terowongan Sarang Emas (v7, misi 29–35, `pal: 'gua'`: gua gelap, kristal `K` bercahaya (penghalang), stalagmit, jamur
+  bercahaya):** Mulut Gua (fog gelap) → Batu Jatuh (`rocks: true`: tiap giliran ganjil 2 petak ⚠️ di dekat tim, jatuh di awal giliran
+  musuh, kena 8 / jadi puing 2 giliran; `markRocks`, `dropRocks`) → Runtuhan Terowongan (lindungi, **Papot** bergabung) → Rel Tambang
+  (bendera) → Ratu Laba-laba Kristal (bos tengah) → Lorong Kristal Gelap (fog + batu) → **Kepala Penambang** (bos `gempa`: tiap giliran
+  ke-2/5/8 menandai batu jatuh di sebelah tiap teman; memanggil cacing). Musuh: kelelawar gua (terbang), laba-laba kristal (`onHit:
+  'jaring'` → 🕸️ tidak bisa pindah 1 giliran, lalu kebal 2 giliran `webCd`; Sup Hangat melepas), cacing batu (menggali = `fly` tanpa
+  `lift`). **Papot**: Penggali (Lv/stat kecil), Gali Terowongan (`gali`, target petak 2–5, menembus rintangan, pose gali→muncul),
+  Lubang Jebakan (`jebak`, `G.traps`, musuh berhenti di situ terperosok: kena serangan + `pedas` 1 giliran; `springTrap`), Telinga
+  Tanah (jarak lihat 4 di gelap; Uti Lilik juga 4 karena lentera). Sprite `pohon-madu/img/papot/`, `musuh/kgua|laba|cacing|tikus-*`.
+- **Bab 6 Pohon Madu Legendaris (v7, misi 36–42, `pal: 'madu'`: padang emas senja, pohon madu bersarang, `m` = sungai madu lengket):**
+  Padang Bunga Emas → Penjaga Sarang → Sungai Madu (bendera) → Kapten Tawon (bos tengah) → Akar Emas (bertahan 7) → Gerbang Sarang Ratu
+  (bukit h3) → **Ratu Tawon Emas** (bos terbang, tembakan madu lengket = jaring, `rage` 70% → +1 serang & memanggil prajurit,
+  **`yield` 40% → menyerah & mendengarkan = menang**, tema: madu terbaik madu yang dibagi). Setelah menang → `goEnding()`: layar pohon
+  legendaris (`pohon-madu/img/pohon-legendaris.png`) + 9 potret + cerita `STORY.ending` + kartu "Tamat"; node 🏆 Tamat di akhir peta.
+  Sampingan baru s5a/s5b/s6a/s6b, Perkemahan Bab 5 (`camp5`, 9 tokoh). Judul "6 bab · 42 misi".
+- Keseimbangan bot (tim 4): Bab 5 Lv 7 (Ratu Laba-laba Lv 7–8), Bab 6 Lv 8, Ratu Tawon butuh Lv 9.
+
 - **Tim maksimal 4 tokoh** (permintaan pengguna, `MAXTEAM`): kalau `m.team` > 4, lembar misi menampilkan pemilih tokoh (Ata,
   tamu & yang dilindungi = wajib), pilihan disimpan per misi di `S.party`; `partyOf(m)` / `defaultParty(m)`. Bab 3 diseimbangkan
   ulang untuk 4 tokoh: bot Lv 4 menang sebagian besar, bos akhir Buaya Serakah butuh Lv 5.
@@ -342,7 +355,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   3 bintang per misi, madu 🍯 untuk naik level di Markas. Ata: Tendangan Kilat/Putar/Mode Sabuk Hitam + Refleks (hindar & balas);
   Ladhia: Tantang/Benteng Badak; Bubunti: Sup Hangat + **Masakan Pedas** (satu-satunya serangan, musuh tidak bisa bergerak 1 giliran).
 - Suara: **tanpa suara pembaca saat bertarung**; narasi suara (speechSynthesis id-ID) hanya di adegan cerita (permintaan pengguna).
-- Ke depan: Bab 5 Terowongan Sarang Emas (Papot) & Bab 6 Pohon Madu Legendaris (Ratu Tawon Emas), lihat rencana di atas.
+- Cerita Ata Taktik sudah tamat (6 bab). Ide lanjutan belum dibahas.
 - Ikon aplikasi (`icons/icon-180|512.png`, `manifest.webmanifest`, nama Layar Utama "ATA Tactics"): Ladhia, Ata menendang, Bubunti
   di petak rumput isometrik, latar biru tua berbingkai emas, tulisan "ATA Tactics".
 - Simpanan `localStorage` kunci `ata-taktik-v1`. Tes: buka lewat http (PNG dari folder lain), `window.__ata`
@@ -350,7 +363,8 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 
 ## Status & yang sedang dibahas
 
-- Branch `pratinjau-v37` = **Ata Taktik versi 5–6 (Bab 4 Gunung Kabut + Perkemahan + Misi Sampingan)**, belum digabung.
+- Branch `pratinjau-v38` = **Ata Taktik versi 5–7 (Bab 4 Gunung Kabut + Perkemahan + Misi Sampingan + Bab 5–6 + Papot + Tamat)**,
+  dibuat dari `pratinjau-v37`, belum digabung. Saat digabung: rilis sebagai versi 37 (atau berikutnya) untuk keduanya.
 - Rilis terakhir di `main`: **versi 36** = **Ata Taktik versi 4** (Bab 3 Rawa Bulan + tim maksimal 4). Game lain tidak berubah.
 - Versi 35 = **Ata Taktik versi 3** (Halaman Tokoh).
 - Versi 34 = **Ata Taktik versi 2** (Bab 2 Hutan Lembab, Oumaldi, Ular Beracun).

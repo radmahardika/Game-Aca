@@ -3,7 +3,7 @@
 (() => {
   const TW = 64, TH = 32, HS = 16;
   const DIRS = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // 0 depan-kanan, 1 depan-kiri, 2 belakang-kiri, 3 belakang-kanan
-  const BLOCK = new Set(['w', 'o', 't', 'p', 'r', 'h', 'k', 's', 'J', 'L', 'F']);
+  const BLOCK = new Set(['w', 'o', 't', 'p', 'r', 'h', 'k', 's', 'J', 'L', 'F', 'K']);
   const $ = s => document.querySelector(s);
   const cv = $('#cv'), ctx = cv.getContext('2d');
   const scr = $('#scr'), hud = $('#hud'), panel = $('#panel'), dlg = $('#dlg'), bannerEl = $('#banner'), tipEl = $('#tip');
@@ -17,12 +17,12 @@
 
   /* ---------------- Simpan & muat ---------------- */
   const SKEY = 'ata-taktik-v1';
-  function defSave() { return { cleared: {}, stars: {}, madu: 0, lvl: { ata: 1, ladhia: 1, bubunti: 1, oumaldi: 1, momon: 1, yanto: 1, leni: 1, lilik: 1 }, seen: {}, snd: { voice: true, sfx: true, music: true } }; }
+  function defSave() { return { cleared: {}, stars: {}, madu: 0, lvl: { ata: 1, ladhia: 1, bubunti: 1, oumaldi: 1, momon: 1, yanto: 1, leni: 1, lilik: 1, papot: 1 }, seen: {}, snd: { voice: true, sfx: true, music: true } }; }
   let S = defSave();
   try { const r = localStorage.getItem(SKEY); if (r) { const o = JSON.parse(r); S = Object.assign(defSave(), o); S.lvl = Object.assign(defSave().lvl, o.lvl || {}); } } catch (e) {}
   function persist() { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) {} }
   Object.assign(Sound.st, S.snd);
-  const JOIN = { ladhia: 'm3', bubunti: 'm6', oumaldi: 'b2m4', momon: 'b3m2', yanto: 'b3m5', leni: 'b4m2', lilik: 'b4m5' };
+  const JOIN = { ladhia: 'm3', bubunti: 'm6', oumaldi: 'b2m4', momon: 'b3m2', yanto: 'b3m5', leni: 'b4m2', lilik: 'b4m5', papot: 'b5m3' };
   const recruited = k => k === 'ata' || !!S.cleared[JOIN[k]];
   const unlockedIdx = () => { let i = 0; while (i < MISSIONS.length && S.cleared[MISSIONS[i].id]) i++; return Math.min(i, MISSIONS.length - 1); };
   function charStats(k, l) { const b = CHARS[k]; return { hp: b.hp + 3 * (l - 1), atk: b.atk + (l - 1), def: b.def + Math.floor((l - 1) / 2), mov: b.mov }; }
@@ -72,7 +72,7 @@
   const dist = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   const isFoe = (a, b) => a.team === 'e' ? b.team !== 'e' : b.team === 'e';
   const foesOf = u => G.units.filter(v => v.alive && isFoe(u, v) && (u.team === 'e' || (seen(v) && !v.diving)));
-  function sightOf(u) { if (u.key !== 'oumaldi') return 3; return T(u.x, u.y).h >= 1 ? 6 : 4; }
+  function sightOf(u) { if (u.key === 'papot' || u.key === 'lilik') return 4; if (u.key !== 'oumaldi') return 3; return T(u.x, u.y).h >= 1 ? 6 : 4; }
   function seen(v) { // kabut: musuh terlihat bila dekat dengan teman atau baru saja menyerang
     if (!G.m.fog || v.team !== 'e') return true;
     if (v.reveal >= G.turn) return true;
@@ -90,7 +90,7 @@
       id: ++UID, key: k, team, name: b.name, x, y, lv, maxhp: b.hp, hp: 0, atk: b.atk, def: b.def, mov: b.mov, jump: b.jump,
       rmin: b.rmin, rmax: b.rmax, fly: !!b.fly, swim: !!b.swim, mudOk: !!b.mudOk, skills: b.skills || [], boss: !!b.boss, ranged: !!b.ranged, madu: b.madu || 0,
       sp: team === 'p' ? 2 : 0, facing: 0, done: false, moved: false, alive: true, gone: false, item: team === 'p' ? 1 : 0,
-      buffs: { sabuk: 0, benteng: 0, taunt: 0, lagu: 0, cangkang: 0 }, status: { pedas: 0, tidur: 0, racun: 0, perisai: 0 }, aggro: opt.aggro ?? 99, aggroOn: false,
+      buffs: { sabuk: 0, benteng: 0, taunt: 0, lagu: 0, cangkang: 0 }, status: { pedas: 0, tidur: 0, racun: 0, perisai: 0, jaring: 0 }, aggro: opt.aggro ?? 99, aggroOn: false,
       anim: 'idle', a0: 0, adur: 1, ox: 0, oy: 0, alpha: 1, tw: null, spin: false,
     };
     if (b.stance) u.stance = b.stance;
@@ -133,6 +133,14 @@
     if (d < rmin || d > rx) return false;
     if (d === 1 && !u.fly && Math.abs(hu - ht) > 1) return false;
     return true;
+  }
+  async function springTrap(e) {
+    const k = key(e.x, e.y); if (!G.traps || !G.traps.has(k) || e.fly) return false;
+    const tr = G.traps.get(k); G.traps.delete(k);
+    focus(e); Sound.play('hit'); addText(e, 'Terperosok! 🪤', '#ffd8a0', 10);
+    const d = Math.max(1, tr.atk + 3 - Math.floor(effDef(e) / 2)); e.hp = Math.max(0, e.hp - d); addText(e, '-' + d, '#ffffff', 11, 0.3); playAnim(e, 'hurt', 300);
+    e.status.pedas = Math.max(e.status.pedas, 1); if (e.hp <= 0) faint(e);
+    await wait(500); return true;
   }
   function landFor(u, tg) { // petak kosong di sebelah sasaran, terdekat ke penyerang
     let best = null;
@@ -233,6 +241,14 @@
     playAnim(def, 'hurt', 280);
     if (def.team === 'e') { def.aggroOn = true; G.units.forEach(e => { if (e.team === 'e' && e.alive && dist(e, def) <= 4) e.aggroOn = true; }); }
     if (def.hp <= 0) faint(def);
+    else if (def.team === 'e' && ENEMIES[def.key].yield && def.hp <= def.maxhp * ENEMIES[def.key].yield) {
+      def.yielded = true; def.hp = Math.max(1, def.hp); addText(def, 'Cukup! Aku mau mendengarkan kalian!', '#ffe08a', 12, 0.2); Sound.play('win');
+      setTimeout(() => checkEnd(), 600);
+    }
+    else if (def.team === 'e' && ENEMIES[def.key].rage && !def.raged && def.hp <= def.maxhp * ENEMIES[def.key].rage) {
+      def.raged = true; def.atk += 1; addText(def, 'Ratu marah! 💢', '#ff9a5a', 11, 0.3); Sound.play('roar');
+      setTimeout(() => { if (!G || G.ended) return; for (const [x, y] of (G.m.summon || { at: [] }).at) spawnUnit(ENEMIES[def.key].summonKind, x, y); renderPanel(); }, 500);
+    }
     else if (def.team === 'e' && ENEMIES[def.key].split && !def.didSplit && def.hp <= def.maxhp / 2) {
       def.didSplit = true; addText(def, 'Terbelah!', '#e0c890', 10, 0.3); Sound.play('roar');
       setTimeout(() => { if (!G || G.ended) return; for (let i = 0; i < 2; i++) { const n = spawnUnit(ENEMIES[def.key].split, def.x, def.y); if (n) { burst(n, ['#6e5034', '#9a7a58'], 8); n.fresh = G.phase === 'enemy'; } } renderPanel(); }, 450);
@@ -324,7 +340,7 @@
         const amt = 10 + 2 * (u.lv - 1);
         const real = Math.min(amt, tg.maxhp - tg.hp); tg.hp += real;
         Sound.play('heal'); addText(tg, '+' + real, '#8cff8c', 12); burst(tg, ['#8cff8c', '#e8ffe0', '#ffffff'], 10);
-        if (tg.status.tidur > 0 || tg.status.racun > 0) { tg.status.tidur = 0; tg.status.racun = 0; addText(tg, 'Segar kembali!', '#c8ffb8', 8, 0.3); if (tg.sleeping) { tg.sleeping = false; if (tg !== u && !tg.moved) tg.done = false; } }
+        if (tg.status.tidur > 0 || tg.status.racun > 0 || tg.status.jaring > 0) { tg.status.tidur = 0; tg.status.racun = 0; tg.status.jaring = 0; if (!tg.done) tg.moved = false; addText(tg, 'Segar kembali!', '#c8ffb8', 8, 0.3); if (tg.sleeping) { tg.sleeping = false; if (tg !== u && !tg.moved) tg.done = false; } }
         await p; break;
       }
       case 'jitu': {
@@ -407,6 +423,21 @@
         tg.status.perisai = 1; Sound.play('shield'); addText(tg, 'Perisai roh! 🫧', '#9fe8ff', 9); burst(tg, ['#9fe8ff', '#ffffff'], 10);
         await p; break;
       }
+      case 'gali': {
+        u.stance = 'gali'; Sound.play('whoosh');
+        const p0 = playAnim(u, 'skill', 500); await wait(450); await p0;
+        u.fade = now(); await wait(250);
+        u.x = tg.x; u.y = tg.y; u.fade = 0; u.stance = 'muncul'; u.dropIn = now(); focus(u, true);
+        burst(u, ['#6e5034', '#9a7a58', '#c8a878'], 12); Sound.play('step'); await wait(450);
+        u.stance = null; u.moved = true; break;
+      }
+      case 'jebak': {
+        faceTo(u, tg.x, tg.y);
+        const p = playAnim(u, 'skill', 560); await wait(260);
+        G.traps = G.traps || new Map(); G.traps.set(key(tg.x, tg.y), { x: tg.x, y: tg.y, atk: effAtk(u) });
+        burst({ key: u.key, x: tg.x, y: tg.y }, ['#6e5034', '#9a7a58'], 8); Sound.play('shield'); addText(u, 'Jebakan siap! 🪤', '#ffd8a0', 8);
+        await p; break;
+      }
       case 'pedas': {
         faceTo(u, tg.x, tg.y);
         const p = playAnim(u, 'skill', 520); await wait(180);
@@ -474,8 +505,30 @@
       first ? h('div', { class: 'madu' }, '🍯 ', h('b', {}, '+10 madu'), ' dari bekal perkemahan') : null,
       h('div', { class: 'row' }, btn('🔁 Dengar lagi', () => { closeOverlay(); startCamp(ch); }), btn('🗺️ Ke peta', () => { closeOverlay(); goMap(); }, 'pri'))));
   }
+  function markRocks(n, near) {
+    const ps = G.units.filter(u => u.team === 'p' && u.alive); if (!ps.length) return;
+    G.rocks = G.rocks || new Map();
+    for (let i = 0, tries = 0; i < n && tries < 40; tries++) {
+      const p = near || ps[Math.floor(Math.random() * ps.length)];
+      const x = p.x + Math.floor(Math.random() * 5) - 2, y = p.y + Math.floor(Math.random() * 5) - 2, t = T(x, y);
+      if (!t || !walkable(t) || G.rocks.has(key(x, y))) continue;
+      G.rocks.set(key(x, y), { x, y }); i++;
+    }
+  }
+  async function dropRocks() {
+    if (!G.rocks || !G.rocks.size) return;
+    Sound.play('roar'); await wait(200);
+    for (const r of G.rocks.values()) {
+      const u = unitAt(r.x, r.y), t = T(r.x, r.y), [wx, wy] = iso(r.x, r.y, t.h); G.shake = now();
+      for (let i = 0; i < 10; i++) { const a = Math.random() * 7, sp = 40 + Math.random() * 70; G.parts.push({ x: wx, y: wy - 10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 50, t0: now(), life: 0.6, c: ['#7a6e62', '#b0a490'][i % 2] }); }
+      if (u && u.alive) { const d = Math.max(1, 8 - Math.floor(effDef(u) / 3)); u.hp = Math.max(0, u.hp - d); addText(u, '-' + d + ' 🪨', '#ffb0a0', 11); playAnim(u, 'hurt', 280); if (u.hp <= 0) faint(u); }
+      else G.walls.set(key(r.x, r.y), { left: 2 });
+    }
+    G.rocks.clear(); await wait(500);
+  }
   function beginPlayerPhase() {
     G.phase = 'player'; G.busy = false;
+    if (G.m.rocks && G.turn % 2 === 1) markRocks(2);
     if (G.walls) for (const [k, w] of [...G.walls]) { if (--w.left <= 0) G.walls.delete(k); }
     for (const u of G.units) {
       if (u.team === 'e') continue;
@@ -487,6 +540,8 @@
         u.status.racun--; const d = Math.min(2, u.hp - 1);
         if (d > 0) { u.hp -= d; addText(u, '-' + d + ' 🤢', '#b8ff7a', 10); }
       }
+      if (u.webCd > 0) u.webCd--;
+      if (u.team === 'p' && u.alive && u.status.jaring > 0) { u.status.jaring--; u.webCd = 2; u.moved = true; addText(u, 'Terjerat! 🕸️', '#d8e8ff', 9, 0.15); }
       if (u.team === 'p' && u.alive && u.status.tidur > 0) { u.status.tidur--; u.done = true; u.sleeping = true; addText(u, 'Zzz... 😴', '#d8c8ff', 10, 0.2); }
       else u.sleeping = false;
     }
@@ -544,7 +599,7 @@
     let list;
     if (d.target === 'tile') {
       const ts = [];
-      for (const row of G.map.tiles) for (const t of row) { const dd = dist(u, t); if (dd >= d.rmin && dd <= d.rmax && walkable(t) && !unitAt(t.x, t.y) && t.t !== 'f') ts.push(t); }
+      for (const row of G.map.tiles) for (const t of row) { const dd = dist(u, t); if (dd >= d.rmin && dd <= d.rmax && walkable(t) && !unitAt(t.x, t.y) && (t.t !== 'f' || sk === 'gali') && !(G.traps && G.traps.has(key(t.x, t.y)))) ts.push(t); }
       if (!ts.length) { toast('Tidak ada petak kosong di dekat ' + u.name + '.'); return; }
       G.mode = 'target'; G.tkind = 'tile'; G.skill = sk; G.targets = new Map(ts.map(t => [key(t.x, t.y), t])); G.rangeTiles = null;
       renderPanel(); return;
@@ -625,6 +680,7 @@
     G.phase = 'enemy'; G.busy = true; renderPanel(); renderHUD();
     Sound.play('enemy');
     await banner('Giliran Musuh', 'enemy');
+    await dropRocks(); if (checkEnd()) return;
     await spawnWaves();
     await bossSummon();
     G.focus = new Map();
@@ -697,6 +753,12 @@
       e.status.pedas--; focus(e); addText(e, 'Huaaa pedas! 🥵', '#ff9b42', 9);
       await playAnim(e, 'hurt', 500); await wait(250); return;
     }
+    if (ENEMIES[e.key].gempa && e.aggroOn && G.turn % 3 === 2) {
+      focus(e); await wait(250); e.pose = 'gempa'; const pr = playAnim(e, 'skill', 800); Sound.play('roar');
+      addText(e, 'BRAAAK! Gempa!', '#ffcf6b', 11); G.shake = now(); await wait(400);
+      for (const v of G.units.filter(v => v.team === 'p' && v.alive)) markRocks(1, v);
+      await pr; await wait(200); return;
+    }
     if (ENEMIES[e.key].roar && e.aggroOn && G.turn % 3 === 2) {
       focus(e); await wait(250); Sound.play('roar'); addText(e, 'GRAAAUM! 🦁', '#ffb35a', 12);
       e.pose = 'aum'; const pr = playAnim(e, 'skill', 900); await wait(350);
@@ -734,6 +796,7 @@
       reveal(e);
       if (best.p.x !== e.x || best.p.y !== e.y) await walk(e, pathTo(R, best.p.x, best.p.y));
       focus(e);
+      if (await springTrap(e)) return;
       G.focus.set(best.t.id, (G.focus.get(best.t.id) || 0) + 1);
       if (ENEMIES[e.key].pack && G.units.some(o => o !== e && o.alive && o.key === e.key && dist(o, best.t) === 1)) { e.pack = true; addText(e, 'Kawanan! 🐺', '#c8d8ff', 8); }
       await basicAttack(e, best.t);
@@ -743,6 +806,7 @@
       const oh = ENEMIES[e.key].onHit, t = best.t;
       if (oh && t.alive && t.team !== 'e') {
         if (oh === 'tidur') { t.status.tidur = 1; addText(t, 'Tertidur! 😴', '#d8c8ff', 9, 0.3); burst(t, ['#c8a0f0', '#ffffff'], 8); }
+        if (oh === 'jaring' && !(t.webCd > 0) && !t.status.jaring) { t.status.jaring = 1; addText(t, e.key === 'ratuTawon' ? 'Lengket! 🍯' : 'Terjerat jaring! 🕸️', '#e8f0ff', 9, 0.3); }
         if (oh === 'racun') { t.status.racun = 3; addText(t, 'Keracunan! 🤢', '#b8ff7a', 9, 0.3); burst(t, ['#9be05a', '#5a2a7a'], 8); }
       }
       return;
@@ -750,7 +814,7 @@
     const field = distField(e, taunters.length ? taunters : targets);
     let mv = null;
     for (const [k, p] of R) { const d = field.get(k); if (d == null) continue; if (!mv || d < mv.d || (d === mv.d && p.c < mv.c)) mv = { d, c: p.c, p }; }
-    if (mv && (mv.p.x !== e.x || mv.p.y !== e.y)) { if (seen(e)) await walk(e, pathTo(R, mv.p.x, mv.p.y)); else { e.x = mv.p.x; e.y = mv.p.y; } }
+    if (mv && (mv.p.x !== e.x || mv.p.y !== e.y)) { if (seen(e)) await walk(e, pathTo(R, mv.p.x, mv.p.y)); else { e.x = mv.p.x; e.y = mv.p.y; } await springTrap(e); }
     faceNearestFoe(e);
   }
 
@@ -760,7 +824,7 @@
     const ata = G.units.find(u => u.key === 'ata');
     if (ata && !ata.alive) { endBattle(false, 'Ata pingsan!'); return true; }
     if (G.m.protect) { const p = G.units.find(u => u.key === G.m.protect); if (p && !p.alive) { endBattle(false, p.name + ' pingsan!'); return true; } }
-    if (G.m.type === 'boss') { const b = G.units.find(u => u.boss); if (b && !b.alive) { endBattle(true); return true; } }
+    if (G.m.type === 'boss') { const b = G.units.find(u => u.boss); if (b && (!b.alive || b.yielded)) { endBattle(true); return true; } }
     if (G.m.type === 'reach') { if (G.units.some(u => u.team === 'p' && u.alive && T(u.x, u.y).t === 'f')) { endBattle(true); return true; } return false; }
     const left = G.units.some(u => u.team === 'e' && u.alive);
     const wavesLeft = G.waves.some(w => !w.done);
@@ -928,6 +992,8 @@
     rawa: ['#203a34', '#4a7458', '#7c9e76'],
     gunung: ['#4a5a30', '#93a45c', '#c8c48a'],
     kemah: ['#33502a', '#6f9448', '#94b464'],
+    gua: ['#2a2630', '#463f4e', '#5e5668'],
+    madu: ['#7a8a2a', '#b8b440', '#ecd462'],
   };
   function stoneTop(X, Y, sc) {
     let su = X * sc, sv = Y * sc; const row = Math.floor(sv); if (row % 2) su += 0.5;
@@ -955,13 +1021,14 @@
       case 'q': { let c = grass(X, Y, gp); const fx = X * 9, fy = Y * 9, id = hash(Math.floor(fx), Math.floor(fy), 21);
         if (id > 0.86) { const d = Math.hypot(fx - Math.floor(fx) - 0.5, fy - Math.floor(fy) - 0.5); if (d < 0.22) c = mix(c, C(['#f2a0b8', '#ffe27a', '#ffffff', '#c8a0f0'][Math.floor(id * 40) % 4]), sm(0.22, 0.12, d)); } return c; }
       case ',': case 's': { const n = fbm(X * 3, Y * 3, 8); let c = mix(C('#7d5a3e'), C('#b48d62'), 0.3 + n * 0.6); return mix(c, C('#c9ae84'), sm(0.7, 0.9, fbm(X * 8, Y * 8, 9)) * 0.4); }
-      case 'm': { const n = fbm(X * 2.2, Y * 2.2, 44); let c = mix(C('#3e2c1e'), C('#6e5034'), 0.2 + n * 0.7);
+      case 'm': { if (G.m.pal === 'madu') { const n = fbm(X * 2, Y * 2, 52); let c = mix(C('#c8841a'), C('#ffc64a'), 0.3 + n * 0.6); return mix(c, C('#fff2b0'), sm(0.82, 0.95, fbm(X * 6, Y * 6, 53)) * 0.7); }
+        const n = fbm(X * 2.2, Y * 2.2, 44); let c = mix(C('#3e2c1e'), C('#6e5034'), 0.2 + n * 0.7);
         const pd = fbm(X * 1.4, Y * 1.4, 45); c = mix(c, C('#2a2a26'), sm(0.6, 0.66, pd) * 0.55); c = mix(c, C('#a7b8a0'), sm(0.66, 0.7, pd) * sm(0.8, 0.95, fbm(X * 9, Y * 9, 46)) * 0.6);
         return mix(c, C('#4a6a2c'), sm(0.72, 0.9, fbm(X * 4, Y * 4, 47)) * 0.35); }
       case 'y': { const n = fbm(X * 2.5, Y * 2.5, 31); let c = mix(C('#d9bf86'), C('#f0dcaa'), 0.3 + n * 0.6); return mul(c, 0.96 + 0.06 * fbm(X * 14, Y * 14, 32)); }
       case 'c': { const r = (X + Y) * 4, f = r - Math.floor(r); let c = mix(C('#5e3e26'), C('#8a6040'), sm(0.1, 0.5, Math.abs(f - 0.5) * 2) * 0.8 + fbm(X * 6, Y * 6, 33) * 0.2);
         if (Math.abs(f - 0.5) < 0.14 && hash(Math.floor(r), Math.floor((X - Y) * 5), 34) > 0.35) { const k = vn((X - Y) * 14, r, 35); if (k > 0.45) c = mix(C('#3f7a2a'), C('#8cc458'), k); } return c; }
-      case 'h': case 'k': case 'z': return stoneTop(X, Y, 2.4);
+      case 'h': case 'k': case 'z': { const c = stoneTop(X, Y, 2.4); return G.m.pal === 'gua' ? mix(c, C('#3a3448'), 0.55) : c; }
       case 'd': { // daun teratai di atas air
         let c = topColor({ t: 'w' }, X, Y, gp);
         const fx = X - Math.round(X), fy = Y - Math.round(Y), a = Math.atan2(fy, fx), d = Math.hypot(fx, fy);
@@ -1103,6 +1170,34 @@
       c.strokeStyle = '#3a6a2a'; c.lineWidth = 2.2; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(x0 + 6, y0 + len * 0.5, x0 - 2, y0 + len); c.stroke();
       c.fillStyle = '#5a8a3a'; for (let q = 0; q < 4; q++) { c.beginPath(); c.ellipse(x0 + 2 - q % 2 * 4, y0 + len * (q + 1) / 5, 3.5, 2, q, 0, 7); c.fill(); } }
   }
+  function drCrystal(c, seed) { // gugus kristal biru bercahaya
+    const g = c.createRadialGradient(0, -20, 2, 0, -20, 50); g.addColorStop(0, 'rgba(120,200,255,0.45)'); g.addColorStop(1, 'rgba(120,200,255,0)'); c.fillStyle = g; c.beginPath(); c.ellipse(0, -20, 50, 34, 0, 0, 7); c.fill();
+    const sh = [[-14, 0, 0.7, -0.35], [12, 2, 0.6, 0.3], [0, 4, 1, 0.05], [-24, 6, 0.45, -0.6], [24, 6, 0.4, 0.55]];
+    for (const [x, y, k, a] of sh) { const hh = 70 * k, w = 11 * k + 4; c.save(); c.translate(x, y); c.rotate(a);
+      c.fillStyle = '#3a6ac8'; c.beginPath(); c.moveTo(-w, 0); c.lineTo(-w * 0.8, -hh * 0.75); c.lineTo(0, -hh); c.lineTo(0, 0); c.fill();
+      c.fillStyle = '#8ad0ff'; c.beginPath(); c.moveTo(w, 0); c.lineTo(w * 0.8, -hh * 0.75); c.lineTo(0, -hh); c.lineTo(0, 0); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.6)'; c.beginPath(); c.moveTo(2, -hh * 0.2); c.lineTo(w * 0.5, -hh * 0.65); c.lineTo(3, -hh * 0.85); c.fill(); c.restore(); }
+  }
+  function drGlowShroom(c, seed) { // jamur gua bercahaya
+    const g = c.createRadialGradient(0, -14, 2, 0, -14, 34); g.addColorStop(0, 'rgba(140,255,220,0.4)'); g.addColorStop(1, 'rgba(140,255,220,0)'); c.fillStyle = g; c.beginPath(); c.ellipse(0, -14, 34, 22, 0, 0, 7); c.fill();
+    for (const [x, y, k] of [[-12, 2, 0.8], [10, 4, 1], [0, -2, 0.6]]) {
+      c.fillStyle = '#d8d0c0'; c.fillRect(x - 3 * k, y - 18 * k, 6 * k, 18 * k);
+      c.fillStyle = '#4ad8c0'; c.beginPath(); c.ellipse(x, y - 18 * k, 14 * k, 9 * k, 0, Math.PI, 0); c.fill();
+      c.fillStyle = 'rgba(220,255,250,0.8)'; c.beginPath(); c.arc(x - 4 * k, y - 22 * k, 2.2 * k, 0, 7); c.fill(); }
+  }
+  function drStalag(c, seed) { // stalagmit batu
+    for (const [x, hh, w] of [[-10, 80, 16], [12, 56, 13], [-26, 40, 10]]) {
+      const g = c.createLinearGradient(x - w, 0, x + w, 0); g.addColorStop(0, '#8a8090'); g.addColorStop(1, '#3a3440');
+      c.fillStyle = g; c.beginPath(); c.moveTo(x - w, 2); c.quadraticCurveTo(x - w * 0.4, -hh * 0.5, x, -hh); c.quadraticCurveTo(x + w * 0.4, -hh * 0.5, x + w, 2); c.fill();
+      c.strokeStyle = 'rgba(255,255,255,0.12)'; c.lineWidth = 2; for (let k = 1; k < 4; k++) { c.beginPath(); c.moveTo(x - w * (1 - k / 5), -hh * k / 5); c.lineTo(x + w * (1 - k / 5), -hh * k / 5 + 2); c.stroke(); } }
+  }
+  function drHoneyTree(c, seed) { // pohon madu: batang cokelat, tajuk emas, sarang madu bercahaya
+    const tr = c.createLinearGradient(-10, 0, 10, 0); tr.addColorStop(0, '#7a5230'); tr.addColorStop(1, '#3a2414');
+    c.fillStyle = tr; c.beginPath(); c.moveTo(-14, 4); c.lineTo(-7, -70); c.lineTo(7, -70); c.lineTo(14, 4); c.fill();
+    blobs(c, [[0, -104, 40], [-30, -86, 30], [30, -84, 30], [-12, -126, 26], [16, -122, 26]], seed, ['#fff0a0', '#e0b030', '#8a5a10']);
+    const g = c.createRadialGradient(14, -70, 2, 14, -70, 16); g.addColorStop(0, '#fff2a0'); g.addColorStop(1, '#e09010'); c.fillStyle = g; c.beginPath(); c.ellipse(14, -68, 11, 14, 0, 0, 7); c.fill();
+    c.strokeStyle = 'rgba(140,80,10,0.6)'; c.lineWidth = 1.5; for (let k = -1; k <= 1; k++) { c.beginPath(); c.moveTo(4, -68 + k * 6); c.lineTo(24, -68 + k * 6); c.stroke(); }
+  }
   function drWall(c) { // tembok batu sihir Tung Yanto
     const a = 0.4, Wh = 44;
     const A = Q(-a, a, 0), B = Q(a, a, 0), Cc = Q(a, -a, 0), At = Q(-a, a, Wh), Bt = Q(a, a, Wh), Ct = Q(a, -a, Wh), Dt = Q(-a, -a, Wh);
@@ -1210,17 +1305,18 @@
     poly(c, [[0, -hh - s / 2], [s, -hh], [0, s / 2 - hh], [-s, -hh]], '#d6a266');
   }
   const DECOR = {
-    t: { draw: (c, s) => G.m.pal === 'gunung' || G.m.pal === 'kemah' ? drPine(c, s) : G.m.pal === 'rawa' ? drMangrove(c, s) : G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
+    t: { draw: (c, s) => G.m.pal === 'gua' ? drStalag(c, s) : G.m.pal === 'madu' ? drHoneyTree(c, s) : G.m.pal === 'gunung' || G.m.pal === 'kemah' ? drPine(c, s) : G.m.pal === 'rawa' ? drMangrove(c, s) : G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
     J: { draw: drShroom, w: 120, h: 110, sh: [8, 4, 26, 10] },
     L: { draw: drLog, w: 150, h: 80, sh: [6, 6, 34, 12] },
     p: { draw: drPine, w: 120, h: 180, sh: [14, 6, 28, 12] },
-    b: { draw: (c, s) => G.m.pal === 'rawa' ? drReeds(c, s) : G.m.pal === 'hutan' ? drFern(c, s) : drBush(c, s), w: 110, h: 80, sh: [8, 4, 26, 10] },
+    b: { draw: (c, s) => G.m.pal === 'gua' ? drGlowShroom(c, s) : G.m.pal === 'rawa' ? drReeds(c, s) : G.m.pal === 'hutan' ? drFern(c, s) : drBush(c, s), w: 110, h: 80, sh: [8, 4, 26, 10] },
     r: { draw: drRock, w: 100, h: 80, sh: [10, 4, 26, 10] },
     h: { draw: drHouse, w: 150, h: 190, sh: [20, 8, 34, 18] },
     k: { draw: drStove, w: 120, h: 120, sh: [10, 6, 24, 10] },
     s: { draw: drWell, w: 120, h: 150, sh: [12, 6, 26, 11] },
     X: { draw: drCrate, w: 80, h: 80, sh: [10, 6, 24, 10] },
     F: { draw: drCampfire, w: 120, h: 120, sh: [6, 4, 22, 9] },
+    K: { draw: drCrystal, w: 110, h: 120, sh: [6, 4, 22, 9] },
     W: { draw: drWall, w: 110, h: 140, sh: [10, 6, 28, 12] },
   };
   function renderDecor(t) {
@@ -1261,15 +1357,19 @@
   const W2S = (wx, wy) => [cam.x + wx * cam.z, cam.y + wy * cam.z];
   let BG = null;
   function bgCanvas() {
-    const pal = G && (G.m.pal === 'hutan' || G.m.pal === 'rawa' || G.m.pal === 'gunung' || G.m.pal === 'kemah') ? G.m.pal : 'x';
+    const pal = G && ['hutan', 'rawa', 'gunung', 'kemah', 'gua', 'madu'].includes(G.m.pal) ? G.m.pal : 'x';
     if (BG && BG.w === VW && BG.h === VH && BG.pal === pal) return BG;
     const back = mkCanvas(Math.round(VW * DPR), Math.round(VH * DPR)), b = back.getContext('2d');
     b.scale(DPR, DPR);
     const g = b.createRadialGradient(VW * 0.5, VH * 0.35, 0, VW * 0.5, VH * 0.5, Math.max(VW, VH) * 0.8);
     if (pal === 'hutan') { g.addColorStop(0, '#2c5a4c'); g.addColorStop(0.55, '#0f2e2a'); g.addColorStop(1, '#030c0c'); }
+    else if (pal === 'gua') { g.addColorStop(0, '#2a2240'); g.addColorStop(0.5, '#120e20'); g.addColorStop(1, '#030206'); }
+    else if (pal === 'madu') { g.addColorStop(0, '#ffe4a0'); g.addColorStop(0.45, '#f0a050'); g.addColorStop(1, '#6a3060'); }
     else if (pal === 'gunung') { g.addColorStop(0, '#f2c4a0'); g.addColorStop(0.4, '#9a8ec0'); g.addColorStop(1, '#2a2c58'); }
     else if (pal === 'rawa' || pal === 'kemah') { g.addColorStop(0, '#2a3e78'); g.addColorStop(0.55, '#121c44'); g.addColorStop(1, '#03060f'); }
     else { g.addColorStop(0, '#2f5ea8'); g.addColorStop(0.55, '#14336e'); g.addColorStop(1, '#050d26'); } b.fillStyle = g; b.fillRect(0, 0, VW, VH);
+    if (pal === 'gua') { for (let i = 0; i < 40; i++) { b.fillStyle = `rgba(140,200,255,${0.1 + hash(i, 4, 7) * 0.35})`; b.beginPath(); b.arc(hash(i, 5, 7) * VW, hash(i, 6, 7) * VH, 1 + hash(i, 7, 7) * 2.5, 0, 7); b.fill(); } }
+    if (pal === 'madu') { const sg = b.createRadialGradient(VW * 0.75, VH * 0.2, 4, VW * 0.75, VH * 0.2, VH * 0.4); sg.addColorStop(0, 'rgba(255,250,210,0.9)'); sg.addColorStop(1, 'rgba(255,250,210,0)'); b.fillStyle = sg; b.fillRect(0, 0, VW, VH); }
     if (pal === 'gunung') { // siluet pegunungan berkabut saat fajar
       [[0.62, '#7a72a8', 0.55], [0.72, '#5c5890', 0.7], [0.82, '#3e3e72', 0.85]].forEach(([base, col, a], li) => {
         b.fillStyle = col; b.globalAlpha = a; b.beginPath(); b.moveTo(0, VH);
@@ -1332,7 +1432,7 @@
     SPR.draw(c, u.key, u.facing, u.alive || u.anim === 'faint' ? u.anim : 'faint', clamp((tm - u.a0) / u.adur, 0, 1), tm, { seed: u.id, spin: u.spin, pose: u.pose, stance: u.stance });
     c.restore();
     c.globalAlpha = 1;
-    if (u.alive) {
+    if (u.alive && !G.m.camp) {
       const hh = (SPR.height(u.key) + 10) * R, bw = (big ? 40 : 30) * R, by = ay - hh - p.hop * R + drop;
       c.fillStyle = 'rgba(8,12,30,0.85)'; c.beginPath(); c.roundRect(ax - bw / 2 - 3, by - 3, bw + 6, 12, 4); c.fill();
       const k = u.hp / u.maxhp;
@@ -1370,7 +1470,9 @@
         ctx.drawImage(G.tileC[t.y * m.w + x], (cx - TW / 2) * R, (cy - TH / 2) * R);
         const hl = G.hl.get(key(t.x, t.y));
         if (hl) drawHighlight(ctx, cx * R, cy * R, hl, tm);
-        if (G.m.fog && fogTile(t.x, t.y)) { diamond(ctx, cx * R, cy * R, 1.02); ctx.fillStyle = 'rgba(196,214,206,0.62)'; ctx.fill(); }
+        if (G.traps && G.traps.has(key(t.x, t.y))) { ctx.save(); ctx.translate(cx * R, cy * R); ctx.scale(1, 0.5); ctx.fillStyle = 'rgba(40,26,14,0.75)'; ctx.beginPath(); ctx.arc(0, 0, TW * R * 0.2, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(200,160,100,0.8)'; ctx.lineWidth = 3; ctx.setLineDash([8, 6]); ctx.stroke(); ctx.restore(); }
+        if (G.rocks && G.rocks.has(key(t.x, t.y))) { diamond(ctx, cx * R, cy * R, 0.92); ctx.fillStyle = `rgba(255,70,40,${0.25 + 0.2 * Math.sin(tm * 8)})`; ctx.fill(); ctx.font = `${Math.round(22 * R)}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText('⚠️', cx * R, cy * R + 8 * R); }
+        if (G.m.fog && fogTile(t.x, t.y)) { diamond(ctx, cx * R, cy * R, 1.02); ctx.fillStyle = G.m.pal === 'gua' ? 'rgba(6,4,14,0.74)' : 'rgba(196,214,206,0.62)'; ctx.fill(); }
       }
       for (let x = x0; x <= x1; x++) {
         const t = m.tiles[d - x][x]; if (isSea(t)) continue;
@@ -1388,7 +1490,7 @@
       ctx.globalAlpha = 1 - k / q.life; ctx.fillStyle = q.c; ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    if (G.m.pal === 'hutan' || G.m.pal === 'rawa' || G.m.pal === 'gunung' || G.m.pal === 'kemah') drawForestAir(ctx, tm);
+    if (['hutan', 'rawa', 'gunung', 'kemah', 'gua', 'madu'].includes(G.m.pal)) drawForestAir(ctx, tm);
     if (G.m.camp) drawCampAir(ctx, tm);
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bg.front, 0, 0);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -1433,6 +1535,7 @@
       if (u.buffs.cangkang > 0) icons.push('🐢');
       if (u.diving) icons.push('🌊');
       if (u.status.perisai) icons.push('🫧');
+      if (u.status.jaring > 0) icons.push('🕸️');
       if (u.summon) icons.push('✨' + u.life);
       if (u.buffs.sabuk > 0) icons.push('🥋');
       if (u.team === 'e' && !u.aggroOn && u.aggro < 50) icons.push('💤');
@@ -1540,13 +1643,13 @@
   function renderHUD() {
     if (!G) { hud.hidden = true; return; }
     hud.innerHTML = '';
-    hud.append(
+    hud.append(...[
       btn('☰', openBattleMenu, 'icon'),
       h('div', { class: 'hmid' }, h('div', { class: 'htitle' }, G.m.camp ? '🔥 Perkemahan · Bab ' + G.m.chap : `${G.m.side ? 'Sampingan' : 'Misi ' + G.m.no} · ${G.m.name}`), G.m.camp ? null : h('div', { class: 'hobj' }, '🎯 ' + objText())),
       h('div', { class: 'hsp' }),
       G.m.camp ? null : h('div', { class: 'hturn' }, h('small', {}, 'Giliran'), h('b', {}, G.turn)),
       h('div', { class: 'zoom' }, btn('−', () => zoomAt(VW / 2, VH / 2, cam.z / 1.2), 'icon sm'), btn('+', () => zoomAt(VW / 2, VH / 2, cam.z * 1.2), 'icon sm'), btn('⌖', () => fitCam(), 'icon sm')),
-    );
+    ].filter(Boolean));
   }
   function spStars(u) { return h('span', { class: 'sp' }, h('span', { class: 'on' }, '★'.repeat(u.sp)), h('span', { class: 'off' }, '★'.repeat(5 - u.sp))); }
   function unitCard(u) {
@@ -1563,6 +1666,7 @@
     if (u.buffs.cangkang > 0) chips.push('🐢 Dalam cangkang');
     if (u.diving) chips.push('🌊 Menyelam: tidak bisa diserang');
     if (u.status.perisai) chips.push('🫧 Perisai roh');
+    if (u.status.jaring > 0) chips.push('🕸️ Terjerat (tidak bisa pindah)');
     if (u.summon) chips.push(`✨ Tinggal ${u.life + 1} giliran`);
     if (u.team === 'p' && T(u.x, u.y).t === 'm') chips.push('🟫 Di lumpur');
     const range = u.rmax > 1 ? `${u.rmin}-${u.rmax}` : '1';
@@ -1618,7 +1722,7 @@
         break;
       }
       case 'target':
-        hint(G.tkind === 'tile' ? (G.skill === 'roh' ? 'Tap petak yang menyala untuk memanggil Roh Ikan.' : 'Tap petak yang menyala untuk memunculkan Tembok Batu.') : G.tkind === 'ally' ? 'Tap teman yang bercincin hijau.' : 'Tap musuh yang menyala merah. Angka = kerusakan, 💥 = langsung kalah.');
+        hint(G.tkind === 'tile' ? (G.skill === 'gali' ? 'Tap petak tujuan terowongan.' : G.skill === 'jebak' ? 'Tap petak untuk memasang jebakan.' : G.skill === 'roh' ? 'Tap petak yang menyala untuk memanggil Roh Ikan.' : 'Tap petak yang menyala untuk memunculkan Tembok Batu.') : G.tkind === 'ally' ? 'Tap teman yang bercincin hijau.' : 'Tap musuh yang menyala merah. Angka = kerusakan, 💥 = langsung kalah.');
         row.append(btn('↩ Kembali', toAction));
         break;
       case 'busy': break;
@@ -1714,9 +1818,12 @@
   };
   CHAPTERS[3] = { name: 'Rawa Bulan', icon: '🌙', end: 'Tung Momon dan Tung Yanto bergabung, Buaya Serakah mau berbagi, dan peta ketiga menunjuk ke Gunung Kabut.', team: ['momon', 'ladhia', 'ata', 'bubunti', 'oumaldi', 'yanto'] };
   CHAPTERS[4] = { name: 'Gunung Kabut', icon: '⛰️', end: 'Uti Leni dan Uti Lilik bergabung, Singa Penyiksa belajar menghargai sesama, dan peta keempat menunjuk ke Gunung Sarang Emas.', team: ['leni', 'ladhia', 'ata', 'bubunti', 'lilik'] };
-  const NEXT = { 4: 'Bab 5: Gunung Sarang Emas dan Madu Legendaris. Segera hadir!', 3: 'Bab 4: Gunung Kabut dan Singa Penyiksa. Teman baru: Uti Leni & Uti Lilik.', 1: 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah.', 2: 'Bab 3: Rawa Bulan dan Buaya Serakah. Teman baru: Tung Momon & Tung Yanto.' };
+  CHAPTERS[5] = { name: 'Terowongan Sarang Emas', icon: '⛏️', end: 'Papot bergabung, Kepala Penambang berhenti merusak akar, dan kelima keping peta bersatu!', team: ['papot', 'ladhia', 'ata', 'bubunti', 'oumaldi'] };
+  CHAPTERS[6] = { name: 'Pohon Madu Legendaris', icon: '🍯', end: '', team: [] };
+  const NEXT = { 5: 'Bab 6: Pohon Madu Legendaris dan Ratu Tawon Emas.', 4: 'Bab 5: Terowongan Sarang Emas. Teman baru: Papot si tikus tanah.', 3: 'Bab 4: Gunung Kabut dan Singa Penyiksa. Teman baru: Uti Leni & Uti Lilik.', 1: 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah.', 2: 'Bab 3: Rawa Bulan dan Buaya Serakah. Teman baru: Tung Momon & Tung Yanto.' };
   async function chapterEnd(m) {
     const ch = m.chap || 1, C_ = CHAPTERS[ch];
+    if (ch === 6) return goEnding();
     G = null; hud.hidden = true; panel.hidden = true;
     Sound.startMusic('calm');
     scr.innerHTML = ''; scr.classList.add('on');
@@ -1727,7 +1834,28 @@
       h('p', {}, C_.end),
       h('p', { class: 'muted' }, NEXT[ch]),
       CAMPS[ch - 1] ? btn('🔥 Berkemah dulu', () => startCamp(ch), 'pri big') : btn('🗺️ Kembali ke peta', goMap, 'pri big')));
-    Sound.speak('Bab ' + ['', 'satu', 'dua', 'tiga', 'empat'][ch] + ' selesai! Petualangan berlanjut!', 1.2);
+    Sound.speak('Bab ' + ['', 'satu', 'dua', 'tiga', 'empat', 'lima'][ch] + ' selesai! Petualangan berlanjut!', 1.2);
+  }
+
+  async function goEnding() {
+    G = null; hud.hidden = true; panel.hidden = true; closeOverlay();
+    Sound.startMusic('calm');
+    scr.innerHTML = ''; scr.classList.add('on');
+    const team = ['ladhia', 'oumaldi', 'momon', 'ata', 'bubunti', 'yanto', 'leni', 'lilik', 'papot'];
+    const img = h('img', { class: 'endtree', src: '../pohon-madu/img/pohon-legendaris.png', alt: '' });
+    scr.append(h('div', { class: 'title end finale' },
+      h('div', { class: 'tsmall' }, 'Bab 6 selesai!'), h('h1', {}, 'Pohon Madu Legendaris'), img,
+      h('div', { class: 'trio' }, team.map(k => portrait(k, k === 'ata' ? 96 : 66))),
+      h('div', { class: 'col' }, btn('📖 Akhir cerita', async () => { await playStory(STORY.ending); S.seen.ending = true; persist(); showTamat(); }, 'pri big'))));
+    Sound.speak('Selamat! Kalian menemukan Pohon Madu Legendaris!', 1.2);
+    function showTamat() {
+      overlay(h('div', { class: 'card result' },
+        h('div', { class: 'rtitle' }, '🏆 Tamat!'),
+        h('p', {}, 'Terima kasih sudah bermain, Penjelajah Hebat! Madu terbaik adalah madu yang dibagi.'),
+        portrait('nenek', 90),
+        h('p', { class: 'muted' }, 'Kamu masih bisa mengulang misi untuk mengumpulkan semua bintang ⭐.'),
+        h('div', { class: 'row' }, btn('🗺️ Ke peta', () => { closeOverlay(); goMap(); }, 'pri'))));
+    }
   }
 
   /* ---------------- Layar menu ---------------- */
@@ -1741,7 +1869,7 @@
     screen(h('div', { class: 'title' },
       h('div', { class: 'tsmall' }, 'Petualangan Dunia Satwa'),
       h('h1', {}, 'Ata dan Madu Legendaris', h('span', {}, 'Taktik')),
-      h('div', { class: 'trio' }, ['ladhia', 'ata', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'].filter(k => k === 'ata' || k === 'ladhia' || k === 'bubunti' || recruited(k)).map(k => portrait(k, k === 'ata' ? 110 : 76))),
+      h('div', { class: 'trio' }, ['ladhia', 'ata', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'].filter(k => k === 'ata' || k === 'ladhia' || k === 'bubunti' || recruited(k)).map(k => portrait(k, k === 'ata' ? 104 : 68))),
       h('div', { class: 'col' },
         btn(started ? '▶ Lanjutkan' : '▶ Mulai Petualangan', async () => {
           Sound.resume(); Sound.startMusic('calm');
@@ -1750,7 +1878,7 @@
         }, 'pri big'),
         btn('👥 Tokoh', () => goChars(null, goTitle)),
         btn('⚙️ Pengaturan', goSettings)),
-      h('p', { class: 'muted small' }, '4 bab · 28 misi'),
+      h('p', { class: 'muted small' }, '6 bab · 42 misi'),
       h('div', { class: 'ver' }, 'versi ' + AT.VERSION)));
   }
   function goMap() {
@@ -1781,7 +1909,8 @@
           h('div', { class: 'ninfo' }, h('b', {}, 'Perkemahan'), h('small', {}, 'Cerita di api unggun'))));
       }
     });
-    path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '🍯'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 5: Gunung Sarang Emas'), h('small', {}, 'Segera hadir'))));
+    const fin = !!S.cleared.b6m7;
+    path.append(h('div', { class: 'node l camp' + (fin ? '' : ' locked'), onclick: () => { Sound.play('tap'); if (fin) goEnding(); else toast('Kalahkan Ratu Tawon Emas dulu.'); } }, h('div', { class: 'dot' }, fin ? '🏆' : '🔒'), h('div', { class: 'ninfo' }, h('b', {}, 'Tamat'), h('small', {}, 'Pohon Madu Legendaris'))));
     screen(topbar('Peta Petualangan', goTitle),
       h('div', { class: 'maphead' }, btn('🏠 Markas', goBase, 'pri2'), btn('👥 Tokoh', () => goChars(null, goMap), 'pri2'), btn('⚙️', goSettings, 'icon')),
       path);

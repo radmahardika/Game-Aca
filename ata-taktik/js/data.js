@@ -1,5 +1,5 @@
 'use strict';
-const AT = { VERSION: 6 };
+const AT = { VERSION: 7 };
 /* Data karakter, jurus, misi, dan cerita Bab 1. */
 
 const CHARS = {
@@ -35,6 +35,10 @@ const CHARS = {
     skills: ['roh', 'perisai'], passive: 'Melayang: bisa melewati air dan rintangan. Cahaya lenteranya menjangkau 3 petak.',
     animal: 'Roh ikan bandeng', bio: 'Sahabat lama Nenek yang tinggal di danau kabut. Lentera rohnya bisa memanggil teman-teman roh ikan.',
     tip: 'Panggil Roh Ikan untuk menambah teman! Pakai Perisai Roh pada teman yang akan diserang musuh kuat.' },
+  papot: { name: 'Papot', job: 'Penggali', desc: 'Tikus tanah ceria berkacamata tebal, ahli terowongan.', hp: 24, atk: 7, def: 4, mov: 4, jump: 2, rmin: 1, rmax: 1,
+    skills: ['gali', 'jebak'], passive: 'Telinga Tanah: merasakan getaran langkah musuh, jadi musuh dalam 4 petak selalu terlihat walau gelap atau berkabut.',
+    animal: 'Tikus tanah', bio: 'Cucu Nenek Pupuk, penjaga akar Pohon Madu Legendaris. Matanya kurang awas, tapi telinganya tajam sekali. Suka mengoceh dan suka menggali.',
+    tip: 'Gali Terowongan membawa Papot ke tempat jauh, menembus tembok dan tebing. Pasang Lubang Jebakan di jalan yang akan dilewati musuh!' },
 };
 
 const FUTURE = [
@@ -69,6 +73,16 @@ const ENEMIES = {
   serigala: { name: 'Serigala Kabut', hp: 15, atk: 7, def: 2, mov: 5, jump: 2, rmin: 1, rmax: 1, madu: 3, pack: true },
   rajaElang: { name: 'Raja Elang', hp: 56, atk: 10, def: 5, mov: 7, jump: 9, rmin: 1, rmax: 1, madu: 14, boss: true, fly: true, summonKind: 'elang', call: 'Kiaaak! Elang-elangku, serang dari langit!' },
   singa: { name: 'Singa Penyiksa', hp: 100, atk: 11, def: 6, mov: 3, jump: 2, rmin: 1, rmax: 2, madu: 25, boss: true, roar: true, summonKind: 'serigala', call: 'Serigala-serigala, kepung mereka!' },
+  // Bab 5 Terowongan Sarang Emas. onHit jaring = tidak bisa berpindah 1 giliran, burrow = menggali (menembus rintangan)
+  kelelawarGua: { name: 'Kelelawar Gua', hp: 11, atk: 7, def: 1, mov: 6, jump: 9, rmin: 1, rmax: 1, madu: 3, fly: true },
+  labaKristal: { name: 'Laba-laba Kristal', hp: 17, atk: 5, def: 5, mov: 3, jump: 2, rmin: 1, rmax: 2, madu: 4, onHit: 'jaring', proj: '🕸️' },
+  cacingBatu: { name: 'Cacing Batu', hp: 20, atk: 7, def: 4, mov: 4, jump: 9, rmin: 1, rmax: 1, madu: 4, fly: true, burrow: true },
+  rajaLaba: { name: 'Ratu Laba-laba Kristal', hp: 56, atk: 8, def: 6, mov: 3, jump: 2, rmin: 1, rmax: 3, madu: 16, boss: true, onHit: 'jaring', proj: '🕸️', summonKind: 'labaKristal', call: 'Anak-anakku, jaring mereka!' },
+  tikusGot: { name: 'Kepala Penambang', hp: 80, atk: 9, def: 6, mov: 3, jump: 2, rmin: 1, rmax: 1, madu: 25, boss: true, gempa: true, summonKind: 'cacingBatu', call: 'Cacing-cacing, gali terus! Ambil semua emasnya!' },
+  // Bab 6 Pohon Madu Legendaris
+  prajuritTawon: { name: 'Prajurit Tawon', hp: 16, atk: 7, def: 4, mov: 5, jump: 9, rmin: 1, rmax: 1, madu: 4, fly: true },
+  kaptenTawon: { name: 'Kapten Tawon', hp: 62, atk: 9, def: 6, mov: 5, jump: 9, rmin: 1, rmax: 1, madu: 18, boss: true, fly: true, summonKind: 'prajuritTawon', call: 'Prajurit, lindungi Ratu! Serbuuu!' },
+  ratuTawon: { name: 'Ratu Tawon Emas', hp: 120, atk: 9, def: 6, mov: 4, jump: 9, rmin: 1, rmax: 2, madu: 40, boss: true, fly: true, onHit: 'jaring', proj: '🍯', yield: 0.4, rage: 0.7, summonKind: 'prajuritTawon', call: 'Prajuritku, jaga Pohon Madu!' },
   kepalaMusang: { name: 'Kepala Musang', hp: 46, atk: 8, def: 4, mov: 3, jump: 2, rmin: 1, rmax: 1, madu: 12, boss: true, summonKind: 'musang', call: 'Geng Musang, serbu!' },
 };
 /* Teman yang dipanggil (bukan anggota tim tetap) */
@@ -95,6 +109,8 @@ const SKILLS = {
   lompat: { name: 'Lompatan Rusa', icon: '🦌', cost: 3, target: 'enemy', rmin: 2, rmax: 5, desc: 'Melompat ke sebelah musuh yang jauh lalu langsung menyerang kuat.' },
   roh: { name: 'Panggil Roh Ikan', icon: '🐟', cost: 3, target: 'tile', rmin: 1, rmax: 2, desc: 'Memanggil Roh Ikan yang ikut bertarung selama 2 giliran.' },
   perisai: { name: 'Perisai Roh', icon: '🫧', cost: 2, target: 'ally', rmin: 0, rmax: 3, desc: 'Gelembung roh menahan satu serangan musuh berikutnya.' },
+  gali: { name: 'Gali Terowongan', icon: '🕳️', cost: 2, target: 'tile', rmin: 2, rmax: 5, desc: 'Menggali ke bawah tanah lalu muncul di petak kosong yang jauh (menembus tembok, tebing, dan air).' },
+  jebak: { name: 'Lubang Jebakan', icon: '🪤', cost: 2, target: 'tile', rmin: 1, rmax: 3, desc: 'Membuat lubang tersembunyi. Musuh yang berhenti di situ terperosok: kena serangan dan tidak bisa bergerak 1 giliran.' },
   pedas: { name: 'Masakan Pedas', icon: '🌶️', cost: 3, target: 'enemy', rmin: 1, rmax: 3, desc: 'Lempar masakan super pedas! Musuh kepedasan dan tidak bisa bergerak 1 giliran.' },
 };
 
@@ -127,6 +143,12 @@ const WHO = {
   kelinci: { name: 'Bu Kelinci', voice: [1.5, 1.0] },
   kurir: { name: 'Pak Kumbang Kurir', voice: [1.0, 1.1] },
   warga: { name: 'Warga Rawa', voice: [1.2, 1.0] },
+  papot: { name: 'Papot', kind: 'papot', voice: [1.6, 1.2] },
+  pupuk: { name: 'Nenek Pupuk', voice: [1.0, 0.8] },
+  tikus: { name: 'Kepala Penambang', kind: 'tikusGot', voice: [0.4, 0.9] },
+  rajaLaba: { name: 'Ratu Laba-laba Kristal', kind: 'rajaLaba', voice: [1.2, 0.85] },
+  kapten: { name: 'Kapten Tawon', kind: 'kaptenTawon', voice: [0.9, 1.1] },
+  ratu: { name: 'Ratu Tawon Emas', kind: 'ratuTawon', voice: [1.1, 0.9] },
   zizi: { name: 'Zizi', kind: 'zizi', voice: [1.9, 1.1] },
   narator: { name: '', kind: null, voice: [1, 0.95] },
 };
@@ -493,6 +515,149 @@ const STORY = {
     ['bubunti', 'Semoga cucunya juga baik hati!'],
     ['narator', 'Malam itu, jauh di bawah tanah, seekor tikus tanah kecil berkacamata sedang menggali... dan mendengar langkah kaki mereka.'],
   ],
+  camp5: [
+    ['narator', 'Keluar dari terowongan, tim berkemah di lereng Gunung Sarang Emas. Puncaknya bersinar keemasan.'],
+    ['papot', 'Hihi, ini pertama kalinya aku berkemah ramai-ramai! Biasanya aku menggali sendirian.'],
+    ['oumaldi', 'Aku juga dulu suka sendirian. Tapi bersama-sama itu lebih seru, kan?'],
+    ['papot', 'Betul! Nenek Pupuk selalu bilang, akar pohon itu kuat karena saling berpegangan.'],
+    ['ata', 'Seperti kita! Ladhia melindungi, Bubunti memasak, Tung Momon bernyanyi...'],
+    ['yanto', '...Dan kamu, Ata, yang mengajak kami semua berkumpul lagi.'],
+    ['lilik', 'Besok kita sampai di Pohon Madu Legendaris. Tapi para tawon penjaganya tidak mudah percaya.'],
+    ['ladhia', 'Kita tunjukkan bahwa kita datang dengan niat baik.'],
+  ],
+  // ---- Bab 5 ----
+  e1pre: [
+    ['narator', 'Gunung Sarang Emas menjulang di depan mereka. Pintu masuknya sebuah gua yang gelap.'],
+    ['momon', 'Gelap sekali! Aku tidak bisa melihat paruhku sendiri!'],
+    ['lilik', 'Lenteraku akan menerangi sedikit. Musuh baru terlihat kalau sudah dekat, hati-hati.'],
+    ['narator', 'Dari dalam tanah terdengar suara kecil: "Tok-tok-tok... siapa di atas sana?"'],
+  ],
+  e1post: [
+    ['ata', 'Tadi ada suara dari bawah tanah. Kalian dengar juga?'],
+    ['leni', 'Ya. Seperti suara orang menggali.'],
+  ],
+  e2pre: [
+    ['narator', 'Langit-langit gua mulai retak. Batu-batu kecil berjatuhan.'],
+    ['papot', '(dari bawah tanah) Hei, kalian di atas! Lihat tanda ⚠️ di lantai? Di situ batu akan jatuh! Cepat menyingkir!'],
+    ['ata', 'Siapa itu?! Terima kasih!'],
+    ['papot', '(dari bawah tanah) Laba-laba kristal juga suka menembakkan jaring. Kalau terjerat, kalian tidak bisa berpindah!'],
+  ],
+  e2post: [
+    ['papot', '(dari bawah tanah) Hebat! Eh... aduh, tolong! Terowonganku runtuh!'],
+    ['ata', 'Suaranya dari arah sana! Ayo kita tolong!'],
+  ],
+  e3pre: [
+    ['papot', 'Tolooong! Kacamataku hampir jatuh dan cacing-cacing batu mengepungku!'],
+    ['bubunti', 'Kami datang! Bertahanlah!'],
+    ['ladhia', 'Jangan biarkan dia pingsan. Awas batu jatuh juga!'],
+  ],
+  e3post: [
+    ['papot', 'Fiuh! Terima kasih! Namaku Papot. Aku tikus tanah, cucu Nenek Pupuk.'],
+    ['yanto', '...Cucu Pupuk. Kau mirip sekali dengannya.'],
+    ['papot', 'Tung Yanto?! Nenek sering cerita tentang Tim Jelajah Legenda! Berarti kamu... cucu Nenek Ata?!'],
+    ['ata', 'Iya! Aku Ata. Kami mencari keping peta terakhir.'],
+    ['papot', 'Keping itu dibawa lari Kepala Penambang! Dia menggali akar Pohon Madu untuk mencari emas. Ayo, aku ikut! Aku tahu semua jalan di bawah tanah!'],
+  ],
+  e4pre: [
+    ['papot', 'Rel tambang ini menuju ke dalam gunung. Kita harus sampai ke bendera di ujung rel!'],
+    ['papot', 'Tenang, aku bisa menggali terowongan langsung ke sana. Hihi!'],
+  ],
+  e4post: [
+    ['narator', 'Di ujung rel, dinding gua dipenuhi kristal biru yang berkilauan... dan sarang laba-laba raksasa.'],
+    ['oumaldi', 'Ada yang besar sekali di sana!'],
+  ],
+  e5pre: [
+    ['rajaLaba', 'Sssst... Siapa yang merusak jaring-jaring indahku?'],
+    ['papot', 'Ratu Laba-laba Kristal! Dia menjaga jalan ke tambang Kepala Penambang.'],
+    ['leni', 'Jaringnya membuat kita tidak bisa bergerak. Tetap dekat dengan Bubunti supaya cepat dibebaskan!'],
+  ],
+  e5post: [
+    ['rajaLaba', 'Aduh... Baiklah, kalian boleh lewat. Kepala Penambang juga sering merusak jaringku dengan alat galinya.'],
+    ['papot', 'Terima kasih, Ratu Laba-laba! Kami akan menghentikannya.'],
+  ],
+  e6pre: [
+    ['narator', 'Lorong kristal yang gelap gulita. Batu-batu berjatuhan dari atas.'],
+    ['papot', 'Telingaku bisa mendengar langkah musuh walau gelap! Tetap dekat denganku.'],
+  ],
+  e6post: [
+    ['papot', 'Itu dia, suara palu dan beliung. Tambang Kepala Penambang ada di depan!'],
+  ],
+  e7pre: [
+    ['tikus', 'Heh heh heh! Emas! Emas di akar pohon ini milikku semua!'],
+    ['papot', 'Hentikan! Kalau akarnya rusak, Pohon Madu Legendaris bisa mati!'],
+    ['tikus', 'Siapa peduli pohon? Aku mau emas! Cacing-cacing, gali terus!'],
+    ['ata', 'Kami peduli! Ayo teman-teman, lindungi akar pohon!'],
+  ],
+  e7post: [
+    ['tikus', 'Ugh... aku cuma ingin kaya... supaya semua orang menghormatiku.'],
+    ['papot', 'Emas tidak membuat kita dihormati. Menolong dan berbagi yang membuat kita dihormati.'],
+    ['tikus', '...Maaf. Ini, keping peta terakhir. Aku akan menutup lubang-lubang galianku.'],
+    ['narator', 'Kelima keping peta akhirnya bersatu. Peta itu bersinar keemasan dan menunjuk ke puncak gunung.'],
+    ['ata', 'Pohon Madu Legendaris... ada di atas sana! Ayo!'],
+  ],
+  // ---- Bab 6 ----
+  f1pre: [
+    ['narator', 'Di puncak Gunung Sarang Emas terbentang padang bunga keemasan. Udaranya harum madu.'],
+    ['bubunti', 'Wangi sekali! Aku ingin memasak semua bunga ini!'],
+    ['narator', 'Tiba-tiba terdengar dengung ratusan sayap.'],
+    ['kapten', 'Berhenti, pencuri! Tidak ada yang boleh mendekati Pohon Madu Legendaris!'],
+    ['ata', 'Kami bukan pencuri! Kami...'],
+    ['kapten', 'Semua bilang begitu! Prajurit, usir mereka!'],
+  ],
+  f1post: [
+    ['momon', 'Mereka tidak mau mendengar. Kita harus menunjukkan niat baik kita.'],
+    ['lilik', 'Mungkin Ratu Tawon mau mendengarkan kalau kita sampai ke sarangnya.'],
+  ],
+  f2pre: [
+    ['narator', 'Para prajurit tawon berjaga di setiap bunga.'],
+    ['ladhia', 'Kita jangan melukai bunga-bunganya. Kalahkan prajurit tanpa merusak padang ini.'],
+  ],
+  f2post: [['papot', 'Lihat, sungai madu! Tapi madunya lengket sekali, kita bisa tertahan.']],
+  f3pre: [
+    ['leni', 'Sungai madu ini lengket. Langkah di atas madu jadi lebih pendek.'],
+    ['ata', 'Kita harus sampai ke bendera di seberang sebelum para tawon mengepung!'],
+  ],
+  f3post: [['kapten', 'Kalian berhasil menyeberang?! Tidak akan kubiarkan kalian sampai ke Ratu!']],
+  f4pre: [
+    ['kapten', 'Aku Kapten Tawon, pengawal Ratu! Sengatku paling tajam di gunung ini!'],
+    ['ladhia', 'Kami tidak ingin bertarung, tapi kami harus bertemu Ratu.'],
+  ],
+  f4post: [
+    ['kapten', 'Kalian kuat... dan kalian tidak merusak satu bunga pun. Mungkin kalian memang bukan pencuri.'],
+    ['kapten', 'Tapi Ratu tidak akan percaya begitu saja. Pasukannya akan menyerbu kalian di Akar Emas!'],
+  ],
+  f5pre: [
+    ['narator', 'Di bawah akar emas raksasa, pasukan tawon datang dari segala arah.'],
+    ['yanto', 'Bertahan bersama. Tembok batuku siap.'],
+    ['momon', 'Aku akan bernyanyi sekeras-kerasnya supaya kalian bersemangat!'],
+  ],
+  f5post: [['narator', 'Para tawon mundur. Di depan mereka terbuka gerbang menuju sarang Ratu.']],
+  f6pre: [
+    ['papot', 'Gerbang sarang Ratu ada di atas bukit. Aku bisa menggali jalan pintas!'],
+    ['leni', 'Serbu dari tempat tinggi. Ayo, ini hampir akhir perjalanan!'],
+  ],
+  f6post: [['narator', 'Gerbang terbuka. Di dalamnya, Pohon Madu Legendaris bersinar keemasan... dan Ratu Tawon Emas menunggu.']],
+  f7pre: [
+    ['ratu', 'Berhenti di situ! Sudah lama sekali ada yang ingin mencuri madu pohon ini. Aku tidak akan membiarkannya!'],
+    ['ata', 'Ratu, kami tidak mau mencuri. Nenekku pernah datang ke sini dulu bersama sahabat-sahabatnya!'],
+    ['ratu', 'Semua pencuri pandai bercerita. Buktikan kekuatan dan hati kalian!'],
+    ['lilik', 'Ratu tidak jahat, dia hanya melindungi pohonnya. Kalahkan dia tanpa menyerah, sampai dia mau mendengar!'],
+  ],
+  f7post: [
+    ['ratu', 'Cukup... cukup. Kalian kuat, tapi kalian juga saling melindungi. Pencuri tidak begitu.'],
+    ['ata', 'Kami hanya ingin sedikit madu untuk Nenek... dan untuk dibagi ke semua teman yang kami temui di perjalanan.'],
+    ['ratu', 'Untuk dibagi...? Dulu ada seekor honey badger yang mengatakan hal yang sama. Dia... nenekmu?'],
+    ['yanto', '...Ya. Kami Tim Jelajah Legenda. Kami kembali.'],
+    ['ratu', 'Maafkan aku. Ambillah madu ini. Madu terbaik memang madu yang dibagi.'],
+  ],
+  ending: [
+    ['narator', 'Ata dan teman-teman pulang membawa madu emas dari Pohon Madu Legendaris.'],
+    ['narator', 'Mereka singgah di setiap desa: Savana, Hutan Lembab, Rawa Bulan, dan Gunung Kabut. Semua mendapat bagian madu.'],
+    ['nenek', 'Ata... kamu menemukannya. Dan kamu membaginya untuk semua. Nenek bangga sekali padamu.'],
+    ['ata', 'Ini semua karena teman-temanku, Nek. Kami bekerja sama!'],
+    ['narator', 'Malam itu ada pesta besar. Raja Kumbang, Buaya Serakah, Singa, Kepala Penambang, dan Ratu Tawon ikut makan bersama.'],
+    ['narator', 'Dan Tim Jelajah Legenda yang baru pun lahir. Tamat.'],
+  ],
   // ---- Misi sampingan ----
   s1apre: [
     ['kelinci', 'Tolong! Kumbang dan siput memakan wortel di kebunku! Padahal wortelnya untuk anak-anakku.'],
@@ -534,6 +699,14 @@ const STORY = {
     ['lilik', 'Lenteraku akan menuntun kita ke sarang mereka.'],
   ],
   s4bpost: [['narator', 'Telur-telur kembali ke sarang ibunya. Burung-burung gunung bernyanyi riang.']],
+  s5apre: [['lilik', 'Lenteraku hampir padam. Kristal gua bisa membuatnya terang lagi, tapi kristalnya dijaga!'], ['papot', 'Aku tahu tempatnya! Ayo!']],
+  s5apost: [['lilik', 'Lenteraku terang kembali. Terima kasih, semuanya.']],
+  s5bpre: [['papot', 'Kereta tambang terakhir membawa makanan untuk warga gua. Ayo antar sampai ke bendera!']],
+  s5bpost: [['papot', 'Sampai! Warga gua bisa makan malam. Hore!']],
+  s6apre: [['bubunti', 'Aku ingin memetik sedikit bunga madu untuk dimasak. Tapi tawon-tawon menjaga!'], ['ladhia', 'Ambil secukupnya saja, ya.']],
+  s6apost: [['bubunti', 'Cukup untuk teh bunga madu! Kita bagi untuk semua.']],
+  s6bpre: [['narator', 'Seekor lebah kecil tersesat dan dikejar prajurit tawon yang salah paham. Lindungi dia dengan mengusir mereka!']],
+  s6bpost: [['narator', 'Lebah kecil itu terbang pulang dengan gembira, sambil melambaikan sayapnya.']],
 };
 
 /* Tipe: rout = kalahkan semua, boss = kalahkan bos, survive = bertahan n giliran, reach = capai bendera */
@@ -830,7 +1003,7 @@ const MISSIONS = [
     h: ['444444444', '433333334', '333333333', '222222222', '222222222', '111111111', '000000000', '000000000', '000000000'],
     players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8]],
     enemies: [['rajaElang', 4, 1, 99], ['elang', 2, 1, 5], ['elang', 6, 1, 5], ['kambing', 4, 3, 4]],
-    summon: { every: 3, max: 5, at: [[2, 0], [6, 0]] },
+    summon: { every: 4, max: 4, at: [[2, 0], [6, 0]] },
     tips: ['Raja Elang bisa terbang jauh dan menyambar yang lemah. Jaga Bubunti dan teman yang nyawanya sedikit di tengah!'],
     pre: 'd4pre', post: 'd4post',
   },
@@ -870,12 +1043,168 @@ const MISSIONS = [
     tips: ['Setiap beberapa giliran Singa Penyiksa mengaum: teman di dekatnya terdorong mundur dan Semangat berkurang. Jaga jarak, lalu serang bersama!'],
     pre: 'd7pre', post: 'd7post', final: true,
   },
+  // ---------------- Bab 5: Terowongan Sarang Emas ----------------
+  {
+    id: 'b5m1', no: 29, chap: 5, name: 'Mulut Gua Sarang Emas', sub: 'Gua gelap', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'], pal: 'gua', music: 'adventure', elv: 5, fog: true,
+    desc: 'Gua yang gelap gulita. Musuh baru terlihat kalau sudah dekat!',
+    star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['zzK...Kzz', 'z.......z', '..r...r..', '.........', 'K...t...K', '.........', '..r...r..', '...,,,...', 't..,,,..t'],
+    h: ['111000111', '100000001', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7]],
+    enemies: [['kelelawarGua', 2, 1, 4], ['kelelawarGua', 6, 1, 4], ['kelelawarGua', 4, 2, 4], ['cacingBatu', 1, 3, 3], ['cacingBatu', 7, 3, 3]],
+    tips: ['Gua ini gelap! Musuh baru terlihat kalau dekat. Cacing Batu menggali di bawah tanah, jadi bisa menembus rintangan.'],
+    pre: 'e1pre', post: 'e1post',
+  },
+  {
+    id: 'b5m2', no: 30, chap: 5, name: 'Batu Jatuh', sub: 'Awas langit-langit', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'], pal: 'gua', music: 'adventure', elv: 5, rocks: true,
+    desc: 'Langit-langit gua retak. Menyingkirlah dari tanda ⚠️ sebelum batu jatuh!',
+    star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['K.......K', '..r.K.r..', '.........', '.z.....z.', '...r.r...', '.........', '.K.....K.', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7]],
+    enemies: [['labaKristal', 3, 2, 4], ['labaKristal', 5, 2, 4], ['kelelawarGua', 1, 0, 5], ['kelelawarGua', 7, 0, 5], ['cacingBatu', 4, 3, 4]],
+    tips: ['Tanda ⚠️ = batu akan jatuh di giliran musuh berikutnya. Siapa pun yang berdiri di situ akan kena!', 'Jaring 🕸️ Laba-laba Kristal membuat teman tidak bisa berpindah 1 giliran (tapi masih bisa menyerang).'],
+    pre: 'e2pre', post: 'e2post',
+  },
+  {
+    id: 'b5m3', no: 31, chap: 5, name: 'Runtuhan Terowongan', sub: 'Bertemu Papot', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'gua', music: 'adventure', elv: 5, rocks: true, protect: 'papot', guests: ['papot'], recruit: 'papot', waves: [{ turn: 3, units: [['cacingBatu', 0, 1], ['cacingBatu', 8, 1]] }],
+    desc: 'Papot terjebak di runtuhan terowongan dan dikepung cacing batu. Selamatkan dia!',
+    star3: { type: 'npc', key: 'papot', text: 'Nyawa Papot tersisa setengah atau lebih' },
+    t: ['K..r.r..K', '...r.r...', '..r...r..', '.........', '.K.....K.', '.........', '..r...r..', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 4, 2]],
+    enemies: [['cacingBatu', 2, 1, 99], ['cacingBatu', 6, 1, 99], ['kelelawarGua', 4, 0, 5], ['kelelawarGua', 1, 3, 5], ['labaKristal', 7, 3, 5]],
+    tips: ['Papot bisa Gali Terowongan untuk kabur dari kepungan, dan memasang Lubang Jebakan untuk musuh!'],
+    pre: 'e3pre', post: 'e3post',
+  },
+  {
+    id: 'b5m4', no: 32, chap: 5, name: 'Rel Tambang', sub: 'Capai bendera', type: 'reach', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'gua', music: 'adventure', elv: 5, limit: 8,
+    desc: 'Ikuti rel tambang sampai ke bendera di ujung terowongan sebelum giliran 8 habis.',
+    star3: { type: 'turns', n: 5, text: 'Sampai dalam 5 giliran' },
+    t: ['K..zfz..K', '...z,z...', '.r..,..r.', '....,....', '.K..,..K.', '....,....', '..r.,.r..', '...,,,...', 't..,,,..t'],
+    h: ['222222222', '221111122', '111111111', '110000011', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['cacingBatu', 2, 2, 5], ['cacingBatu', 6, 3, 5], ['labaKristal', 4, 1, 4], ['kelelawarGua', 1, 0, 5], ['kelelawarGua', 7, 0, 5]],
+    tips: ['Papot bisa Gali Terowongan sampai 5 petak, menembus tebing, langsung mendekati bendera!'],
+    pre: 'e4pre', post: 'e4post',
+  },
+  {
+    id: 'b5m5', no: 33, chap: 5, name: 'Sarang Laba-laba Kristal', sub: 'Lawan Ratu Laba-laba', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'gua', music: 'boss', elv: 6, summon: { every: 3, max: 5, at: [[2, 0], [6, 0]] },
+    desc: 'Ratu Laba-laba Kristal menembakkan jaring dari jauh dan memanggil anak-anaknya.',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['KK.....KK', 'K..K.K..K', '.........', '..K...K..', '.........', 'K.......K', '.........', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['rajaLaba', 4, 1, 99], ['labaKristal', 2, 2, 5], ['labaKristal', 6, 2, 5], ['kelelawarGua', 4, 3, 5]],
+    tips: ['Jaring Ratu Laba-laba menjangkau 3 petak. Sup Hangat Bubunti bisa melepaskan jaring!'],
+    pre: 'e5pre', post: 'e5post',
+  },
+  {
+    id: 'b5m6', no: 34, chap: 5, name: 'Lorong Kristal Gelap', sub: 'Gelap & batu jatuh', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'gua', music: 'adventure', elv: 6, fog: true, rocks: true,
+    desc: 'Lorong paling gelap dan batu terus berjatuhan. Telinga Papot sangat membantu di sini!',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['zK.....Kz', '.........', '.K.r.r.K.', '.........', '..K...K..', '.........', '.r.....r.', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['kelelawarGua', 1, 1, 4], ['kelelawarGua', 7, 1, 4], ['kelelawarGua', 4, 0, 4], ['labaKristal', 3, 3, 4], ['labaKristal', 5, 3, 4], ['cacingBatu', 2, 5, 3], ['cacingBatu', 6, 5, 3]],
+    tips: ['Papot bisa mendengar musuh dalam 4 petak walau gelap gulita!'],
+    pre: 'e6pre', post: 'e6post',
+  },
+  {
+    id: 'b5m7', no: 35, chap: 5, name: 'Tambang Kepala Penambang', sub: 'Lawan Kepala Penambang', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'gua', music: 'boss', elv: 6, final: true, summon: { every: 4, max: 5, at: [[1, 1], [7, 1]] },
+    desc: 'Kepala Penambang menggali akar Pohon Madu. Hentikan dia sebelum akarnya rusak!',
+    star3: { type: 'turns', n: 11, text: 'Menang dalam 11 giliran' },
+    t: ['zzz...zzz', 'z.......z', '..K...K..', '.........', '.r.....r.', '.........', '..K...K..', '...,,,...', 't..,,,..t'],
+    h: ['222111222', '211111112', '111111111', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['tikusGot', 4, 1, 99], ['cacingBatu', 3, 2, 4], ['cacingBatu', 5, 2, 4], ['kelelawarGua', 7, 3, 5]],
+    tips: ['Kepala Penambang memukul tanah dengan beliungnya: batu-batu jatuh di sekitar kalian. Lihat tanda ⚠️ dan menyingkir!'],
+    pre: 'e7pre', post: 'e7post',
+  },
+  // ---------------- Bab 6: Pohon Madu Legendaris ----------------
+  {
+    id: 'b6m1', no: 36, chap: 6, name: 'Padang Bunga Emas', sub: 'Prajurit tawon', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'adventure', elv: 6,
+    desc: 'Padang bunga keemasan di puncak gunung. Para prajurit tawon mengira kalian pencuri!',
+    star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['t.q...q.t', '..qq.qq..', '.q.....q.', '...t.t...', 'q.......q', '..q...q..', '.........', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['prajuritTawon', 2, 1, 4], ['prajuritTawon', 6, 1, 4], ['prajuritTawon', 4, 2, 4], ['capung', 1, 0, 5], ['capung', 7, 0, 5]],
+    tips: ['Prajurit Tawon terbang dan menyengat kuat. Lindungi teman yang nyawanya sedikit!'],
+    pre: 'f1pre', post: 'f1post',
+  },
+  {
+    id: 'b6m2', no: 37, chap: 6, name: 'Penjaga Sarang', sub: 'Banyak tawon', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'adventure', elv: 6,
+    desc: 'Prajurit tawon menjaga setiap bunga. Kalahkan mereka semua!',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['t..m.m..t', '.m.....m.', '...t.t...', '.q.....q.', '...m.m...', 'q.......q', '.........', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['prajuritTawon', 2, 1, 4], ['prajuritTawon', 6, 1, 4], ['prajuritTawon', 4, 0, 4], ['prajuritTawon', 4, 3, 4], ['tawon', 1, 3, 5], ['tawon', 7, 3, 5]],
+    tips: ['Madu 🍯 di tanah itu lengket: satu petak madu dihitung 2 langkah.'],
+    pre: 'f2pre', post: 'f2post',
+  },
+  {
+    id: 'b6m3', no: 38, chap: 6, name: 'Sungai Madu', sub: 'Capai bendera', type: 'reach', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'adventure', elv: 6, limit: 9,
+    desc: 'Seberangi sungai madu yang lengket sampai ke bendera sebelum giliran 9 habis.',
+    star3: { type: 'turns', n: 6, text: 'Sampai dalam 6 giliran' },
+    t: ['t..f...bt', '.mmm.mmm.', '.m.....m.', '.mm.m.mm.', '...mmm...', '.m.....m.', '..mm.mm..', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['prajuritTawon', 2, 2, 5], ['prajuritTawon', 6, 2, 5], ['tawon', 4, 1, 5], ['capung', 1, 0, 5], ['capung', 6, 0, 5]],
+    tips: ['Yang bisa terbang (Tung Momon, Uti Lilik) tidak tertahan madu. Papot bisa menggali di bawahnya!'],
+    pre: 'f3pre', post: 'f3post',
+  },
+  {
+    id: 'b6m4', no: 39, chap: 6, name: 'Kapten Tawon', sub: 'Lawan Kapten Tawon', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'boss', elv: 6, summon: { every: 4, max: 4, at: [[1, 0], [7, 0]] },
+    desc: 'Kapten Tawon, pengawal Ratu, menghadang jalan bersama pasukannya.',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['t.......t', '..q...q..', '.........', '...t.t...', '.........', '.q.....q.', '.........', '...,,,...', 't..,,,..t'],
+    h: ['111111111', '111111111', '111111111', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['kaptenTawon', 4, 1, 99], ['prajuritTawon', 2, 2, 5], ['prajuritTawon', 6, 2, 5], ['tawon', 4, 3, 5]],
+    tips: ['Kapten Tawon terbang cepat dan memanggil prajurit. Kalahkan Kapten untuk menang!'],
+    pre: 'f4pre', post: 'f4post',
+  },
+  {
+    id: 'b6m5', no: 40, chap: 6, name: 'Akar Emas', sub: 'Bertahan 7 giliran', type: 'survive', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'adventure', elv: 6, n: 7, waves: [{ turn: 2, units: [['tawon', 1, 0], ['tawon', 7, 8]] }, { turn: 3, units: [['prajuritTawon', 4, 8], ['prajuritTawon', 0, 1]] }, { turn: 5, units: [['prajuritTawon', 8, 1], ['prajuritTawon', 1, 8], ['capung', 7, 0]] }, { turn: 6, units: [['tawon', 0, 7], ['tawon', 8, 7]] }],
+    desc: 'Pasukan tawon datang dari segala arah. Bertahan di bawah akar emas selama 7 giliran!',
+    star3: { type: 'kills', n: 8, text: 'Kalahkan 8 musuh' },
+    t: ['t.......t', '.........', '..q...q..', '...m.m...', '....t....', '...m.m...', '..q...q..', '.........', 't.......t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 6], ['ladhia', 3, 4], ['bubunti', 5, 4], ['oumaldi', 4, 2], ['momon', 2, 4], ['yanto', 6, 4], ['leni', 4, 7], ['lilik', 3, 6], ['papot', 5, 6]],
+    enemies: [['prajuritTawon', 0, 4, 99], ['prajuritTawon', 8, 4, 99], ['capung', 4, 0, 99]],
+    tips: ['Bertahan 7 giliran! Pakai Tembok Batu, Perisai Roh, dan Lubang Jebakan untuk melindungi tim.'],
+    pre: 'f5pre', post: 'f5post',
+  },
+  {
+    id: 'b6m6', no: 41, chap: 6, name: 'Gerbang Sarang Ratu', sub: 'Serbu ke atas bukit', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'adventure', elv: 6,
+    desc: 'Gerbang sarang Ratu ada di atas bukit. Serbu dari bawah!',
+    star3: { type: 'turns', n: 10, text: 'Menang dalam 10 giliran' },
+    t: ['tt.q.q.tt', 't.......t', '..t...t..', '.q.....q.', '.........', '..t...t..', '.........', '...,,,...', 't..,,,..t'],
+    h: ['333333333', '322222223', '222222222', '111111111', '111111111', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['prajuritTawon', 2, 1, 4], ['prajuritTawon', 6, 1, 4], ['prajuritTawon', 4, 0, 4], ['prajuritTawon', 4, 3, 4], ['capung', 1, 3, 5], ['capung', 7, 3, 5], ['tawon', 3, 4, 4], ['tawon', 5, 4, 4]],
+    tips: ['Musuh di atas bukit lebih kuat. Papot bisa menggali langsung ke atas, Uti Leni bisa memanjat 3 tingkat!'],
+    pre: 'f6pre', post: 'f6post',
+  },
+  {
+    id: 'b6m7', no: 42, chap: 6, name: 'Ratu Tawon Emas', sub: 'Ujian terakhir', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'boss', elv: 6, final: true, summon: { every: 4, max: 4, at: [[3, 0], [5, 0]] },
+    desc: 'Ratu Tawon Emas melindungi Pohon Madu Legendaris. Kalahkan dia sampai dia mau mendengarkan kalian!',
+    star3: { type: 'turns', n: 12, text: 'Menang dalam 12 giliran' },
+    t: ['ttt...ttt', 't.......t', '..q...q..', '.........', '.t.....t.', '.........', '..q...q..', '...,,,...', 't..,,,..t'],
+    h: ['333333333', '322222223', '222222222', '111111111', '111111111', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7], ['papot', 6, 7]],
+    enemies: [['ratuTawon', 4, 1, 99], ['prajuritTawon', 3, 2, 5], ['prajuritTawon', 5, 2, 5], ['capung', 1, 3, 5], ['capung', 7, 3, 5]],
+    tips: ['Ratu Tawon menembakkan madu lengket dari jauh: teman yang kena tidak bisa berpindah 1 giliran. Saat nyawanya tinggal kurang dari setengah, dia akan berhenti dan mendengarkan kalian.'],
+    pre: 'f7pre', post: 'f7post',
+  },
 ];
 
 /* Perluas setiap peta inti menjadi pulau: daratan 13x13 + pantai + laut. */
 /* ---------------- Misi sampingan (opsional, untuk mencari madu) ----------------
    after = misi utama yang harus selesai dulu. Posisi tim memakai SIDE_SLOTS sesuai urutan team. */
-const SIDE_SLOTS = [[4, 8], [3, 7], [5, 7], [6, 8], [2, 8], [3, 8], [5, 8], [4, 7]];
+const SIDE_SLOTS = [[4, 8], [3, 7], [5, 7], [6, 8], [2, 8], [3, 8], [5, 8], [4, 7], [6, 7]];
 const SIDE = [
   { id: 's1a', after: 'm3', chap: 1, name: 'Kebun Wortel Bu Kelinci', sub: 'Usir hama', type: 'rout', team: ['ata', 'ladhia'], pal: 'desa', music: 'adventure', elv: 1, reward: 15,
     desc: 'Kumbang dan siput memakan wortel di kebun Bu Kelinci.', star3: { type: 'turns', n: 6, text: 'Menang dalam 6 giliran' },
@@ -912,6 +1241,22 @@ const SIDE = [
     t: ['pz.....zp', 'z.......z', '..r...r..', '.........', '.z..p..z.', '.........', '..r...r..', '...,,,...', 'p..,,,..p'],
     h: ['444444444', '433333334', '333333333', '222222222', '222222222', '111111111', '000000000', '000000000', '000000000'],
     enemies: [['elang', 2, 0, 5], ['elang', 6, 0, 5], ['elang', 1, 2, 5], ['elang', 7, 2, 5], ['serigala', 3, 3, 4], ['serigala', 5, 3, 4]], pre: 's4bpre', post: 's4bpost' },
+  { id: 's5a', after: 'b5m3', chap: 5, name: 'Kristal untuk Lentera', sub: 'Kristal gua', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'gua', music: 'adventure', elv: 5, reward: 28,
+    desc: 'Lentera Uti Lilik hampir padam. Ambil kristal gua yang dijaga kelelawar dan laba-laba!', star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['K...K...K', '..r...r..', '.........', '.K.....K.', '.........', '..r...r..', '.........', '...,,,...', 't..,,,..t'],
+    enemies: [['kelelawarGua', 2, 0, 4], ['kelelawarGua', 6, 0, 4], ['kelelawarGua', 4, 2, 4], ['labaKristal', 2, 3, 4], ['labaKristal', 6, 3, 4]], pre: 's5apre', post: 's5apost' },
+  { id: 's5b', after: 'b5m5', chap: 5, name: 'Kereta Tambang Terakhir', sub: 'Capai bendera', type: 'reach', limit: 7, team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'gua', music: 'adventure', elv: 6, reward: 28,
+    desc: 'Antar kereta tambang berisi makanan warga gua sampai ke bendera.', star3: { type: 'turns', n: 5, text: 'Sampai dalam 5 giliran' },
+    t: ['f..,.....', '...,..K..', '...,.r...', '.K.,.....', '...,,,,..', '......,.K', '..r...,..', '...,,,,..', 't..,,,..t'],
+    enemies: [['cacingBatu', 2, 1, 5], ['cacingBatu', 5, 3, 5], ['kelelawarGua', 1, 2, 5], ['labaKristal', 7, 3, 4]], pre: 's5bpre', post: 's5bpost' },
+  { id: 's6a', after: 'b6m2', chap: 6, name: 'Panen Bunga Madu', sub: 'Usir tawon', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'adventure', elv: 6, reward: 30,
+    desc: 'Bubunti ingin memetik sedikit bunga madu untuk dimasak.', star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['t.q.q.q.t', '.q.q.q.q.', '..q...q..', '.........', 'q.t...t.q', '.........', '..q...q..', '...,,,...', 't..,,,..t'],
+    enemies: [['prajuritTawon', 2, 1, 4], ['prajuritTawon', 6, 1, 4], ['tawon', 4, 0, 4], ['tawon', 1, 3, 4], ['tawon', 7, 3, 4]], pre: 's6apre', post: 's6apost' },
+  { id: 's6b', after: 'b6m5', chap: 6, name: 'Lebah Kecil Tersesat', sub: 'Usir pengejar', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'], pal: 'madu', music: 'adventure', elv: 7, reward: 30,
+    desc: 'Seekor lebah kecil dikejar prajurit tawon yang salah paham.', star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['t..m.m..t', '.........', '.q.t.t.q.', '.........', '..m...m..', '.........', '.q.....q.', '...,,,...', 't..,,,..t'],
+    enemies: [['prajuritTawon', 1, 1, 4], ['prajuritTawon', 7, 1, 4], ['prajuritTawon', 4, 1, 4], ['capung', 2, 3, 4], ['capung', 6, 3, 4]], pre: 's6bpre', post: 's6bpost' },
 ];
 SIDE.forEach(m => {
   m.side = true; m.no = '★';
@@ -920,9 +1265,9 @@ SIDE.forEach(m => {
 });
 
 /* ---------------- Perkemahan: api unggun di antara bab ---------------- */
-const CAMP_TEAM = { 1: ['ata', 'ladhia', 'bubunti'], 2: ['ata', 'ladhia', 'bubunti', 'oumaldi'], 3: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto'], 4: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'] };
-const CAMP_SLOTS = [[4, 5], [3, 4], [5, 4], [4, 3], [3, 5], [5, 3], [3, 3], [5, 5]];
-const CAMPS = [1, 2, 3, 4].map(ch => ({
+const CAMP_TEAM = { 1: ['ata', 'ladhia', 'bubunti'], 2: ['ata', 'ladhia', 'bubunti', 'oumaldi'], 3: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto'], 4: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'], 5: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik', 'papot'] };
+const CAMP_SLOTS = [[4, 6], [2, 4], [6, 4], [4, 2], [3, 6], [5, 6], [2, 3], [6, 3], [3, 2]];
+const CAMPS = [1, 2, 3, 4, 5].map(ch => ({
   id: 'camp' + ch, chap: ch, camp: true, no: '🔥', name: 'Perkemahan', pal: 'kemah', story: 'camp' + ch, team: CAMP_TEAM[ch],
   t: ['t...p...t', '..b...b..', '.........', '.........', '....F....', '.........', '.........', '..b...b..', 't...p...t'],
   h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
@@ -943,7 +1288,7 @@ const CAMPS = [1, 2, 3, 4].map(ch => ({
         if (cx >= 0 && cy >= 0 && cx < n && cy < n) { rt += m.t[cy][cx]; rh += m.h[cy][cx]; continue; }
         const corner = (x < 3 || x > S - 4) && (y < 3 || y > S - 4) && (Math.min(x, S - 1 - x) + Math.min(y, S - 1 - y) < 3);
         if (edge === 0 || corner) { rt += 'o'; rh += '0'; continue; }
-        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : m.pal === 'rawa' ? (hsh(x, y, mi + 5) > 0.55 ? 'w' : 'g') : m.pal === 'gunung' ? (hsh(x, y, mi + 5) > 0.5 ? 'z' : 'g') : m.pal === 'kemah' ? 'g' : 'y'); rh += '0'; continue; }
+        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : m.pal === 'rawa' ? (hsh(x, y, mi + 5) > 0.55 ? 'w' : 'g') : m.pal === 'gunung' ? (hsh(x, y, mi + 5) > 0.5 ? 'z' : 'g') : m.pal === 'kemah' || m.pal === 'madu' ? 'g' : m.pal === 'gua' ? 'z' : 'y'); rh += '0'; continue; }
         const kx = Math.max(0, Math.min(n - 1, cx)), ky = Math.max(0, Math.min(n - 1, cy));
         const d = Math.max(Math.abs(cx - kx), Math.abs(cy - ky));
         const tc = m.t[ky][kx], hc = +m.h[ky][kx];
@@ -953,9 +1298,9 @@ const CAMPS = [1, 2, 3, 4].map(ch => ({
         const r = hsh(x, y, mi + 11);
         let c = '.';
         if (r < 0.07) c = 'b';
-        else if (r < 0.14) c = m.pal === 'savana' || m.pal === 'hutan' || m.pal === 'rawa' || m.pal === 'kemah' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
-        else if (r < 0.17) c = m.pal === 'hutan' ? 'J' : m.pal === 'rawa' ? 'b' : m.pal === 'gunung' ? 'r' : 'r';
-        else if (r < 0.24) c = m.pal === 'hutan' || m.pal === 'rawa' ? 'm' : m.pal === 'gunung' ? 'z' : 'q';
+        else if (r < 0.14) c = m.pal === 'savana' || m.pal === 'hutan' || m.pal === 'rawa' || m.pal === 'kemah' || m.pal === 'gua' || m.pal === 'madu' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
+        else if (r < 0.17) c = m.pal === 'hutan' ? 'J' : m.pal === 'rawa' ? 'b' : m.pal === 'gua' ? 'K' : m.pal === 'madu' ? 'q' : 'r';
+        else if (r < 0.24) c = m.pal === 'hutan' || m.pal === 'rawa' ? 'm' : m.pal === 'gunung' || m.pal === 'gua' ? 'z' : 'q';
         else if (r < 0.55) c = 'g';
         rt += c;
       }
