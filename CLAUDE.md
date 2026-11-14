@@ -298,11 +298,14 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 - Suara: **tanpa suara pembaca saat bertarung**; narasi suara (speechSynthesis id-ID) hanya di adegan cerita (permintaan pengguna).
 - Ke depan: Bab 2 Hutan Lembab (Ular Beracun, Oumaldi), Bab 3 Rawa (Buaya Serakah, Tung Momon & Tung Yanto),
   Bab 4 Gunung (Singa Penyiksa, Utireni & Utililik).
+- Ikon aplikasi (`icons/icon-180|512.png`, `manifest.webmanifest`, nama Layar Utama "ATA Tactics"): Ladhia, Ata menendang, Bubunti
+  di petak rumput isometrik, latar biru tua berbingkai emas, tulisan "ATA Tactics".
 - Simpanan `localStorage` kunci `ata-taktik-v1`. Tes: buka lewat http (PNG dari folder lain), `window.__ata`
   (`startMission(i)`, `G`, `S()`, `onTapWorld`, `iso`, `endPlayerTurn`); bot uji ada di riwayat percakapan (pakai `onTapWorld`).
 
 ## Status & yang sedang dibahas
 
+- Branch `pratinjau-v33` = ikon aplikasi Ata Taktik, belum digabung.
 - Rilis terakhir di `main`: **versi 32** = **Ata Taktik versi 1** (game kedelapan, `ata-taktik/`, dari branch `pratinjau-v32`;
   musuh sprite asli, bos Raja Kumbang & Kepala Musang). Game lain tidak berubah.
 - Versi 31 = **Manasik Umroh versi 1** (game ketujuh, `manasik-umroh/`).
