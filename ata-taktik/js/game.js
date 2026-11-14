@@ -504,9 +504,9 @@
     const count = G.units.filter(u => u.team === 'e' && u.alive).length;
     if (count >= sm.max) return;
     focus(boss); await wait(300);
-    Sound.play('roar'); addText(boss, 'Geng Hyena, serbu!', '#ffcf6b', 9);
+    Sound.play('roar'); addText(boss, ENEMIES[boss.key].call || 'Serbu!', '#ffcf6b', 9);
     await playAnim(boss, 'skill', 700);
-    for (const [x, y] of sm.at) { if (G.units.filter(u => u.team === 'e' && u.alive).length >= sm.max) break; spawnUnit('hyenaCilik', x, y); }
+    for (const [x, y] of sm.at) { if (G.units.filter(u => u.team === 'e' && u.alive).length >= sm.max) break; spawnUnit(ENEMIES[boss.key].summonKind || 'kumbang', x, y); }
     await wait(400);
   }
   function distField(e, targets) {
@@ -538,7 +538,7 @@
       for (const t of targets) {
         if (!canHitFrom(e, p.x, p.y, t)) continue;
         const r = calcDmg(e, t, { ax: p.x, ay: p.y });
-        let sc = r.dmg * 2 + (r.dmg >= t.hp ? 15 : 0) + (t.team === 'n' ? 4 : 0) + (t.key === 'bubunti' ? 2 : 0) - p.c * 0.1 - (G.focus.get(t.id) || 0) * 7;
+        let sc = r.dmg * 2 + (r.dmg >= t.hp ? 15 : 0) + (t.team === 'n' ? 4 : 0) + (t.key === 'bubunti' && !G.m.protect ? 2 : 0) - p.c * 0.1 - (G.focus.get(t.id) || 0) * 10;
         if (taunters.length && !taunters.includes(t)) sc -= 40;
         if (e.ranged) { const near = Math.min(...targets.map(o => Math.abs(o.x - p.x) + Math.abs(o.y - p.y))); if (near >= 2) sc += 4; }
         if (!best || sc > best.sc) best = { sc, p, t };
@@ -1166,7 +1166,7 @@
   function objText() {
     const m = G.m; let s = '';
     if (m.type === 'rout') s = 'Kalahkan semua musuh';
-    else if (m.type === 'boss') s = 'Kalahkan Raja Hyena 👑';
+    else if (m.type === 'boss') { const b = G.units.find(u => u.boss); s = 'Kalahkan ' + (b ? b.name : 'bos') + ' 👑'; }
     else if (m.type === 'survive') s = `Bertahan: giliran ${G.turn}/${m.n}`;
     else if (m.type === 'reach') s = `Capai bendera 🚩 · sisa ${m.limit - G.turn + 1} giliran`;
     if (m.protect) s += ' · Jaga ' + (CHARS[m.protect] || NPCS[m.protect]).name;
@@ -1345,7 +1345,7 @@
     scr.innerHTML = ''; scr.classList.add('on');
     scr.append(h('div', { class: 'title end' },
       h('div', { class: 'tsmall' }, 'Bab 1 selesai!'),
-      h('h1', {}, 'Savana Raja Hyena'),
+      h('h1', {}, 'Savana'),
       h('div', { class: 'trio' }, portrait('ladhia', 90), portrait('ata', 100), portrait('bubunti', 90)),
       h('p', {}, 'Ata, Ladhia, dan Bubunti siap melanjutkan perjalanan ke Hutan Lembab.'),
       h('p', { class: 'muted' }, 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah. Segera hadir!'),
@@ -1372,7 +1372,7 @@
           goMap();
         }, 'pri big'),
         btn('⚙️ Pengaturan', goSettings)),
-      h('p', { class: 'muted small' }, 'Bab 1: Savana Raja Hyena · 7 misi'),
+      h('p', { class: 'muted small' }, 'Bab 1: Savana · 7 misi'),
       h('div', { class: 'ver' }, 'versi ' + AT.VERSION)));
   }
   function goMap() {
@@ -1444,5 +1444,5 @@
   window.__ata = { get G() { return G; }, S: () => S, startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
   scr.classList.add('on'); scr.innerHTML = '<div class="title"><div class="tsmall">Memuat gambar…</div></div>';
   requestAnimationFrame(frame);
-  SPR.load().then(goTitle);
+  window.__ata.ready = SPR.load().then(goTitle);
 })();

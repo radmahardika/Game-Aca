@@ -284,11 +284,14 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   latar biru tua bervinyet. Panel UI biru tua berbingkai emas tipis; kartu tokoh kiri bawah, daftar perintah kanan bawah (landscape iPad).
   Petak 64×32 dunia, digambar 2× (`R`) lalu diskalakan; tekstur per petak dibuat sekali (`prepareMap`).
 - **Sprite:** Ata/Ladhia/Bubunti/Nenek memakai PNG dari `../pohon-madu/img/` (`js/sprites.js`: trim, titik pijak, garis luar,
-  pose per arah: siaga/kanan/kiri/belakang + pose jurus tendang/pukul/ayun/lempar/bertahan/sorak). Hyena, Raja Hyena, Burung
-  Nasar, Zizi masih **gambar vektor bawaan** (`js/art.js`) sampai pengguna membuat sprite (format sama dengan `pohon-madu/ASET.md`).
-- **Bab 1 Savana (7 misi):** Kebun Nenek (tutorial) → Jalan Setapak → Badak di Kubangan (Ladhia bergabung) → Jaga Sumur
-  (bertahan 6 giliran, lindungi Zizi) → Lari ke Bukit Batu (capai bendera) → Dapur Bubunti (Bubunti bergabung) → Batu Singgasana
-  (bos Raja Hyena, memanggil anak buah tiap 3 giliran). Peta = pulau 17×17 (`expandIslands` di `data.js`; `o` = laut, tidak digambar).
+  pose per arah: siaga/kanan/kiri/belakang + pose jurus tendang/pukul/ayun/lempar/bertahan/sorak). **Musuh juga PNG** dari
+  `../pohon-madu/img/musuh/` (kumbang, tawon, siput, Raja Kumbang, musang, kelelawar, kadal, landak, Kepala Musang; `dir:'musuh'`,
+  `lift` = terbang). Hanya Zizi yang masih gambar vektor bawaan (`js/art.js`).
+- **Bab 1 Savana (7 misi):** musuh misi 1–3 = kumbang/tawon/siput; Kebun Nenek (tutorial) → Jalan Setapak → Badak di Kubangan
+  (Ladhia bergabung) → Jaga Sumur (bos tengah **Raja Kumbang**, lindungi Zizi; Raja Kumbang membocorkan Kepala Musang pencuri guci madu)
+  → Lari ke Bukit Batu (capai bendera) → Dapur Bubunti (Geng Musang, Bubunti bergabung) → Batu Singgasana (bos **Kepala Musang**,
+  memanggil musang tiap 3 giliran). Tidak ada hyena lagi. Bot uji (tim Lv 2) menang 6/7; misi 7 butuh naik level di Markas.
+  Peta = pulau 17×17 (`expandIslands` di `data.js`; `o` = laut, tidak digambar).
 - Mekanik: arah hadap (belakang ×1,5), ketinggian, jangkauan senjata, Semangat ⭐ untuk jurus, musuh tidur 💤 sampai didekati,
   3 bintang per misi, madu 🍯 untuk naik level di Markas. Ata: Tendangan Kilat/Putar/Mode Sabuk Hitam + Refleks (hindar & balas);
   Ladhia: Tantang/Benteng Badak; Bubunti: Sup Hangat + **Masakan Pedas** (satu-satunya serangan, musuh tidak bisa bergerak 1 giliran).

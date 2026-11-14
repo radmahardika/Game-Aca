@@ -1,6 +1,6 @@
 'use strict';
 /* Sprite tokoh: memakai gambar dari ../pohon-madu/img (buatan pengguna).
-   Tokoh tanpa gambar (hyena, nasar, Zizi) memakai gambar vektor Art sebagai cadangan.
+   Tokoh tanpa gambar (Zizi) memakai gambar vektor Art sebagai cadangan.
    Semua ukuran dalam piksel dunia logika (petak 64×32), digambar di ruang R (2×). */
 const SPR = (() => {
   const BASE = '../pohon-madu/img/';
@@ -17,6 +17,16 @@ const SPR = (() => {
       idle: ['siaga', 'R'], walk: ['kanan', 'R'], walkL: ['kiri', 'L'], back: ['belakang', 'N'],
       attack: ['ayun', 'L'], pedas: ['ayun', 'L'], sup: ['sorak', 'R'] } },
     nenek: { h: 52, ref: 'depan', face: 'depan', poses: { idle: ['kanan', 'R'], back: ['belakang', 'N'] } },
+    // musuh (folder musuh/, file <nama>-N): idle = sprite battle Pohon Madu (menghadap kanan kecuali L)
+    kumbang: { dir: 'musuh', h: 30, ref: 'kumbang-2', face: 'kumbang-1', poses: { idle: ['kumbang-2', 'R'], back: ['kumbang-3', 'R'] } },
+    tawon: { dir: 'musuh', h: 34, lift: 20, ref: 'tawon-4', face: 'tawon-1', poses: { idle: ['tawon-4', 'R'], back: ['tawon-3', 'R'] } },
+    siput: { dir: 'musuh', h: 36, ref: 'siput-2', face: 'siput-1', poses: { idle: ['siput-2', 'L'], back: ['siput-4', 'L'] } },
+    rajaKumbang: { dir: 'musuh', h: 68, ref: 'raja-kumbang-2', face: 'raja-kumbang-1', poses: { idle: ['raja-kumbang-2', 'L'], back: ['raja-kumbang-4', 'N'], attack: ['raja-kumbang-5', 'R'] } },
+    musang: { dir: 'musuh', h: 28, ref: 'musang-4', face: 'musang-1', poses: { idle: ['musang-4', 'R'], back: ['musang-3', 'N'] } },
+    kelelawar: { dir: 'musuh', h: 26, lift: 24, ref: 'kelelawar-3', face: 'kelelawar-1', poses: { idle: ['kelelawar-3', 'R'], back: ['kelelawar-4', 'N'] } },
+    kadal: { dir: 'musuh', h: 28, ref: 'kadal-3', face: 'kadal-1', poses: { idle: ['kadal-3', 'R'], back: ['kadal-4', 'R'] } },
+    landak: { dir: 'musuh', h: 34, ref: 'landak-4', face: 'landak-1', poses: { idle: ['landak-4', 'R'], back: ['landak-3', 'N'] } },
+    kepalaMusang: { dir: 'musuh', h: 66, ref: 'kepala-musang-4', face: 'kepala-musang-1', poses: { idle: ['kepala-musang-4', 'R'], back: ['kepala-musang-2', 'N'], attack: ['kepala-musang-4', 'R'] } },
   };
   const VEC_SCALE = 1.8;           // skala gambar vektor Art
   const store = {};                // kind -> {pose -> processed}
@@ -63,7 +73,7 @@ const SPR = (() => {
       jobs.push((async () => {
         const files = new Set([d.ref, ...Object.values(d.poses).map(p => p[0])]);
         const imgs = {};
-        await Promise.all([...files].map(async f => { imgs[f] = await loadImg(BASE + kind + '/' + f + '.png'); }));
+        await Promise.all([...files].map(async f => { imgs[f] = await loadImg(BASE + (d.dir || kind) + '/' + f + '.png'); }));
         if (!imgs[d.ref]) return;
         const ref = trim(imgs[d.ref]);
         const scale = d.h / ref.h * R * OS;
@@ -75,16 +85,16 @@ const SPR = (() => {
           out[pose] = { ...done[f], dir };
         }
         store[kind] = out;
-        const fi = await loadImg(BASE + kind + '/' + d.face + '.png');
+        const fi = await loadImg(BASE + (d.dir || kind) + '/' + d.face + '.png');
         if (fi) faces[kind] = fi;
       })());
     }
     await Promise.all(jobs);
   }
   const has = k => !!store[k];
-  function height(k) { if (DEF[k] && store[k]) return DEF[k].h; return (Art.H[k] || 36) * VEC_SCALE; }
-  function width(k) { if (DEF[k] && store[k]) return DEF[k].h * 0.62; return (Art.BIG[k] ? 30 : 21) * VEC_SCALE; }
-  const big = k => (DEF[k] ? DEF[k].h >= 70 : !!Art.BIG[k]);
+  function height(k) { if (DEF[k] && store[k]) return DEF[k].h + (DEF[k].lift || 0); return (Art.H[k] || 36) * VEC_SCALE; }
+  function width(k) { if (DEF[k] && store[k]) { const p = store[k].idle; return p ? Math.min(90, p.w / (R * OS)) : DEF[k].h * 0.62; } return (Art.BIG[k] ? 30 : 21) * VEC_SCALE; }
+  const big = k => (DEF[k] ? DEF[k].h >= 60 : !!Art.BIG[k]);
 
   /* Gambar tokoh. ctx sudah di ruang R dengan titik asal di titik pijak. */
   function draw(c, kind, dir, anim, ap, t, o = {}) {
@@ -111,7 +121,8 @@ const SPR = (() => {
       case 'hurt': lx = -Math.sin(ap * Math.PI) * 6 + Math.sin(t * 70) * 1.5; flash = 1 - ap; break;
       case 'faint': rot = Math.min(1, ap * 1.6) * 1.35; alpha = 1 - Math.min(0.35, ap * 0.4); break;
     }
-    const k = 1 / OS;
+    const k = 1 / OS, lift = DEF[kind].lift || 0;
+    if (lift) ly -= lift + (anim === 'faint' ? -lift * Math.min(1, ap * 1.5) : Math.sin(t * 5 + (o.seed || 0)) * 3);
     c.save();
     c.globalAlpha *= alpha;
     c.translate((right ? lx : -lx) * R, ly * R);
