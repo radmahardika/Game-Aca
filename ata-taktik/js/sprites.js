@@ -25,6 +25,13 @@ const SPR = (() => {
     yanto: { h: 60, ref: 'depan', face: 'wajah', poses: {
       idle: ['kanan', 'R'], walk: ['kanan', 'R'], back: ['belakang', 'N'],
       attack: ['rapal', 'N'], batu: ['rapal', 'N'], tembok: ['rapal', 'N'], cangkang: ['cangkang', 'N'] } },
+    leni: { h: 58, ref: 'depan', face: 'wajah', poses: {
+      idle: ['kanan', 'R'], walk: ['kanan', 'R'], back: ['belakang', 'N'],
+      attack: ['tusuk', 'R'], tusuk: ['tusuk', 'R'], lompat: ['lompat', 'R'] } },
+    lilik: { h: 56, lift: 8, ref: 'depan', face: 'wajah', poses: {
+      idle: ['kanan', 'R'], walk: ['kanan', 'R'], back: ['belakang', 'N'],
+      attack: ['panggil', 'L'], roh: ['panggil', 'L'], perisai: ['depan', 'N'] } },
+    rohIkan: { dir: 'musuh', h: 30, lift: 18, ref: 'roh-ikan-1', face: 'roh-ikan-1', poses: { idle: ['roh-ikan-1', 'L'] } },
     nenek: { h: 52, ref: 'depan', face: 'depan', poses: { idle: ['kanan', 'R'], back: ['belakang', 'N'] } },
     // musuh (folder musuh/, file <nama>-N): idle = sprite battle Pohon Madu (menghadap kanan kecuali L)
     kumbang: { dir: 'musuh', h: 30, ref: 'kumbang-2', face: 'kumbang-1', poses: { idle: ['kumbang-2', 'R'], back: ['kumbang-3', 'R'] } },
@@ -46,6 +53,11 @@ const SPR = (() => {
     rajaKepiting: { dir: 'musuh', h: 58, ref: 'kepiting-3', face: 'kepiting-3', poses: { idle: ['kepiting-3', 'N'], back: ['kepiting-3', 'N'] } },
     anakBuaya: { dir: 'musuh', h: 30, ref: 'anak-buaya-3', face: 'anak-buaya-1', poses: { idle: ['anak-buaya-3', 'R'], back: ['anak-buaya-2', 'R'] } },
     buaya: { dir: 'musuh', h: 74, ref: 'buaya-1', face: 'buaya-1', poses: { idle: ['buaya-2', 'L'], back: ['buaya-4', 'N'], attack: ['buaya-5', 'L'], selam: ['buaya-6', 'N'] } },
+    elang: { dir: 'musuh', h: 30, lift: 24, ref: 'elang-3', face: 'elang-2', poses: { idle: ['elang-3', 'R'], back: ['elang-1', 'L'] } },
+    rajaElang: { dir: 'musuh', h: 54, lift: 30, ref: 'elang-3', face: 'elang-2', poses: { idle: ['elang-3', 'R'], back: ['elang-2', 'L'] } },
+    kambing: { dir: 'musuh', h: 38, ref: 'kambing-1', face: 'kambing-1', poses: { idle: ['kambing-2', 'L'], back: ['kambing-3', 'N'] } },
+    serigala: { dir: 'musuh', h: 30, ref: 'serigala-1', face: 'serigala-1', poses: { idle: ['serigala-1', 'R'], back: ['serigala-2', 'N'], attack: ['serigala-3', 'R'] } },
+    singa: { dir: 'musuh', h: 80, ref: 'singa-1', face: 'singa-6', poses: { idle: ['singa-2', 'R'], back: ['singa-3', 'N'], attack: ['singa-5', 'R'], aum: ['singa-4', 'N'] } },
     lumpurKecil: { dir: 'musuh', h: 34, ref: 'lumpur-raksasa-2', face: 'lumpur-raksasa-1', poses: { idle: ['lumpur-raksasa-2', 'R'], back: ['lumpur-raksasa-3', 'N'] } },
     ular: { dir: 'musuh', h: 62, ref: 'ular-4', face: 'ular-1', poses: { idle: ['ular-4', 'R'], back: ['ular-7', 'N'], attack: ['ular-8', 'R'] } },
     lumpurRaksasa: { dir: 'musuh', h: 70, ref: 'lumpur-raksasa-2', face: 'lumpur-raksasa-1', poses: { idle: ['lumpur-raksasa-2', 'R'], back: ['lumpur-raksasa-3', 'N'], attack: ['lumpur-raksasa-1', 'N'] } },

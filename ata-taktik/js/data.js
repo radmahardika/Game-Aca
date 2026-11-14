@@ -1,5 +1,5 @@
 'use strict';
-const AT = { VERSION: 4 };
+const AT = { VERSION: 5 };
 /* Data karakter, jurus, misi, dan cerita Bab 1. */
 
 const CHARS = {
@@ -27,11 +27,17 @@ const CHARS = {
     skills: ['batu', 'tembok', 'cangkang'], passive: 'Tenang Seperti Batu: lambat berjalan, tapi sihir batunya menjangkau 3 petak.',
     animal: 'Kura-kura', bio: 'Sahabat lama Nenek yang bertapa di pulau Rawa Bulan. Jarang bicara, tapi sekali bicara selalu bijak.',
     tip: 'Pakai Tembok Batu untuk menghalangi jalan musuh. Tung Yanto lambat, jadi biarkan musuh yang datang padanya.' },
+  leni: { name: 'Uti Leni', job: 'Penjaga Hutan', desc: 'Rusa tua yang gesit dan pemberani.', hp: 26, atk: 9, def: 4, mov: 5, jump: 3, rmin: 1, rmax: 2,
+    skills: ['tusuk', 'lompat'], passive: 'Kaki Rusa: bisa memanjat 3 tingkat sekaligus. Tombaknya menjangkau 2 petak.',
+    animal: 'Rusa', bio: 'Sahabat lama Nenek yang menjaga hutan di kaki Gunung Kabut. Tegas, berani, dan suka melatih yang muda.',
+    tip: 'Uti Leni cocok untuk menyerbu musuh yang jauh dengan Lompatan Rusa. Tusukan Tembus bisa kena dua musuh yang berbaris!' },
+  lilik: { name: 'Uti Lilik', job: 'Pemanggil Roh', desc: 'Roh ikan bandeng yang lembut dan bijak.', hp: 22, atk: 6, def: 3, mov: 4, jump: 2, rmin: 1, rmax: 3, fly: true,
+    skills: ['roh', 'perisai'], passive: 'Melayang: bisa melewati air dan rintangan. Cahaya lenteranya menjangkau 3 petak.',
+    animal: 'Roh ikan bandeng', bio: 'Sahabat lama Nenek yang tinggal di danau kabut. Lentera rohnya bisa memanggil teman-teman roh ikan.',
+    tip: 'Panggil Roh Ikan untuk menambah teman! Pakai Perisai Roh pada teman yang akan diserang musuh kuat.' },
 };
 
 const FUTURE = [
-  { name: 'Utireni', desc: 'Rusa penyerang', bab: 'Bab 4' },
-  { name: 'Utililik', desc: 'Roh bandeng pemanggil roh', bab: 'Bab 4' },
 ];
 
 const ENEMIES = {
@@ -57,8 +63,17 @@ const ENEMIES = {
   anakBuaya: { name: 'Anak Buaya', hp: 17, atk: 7, def: 3, mov: 3, jump: 1, rmin: 1, rmax: 1, madu: 3, swim: true, mudOk: true },
   rajaKepiting: { name: 'Raja Kepiting', hp: 48, atk: 9, def: 7, mov: 2, jump: 1, rmin: 1, rmax: 1, madu: 12, boss: true, swim: true, mudOk: true, summonKind: 'kepiting', call: 'Kepiting-kepitingku, jepit mereka!' },
   buaya: { name: 'Buaya Serakah', hp: 90, atk: 10, def: 7, mov: 3, jump: 1, rmin: 1, rmax: 1, madu: 20, boss: true, swim: true, mudOk: true, dive: true, summonKind: 'anakBuaya', call: 'Anak-anakku, tangkap mereka! Semua makanan milikku!' },
+  // Bab 4 Gunung Kabut. onHit dorong = terdorong 1 petak, pack = lebih kuat bila ada kawan di sebelah sasaran
+  elang: { name: 'Elang Gunung', hp: 12, atk: 7, def: 2, mov: 6, jump: 9, rmin: 1, rmax: 1, madu: 3, fly: true },
+  kambing: { name: 'Kambing Batu', hp: 22, atk: 7, def: 6, mov: 3, jump: 3, rmin: 1, rmax: 1, madu: 4, onHit: 'dorong' },
+  serigala: { name: 'Serigala Kabut', hp: 15, atk: 7, def: 2, mov: 5, jump: 2, rmin: 1, rmax: 1, madu: 3, pack: true },
+  rajaElang: { name: 'Raja Elang', hp: 56, atk: 10, def: 5, mov: 7, jump: 9, rmin: 1, rmax: 1, madu: 14, boss: true, fly: true, summonKind: 'elang', call: 'Kiaaak! Elang-elangku, serang dari langit!' },
+  singa: { name: 'Singa Penyiksa', hp: 100, atk: 11, def: 6, mov: 3, jump: 2, rmin: 1, rmax: 2, madu: 25, boss: true, roar: true, summonKind: 'serigala', call: 'Serigala-serigala, kepung mereka!' },
   kepalaMusang: { name: 'Kepala Musang', hp: 46, atk: 8, def: 4, mov: 3, jump: 2, rmin: 1, rmax: 1, madu: 12, boss: true, summonKind: 'musang', call: 'Geng Musang, serbu!' },
 };
+/* Teman yang dipanggil (bukan anggota tim tetap) */
+const SUMMONS = { rohIkan: { name: 'Roh Ikan', job: 'Roh panggilan', hp: 12, atk: 6, def: 2, mov: 4, jump: 9, rmin: 1, rmax: 1, fly: true, skills: [] } };
+
 const NPCS = { zizi: { name: 'Zizi', hp: 28, atk: 0, def: 3, mov: 0, jump: 0, rmin: 0, rmax: 0 },
   yanto: { name: 'Tung Yanto', hp: 44, atk: 0, def: 7, mov: 0, jump: 0, rmin: 0, rmax: 0, stance: 'cangkang' } };
 
@@ -76,6 +91,10 @@ const SKILLS = {
   batu: { name: 'Batu Melayang', icon: '🪨', cost: 2, target: 'enemy', rmin: 2, rmax: 4, desc: 'Lempar batu sihir yang menembus pertahanan. Jangkauan 4!' },
   tembok: { name: 'Tembok Batu', icon: '🧱', cost: 3, target: 'tile', rmin: 1, rmax: 3, desc: 'Munculkan tembok batu di petak kosong. Menghalangi jalan musuh selama 2 giliran.' },
   cangkang: { name: 'Masuk Cangkang', icon: '🐢', cost: 2, target: 'self', desc: 'Pertahanan +5 sampai giliranmu berikutnya, dan sembuh sedikit.' },
+  tusuk: { name: 'Tusukan Tembus', icon: '🗡️', cost: 2, target: 'enemy', rmin: 1, rmax: 2, line: true, desc: 'Tusuk musuh di garis lurus. Musuh di belakangnya juga kena!' },
+  lompat: { name: 'Lompatan Rusa', icon: '🦌', cost: 3, target: 'enemy', rmin: 2, rmax: 5, desc: 'Melompat ke sebelah musuh yang jauh lalu langsung menyerang kuat.' },
+  roh: { name: 'Panggil Roh Ikan', icon: '🐟', cost: 3, target: 'tile', rmin: 1, rmax: 2, desc: 'Memanggil Roh Ikan yang ikut bertarung selama 2 giliran.' },
+  perisai: { name: 'Perisai Roh', icon: '🫧', cost: 2, target: 'ally', rmin: 0, rmax: 3, desc: 'Gelembung roh menahan satu serangan musuh berikutnya.' },
   pedas: { name: 'Masakan Pedas', icon: '🌶️', cost: 3, target: 'enemy', rmin: 1, rmax: 3, desc: 'Lempar masakan super pedas! Musuh kepedasan dan tidak bisa bergerak 1 giliran.' },
 };
 
@@ -100,6 +119,11 @@ const WHO = {
   buaya: { name: 'Buaya Serakah', kind: 'buaya', voice: [0.35, 0.85] },
   rajaKp: { name: 'Raja Kepiting', kind: 'rajaKepiting', voice: [0.8, 1.0] },
   kepiting: { name: 'Kepiting Rawa', kind: 'kepiting', voice: [1.4, 1.1] },
+  leni: { name: 'Uti Leni', kind: 'leni', voice: [1.1, 0.95] },
+  lilik: { name: 'Uti Lilik', kind: 'lilik', voice: [1.4, 0.85] },
+  singa: { name: 'Singa Penyiksa', kind: 'singa', voice: [0.3, 0.8] },
+  rajaElang: { name: 'Raja Elang', kind: 'rajaElang', voice: [1.2, 1.0] },
+  serigala: { name: 'Serigala Kabut', kind: 'serigala', voice: [0.7, 1.0] },
   zizi: { name: 'Zizi', kind: 'zizi', voice: [1.9, 1.1] },
   narator: { name: '', kind: null, voice: [1, 0.95] },
 };
@@ -347,7 +371,79 @@ const STORY = {
     ['buaya', 'Benarkah...? Baiklah. Lumbungnya kubuka. Semua warga boleh mengambil makanannya.'],
     ['narator', 'Malam itu warga Rawa Bulan berpesta. Buaya Serakah ikut makan bersama dan tersenyum untuk pertama kalinya.'],
     ['yanto', 'Ini. Sobekan peta ketiga. Nenekmu menitipkannya padaku dulu.'],
-    ['momon', 'Peta menunjuk ke Gunung Kabut, tempat Uti Reni dan Uti Lilik. Ayo, petualangan kita berlanjut!'],
+    ['momon', 'Peta menunjuk ke Gunung Kabut, tempat Uti Leni dan Uti Lilik. Ayo, petualangan kita berlanjut!'],
+  ],
+  d1pre: [
+    ['narator', 'Pagi berkabut di kaki Gunung Kabut. Udara dingin dan jalannya menanjak.'],
+    ['ladhia', 'Hati-hati, tanahnya naik turun. Yang di tempat tinggi lebih kuat menyerang.'],
+    ['yanto', 'Kambing Batu suka menyeruduk sampai lawannya terdorong. Serigala Kabut lebih kuat kalau berkelompok.'],
+  ],
+  d1post: [
+    ['momon', 'Aneh. Hewan-hewan gunung ini tampak lelah dan takut.'],
+    ['narator', 'Dari atas tebing terdengar suara tombak beradu dan lolongan serigala.'],
+    ['ata', 'Ada yang bertarung di atas! Ayo naik!'],
+  ],
+  d2pre: [
+    ['leni', 'Mundur kalian, serigala nakal! Hutan ini tidak akan kuserahkan!'],
+    ['yanto', '...Itu Leni. Masih galak seperti dulu.'],
+    ['ata', 'Uti Leni! Kami teman Tung Momon dan Tung Yanto. Kami bantu!'],
+    ['leni', 'Momon? Yanto? Hah, akhirnya kalian datang! Ayo, jangan sampai aku jatuh di sini!'],
+  ],
+  d2post: [
+    ['leni', 'Jadi kau cucu sahabat kami? Tendanganmu lumayan, Nak.'],
+    ['leni', 'Singa Penyiksa menguasai puncak gunung. Dia memaksa hewan-hewan menggali madu emas untuknya siang dan malam.'],
+    ['momon', 'Kita harus menolong mereka, Leni.'],
+    ['leni', 'Tentu. Tombakku ikut kalian!'],
+  ],
+  d3pre: [
+    ['leni', 'Jalan pintas ke puncak lewat Tebing Elang. Tapi elang-elangnya menjaga dari langit.'],
+    ['oumaldi', 'Kita harus sampai ke bendera di puncak tebing sebelum giliran habis!'],
+  ],
+  d3post: [
+    ['ata', 'Fiuh, tebingnya tinggi sekali! Pemandangannya indah.'],
+    ['rajaElang', 'Kiaaak! Siapa yang berani naik ke sarangku? Aku Raja Elang, pengawal Singa Penyiksa!'],
+  ],
+  d4pre: [
+    ['rajaElang', 'Aku terbang paling cepat! Aku suka menyambar yang paling lemah!'],
+    ['ladhia', 'Lindungi teman yang lemah. Berdiri berdekatan!'],
+  ],
+  d4post: [
+    ['rajaElang', 'Aduh, sayapku lelah... Aku cuma takut pada auman Singa Penyiksa.'],
+    ['leni', 'Kalau begitu bantu kami. Di mana Lilik?'],
+    ['rajaElang', 'Uti Lilik dikurung kabut di danau. Lenteranya diambil serigala!'],
+  ],
+  d5pre: [
+    ['lilik', 'Siapa di sana...? Kabutnya tebal, aku tidak bisa melihat.'],
+    ['leni', 'Lilik! Ini aku, Leni! Kami datang menjemputmu!'],
+    ['lilik', 'Leni... Momon... Yanto... Hati-hati, serigala bersembunyi di dalam kabut.'],
+  ],
+  d5post: [
+    ['lilik', 'Terima kasih, anak-anak. Lenteraku menyala lagi.'],
+    ['lilik', 'Lihat, roh ikan kecil ini temanku. Kalau kupanggil, dia ikut membantu kita.'],
+    ['ata', 'Keren! Tim Jelajah Legenda Nenek akhirnya lengkap lagi!'],
+  ],
+  d6pre: [
+    ['narator', 'Malam tiba. Tim berlindung di pos gunung, tapi Singa Penyiksa mengirim pasukannya.'],
+    ['leni', 'Mereka datang dari segala arah! Bertahan sampai pagi!'],
+    ['yanto', 'Tembok batuku dan perisai roh Lilik akan membantu.'],
+  ],
+  d6post: [
+    ['momon', 'Pagi! Kita berhasil bertahan!'],
+    ['lilik', 'Singgasana Singa ada di puncak. Ayo kita akhiri ini bersama.'],
+  ],
+  d7pre: [
+    ['singa', 'GRAAAUM! Jadi kalian yang mengganggu pekerjaku? Madu emas gunung ini milikku!'],
+    ['ata', 'Hewan-hewan itu bukan pekerjamu! Mereka teman, bukan untuk disuruh-suruh!'],
+    ['singa', 'Aumanku akan membuat kalian gemetar dan mundur! Serigala, kepung mereka!'],
+    ['leni', 'Jangan takut! Tetap bersama, dan serang dari belakang!'],
+  ],
+  d7post: [
+    ['singa', 'Hhh... kalian tidak takut padaku... Kenapa?'],
+    ['ata', 'Karena kami saling menjaga. Teman itu dihargai, bukan ditakut-takuti.'],
+    ['singa', 'Aku... aku cuma ingin dihormati. Ternyata caraku salah. Maafkan aku, hewan-hewan gunung.'],
+    ['narator', 'Hewan-hewan gunung bebas. Mereka berbagi madu emas dan berpesta bersama Singa yang kini lebih ramah.'],
+    ['lilik', 'Ata, ini sobekan peta keempat. Tinggal satu lagi menuju Gunung Sarang Emas.'],
+    ['ata', 'Madu Legendaris, tunggu kami! Ayo teman-teman!'],
   ],
 };
 
@@ -602,6 +698,89 @@ const MISSIONS = [
     tips: ['Setiap 3 giliran Buaya Serakah menyelam 🌊 dan tidak bisa diserang. Saat muncul, gigitannya lebih kuat. Jaga jarak!', 'Buaya Serakah memanggil anak buaya. Kalahkan bosnya untuk menang!'],
     pre: 'c7pre', post: 'c7post', final: true,
   },
+  // ---------------- Bab 4: Gunung Kabut ----------------
+  {
+    id: 'b4m1', no: 22, chap: 4, name: 'Kaki Gunung Kabut', sub: 'Seruduk & kawanan', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto'], pal: 'gunung', music: 'adventure', elv: 4,
+    desc: 'Jalan menanjak ke Gunung Kabut. Kambing Batu menyeruduk, Serigala Kabut lebih kuat kalau berkelompok!',
+    star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['p..r..p.z', '..z..g...', '.zz.....p', '.........', 'g...zz...', '..p......', '.........', '...,,,...', 'p..,,,..p'],
+    h: ['332222233', '322111223', '221110112', '111100011', '100001100', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8]],
+    enemies: [['kambing', 2, 1, 4], ['kambing', 6, 2, 4], ['elang', 1, 0, 5], ['elang', 7, 0, 5], ['serigala', 5, 3, 4]],
+    tips: ['Kambing Batu menyeruduk sampai terdorong 1 petak. Serigala Kabut lebih kuat kalau temannya ada di sebelahmu!'],
+    pre: 'd1pre', post: 'd1post',
+  },
+  {
+    id: 'b4m2', no: 23, chap: 4, name: 'Rusa Penjaga', sub: 'Bertemu Uti Leni', type: 'rout', protect: 'leni', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni'], guests: ['leni'], pal: 'gunung', music: 'adventure', elv: 4,
+    desc: 'Uti Leni dikepung Serigala Kabut di tebing. Naik dan bantu dia!',
+    star3: { type: 'npc', key: 'leni', text: 'Nyawa Uti Leni tersisa setengah atau lebih' },
+    t: ['p.z...z.p', '..zz.zz..', '...z.z...', '....,....', '..r...r..', '.........', '..p...p..', '...,,,...', 'p..,,,..p'],
+    h: ['443333344', '433222334', '332222233', '222111222', '111111111', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 4, 2]],
+    enemies: [['serigala', 3, 1, 99], ['serigala', 5, 1, 99], ['elang', 1, 1, 5], ['kambing', 7, 3, 4]],
+    waves: [{ turn: 3, units: [['serigala', 0, 4], ['serigala', 8, 4]] }],
+    tips: ['Uti Leni bisa memanjat 3 tingkat dan menusuk dari jarak 2. Lompatan Rusa membawanya langsung ke dekat musuh!'],
+    pre: 'd2pre', post: 'd2post', recruit: 'leni',
+  },
+  {
+    id: 'b4m3', no: 24, chap: 4, name: 'Tebing Elang', sub: 'Capai bendera', type: 'reach', limit: 9, team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni'], pal: 'gunung', music: 'adventure', elv: 4,
+    desc: 'Panjat tebing sampai ke bendera di puncak sebelum giliran 9 habis. Elang menjaga dari langit!',
+    star3: { type: 'turns', n: 6, text: 'Sampai dalam 6 giliran' },
+    t: ['p..f...pz', '.z.zz..z.', '..z..z...', '.z...zz..', '...z.....', '..z...z..', '.........', '...,,,...', 'p..,,,..p'],
+    h: ['444444444', '443333334', '333322333', '222222222', '222111122', '111111111', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8]],
+    enemies: [['elang', 2, 1, 5], ['elang', 6, 2, 5], ['elang', 5, 4, 5], ['kambing', 3, 1, 4], ['kambing', 6, 3, 4], ['serigala', 1, 4, 4]],
+    tips: ['Uti Leni dan yang bisa terbang lebih cepat naik tebing. Ladhia hanya bisa memanjat 1 tingkat!'],
+    pre: 'd3pre', post: 'd3post',
+  },
+  {
+    id: 'b4m4', no: 25, chap: 4, name: 'Sarang Raja Elang', sub: 'Lawan Raja Elang', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni'], pal: 'gunung', music: 'boss', elv: 4,
+    desc: 'Raja Elang terbang paling cepat dan suka menyambar teman yang paling lemah!',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['pp.z.z.pp', 'p.......p', '..r...r..', '.........', '.z.....z.', '.........', '..p...p..', '...,,,...', 'p..,,,..p'],
+    h: ['444444444', '433333334', '333333333', '222222222', '222222222', '111111111', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8]],
+    enemies: [['rajaElang', 4, 1, 99], ['elang', 2, 1, 5], ['elang', 6, 1, 5], ['kambing', 4, 3, 4]],
+    summon: { every: 3, max: 5, at: [[2, 0], [6, 0]] },
+    tips: ['Raja Elang bisa terbang jauh dan menyambar yang lemah. Jaga Bubunti dan teman yang nyawanya sedikit di tengah!'],
+    pre: 'd4pre', post: 'd4post',
+  },
+  {
+    id: 'b4m5', no: 26, chap: 4, name: 'Lentera Danau Kabut', sub: 'Bertemu Uti Lilik', type: 'rout', fog: true, protect: 'lilik', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'], guests: ['lilik'], pal: 'gunung', music: 'adventure', elv: 4,
+    desc: 'Uti Lilik terjebak kabut di danau gunung. Jemput dia dan usir serigala yang bersembunyi!',
+    star3: { type: 'npc', key: 'lilik', text: 'Nyawa Uti Lilik tersisa setengah atau lebih' },
+    t: ['p..z...zp', '.www.www.', '.w.....w.', '.w..r..w.', '.ww...ww.', '..ww.ww..', '.........', '...,,,...', 'p..,,,..p'],
+    h: ['333333333', '222222222', '222222222', '222222222', '222222222', '111111111', '111111111', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 2]],
+    enemies: [['serigala', 2, 2, 4], ['serigala', 6, 2, 4], ['elang', 4, 0, 5], ['kambing', 3, 4, 4]],
+    waves: [{ turn: 3, units: [['serigala', 1, 0], ['serigala', 8, 1]] }],
+    tips: ['Uti Lilik bisa melayang dan memanggil Roh Ikan untuk membantu. Musuh di kabut baru terlihat kalau dekat!'],
+    pre: 'd5pre', post: 'd5post', recruit: 'lilik',
+  },
+  {
+    id: 'b4m6', no: 27, chap: 4, name: 'Pos Gunung', sub: 'Bertahan 7 giliran', type: 'survive', n: 7, team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'], pal: 'gunung', music: 'adventure', elv: 4,
+    desc: 'Pasukan Singa Penyiksa datang dari segala arah. Bertahan di pos gunung sampai pagi!',
+    star3: { type: 'kills', n: 8, text: 'Kalahkan 8 musuh' },
+    t: ['p.......p', '.........', '..r...r..', '...z.z...', '.........', '...z.z...', '..r...r..', '.........', 'p.......p'],
+    h: ['222222222', '211111112', '210000012', '210000012', '210000012', '210000012', '210000012', '211111112', '222222222'],
+    players: [['ata', 4, 4], ['ladhia', 3, 4], ['bubunti', 4, 5], ['oumaldi', 5, 4], ['momon', 3, 5], ['yanto', 5, 5], ['leni', 4, 3], ['lilik', 4, 6]],
+    enemies: [['serigala', 0, 4, 99], ['serigala', 8, 4, 99], ['elang', 4, 0, 99]],
+    waves: [{ turn: 2, units: [['kambing', 4, 8], ['kambing', 1, 0]] }, { turn: 4, units: [['serigala', 0, 1], ['serigala', 8, 7], ['elang', 1, 8]] }, { turn: 6, units: [['serigala', 4, 0], ['serigala', 4, 8], ['kambing', 8, 1]] }],
+    tips: ['Bertahan 7 giliran! Pakai Tembok Batu dan Perisai Roh untuk melindungi teman.'],
+    pre: 'd6pre', post: 'd6post',
+  },
+  {
+    id: 'b4m7', no: 28, chap: 4, name: 'Singgasana Singa', sub: 'Lawan Singa Penyiksa', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'], pal: 'gunung', music: 'boss', elv: 4,
+    desc: 'Singa Penyiksa menunggu di puncak. Aumannya membuat teman mundur ketakutan!',
+    star3: { type: 'turns', n: 11, text: 'Menang dalam 11 giliran' },
+    t: ['pz.z.z.zp', 'z.......z', '..r...r..', '.........', '.z.....z.', '.........', '..p...p..', '...,,,...', 'p..,,,..p'],
+    h: ['444444444', '433333334', '333333333', '222222222', '222222222', '111111111', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 3, 8], ['leni', 5, 8], ['lilik', 4, 7]],
+    enemies: [['singa', 4, 1, 99], ['serigala', 3, 2, 5], ['serigala', 5, 2, 5], ['elang', 6, 0, 5]],
+    summon: { every: 3, max: 5, at: [[0, 2], [8, 2]] },
+    tips: ['Setiap beberapa giliran Singa Penyiksa mengaum: teman di dekatnya terdorong mundur dan Semangat berkurang. Jaga jarak, lalu serang bersama!'],
+    pre: 'd7pre', post: 'd7post', final: true,
+  },
 ];
 
 /* Perluas setiap peta inti menjadi pulau: daratan 13x13 + pantai + laut. */
@@ -619,7 +798,7 @@ const MISSIONS = [
         if (cx >= 0 && cy >= 0 && cx < n && cy < n) { rt += m.t[cy][cx]; rh += m.h[cy][cx]; continue; }
         const corner = (x < 3 || x > S - 4) && (y < 3 || y > S - 4) && (Math.min(x, S - 1 - x) + Math.min(y, S - 1 - y) < 3);
         if (edge === 0 || corner) { rt += 'o'; rh += '0'; continue; }
-        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : m.pal === 'rawa' ? (hsh(x, y, mi + 5) > 0.55 ? 'w' : 'g') : 'y'); rh += '0'; continue; }
+        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : m.pal === 'rawa' ? (hsh(x, y, mi + 5) > 0.55 ? 'w' : 'g') : m.pal === 'gunung' ? (hsh(x, y, mi + 5) > 0.5 ? 'z' : 'g') : 'y'); rh += '0'; continue; }
         const kx = Math.max(0, Math.min(n - 1, cx)), ky = Math.max(0, Math.min(n - 1, cy));
         const d = Math.max(Math.abs(cx - kx), Math.abs(cy - ky));
         const tc = m.t[ky][kx], hc = +m.h[ky][kx];
@@ -630,8 +809,8 @@ const MISSIONS = [
         let c = '.';
         if (r < 0.07) c = 'b';
         else if (r < 0.14) c = m.pal === 'savana' || m.pal === 'hutan' || m.pal === 'rawa' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
-        else if (r < 0.17) c = m.pal === 'hutan' ? 'J' : m.pal === 'rawa' ? 'b' : 'r';
-        else if (r < 0.24) c = m.pal === 'hutan' || m.pal === 'rawa' ? 'm' : 'q';
+        else if (r < 0.17) c = m.pal === 'hutan' ? 'J' : m.pal === 'rawa' ? 'b' : m.pal === 'gunung' ? 'r' : 'r';
+        else if (r < 0.24) c = m.pal === 'hutan' || m.pal === 'rawa' ? 'm' : m.pal === 'gunung' ? 'z' : 'q';
         else if (r < 0.55) c = 'g';
         rt += c;
       }

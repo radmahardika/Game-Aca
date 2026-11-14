@@ -17,12 +17,12 @@
 
   /* ---------------- Simpan & muat ---------------- */
   const SKEY = 'ata-taktik-v1';
-  function defSave() { return { cleared: {}, stars: {}, madu: 0, lvl: { ata: 1, ladhia: 1, bubunti: 1, oumaldi: 1, momon: 1, yanto: 1 }, seen: {}, snd: { voice: true, sfx: true, music: true } }; }
+  function defSave() { return { cleared: {}, stars: {}, madu: 0, lvl: { ata: 1, ladhia: 1, bubunti: 1, oumaldi: 1, momon: 1, yanto: 1, leni: 1, lilik: 1 }, seen: {}, snd: { voice: true, sfx: true, music: true } }; }
   let S = defSave();
   try { const r = localStorage.getItem(SKEY); if (r) { const o = JSON.parse(r); S = Object.assign(defSave(), o); S.lvl = Object.assign(defSave().lvl, o.lvl || {}); } } catch (e) {}
   function persist() { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) {} }
   Object.assign(Sound.st, S.snd);
-  const JOIN = { ladhia: 'm3', bubunti: 'm6', oumaldi: 'b2m4', momon: 'b3m2', yanto: 'b3m5' };
+  const JOIN = { ladhia: 'm3', bubunti: 'm6', oumaldi: 'b2m4', momon: 'b3m2', yanto: 'b3m5', leni: 'b4m2', lilik: 'b4m5' };
   const recruited = k => k === 'ata' || !!S.cleared[JOIN[k]];
   const unlockedIdx = () => { let i = 0; while (i < MISSIONS.length && S.cleared[MISSIONS[i].id]) i++; return Math.min(i, MISSIONS.length - 1); };
   function charStats(k, l) { const b = CHARS[k]; return { hp: b.hp + 3 * (l - 1), atk: b.atk + (l - 1), def: b.def + Math.floor((l - 1) / 2), mov: b.mov }; }
@@ -84,17 +84,18 @@
 
   let UID = 0;
   function mkUnit(k, team, x, y, opt = {}) {
-    const b = team === 'p' ? CHARS[k] : team === 'e' ? ENEMIES[k] : NPCS[k];
-    const lv = team === 'p' ? (recruited(k) ? (S.lvl[k] || 1) : teamLv()) : (opt.lv || 1);
+    const b = team === 'p' ? (CHARS[k] || SUMMONS[k]) : team === 'e' ? ENEMIES[k] : NPCS[k];
+    const lv = team === 'p' ? (opt.lv || (recruited(k) ? (S.lvl[k] || 1) : teamLv())) : (opt.lv || 1);
     const u = {
       id: ++UID, key: k, team, name: b.name, x, y, lv, maxhp: b.hp, hp: 0, atk: b.atk, def: b.def, mov: b.mov, jump: b.jump,
       rmin: b.rmin, rmax: b.rmax, fly: !!b.fly, swim: !!b.swim, mudOk: !!b.mudOk, skills: b.skills || [], boss: !!b.boss, ranged: !!b.ranged, madu: b.madu || 0,
       sp: team === 'p' ? 2 : 0, facing: 0, done: false, moved: false, alive: true, gone: false, item: team === 'p' ? 1 : 0,
-      buffs: { sabuk: 0, benteng: 0, taunt: 0, lagu: 0, cangkang: 0 }, status: { pedas: 0, tidur: 0, racun: 0 }, aggro: opt.aggro ?? 99, aggroOn: false,
+      buffs: { sabuk: 0, benteng: 0, taunt: 0, lagu: 0, cangkang: 0 }, status: { pedas: 0, tidur: 0, racun: 0, perisai: 0 }, aggro: opt.aggro ?? 99, aggroOn: false,
       anim: 'idle', a0: 0, adur: 1, ox: 0, oy: 0, alpha: 1, tw: null, spin: false,
     };
     if (b.stance) u.stance = b.stance;
-    if (team === 'p') { const s = charStats(k, lv); u.maxhp = s.hp; u.atk = s.atk; u.def = s.def; }
+    if (team === 'p' && CHARS[k]) { const s = charStats(k, lv); u.maxhp = s.hp; u.atk = s.atk; u.def = s.def; }
+    if (team === 'p' && SUMMONS[k]) { u.maxhp += 2 * (lv - 1); u.atk += lv - 1; u.summon = true; }
     if (team === 'e' && lv > 1) { u.maxhp += (b.boss ? 6 : 2) * (lv - 1); u.atk += lv - 1; u.def += Math.floor((lv - 1) / 2); }
     u.hp = u.maxhp;
     return u;
@@ -132,6 +133,19 @@
     if (d < rmin || d > rx) return false;
     if (d === 1 && !u.fly && Math.abs(hu - ht) > 1) return false;
     return true;
+  }
+  function landFor(u, tg) { // petak kosong di sebelah sasaran, terdekat ke penyerang
+    let best = null;
+    for (const [dx, dy] of DIRS) { const t = T(tg.x + dx, tg.y + dy); if (!t || !canStand(u, t) || unitAt(t.x, t.y) || Math.abs(t.h - T(tg.x, tg.y).h) > 1) continue; const d = Math.abs(t.x - u.x) + Math.abs(t.y - u.y); if (!best || d < best.d) best = { x: t.x, y: t.y, d }; }
+    return best;
+  }
+  async function pushAway(from, v) { // dorong v 1 petak menjauhi from
+    let dx = v.x - from.x, dy = v.y - from.y;
+    if (Math.abs(dx) >= Math.abs(dy)) { dx = Math.sign(dx) || 1; dy = 0; } else { dy = Math.sign(dy); dx = 0; }
+    const t = T(v.x + dx, v.y + dy), t0 = T(v.x, v.y);
+    if (!t || !canStand(v, t) || unitAt(t.x, t.y) || t.h - t0.h > 1) return false;
+    v.tw = { fx: v.x, fy: v.y, tx: t.x, ty: t.y, fh: t0.h, th: t.h, t0: now(), dur: 0.22 };
+    await wait(220); v.x = t.x; v.y = t.y; v.tw = null; return true;
   }
   function faceTo(u, x, y) {
     const dx = x - u.x, dy = y - u.y; if (!dx && !dy) return;
@@ -209,6 +223,7 @@
 
   /* ---------------- Aksi ---------------- */
   function applyDamage(att, def, r, opt = {}) {
+    if (def.status.perisai && r.dmg > 0) { def.status.perisai = 0; Sound.play('shield'); addText(def, 'Ditahan perisai roh! 🫧', '#9fe8ff', 9); burst(def, ['#9fe8ff', '#ffffff'], 10); return; }
     def.hp = Math.max(0, def.hp - r.dmg);
     Sound.play(opt.sfx || (att.key === 'ata' ? 'kick' : 'hit'));
     addText(def, '-' + r.dmg, def.team === 'e' ? '#fff7d6' : '#ff8a80', 12);
@@ -227,12 +242,14 @@
     u.alive = false; u.anim = 'faint'; u.a0 = now(); u.adur = 0.6;
     Sound.play('faint');
     if (u.team === 'e') {
+      G.stats.kills = (G.stats.kills || 0) + 1;
       G.madu += u.madu;
       addText(u, '+' + u.madu + ' 🍯', '#ffd24a', 9, 0.4);
       setTimeout(() => { addText(u, '💨 kabur!', '#ffffff', 8); u.fade = now(); }, 800);
       setTimeout(() => { u.gone = true; }, 1500);
     } else {
-      if (u.team === 'p') G.stats.faint++;
+      if (u.team === 'p' && !u.summon) G.stats.faint++;
+      if (u.summon) { u.fade = now(); setTimeout(() => { u.gone = true; }, 700); }
       addText(u, 'Pingsan!', '#ffb3b3', 9, 0.3);
     }
   }
@@ -259,7 +276,7 @@
     const far = dist(u, t) > 1;
     const p = playAnim(u, 'attack', 420);
     if (far) { await wait(140); await projectile(u, t, u.key === 'ladhia' ? '⚙️' : u.key === 'oumaldi' ? 'arrow' : u.key === 'momon' ? '🎵' : u.key === 'yanto' ? '🪨' : (ENEMIES[u.key] && ENEMIES[u.key].proj) || '🪨', 280); } else await wait(250);
-    await hit(u, t, { basic: true, melee: !far, mult: u.surge ? 1.4 : 1 });
+    await hit(u, t, { basic: true, melee: !far, mult: (u.surge ? 1.4 : 1) * (u.pack ? 1.3 : 1) });
     u.surge = false;
     await p;
   }
@@ -358,6 +375,38 @@
         addText(u, '+5 🛡️', '#9fd4ff', 10); if (amt) addText(u, '+' + amt, '#8cff8c', 9, 0.3);
         u.stance = 'cangkang'; await playAnim(u, 'skill', 600); break;
       }
+      case 'tusuk': {
+        faceTo(u, tg.x, tg.y);
+        const sx = Math.sign(tg.x - u.x), sy = Math.sign(tg.y - u.y);
+        const p = playAnim(u, 'skill', 560); await wait(240); Sound.play('whoosh');
+        applyDamage(u, tg, calcDmg(u, tg, { mult: 1.1 }));
+        const b2 = unitAt(tg.x + sx, tg.y + sy);
+        if (b2 && b2.alive && isFoe(u, b2) && !b2.diving) { await wait(120); applyDamage(u, b2, calcDmg(u, b2, { mult: 0.8 })); }
+        await p; break;
+      }
+      case 'lompat': {
+        const land = landFor(u, tg); if (!land) break;
+        const fh = T(u.x, u.y).h, th = T(land.x, land.y).h; Sound.play('whoosh');
+        u.anim = 'skill'; u.a0 = now(); u.adur = 0.5; u.tw = { fx: u.x, fy: u.y, tx: land.x, ty: land.y, fh, th: th + 1.5, t0: now(), dur: 0.45 };
+        await wait(450); u.x = land.x; u.y = land.y; u.tw = null; focus(u, true);
+        faceTo(u, tg.x, tg.y);
+        const p = playAnim(u, 'attack', 420); await wait(200);
+        applyDamage(u, tg, calcDmg(u, tg, { mult: 1.3 })); u.moved = true;
+        await p; break;
+      }
+      case 'roh': {
+        faceTo(u, tg.x, tg.y);
+        const p = playAnim(u, 'skill', 650); await wait(300); Sound.play('power');
+        const f = mkUnit('rohIkan', 'p', tg.x, tg.y, { lv: u.lv }); f.life = 2; f.done = true; f.sp = 0; f.facing = u.facing; f.dropIn = now();
+        G.units.push(f); burst(f, ['#9fe8ff', '#ffffff', '#6ac8ff'], 14); addText(f, 'Roh Ikan datang!', '#9fe8ff', 9);
+        await p; break;
+      }
+      case 'perisai': {
+        if (tg !== u) faceTo(u, tg.x, tg.y);
+        const p = playAnim(u, 'skill', 560); await wait(240);
+        tg.status.perisai = 1; Sound.play('shield'); addText(tg, 'Perisai roh! 🫧', '#9fe8ff', 9); burst(tg, ['#9fe8ff', '#ffffff'], 10);
+        await p; break;
+      }
       case 'pedas': {
         faceTo(u, tg.x, tg.y);
         const p = playAnim(u, 'skill', 520); await wait(180);
@@ -408,6 +457,7 @@
     if (G.walls) for (const [k, w] of [...G.walls]) { if (--w.left <= 0) G.walls.delete(k); }
     for (const u of G.units) {
       if (u.team === 'e') continue;
+      if (u.summon && u.alive && G.turn > 1) { if (u.life <= 0) { u.alive = false; u.fade = now(); addText(u, 'Kembali ke lentera ✨', '#9fe8ff', 8); setTimeout(() => { u.gone = true; }, 700); continue; } u.life--; }
       u.done = !u.alive || u.team === 'n'; u.moved = false;
       if (G.turn > 1 && u.alive) { u.sp = Math.min(5, u.sp + 1); if (u.buffs.sabuk > 0) u.buffs.sabuk--; }
       u.buffs.benteng = 0; u.buffs.taunt = 0; u.buffs.lagu = 0; u.buffs.cangkang = 0; if (u.team === 'p') u.stance = null;
@@ -473,11 +523,11 @@
     if (d.target === 'tile') {
       const ts = [];
       for (const row of G.map.tiles) for (const t of row) { const dd = dist(u, t); if (dd >= d.rmin && dd <= d.rmax && walkable(t) && !unitAt(t.x, t.y) && t.t !== 'f') ts.push(t); }
-      if (!ts.length) { toast('Tidak ada petak kosong di dekat Tung Yanto.'); return; }
+      if (!ts.length) { toast('Tidak ada petak kosong di dekat ' + u.name + '.'); return; }
       G.mode = 'target'; G.tkind = 'tile'; G.skill = sk; G.targets = new Map(ts.map(t => [key(t.x, t.y), t])); G.rangeTiles = null;
       renderPanel(); return;
     }
-    if (d.target === 'enemy') list = foesOf(u).filter(f => canHitFrom(u, u.x, u.y, f, d.rmin, d.rmax));
+    if (d.target === 'enemy') list = foesOf(u).filter(f => canHitFrom(u, u.x, u.y, f, d.rmin, d.rmax) && (!d.line || f.x === u.x || f.y === u.y) && (sk !== 'lompat' || landFor(u, f)));
     else list = G.units.filter(v => v.alive && v.team !== 'e' && dist(u, v) >= d.rmin && dist(u, v) <= d.rmax);
     if (!list.length) { toast(d.target === 'enemy' ? 'Tidak ada musuh dalam jangkauan jurus ini.' : 'Tidak ada teman dalam jangkauan.'); return; }
     G.mode = 'target'; G.tkind = d.target; G.skill = sk; G.targets = new Map(list.map(f => [key(f.x, f.y), f]));
@@ -625,6 +675,15 @@
       e.status.pedas--; focus(e); addText(e, 'Huaaa pedas! 🥵', '#ff9b42', 9);
       await playAnim(e, 'hurt', 500); await wait(250); return;
     }
+    if (ENEMIES[e.key].roar && e.aggroOn && G.turn % 3 === 2) {
+      focus(e); await wait(250); Sound.play('roar'); addText(e, 'GRAAAUM! 🦁', '#ffb35a', 12);
+      e.pose = 'aum'; const pr = playAnim(e, 'skill', 900); await wait(350);
+      for (const v of G.units.filter(v => v.alive && v.team !== 'e' && dist(v, e) <= 3)) {
+        if (v.team === 'p') v.sp = Math.max(0, v.sp - 1);
+        addText(v, 'Takut! 😨', '#ffd8a0', 8); pushAway(e, v);
+      }
+      await pr; await wait(250); return;
+    }
     if (e.diving) { e.diving = false; e.stance = null; e.surge = true; focus(e); addText(e, 'Muncul! 💥', '#ffd84d', 10); Sound.play('roar'); await wait(350); }
     else if (ENEMIES[e.key].dive && e.aggroOn && G.turn % 3 === 0 && T(e.x, e.y).t === 'w') {
       focus(e); e.diving = true; e.stance = 'selam'; addText(e, 'Menyelam! 🌊', '#8fd6ff', 10); Sound.play('whoosh');
@@ -654,8 +713,11 @@
       if (best.p.x !== e.x || best.p.y !== e.y) await walk(e, pathTo(R, best.p.x, best.p.y));
       focus(e);
       G.focus.set(best.t.id, (G.focus.get(best.t.id) || 0) + 1);
+      if (ENEMIES[e.key].pack && G.units.some(o => o !== e && o.alive && o.key === e.key && dist(o, best.t) === 1)) { e.pack = true; addText(e, 'Kawanan! 🐺', '#c8d8ff', 8); }
       await basicAttack(e, best.t);
+      e.pack = false;
       reveal(e);
+      if (ENEMIES[e.key].onHit === 'dorong' && best.t.alive && best.t.team !== 'e') { if (await pushAway(e, best.t)) addText(best.t, 'Terdorong!', '#ffd8a0', 8); }
       const oh = ENEMIES[e.key].onHit, t = best.t;
       if (oh && t.alive && t.team !== 'e') {
         if (oh === 'tidur') { t.status.tidur = 1; addText(t, 'Tertidur! 😴', '#d8c8ff', 9, 0.3); burst(t, ['#c8a0f0', '#ffffff'], 8); }
@@ -686,6 +748,7 @@
   function computeStars() {
     const s = [true, G.stats.faint === 0, false], r = G.m.star3;
     if (r.type === 'turns') s[2] = G.turn <= r.n;
+    else if (r.type === 'kills') s[2] = (G.stats.kills || 0) >= r.n;
     else if (r.type === 'npc') { const n = G.units.find(u => u.key === r.key); s[2] = !!n && n.alive && n.hp >= n.maxhp / 2; }
     return s;
   }
@@ -777,9 +840,9 @@
     if (hits.length <= 1) return hits[0] || null;
     const pt = pickTile(wx, wy);
     const onTile = pt && hits.find(u => u.x === pt.x && u.y === pt.y);
-    if (onTile) return onTile;
+    if (onTile) { const ty = iso(pt.x, pt.y, pt.h)[1]; if (Math.abs(wy - ty) < TH * 0.6) return onTile; }
     if (G.mode === 'target' && G.targets) { const tg = hits.find(u => G.targets.has(key(u.x, u.y))); if (tg) return tg; }
-    return hits.find(u => u.team === 'p' && !u.done) || hits[0];
+    return hits[0];
   }
   function pickTile(wx, wy) {
     const m = G.map; const list = [];
@@ -841,6 +904,7 @@
     kebun: ['#456f2c', '#8cb653', '#a9c46a'], desa: ['#4a742e', '#90b856', '#b0c870'], savana: ['#5f7a2c', '#a8b456', '#c9c070'],
     hutan: ['#1f3d22', '#4a7a3a', '#7aa84e'],
     rawa: ['#203a34', '#4a7458', '#7c9e76'],
+    gunung: ['#4a5a30', '#93a45c', '#c8c48a'],
   };
   function stoneTop(X, Y, sc) {
     let su = X * sc, sv = Y * sc; const row = Math.floor(sv); if (row % 2) su += 0.5;
@@ -858,6 +922,11 @@
     return mul(c, 0.93 + 0.12 * sm(0.4, 0.7, fbm(X * 11, Y * 11, 3)));
   }
   function topColor(t, X, Y, gp) {
+    let c = topColor0(t, X, Y, gp);
+    if (G.m.pal === 'gunung' && t.h >= 3 && !isWater(t)) c = mix(c, C('#eef3fa'), sm(0.2, 0.55, fbm(X * 2.4, Y * 2.4, 60) + (t.h - 3) * 0.35) * 0.88);
+    return c;
+  }
+  function topColor0(t, X, Y, gp) {
     switch (t.t) {
       case 'g': return mul(grass(X, Y, gp), 0.9);
       case 'q': { let c = grass(X, Y, gp); const fx = X * 9, fy = Y * 9, id = hash(Math.floor(fx), Math.floor(fy), 21);
@@ -1099,7 +1168,7 @@
     poly(c, [[0, -hh - s / 2], [s, -hh], [0, s / 2 - hh], [-s, -hh]], '#d6a266');
   }
   const DECOR = {
-    t: { draw: (c, s) => G.m.pal === 'rawa' ? drMangrove(c, s) : G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
+    t: { draw: (c, s) => G.m.pal === 'gunung' ? drPine(c, s) : G.m.pal === 'rawa' ? drMangrove(c, s) : G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
     J: { draw: drShroom, w: 120, h: 110, sh: [8, 4, 26, 10] },
     L: { draw: drLog, w: 150, h: 80, sh: [6, 6, 34, 12] },
     p: { draw: drPine, w: 120, h: 180, sh: [14, 6, 28, 12] },
@@ -1149,14 +1218,23 @@
   const W2S = (wx, wy) => [cam.x + wx * cam.z, cam.y + wy * cam.z];
   let BG = null;
   function bgCanvas() {
-    const pal = G && (G.m.pal === 'hutan' || G.m.pal === 'rawa') ? G.m.pal : 'x';
+    const pal = G && (G.m.pal === 'hutan' || G.m.pal === 'rawa' || G.m.pal === 'gunung') ? G.m.pal : 'x';
     if (BG && BG.w === VW && BG.h === VH && BG.pal === pal) return BG;
     const back = mkCanvas(Math.round(VW * DPR), Math.round(VH * DPR)), b = back.getContext('2d');
     b.scale(DPR, DPR);
     const g = b.createRadialGradient(VW * 0.5, VH * 0.35, 0, VW * 0.5, VH * 0.5, Math.max(VW, VH) * 0.8);
     if (pal === 'hutan') { g.addColorStop(0, '#2c5a4c'); g.addColorStop(0.55, '#0f2e2a'); g.addColorStop(1, '#030c0c'); }
+    else if (pal === 'gunung') { g.addColorStop(0, '#f2c4a0'); g.addColorStop(0.4, '#9a8ec0'); g.addColorStop(1, '#2a2c58'); }
     else if (pal === 'rawa') { g.addColorStop(0, '#2a3e78'); g.addColorStop(0.55, '#121c44'); g.addColorStop(1, '#03060f'); }
     else { g.addColorStop(0, '#2f5ea8'); g.addColorStop(0.55, '#14336e'); g.addColorStop(1, '#050d26'); } b.fillStyle = g; b.fillRect(0, 0, VW, VH);
+    if (pal === 'gunung') { // siluet pegunungan berkabut saat fajar
+      [[0.62, '#7a72a8', 0.55], [0.72, '#5c5890', 0.7], [0.82, '#3e3e72', 0.85]].forEach(([base, col, a], li) => {
+        b.fillStyle = col; b.globalAlpha = a; b.beginPath(); b.moveTo(0, VH);
+        for (let x = 0; x <= VW; x += 20) { const yy = VH * base - Math.abs(Math.sin(x / VW * (3 + li) * Math.PI + li)) * VH * (0.18 - li * 0.04) - hash(Math.floor(x / 60), li, 9) * 18; b.lineTo(x, yy); }
+        b.lineTo(VW, VH); b.fill(); });
+      b.globalAlpha = 1;
+      const sg = b.createRadialGradient(VW * 0.2, VH * 0.18, 4, VW * 0.2, VH * 0.18, VH * 0.35); sg.addColorStop(0, 'rgba(255,240,200,0.8)'); sg.addColorStop(1, 'rgba(255,240,200,0)'); b.fillStyle = sg; b.fillRect(0, 0, VW, VH);
+    }
     if (pal === 'rawa') { // bulan purnama & bintang
       const mx = VW * 0.82, my = VH * 0.16, mr = Math.min(VW, VH) * 0.07;
       const hg = b.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 4); hg.addColorStop(0, 'rgba(220,230,255,0.35)'); hg.addColorStop(1, 'rgba(220,230,255,0)'); b.fillStyle = hg; b.fillRect(0, 0, VW, VH);
@@ -1267,7 +1345,7 @@
       ctx.globalAlpha = 1 - k / q.life; ctx.fillStyle = q.c; ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    if (G.m.pal === 'hutan' || G.m.pal === 'rawa') drawForestAir(ctx, tm);
+    if (G.m.pal === 'hutan' || G.m.pal === 'rawa' || G.m.pal === 'gunung') drawForestAir(ctx, tm);
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bg.front, 0, 0);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     drawOverlays(ctx, tm);
@@ -1309,6 +1387,8 @@
       if (u.buffs.lagu > 0) icons.push('🎵');
       if (u.buffs.cangkang > 0) icons.push('🐢');
       if (u.diving) icons.push('🌊');
+      if (u.status.perisai) icons.push('🫧');
+      if (u.summon) icons.push('✨' + u.life);
       if (u.buffs.sabuk > 0) icons.push('🥋');
       if (u.team === 'e' && !u.aggroOn && u.aggro < 50) icons.push('💤');
       if (u.boss) icons.push('👑');
@@ -1325,11 +1405,13 @@
           else if (G.skill === 'kilat') { const one = calcDmg(G.sel, tg, { mult: 0.75 }); r = { dmg: one.dmg * 2, side: one.side }; }
           else if (G.skill === 'jitu') r = calcDmg(G.sel, tg, { mult: 1.3, pierce: true });
           else if (G.skill === 'hujan') r = calcDmg(G.sel, tg, { mult: 1 });
+          else if (G.skill === 'tusuk') r = calcDmg(G.sel, tg, { mult: 1.1 });
+          else if (G.skill === 'lompat') r = calcDmg(G.sel, tg, { mult: 1.3, ax: (landFor(G.sel, tg) || tg).x, ay: (landFor(G.sel, tg) || tg).y });
           else if (G.skill === 'batu') r = calcDmg(G.sel, tg, { flat: effAtk(G.sel) + 4, pierce: true });
           else r = calcDmg(G.sel, tg, { flat: effAtk(G.sel) + 5 + (G.sel.lv - 1), pierce: true });
           label = (r.dmg >= tg.hp ? '💥 ' : '') + '-' + r.dmg + (r.side === 'back' ? ' ↩' : '');
           color = r.dmg >= tg.hp ? '#ffe14d' : '#ffffff';
-        } else { label = '+' + Math.min(10 + 2 * (G.sel.lv - 1), tg.maxhp - tg.hp); color = '#8cff8c'; }
+        } else if (G.skill === 'perisai') { label = '🫧'; color = '#9fe8ff'; } else { label = '+' + Math.min(10 + 2 * (G.sel.lv - 1), tg.maxhp - tg.hp); color = '#8cff8c'; }
         const [sx, sy] = W2S(p.sx, p.sy - hh - 30);
         txt(c, label, sx, sy + Math.sin(tm * 5) * 2, clamp(11 * z, 16, 28), color);
       }
@@ -1424,7 +1506,7 @@
   function spStars(u) { return h('span', { class: 'sp' }, h('span', { class: 'on' }, '★'.repeat(u.sp)), h('span', { class: 'off' }, '★'.repeat(5 - u.sp))); }
   function unitCard(u) {
     const k = u.hp / u.maxhp;
-    const info = u.team === 'p' ? `${CHARS[u.key].job} · Lv ${u.lv}` : u.team === 'e' ? (u.aggroOn || u.aggro >= 50 ? 'Musuh' : 'Musuh · belum melihatmu 💤') : 'Harus dilindungi';
+    const info = u.team === 'p' ? `${(CHARS[u.key] || SUMMONS[u.key]).job} · Lv ${u.lv}` : u.team === 'e' ? (u.aggroOn || u.aggro >= 50 ? 'Musuh' : 'Musuh · belum melihatmu 💤') : 'Harus dilindungi';
     const chips = [];
     if (u.buffs.sabuk > 0) chips.push(`🥋 Sabuk Hitam ${u.buffs.sabuk}`);
     if (u.buffs.benteng > 0) chips.push('🛡️ Benteng');
@@ -1435,6 +1517,8 @@
     if (u.buffs.lagu > 0) chips.push('🎵 +2 serang');
     if (u.buffs.cangkang > 0) chips.push('🐢 Dalam cangkang');
     if (u.diving) chips.push('🌊 Menyelam: tidak bisa diserang');
+    if (u.status.perisai) chips.push('🫧 Perisai roh');
+    if (u.summon) chips.push(`✨ Tinggal ${u.life + 1} giliran`);
     if (u.team === 'p' && T(u.x, u.y).t === 'm') chips.push('🟫 Di lumpur');
     const range = u.rmax > 1 ? `${u.rmin}-${u.rmax}` : '1';
     return h('div', { class: 'ucard ' + u.team },
@@ -1489,7 +1573,7 @@
         break;
       }
       case 'target':
-        hint(G.tkind === 'tile' ? 'Tap petak yang menyala untuk memunculkan Tembok Batu.' : G.tkind === 'ally' ? 'Tap teman yang bercincin hijau.' : 'Tap musuh yang menyala merah. Angka = kerusakan, 💥 = langsung kalah.');
+        hint(G.tkind === 'tile' ? (G.skill === 'roh' ? 'Tap petak yang menyala untuk memanggil Roh Ikan.' : 'Tap petak yang menyala untuk memunculkan Tembok Batu.') : G.tkind === 'ally' ? 'Tap teman yang bercincin hijau.' : 'Tap musuh yang menyala merah. Angka = kerusakan, 💥 = langsung kalah.');
         row.append(btn('↩ Kembali', toAction));
         break;
       case 'busy': break;
@@ -1584,7 +1668,8 @@
     2: { name: 'Hutan Lembab', icon: '🌿', end: 'Oumaldi bergabung, Ular Beracun kalah, dan sobekan peta menunjuk ke Rawa Bulan.', team: ['ladhia', 'ata', 'bubunti', 'oumaldi'] },
   };
   CHAPTERS[3] = { name: 'Rawa Bulan', icon: '🌙', end: 'Tung Momon dan Tung Yanto bergabung, Buaya Serakah mau berbagi, dan peta ketiga menunjuk ke Gunung Kabut.', team: ['momon', 'ladhia', 'ata', 'bubunti', 'oumaldi', 'yanto'] };
-  const NEXT = { 3: 'Bab 4: Gunung Kabut dan Singa Penyiksa. Teman baru: Uti Reni & Uti Lilik. Segera hadir!', 1: 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah.', 2: 'Bab 3: Rawa Bulan dan Buaya Serakah. Teman baru: Tung Momon & Tung Yanto.' };
+  CHAPTERS[4] = { name: 'Gunung Kabut', icon: '⛰️', end: 'Uti Leni dan Uti Lilik bergabung, Singa Penyiksa belajar menghargai sesama, dan peta keempat menunjuk ke Gunung Sarang Emas.', team: ['leni', 'ladhia', 'ata', 'bubunti', 'lilik'] };
+  const NEXT = { 4: 'Bab 5: Gunung Sarang Emas dan Madu Legendaris. Segera hadir!', 3: 'Bab 4: Gunung Kabut dan Singa Penyiksa. Teman baru: Uti Leni & Uti Lilik.', 1: 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah.', 2: 'Bab 3: Rawa Bulan dan Buaya Serakah. Teman baru: Tung Momon & Tung Yanto.' };
   async function chapterEnd(m) {
     const ch = m.chap || 1, C_ = CHAPTERS[ch];
     G = null; hud.hidden = true; panel.hidden = true;
@@ -1597,7 +1682,7 @@
       h('p', {}, C_.end),
       h('p', { class: 'muted' }, NEXT[ch]),
       btn('🗺️ Kembali ke peta', goMap, 'pri big')));
-    Sound.speak('Bab ' + ['', 'satu', 'dua', 'tiga'][ch] + ' selesai! Petualangan berlanjut!', 1.2);
+    Sound.speak('Bab ' + ['', 'satu', 'dua', 'tiga', 'empat'][ch] + ' selesai! Petualangan berlanjut!', 1.2);
   }
 
   /* ---------------- Layar menu ---------------- */
@@ -1611,7 +1696,7 @@
     screen(h('div', { class: 'title' },
       h('div', { class: 'tsmall' }, 'Petualangan Dunia Satwa'),
       h('h1', {}, 'Ata dan Madu Legendaris', h('span', {}, 'Taktik')),
-      h('div', { class: 'trio' }, portrait('ladhia', 96), portrait('ata', 120), portrait('bubunti', 96), recruited('oumaldi') ? portrait('oumaldi', 90) : null, recruited('momon') ? portrait('momon', 86) : null, recruited('yanto') ? portrait('yanto', 86) : null),
+      h('div', { class: 'trio' }, ['ladhia', 'ata', 'bubunti', 'oumaldi', 'momon', 'yanto', 'leni', 'lilik'].filter(k => k === 'ata' || k === 'ladhia' || k === 'bubunti' || recruited(k)).map(k => portrait(k, k === 'ata' ? 110 : 76))),
       h('div', { class: 'col' },
         btn(started ? '▶ Lanjutkan' : '▶ Mulai Petualangan', async () => {
           Sound.resume(); Sound.startMusic('calm');
@@ -1620,7 +1705,7 @@
         }, 'pri big'),
         btn('👥 Tokoh', () => goChars(null, goTitle)),
         btn('⚙️ Pengaturan', goSettings)),
-      h('p', { class: 'muted small' }, 'Bab 1 Savana · Bab 2 Hutan Lembab · Bab 3 Rawa Bulan · 21 misi'),
+      h('p', { class: 'muted small' }, '4 bab · 28 misi'),
       h('div', { class: 'ver' }, 'versi ' + AT.VERSION)));
   }
   function goMap() {
@@ -1637,7 +1722,7 @@
         h('div', { class: 'dot' }, open ? (m.type === 'boss' ? '👑' : m.no) : '🔒'),
         h('div', { class: 'ninfo' }, h('b', {}, m.name), h('small', {}, m.sub), h('span', { class: 'nst' }, open ? stars(S.stars[m.id] || 0) : ''))));
     });
-    path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '⛰️'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 4: Gunung Kabut'), h('small', {}, 'Segera hadir'))));
+    path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '🍯'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 5: Gunung Sarang Emas'), h('small', {}, 'Segera hadir'))));
     screen(topbar('Peta Petualangan', goTitle),
       h('div', { class: 'maphead' }, btn('🏠 Markas', goBase, 'pri2'), btn('👥 Tokoh', () => goChars(null, goMap), 'pri2'), btn('⚙️', goSettings, 'icon')),
       path);

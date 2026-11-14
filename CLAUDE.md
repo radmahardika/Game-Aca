@@ -250,7 +250,7 @@ Ringkasan desain (disepakati): Turn-based RPG (genre ala Dragon Quest, bukan tir
   Kalah → penginapan terakhir, **koin −¼**. Level maks 40, pilih 1 dari 2 jurus di Lv 10 & 25.
 - **Tim Jelajah Legenda**: Ata (honey badger, **Taekwondoin**, jurus tendangan nama **Indonesia + Korea**), Ladhia (badak,
   Paladin), Bubunti (llama, **Chef**: menyembuhkan lewat masakan, satu-satunya serangan Sambal Super Pedas; Dapur Perkemahan),
-  Oumaldi (tupai, Pemanah), Tung Momon (jalak, Pemusik), Tung Yanto (kura-kura pendiam, Pertapa Batu), Uti Reni (rusa,
+  Oumaldi (tupai, Pemanah), Tung Momon (jalak, Pemusik), Tung Yanto (kura-kura pendiam, Pertapa Batu), Uti Leni (rusa,
   Penjaga Hutan), Uti Lilik (roh hewan, Pemanggil Roh). Tung = tetua laki-laki, Uti = tetua perempuan.
 - Cerita: Ata mencari Pohon Madu Legendaris dari dongeng Nenek; para tetua = tim lama Nenek, peta disobek 5 keping.
   Prolog + 8 bab (lengkap), tiap bab panjang (desa, 2–3 area, misi warga, dungeon, bos tengah, rekrut, bos bab).
@@ -312,6 +312,15 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   2 giliran, `drWall`), Masuk Cangkang (+5 tahan). Musuh: capung (terbang), kepiting (tahan 6), anak buaya, Raja Kepiting
   (sprite kepiting bermahkota), Buaya Serakah (`dive`). Sprite `pohon-madu/img/momon|yanto/`, `musuh/buaya-1..6`,
   `anak-buaya-1..3`, `kepiting-1..3`, `capung-1..3`. Bot uji: Lv 4 hampir semua menang, Lv 3 banyak kalah (perlu naik level).
+- **Bab 4 Gunung Kabut (v5, misi 22–28, `chap: 4`, `pal: 'gunung'` fajar berkabut: siluet gunung, pinus, petak tinggi ≥3 bersalju,
+  `z` = tebing batu):** Kaki Gunung → Rusa Penjaga (lindungi, **Uti Leni** bergabung; dulu "Uti Reni", diganti pengguna) → Tebing Elang
+  (capai bendera, h 0→4) → Sarang Raja Elang (bos tengah terbang, sprite elang besar) → Lentera Danau Kabut (fog, lindungi, **Uti Lilik**
+  bergabung) → Pos Gunung (bertahan 7 giliran, bintang 3 `kills` 8) → Singgasana **Singa Penyiksa** (bos: tiap giliran ke-2/5/8 mengaum
+  `roar` → teman ≤3 petak terdorong & Semangat −1; memanggil serigala). Musuh: elang (terbang), kambing (`onHit: 'dorong'`), serigala
+  (`pack`: ×1,3 bila kawanan di sebelah sasaran). Leni: jangkauan 2, lompat 3 tingkat, Tusukan Tembus (`line`, kena musuh di belakang),
+  Lompatan Rusa (`landFor`, lompat ke sebelah musuh jarak 2–5 + serang ×1,3). Lilik: melayang, Panggil Roh Ikan (`SUMMONS.rohIkan`,
+  teman sementara 2 giliran, `u.summon/u.life`), Perisai Roh (`status.perisai` menahan 1 serangan). `pushAway()` untuk dorong.
+  Ketuk tokoh: dipilih yang paling depan, kecuali ketukan tepat di petak kakinya. Bot: Lv 5 menang 6/7, bos akhir butuh Lv 6.
 - **Tim maksimal 4 tokoh** (permintaan pengguna, `MAXTEAM`): kalau `m.team` > 4, lembar misi menampilkan pemilih tokoh (Ata,
   tamu & yang dilindungi = wajib), pilihan disimpan per misi di `S.party`; `partyOf(m)` / `defaultParty(m)`. Bab 3 diseimbangkan
   ulang untuk 4 tokoh: bot Lv 4 menang sebagian besar, bos akhir Buaya Serakah butuh Lv 5.
@@ -322,7 +331,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   3 bintang per misi, madu 🍯 untuk naik level di Markas. Ata: Tendangan Kilat/Putar/Mode Sabuk Hitam + Refleks (hindar & balas);
   Ladhia: Tantang/Benteng Badak; Bubunti: Sup Hangat + **Masakan Pedas** (satu-satunya serangan, musuh tidak bisa bergerak 1 giliran).
 - Suara: **tanpa suara pembaca saat bertarung**; narasi suara (speechSynthesis id-ID) hanya di adegan cerita (permintaan pengguna).
-- Ke depan: Bab 4 Gunung Kabut (Singa Penyiksa, Utireni & Utililik).
+- Ke depan: Bab 5 Gunung Sarang Emas (Madu Legendaris; belum dibahas).
 - Ikon aplikasi (`icons/icon-180|512.png`, `manifest.webmanifest`, nama Layar Utama "ATA Tactics"): Ladhia, Ata menendang, Bubunti
   di petak rumput isometrik, latar biru tua berbingkai emas, tulisan "ATA Tactics".
 - Simpanan `localStorage` kunci `ata-taktik-v1`. Tes: buka lewat http (PNG dari folder lain), `window.__ata`
@@ -330,6 +339,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 
 ## Status & yang sedang dibahas
 
+- Branch `pratinjau-v37` = **Ata Taktik versi 5 (Bab 4 Gunung Kabut)**, belum digabung.
 - Rilis terakhir di `main`: **versi 36** = **Ata Taktik versi 4** (Bab 3 Rawa Bulan + tim maksimal 4). Game lain tidak berubah.
 - Versi 35 = **Ata Taktik versi 3** (Halaman Tokoh).
 - Versi 34 = **Ata Taktik versi 2** (Bab 2 Hutan Lembab, Oumaldi, Ular Beracun).
