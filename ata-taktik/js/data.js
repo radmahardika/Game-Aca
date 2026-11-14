@@ -1,5 +1,5 @@
 'use strict';
-const AT = { VERSION: 3 };
+const AT = { VERSION: 4 };
 /* Data karakter, jurus, misi, dan cerita Bab 1. */
 
 const CHARS = {
@@ -19,11 +19,17 @@ const CHARS = {
     skills: ['jitu', 'hujan'], passive: 'Mata Elang: dari tempat tinggi, panahnya +1 petak lebih jauh dan pandangannya menembus kabut. Tidak bisa memanah musuh yang menempel.',
     animal: 'Tupai', bio: 'Pemanah gesit dari Hutan Lembab. Dulu suka bekerja sendirian, sekarang tahu bahwa menang bersama lebih seru.',
     tip: 'Naikkan Oumaldi ke tempat tinggi supaya panahnya lebih jauh. Jangan biarkan musuh menempel padanya!' },
+  momon: { name: 'Tung Momon', job: 'Pemusik', desc: 'Jalak tua yang ceria, sahabat lama Nenek.', hp: 22, atk: 5, def: 3, mov: 4, jump: 2, rmin: 1, rmax: 2, fly: true,
+    skills: ['lagu', 'ceria'], passive: 'Sayap Jalak: bisa terbang melewati air, lumpur, dan rintangan (tapi tidak bisa berhenti di atas air). Serulingnya menjangkau 2 petak.',
+    animal: 'Burung jalak', bio: 'Sahabat lama Nenek dari tim penjelajah. Suka bercanda dan bernyanyi. Lagunya membuat teman-teman bersemangat.',
+    tip: 'Taruh Tung Momon di tengah tim. Lagunya kena teman yang dekat (2 petak), jadi kumpulkan teman sebelum bernyanyi!' },
+  yanto: { name: 'Tung Yanto', job: 'Pertapa Batu', desc: 'Kura-kura tua yang pendiam dan bijak.', hp: 32, atk: 8, def: 6, mov: 2, jump: 1, rmin: 1, rmax: 3,
+    skills: ['batu', 'tembok', 'cangkang'], passive: 'Tenang Seperti Batu: lambat berjalan, tapi sihir batunya menjangkau 3 petak.',
+    animal: 'Kura-kura', bio: 'Sahabat lama Nenek yang bertapa di pulau Rawa Bulan. Jarang bicara, tapi sekali bicara selalu bijak.',
+    tip: 'Pakai Tembok Batu untuk menghalangi jalan musuh. Tung Yanto lambat, jadi biarkan musuh yang datang padanya.' },
 };
 
 const FUTURE = [
-  { name: 'Tung Momon', desc: 'Jalak pemusik', bab: 'Bab 3' },
-  { name: 'Tung Yanto', desc: 'Kura-kura penyihir', bab: 'Bab 3' },
   { name: 'Utireni', desc: 'Rusa penyerang', bab: 'Bab 4' },
   { name: 'Utililik', desc: 'Roh bandeng pemanggil roh', bab: 'Bab 4' },
 ];
@@ -45,9 +51,16 @@ const ENEMIES = {
   lumpurRaksasa: { name: 'Lumpur Raksasa', hp: 46, atk: 8, def: 4, mov: 2, jump: 1, rmin: 1, rmax: 1, madu: 10, boss: true, mudOk: true, split: 'lumpurKecil' },
   lumpurKecil: { name: 'Lumpur Kecil', hp: 12, atk: 5, def: 2, mov: 3, jump: 1, rmin: 1, rmax: 1, madu: 2, mudOk: true },
   ular: { name: 'Ular Beracun', hp: 62, atk: 10, def: 5, mov: 3, jump: 1, rmin: 1, rmax: 2, madu: 15, boss: true, swim: true, mudOk: true, onHit: 'racun', summonKind: 'belut', call: 'Ssshh! Belut-belutku, keluarlah!' },
+  // Bab 3 Rawa Bulan
+  capung: { name: 'Capung Raksasa', hp: 10, atk: 6, def: 1, mov: 6, jump: 9, rmin: 1, rmax: 1, madu: 2, fly: true },
+  kepiting: { name: 'Kepiting Rawa', hp: 16, atk: 6, def: 6, mov: 2, jump: 1, rmin: 1, rmax: 1, madu: 3, swim: true, mudOk: true },
+  anakBuaya: { name: 'Anak Buaya', hp: 17, atk: 7, def: 3, mov: 3, jump: 1, rmin: 1, rmax: 1, madu: 3, swim: true, mudOk: true },
+  rajaKepiting: { name: 'Raja Kepiting', hp: 48, atk: 9, def: 7, mov: 2, jump: 1, rmin: 1, rmax: 1, madu: 12, boss: true, swim: true, mudOk: true, summonKind: 'kepiting', call: 'Kepiting-kepitingku, jepit mereka!' },
+  buaya: { name: 'Buaya Serakah', hp: 100, atk: 12, def: 7, mov: 3, jump: 1, rmin: 1, rmax: 1, madu: 20, boss: true, swim: true, mudOk: true, dive: true, summonKind: 'anakBuaya', call: 'Anak-anakku, tangkap mereka! Semua makanan milikku!' },
   kepalaMusang: { name: 'Kepala Musang', hp: 46, atk: 8, def: 4, mov: 3, jump: 2, rmin: 1, rmax: 1, madu: 12, boss: true, summonKind: 'musang', call: 'Geng Musang, serbu!' },
 };
-const NPCS = { zizi: { name: 'Zizi', hp: 28, atk: 0, def: 3, mov: 0, jump: 0, rmin: 0, rmax: 0 } };
+const NPCS = { zizi: { name: 'Zizi', hp: 28, atk: 0, def: 3, mov: 0, jump: 0, rmin: 0, rmax: 0 },
+  yanto: { name: 'Tung Yanto', hp: 44, atk: 0, def: 7, mov: 0, jump: 0, rmin: 0, rmax: 0, stance: 'cangkang' } };
 
 const SKILLS = {
   kilat: { name: 'Tendangan Kilat', icon: '⚡', cost: 2, target: 'enemy', rmin: 1, rmax: 1, desc: 'Tendang 2 kali berturut-turut!' },
@@ -58,6 +71,11 @@ const SKILLS = {
   sup: { name: 'Sup Hangat', icon: '🍲', cost: 2, target: 'ally', rmin: 0, rmax: 3, desc: 'Sembuhkan satu teman (jarak 3). Juga membangunkan yang tertidur dan menyembuhkan racun.' },
   jitu: { name: 'Panah Jitu', icon: '🎯', cost: 2, target: 'enemy', rmin: 2, rmax: 5, desc: 'Panah kuat yang menembus pertahanan musuh. Jangkauan 5!' },
   hujan: { name: 'Hujan Panah', icon: '🌧️', cost: 4, target: 'enemy', rmin: 2, rmax: 4, desc: 'Kena musuh sasaran dan semua musuh di sebelahnya.' },
+  lagu: { name: 'Lagu Semangat', icon: '🎵', cost: 2, target: 'self', desc: 'Teman dalam 2 petak: serangan +2 dan Semangat +1 ⭐.' },
+  ceria: { name: 'Lagu Penyembuh', icon: '🎶', cost: 3, target: 'self', desc: 'Sembuhkan semua teman dalam 2 petak sekaligus.' },
+  batu: { name: 'Batu Melayang', icon: '🪨', cost: 2, target: 'enemy', rmin: 2, rmax: 4, desc: 'Lempar batu sihir yang menembus pertahanan. Jangkauan 4!' },
+  tembok: { name: 'Tembok Batu', icon: '🧱', cost: 3, target: 'tile', rmin: 1, rmax: 3, desc: 'Munculkan tembok batu di petak kosong. Menghalangi jalan musuh selama 2 giliran.' },
+  cangkang: { name: 'Masuk Cangkang', icon: '🐢', cost: 2, target: 'self', desc: 'Pertahanan +5 sampai giliranmu berikutnya, dan sembuh sedikit.' },
   pedas: { name: 'Masakan Pedas', icon: '🌶️', cost: 3, target: 'enemy', rmin: 1, rmax: 3, desc: 'Lempar masakan super pedas! Musuh kepedasan dan tidak bisa bergerak 1 giliran.' },
 };
 
@@ -77,6 +95,11 @@ const WHO = {
   jamur: { name: 'Jamur Spora', kind: 'jamur', voice: [1.2, 0.9] },
   lumpur: { name: 'Lumpur Raksasa', kind: 'lumpurRaksasa', voice: [0.3, 0.8] },
   ular: { name: 'Ular Beracun', kind: 'ular', voice: [0.7, 0.85] },
+  momon: { name: 'Tung Momon', kind: 'momon', voice: [1.3, 1.1] },
+  yanto: { name: 'Tung Yanto', kind: 'yanto', voice: [0.5, 0.75] },
+  buaya: { name: 'Buaya Serakah', kind: 'buaya', voice: [0.35, 0.85] },
+  rajaKp: { name: 'Raja Kepiting', kind: 'rajaKepiting', voice: [0.8, 1.0] },
+  kepiting: { name: 'Kepiting Rawa', kind: 'kepiting', voice: [1.4, 1.1] },
   zizi: { name: 'Zizi', kind: 'zizi', voice: [1.9, 1.1] },
   narator: { name: '', kind: null, voice: [1, 0.95] },
 };
@@ -249,6 +272,83 @@ const STORY = {
     ['ladhia', 'Peta itu menunjuk ke Rawa Bulan. Tempat tinggal Tung Momon dan Tung Yanto.'],
     ['ata', 'Ayo teman-teman, petualangan kita berlanjut!'],
   ],
+  c1pre: [
+    ['narator', 'Malam turun di Rawa Bulan. Bulan purnama bersinar di atas air yang tenang.'],
+    ['oumaldi', 'Sepi sekali... Kenapa tidak ada warga rawa yang keluar?'],
+    ['kepiting', 'Krek krek! Siapa itu? Rawa ini milik Buaya Serakah! Pergi!'],
+    ['ata', 'Buaya Serakah? Kami cuma mau bertemu Tung Momon dan Tung Yanto!'],
+  ],
+  c1post: [
+    ['bubunti', 'Lihat, perahu-perahu warga kosong. Lumbung makanan mereka juga kosong.'],
+    ['narator', 'Dari pulau kecil di tengah rawa, terdengar suara seruling yang merdu.'],
+    ['ata', 'Suara seruling! Mungkin itu Tung Momon!'],
+  ],
+  c2pre: [
+    ['momon', 'Tralala~ Walau dikepung, aku tetap bernyanyi! Eh, siapa kalian, anak-anak muda?'],
+    ['ata', 'Tung Momon? Aku Ata, cucu Nenek! Kami datang membantu!'],
+    ['momon', 'Cucu sahabatku?! Wah, kebetulan sekali! Tolong usir mereka, aku sudah lelah meniup seruling!'],
+    ['ladhia', 'Lewat daun teratai untuk menyeberang. Jangan biarkan Tung Momon pingsan!'],
+  ],
+  c2post: [
+    ['momon', 'Hahaha! Kalian hebat! Nenekmu pasti bangga, Ata.'],
+    ['momon', 'Sejak Buaya Serakah datang, dia mengambil semua makanan warga rawa. Tung Yanto bertapa di pulaunya dan tidak mau bicara.'],
+    ['ata', 'Ayo ikut kami, Tung Momon! Kita bujuk Tung Yanto bersama.'],
+    ['momon', 'Tentu! Pemusik tua ini masih punya banyak lagu!'],
+  ],
+  c3pre: [
+    ['momon', 'Jalan ke pulau Tung Yanto hanya lewat daun teratai. Hati-hati, anak buaya suka bersembunyi di air!'],
+    ['oumaldi', 'Kita harus cepat sampai ke bendera di seberang sana!'],
+  ],
+  c3post: [
+    ['ata', 'Sampai! Daun teratainya goyang-goyang, hihi.'],
+    ['rajaKp', 'Krak! Siapa yang berani menginjak pantaiku? Akulah Raja Kepiting, penjaga harta Buaya Serakah!'],
+  ],
+  c4pre: [
+    ['rajaKp', 'Cangkangku paling keras sedunia! Serangan kalian tidak akan terasa!'],
+    ['momon', 'Cangkangnya keras sekali. Serang dari belakang, atau pakai jurus yang menembus pertahanan!'],
+    ['bubunti', 'Masakan pedasku bisa menembus cangkang!'],
+  ],
+  c4post: [
+    ['rajaKp', 'Aduh, cangkangku retak... Ampun! Buaya Serakah menjanjikan aku separuh makanan rawa...'],
+    ['ladhia', 'Makanan itu milik warga. Kembalikan!'],
+    ['rajaKp', 'I-iya, iya! Lumbungnya ada di Istana Buaya. Tapi hati-hati, dia bisa menyelam lalu menyerang tiba-tiba!'],
+  ],
+  c5pre: [
+    ['momon', 'Itu dia Tung Yanto, bertapa di dalam cangkangnya.'],
+    ['yanto', '...'],
+    ['momon', 'Dia akan bangun kalau mendengar laguku. Tapi butuh waktu. Lindungi dia selama aku bernyanyi!'],
+    ['ata', 'Siap! Bertahan 6 giliran, dan jangan biarkan Tung Yanto pingsan!'],
+  ],
+  c5post: [
+    ['yanto', '...Momon. Lagumu masih fals seperti dulu.'],
+    ['momon', 'Hahaha! Akhirnya kau bicara juga, sahabatku!'],
+    ['yanto', 'Kau... cucu sahabat kami. Matamu sama seperti nenekmu.'],
+    ['yanto', 'Aku bertapa karena sedih tidak bisa mengusir Buaya Serakah sendirian. Tapi bersama kalian, aku ikut.'],
+    ['ata', 'Hore! Tim kita jadi berenam!'],
+  ],
+  c6pre: [
+    ['narator', 'Kabut bulan turun menutupi rawa. Istana Buaya Serakah ada di balik kabut.'],
+    ['yanto', 'Tetap bersama. Tembok batuku bisa melindungi kalian.'],
+    ['oumaldi', 'Aku naik ke tempat tinggi supaya bisa melihat musuh di kabut!'],
+  ],
+  c6post: [
+    ['momon', 'Kabutnya terbuka. Itu Istana Buaya Serakah, di tengah danau!'],
+    ['bubunti', 'Aku bisa mencium bau madu dan ikan bakar dari sana. Itu makanan warga!'],
+  ],
+  c7pre: [
+    ['buaya', 'Hohoho! Siapa yang berani datang ke istanaku? Semua makanan rawa ini milikku seorang!'],
+    ['ata', 'Makanan itu milik semua warga rawa! Bagilah, jangan serakah!'],
+    ['buaya', 'Berbagi? Hah! Anak-anakku, tangkap mereka!'],
+    ['yanto', 'Hati-hati. Saat dia menyelam, dia tidak bisa diserang. Bersiaplah saat dia muncul.'],
+  ],
+  c7post: [
+    ['buaya', 'Aduh... perutku kenyang tapi hatiku sepi. Tidak ada yang mau berteman denganku.'],
+    ['bubunti', 'Kalau kamu mau berbagi, kami mau masak bersama dan makan bersama kamu.'],
+    ['buaya', 'Benarkah...? Baiklah. Lumbungnya kubuka. Semua warga boleh mengambil makanannya.'],
+    ['narator', 'Malam itu warga Rawa Bulan berpesta. Buaya Serakah ikut makan bersama dan tersenyum untuk pertama kalinya.'],
+    ['yanto', 'Ini. Sobekan peta ketiga. Nenekmu menitipkannya padaku dulu.'],
+    ['momon', 'Peta menunjuk ke Gunung Kabut, tempat Uti Reni dan Uti Lilik. Ayo, petualangan kita berlanjut!'],
+  ],
 };
 
 /* Tipe: rout = kalahkan semua, boss = kalahkan bos, survive = bertahan n giliran, reach = capai bendera */
@@ -419,6 +519,89 @@ const MISSIONS = [
     tips: ['Gigitan Ular Beracun membuat keracunan 🤢: nyawa berkurang 2 tiap giliran selama 3 giliran. Sup Hangat menyembuhkannya!', 'Ular bisa berenang. Serang dia saat mendekat ke tepi kolam!'],
     pre: 'b7pre', post: 'b7post', final: true,
   },
+  // ---------------- Bab 3: Rawa Bulan ----------------
+  {
+    id: 'b3m1', no: 15, chap: 3, name: 'Gerbang Rawa Bulan', sub: 'Kepiting bercangkang keras', type: 'rout', team: ['ata', 'ladhia', 'bubunti', 'oumaldi'], pal: 'rawa', music: 'adventure', elv: 3,
+    desc: 'Rawa Bulan dijaga anak buah Buaya Serakah. Kepiting Rawa punya cangkang yang keras sekali!',
+    star3: { type: 'turns', n: 8, text: 'Menang dalam 8 giliran' },
+    t: ['t..ww...t', '.b.ww.b..', '...dd....', '.m.ww..m.', '...ww....', '........b', 'b...m....', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8]],
+    enemies: [['kepiting', 1, 3, 4], ['kepiting', 7, 2, 4], ['capung', 2, 0, 5], ['capung', 6, 1, 5], ['anakBuaya', 4, 1, 99]],
+    tips: ['Kepiting Rawa bercangkang keras 🛡️. Serang dari belakang, atau pakai Masakan Pedas yang menembus pertahanan!', 'Daun teratai 🍃 bisa diinjak untuk menyeberangi air.'],
+    pre: 'c1pre', post: 'c1post',
+  },
+  {
+    id: 'b3m2', no: 16, chap: 3, name: 'Lagu di Pulau Kecil', sub: 'Bertemu Tung Momon', type: 'rout', protect: 'momon', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon'], guests: ['momon'], pal: 'rawa', music: 'adventure', elv: 3,
+    desc: 'Tung Momon terkepung di pulau kecil. Seberangi daun teratai dan selamatkan dia!',
+    star3: { type: 'npc', key: 'momon', text: 'Nyawa Tung Momon tersisa setengah atau lebih' },
+    t: ['t...b...t', '.wwwwwww.', '.ww...ww.', '.w.....w.', '.d..r..d.', '.ww...ww.', '.wwwdwww.', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 4, 3]],
+    enemies: [['anakBuaya', 1, 3, 99], ['anakBuaya', 7, 4, 5], ['kepiting', 5, 2, 5], ['capung', 2, 0, 99]],
+    waves: [{ turn: 2, units: [['kepiting', 4, 0]] }, { turn: 3, units: [['capung', 0, 1], ['capung', 8, 1]] }],
+    tips: ['Tung Momon bisa terbang melewati air! Lagunya membuat teman di dekatnya lebih kuat.'],
+    pre: 'c2pre', post: 'c2post', recruit: 'momon',
+  },
+  {
+    id: 'b3m3', no: 17, chap: 3, name: 'Jalan Teratai', sub: 'Capai bendera', type: 'reach', limit: 8, team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon'], pal: 'rawa', music: 'adventure', elv: 3,
+    desc: 'Melompat dari daun teratai ke daun teratai sampai ke bendera di seberang danau sebelum giliran 8 habis.',
+    star3: { type: 'turns', n: 5, text: 'Sampai dalam 5 giliran' },
+    t: ['t...f.b.t', 'wdwwwwwdw', 'wddwwwddw', 'wwdwwwdww', 'wwddwddww', 'wwwdwdwww', 'wwwdddwww', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 4, 7]],
+    enemies: [['anakBuaya', 2, 1, 5], ['anakBuaya', 6, 5, 5], ['belut', 4, 3, 5], ['capung', 3, 0, 5], ['kepiting', 5, 0, 4]],
+    tips: ['Tung Momon terbang, jadi dia bisa langsung menuju bendera. Tapi jangan sampai dia sendirian!'],
+    pre: 'c3pre', post: 'c3post',
+  },
+  {
+    id: 'b3m4', no: 18, chap: 3, name: 'Pantai Raja Kepiting', sub: 'Lawan Raja Kepiting', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon'], pal: 'rawa', music: 'boss', elv: 4,
+    desc: 'Raja Kepiting menjaga pantai dengan cangkang terkeras di rawa. Cari cara menembus pertahanannya!',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['r.yy.yy.r', '.yyyyyyy.', 'yy.www.yy', 'y..www..y', '..m...m..', 'b.......b', '...m.m...', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8]],
+    enemies: [['rajaKepiting', 4, 1, 99], ['kepiting', 1, 2, 4], ['kepiting', 7, 2, 4], ['capung', 2, 0, 5], ['capung', 6, 0, 5]],
+    summon: { every: 3, max: 5, at: [[3, 0], [5, 0]] },
+    tips: ['Raja Kepiting bertahan 8! Pakai jurus yang menembus pertahanan: Masakan Pedas, Panah Jitu, atau serang dari belakang.'],
+    pre: 'c4pre', post: 'c4post',
+  },
+  {
+    id: 'b3m5', no: 19, chap: 3, name: 'Pulau Tung Yanto', sub: 'Bertahan 6 giliran', type: 'survive', n: 6, protect: 'yanto', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon'], pal: 'rawa', music: 'adventure', elv: 4,
+    desc: 'Tung Momon bernyanyi untuk membangunkan Tung Yanto. Lindungi Tung Yanto selama 6 giliran!',
+    star3: { type: 'npc', key: 'yanto', text: 'Nyawa Tung Yanto tersisa setengah atau lebih' },
+    t: ['t.b...b.t', '.www.www.', '.w.....w.', '.d.....d.', '.w..r..w.', '.ww...ww.', '.wwwdwww.', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000010000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 4, 5]],
+    npcs: [['yanto', 4, 3]],
+    enemies: [['anakBuaya', 2, 1, 99], ['anakBuaya', 6, 1, 99], ['kepiting', 2, 2, 99], ['capung', 4, 0, 99]],
+    waves: [{ turn: 2, units: [['capung', 1, 0], ['capung', 7, 0]] }, { turn: 4, units: [['anakBuaya', 1, 4], ['anakBuaya', 7, 4], ['kepiting', 4, 1]] }],
+    tips: ['Tung Yanto sedang bertapa di dalam cangkangnya dan tidak bisa bergerak. Berdirilah di sekelilingnya!'],
+    pre: 'c5pre', post: 'c5post', recruit: 'yanto',
+  },
+  {
+    id: 'b3m6', no: 20, chap: 3, name: 'Kabut Bulan', sub: 'Musuh di balik kabut', type: 'rout', fog: true, team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto'], pal: 'rawa', music: 'adventure', elv: 4,
+    desc: 'Kabut bulan menutupi rawa. Gunakan Tembok Batu Tung Yanto untuk melindungi tim!',
+    star3: { type: 'turns', n: 9, text: 'Menang dalam 9 giliran' },
+    t: ['t..w..b.t', '.b.w.m...', '...d...w.', 'm..w..ww.', '.r.w..d..', '...d.....', 'b..w..m.b', '...d,,,..', 't..w,,,.t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000011', '000000011', '000000001'],
+    players: [['ata', 5, 8], ['ladhia', 4, 7], ['bubunti', 6, 7], ['oumaldi', 7, 7], ['momon', 5, 7], ['yanto', 6, 8]],
+    enemies: [['capung', 1, 1, 4], ['capung', 6, 1, 4], ['capung', 1, 5, 4], ['anakBuaya', 3, 1, 4], ['anakBuaya', 3, 6, 3], ['kepiting', 7, 3, 3], ['belut', 6, 3, 3]],
+    tips: ['Tembok Batu 🧱 Tung Yanto menghalangi jalan musuh selama 2 giliran. Pakai untuk menutup jalan di dekat teman yang lemah!'],
+    pre: 'c6pre', post: 'c6post',
+  },
+  {
+    id: 'b3m7', no: 21, chap: 3, name: 'Istana Buaya Serakah', sub: 'Lawan Buaya Serakah', type: 'boss', team: ['ata', 'ladhia', 'bubunti', 'oumaldi', 'momon', 'yanto'], pal: 'rawa', music: 'boss', elv: 4,
+    desc: 'Buaya Serakah menimbun makanan seluruh rawa di istananya. Dia bisa menyelam lalu muncul tiba-tiba!',
+    star3: { type: 'turns', n: 11, text: 'Menang dalam 11 giliran' },
+    t: ['t.b...b.t', 'wwwwdwwww', 'wwd...dww', 'ww.....ww', 'wwd.r.dww', 'www...www', 'wwwdddwww', '...,,,...', 't..,,,..t'],
+    h: ['000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000', '000000000'],
+    players: [['ata', 4, 8], ['ladhia', 3, 7], ['bubunti', 5, 7], ['oumaldi', 6, 8], ['momon', 2, 8], ['yanto', 4, 7]],
+    enemies: [['buaya', 4, 3, 99], ['anakBuaya', 2, 1, 99], ['anakBuaya', 6, 5, 99], ['kepiting', 3, 2, 99], ['kepiting', 5, 2, 99], ['capung', 1, 0, 5], ['capung', 7, 0, 5]],
+    summon: { every: 3, max: 7, at: [[1, 3], [7, 3]] },
+    tips: ['Setiap 3 giliran Buaya Serakah menyelam 🌊 dan tidak bisa diserang. Saat muncul, gigitannya lebih kuat. Jaga jarak!', 'Buaya Serakah memanggil anak buaya. Kalahkan bosnya untuk menang!'],
+    pre: 'c7pre', post: 'c7post', final: true,
+  },
 ];
 
 /* Perluas setiap peta inti menjadi pulau: daratan 13x13 + pantai + laut. */
@@ -436,19 +619,19 @@ const MISSIONS = [
         if (cx >= 0 && cy >= 0 && cx < n && cy < n) { rt += m.t[cy][cx]; rh += m.h[cy][cx]; continue; }
         const corner = (x < 3 || x > S - 4) && (y < 3 || y > S - 4) && (Math.min(x, S - 1 - x) + Math.min(y, S - 1 - y) < 3);
         if (edge === 0 || corner) { rt += 'o'; rh += '0'; continue; }
-        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : 'y'); rh += '0'; continue; }
+        if (edge === 1) { rt += hsh(x, y, mi) > 0.88 ? 'o' : (m.pal === 'hutan' ? (hsh(x, y, mi + 5) > 0.6 ? 'm' : 'g') : m.pal === 'rawa' ? (hsh(x, y, mi + 5) > 0.55 ? 'w' : 'g') : 'y'); rh += '0'; continue; }
         const kx = Math.max(0, Math.min(n - 1, cx)), ky = Math.max(0, Math.min(n - 1, cy));
         const d = Math.max(Math.abs(cx - kx), Math.abs(cy - ky));
         const tc = m.t[ky][kx], hc = +m.h[ky][kx];
         rh += String(Math.max(0, hc - Math.floor(d / 2)));
         if (tc === ',' && (cx === kx || cy === ky)) { rt += ','; continue; }
-        if (tc === 'w' && m.pal === 'hutan' && (cx === kx || cy === ky) && (kx === 0 || kx === n - 1 || ky === 0 || ky === n - 1)) { rt += 'w'; continue; }
+        if (tc === 'w' && (m.pal === 'hutan' || m.pal === 'rawa') && (cx === kx || cy === ky) && (kx === 0 || kx === n - 1 || ky === 0 || ky === n - 1)) { rt += 'w'; continue; }
         const r = hsh(x, y, mi + 11);
         let c = '.';
         if (r < 0.07) c = 'b';
-        else if (r < 0.14) c = m.pal === 'savana' || m.pal === 'hutan' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
-        else if (r < 0.17) c = m.pal === 'hutan' ? 'J' : 'r';
-        else if (r < 0.24) c = m.pal === 'hutan' ? 'm' : 'q';
+        else if (r < 0.14) c = m.pal === 'savana' || m.pal === 'hutan' || m.pal === 'rawa' ? 't' : (hsh(x, y, 3) > 0.5 ? 'p' : 't');
+        else if (r < 0.17) c = m.pal === 'hutan' ? 'J' : m.pal === 'rawa' ? 'b' : 'r';
+        else if (r < 0.24) c = m.pal === 'hutan' || m.pal === 'rawa' ? 'm' : 'q';
         else if (r < 0.55) c = 'g';
         rt += c;
       }

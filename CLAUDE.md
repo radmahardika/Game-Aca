@@ -302,6 +302,16 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   lebih tinggi), Panah Jitu (tembus, jarak 5), Hujan Panah (sasaran + sebelahnya); sprite `pohon-madu/img/oumaldi/`, Ular di
   `musuh/ular-1..8` (dipotong dari lembar hijau pengguna). Tamu/rekrut baru mendapat level rata-rata tim (`teamLv`).
   Peta misi dikelompokkan per bab. Bot uji: tim Lv 3 menang 7/7; Lv 2 kalah di Rawa Lumpur & Sarang Ular.
+- **Bab 3 Rawa Bulan (v4, misi 15–21, `chap: 3`, `pal: 'rawa'` malam: bulan purnama, bakau `t`, ilalang `b`, air biru tua):**
+  Gerbang Rawa Bulan (kepiting bercangkang keras) → Lagu di Pulau Kecil (lindungi, **Tung Momon** bergabung) → Jalan Teratai
+  (capai bendera lewat daun teratai `d` = petak air yang bisa diinjak) → Pantai Raja Kepiting (bos tengah) → Pulau Tung Yanto
+  (bertahan 6 giliran, Yanto = NPC dalam cangkang `stance`, lalu **Tung Yanto** bergabung) → Kabut Bulan (fog, tim 6) → Istana
+  **Buaya Serakah** (bos: tiap 3 giliran menyelam 🌊 di air = tak bisa diserang, muncul dengan gigitan ×1,4; memanggil anak buaya).
+  Momon: Pemusik terbang (`fly`, lewat air tapi tak berhenti di air), Lagu Semangat (teman ≤2 petak +2 serang & +1 ⭐), Lagu
+  Penyembuh (sembuh berkelompok). Yanto: Batu Melayang (tembus, 2–4), **Tembok Batu** (`target: 'tile'`, `G.walls`, menghalangi
+  2 giliran, `drWall`), Masuk Cangkang (+5 tahan). Musuh: capung (terbang), kepiting (tahan 6), anak buaya, Raja Kepiting
+  (sprite kepiting bermahkota), Buaya Serakah (`dive`). Sprite `pohon-madu/img/momon|yanto/`, `musuh/buaya-1..6`,
+  `anak-buaya-1..3`, `kepiting-1..3`, `capung-1..3`. Bot uji: Lv 4 hampir semua menang, Lv 3 banyak kalah (perlu naik level).
 - **Halaman Tokoh (v3, `goChars(key, back)`):** dari tombol 👥 Tokoh di judul & peta, atau ketuk potret di Markas. Panggung
   isometrik dengan sprite besar + tombol pose (Siaga/Jalan/Serang/Jurus bergilir/Putar arah), kartu info (hewan, `bio`, batang
   kemampuan, jangkauan, jurus, kemampuan khusus, `tip` cara main), deretan potret untuk memilih tokoh (yang belum bergabung = ?).
@@ -309,8 +319,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   3 bintang per misi, madu 🍯 untuk naik level di Markas. Ata: Tendangan Kilat/Putar/Mode Sabuk Hitam + Refleks (hindar & balas);
   Ladhia: Tantang/Benteng Badak; Bubunti: Sup Hangat + **Masakan Pedas** (satu-satunya serangan, musuh tidak bisa bergerak 1 giliran).
 - Suara: **tanpa suara pembaca saat bertarung**; narasi suara (speechSynthesis id-ID) hanya di adegan cerita (permintaan pengguna).
-- Ke depan: Bab 3 Rawa (Buaya Serakah, Tung Momon & Tung Yanto),
-  Bab 4 Gunung (Singa Penyiksa, Utireni & Utililik).
+- Ke depan: Bab 4 Gunung Kabut (Singa Penyiksa, Utireni & Utililik).
 - Ikon aplikasi (`icons/icon-180|512.png`, `manifest.webmanifest`, nama Layar Utama "ATA Tactics"): Ladhia, Ata menendang, Bubunti
   di petak rumput isometrik, latar biru tua berbingkai emas, tulisan "ATA Tactics".
 - Simpanan `localStorage` kunci `ata-taktik-v1`. Tes: buka lewat http (PNG dari folder lain), `window.__ata`
@@ -318,6 +327,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 
 ## Status & yang sedang dibahas
 
+- Branch `pratinjau-v36` = **Ata Taktik versi 4 (Bab 3 Rawa Bulan)**, belum digabung.
 - Rilis terakhir di `main`: **versi 35** = **Ata Taktik versi 3** (Halaman Tokoh). Game lain tidak berubah.
 - Versi 34 = **Ata Taktik versi 2** (Bab 2 Hutan Lembab, Oumaldi, Ular Beracun).
 - Versi 33 = ikon aplikasi Ata Taktik ("ATA Tactics").

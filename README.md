@@ -70,7 +70,7 @@ grafis Halus/Ringan. Mohon bacaan doa dicek pembimbing.
 Folder `ata-taktik/` → `https://radmahardika.github.io/Game-Aca/ata-taktik/`
 
 Game strategi giliran di papan isometrik (gaya diorama ala Tactics Ogre). Ata si honey badger berpetualang mencari Madu Legendaris
-dari cerita Nenek. Bab 1 Savana: 7 misi, Ladhia dan Bubunti bergabung di perjalanan, bos tengah Raja Kumbang, bos terakhir Kepala Musang. Bab 2 Hutan Lembab: 7 misi, Oumaldi si pemanah bergabung, lumpur, spora tidur, kabut, dan bos Ular Beracun.
+dari cerita Nenek. Bab 1 Savana: 7 misi, Ladhia dan Bubunti bergabung di perjalanan, bos tengah Raja Kumbang, bos terakhir Kepala Musang. Bab 2 Hutan Lembab: 7 misi, Oumaldi si pemanah bergabung, lumpur, spora tidur, kabut, dan bos Ular Beracun. Bab 3 Rawa Bulan: Tung Momon & Tung Yanto bergabung, daun teratai, tembok batu, dan bos Buaya Serakah.
 Tap tokoh → tap petak biru untuk berjalan → Serang / Jurus / Madu / Selesai. Serang dari belakang atau dari tempat tinggi lebih sakit.
 Sprite Ata, Ladhia, Bubunti diambil dari folder `pohon-madu/img/`.
 

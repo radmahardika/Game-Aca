@@ -17,12 +17,12 @@
 
   /* ---------------- Simpan & muat ---------------- */
   const SKEY = 'ata-taktik-v1';
-  function defSave() { return { cleared: {}, stars: {}, madu: 0, lvl: { ata: 1, ladhia: 1, bubunti: 1, oumaldi: 1 }, seen: {}, snd: { voice: true, sfx: true, music: true } }; }
+  function defSave() { return { cleared: {}, stars: {}, madu: 0, lvl: { ata: 1, ladhia: 1, bubunti: 1, oumaldi: 1, momon: 1, yanto: 1 }, seen: {}, snd: { voice: true, sfx: true, music: true } }; }
   let S = defSave();
   try { const r = localStorage.getItem(SKEY); if (r) { const o = JSON.parse(r); S = Object.assign(defSave(), o); S.lvl = Object.assign(defSave().lvl, o.lvl || {}); } } catch (e) {}
   function persist() { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) {} }
   Object.assign(Sound.st, S.snd);
-  const JOIN = { ladhia: 'm3', bubunti: 'm6', oumaldi: 'b2m4' };
+  const JOIN = { ladhia: 'm3', bubunti: 'm6', oumaldi: 'b2m4', momon: 'b3m2', yanto: 'b3m5' };
   const recruited = k => k === 'ata' || !!S.cleared[JOIN[k]];
   const unlockedIdx = () => { let i = 0; while (i < MISSIONS.length && S.cleared[MISSIONS[i].id]) i++; return Math.min(i, MISSIONS.length - 1); };
   function charStats(k, l) { const b = CHARS[k]; return { hp: b.hp + 3 * (l - 1), atk: b.atk + (l - 1), def: b.def + Math.floor((l - 1) / 2), mov: b.mov }; }
@@ -65,13 +65,13 @@
   }
   const iso = (x, y, hh) => [(x - y) * TW / 2, (x + y) * TH / 2 - hh * HS];
   const T = (x, y) => G.map.tiles[y] && G.map.tiles[y][x];
-  const walkable = t => t && !BLOCK.has(t.t);
-  const canStand = (u, t) => t && (walkable(t) || (u && u.swim && t.t === 'w'));
+  const walkable = t => t && !BLOCK.has(t.t) && !(G && G.walls && G.walls.has(key(t.x, t.y)));
+  const canStand = (u, t) => t && (walkable(t) || (u && u.swim && t.t === 'w' && !(G.walls && G.walls.has(key(t.x, t.y)))));
   const stepCost = (u, t) => (t.t === 'm' && !u.fly && !u.mudOk ? 2 : 1);
   const unitAt = (x, y) => G.units.find(u => !u.gone && u.x === x && u.y === y);
   const dist = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   const isFoe = (a, b) => a.team === 'e' ? b.team !== 'e' : b.team === 'e';
-  const foesOf = u => G.units.filter(v => v.alive && isFoe(u, v) && (u.team === 'e' || seen(v)));
+  const foesOf = u => G.units.filter(v => v.alive && isFoe(u, v) && (u.team === 'e' || (seen(v) && !v.diving)));
   function sightOf(u) { if (u.key !== 'oumaldi') return 3; return T(u.x, u.y).h >= 1 ? 6 : 4; }
   function seen(v) { // kabut: musuh terlihat bila dekat dengan teman atau baru saja menyerang
     if (!G.m.fog || v.team !== 'e') return true;
@@ -90,9 +90,10 @@
       id: ++UID, key: k, team, name: b.name, x, y, lv, maxhp: b.hp, hp: 0, atk: b.atk, def: b.def, mov: b.mov, jump: b.jump,
       rmin: b.rmin, rmax: b.rmax, fly: !!b.fly, swim: !!b.swim, mudOk: !!b.mudOk, skills: b.skills || [], boss: !!b.boss, ranged: !!b.ranged, madu: b.madu || 0,
       sp: team === 'p' ? 2 : 0, facing: 0, done: false, moved: false, alive: true, gone: false, item: team === 'p' ? 1 : 0,
-      buffs: { sabuk: 0, benteng: 0, taunt: 0 }, status: { pedas: 0, tidur: 0, racun: 0 }, aggro: opt.aggro ?? 99, aggroOn: false,
+      buffs: { sabuk: 0, benteng: 0, taunt: 0, lagu: 0, cangkang: 0 }, status: { pedas: 0, tidur: 0, racun: 0 }, aggro: opt.aggro ?? 99, aggroOn: false,
       anim: 'idle', a0: 0, adur: 1, ox: 0, oy: 0, alpha: 1, tw: null, spin: false,
     };
+    if (b.stance) u.stance = b.stance;
     if (team === 'p') { const s = charStats(k, lv); u.maxhp = s.hp; u.atk = s.atk; u.def = s.def; }
     if (team === 'e' && lv > 1) { u.maxhp += (b.boss ? 6 : 2) * (lv - 1); u.atk += lv - 1; u.def += Math.floor((lv - 1) / 2); }
     u.hp = u.maxhp;
@@ -145,8 +146,8 @@
     const dot = fx * vx + fy * vy, cr = Math.abs(fx * vy - fy * vx);
     if (dot > 0 && dot >= cr) return 'front'; if (dot < 0 && -dot >= cr) return 'back'; return 'side';
   }
-  const effAtk = u => u.atk + (u.buffs.sabuk > 0 ? 4 : 0);
-  function effDef(u) { const t = T(u.x, u.y); return u.def + (u.buffs.benteng > 0 ? 3 : 0) + (t && t.t === 'b' ? 1 : 0); }
+  const effAtk = u => u.atk + (u.buffs.sabuk > 0 ? 4 : 0) + (u.buffs.lagu > 0 ? 2 : 0);
+  function effDef(u) { const t = T(u.x, u.y); return u.def + (u.buffs.benteng > 0 ? 3 : 0) + (u.buffs.cangkang > 0 ? 5 : 0) + (t && t.t === 'b' ? 1 : 0); }
   function calcDmg(att, def, opt = {}) {
     const ax = opt.ax ?? att.x, ay = opt.ay ?? att.y;
     const a = opt.flat ?? effAtk(att) * (opt.mult ?? 1);
@@ -257,8 +258,9 @@
     faceTo(u, t.x, t.y); u.pose = null;
     const far = dist(u, t) > 1;
     const p = playAnim(u, 'attack', 420);
-    if (far) { await wait(140); await projectile(u, t, u.key === 'ladhia' ? '⚙️' : u.key === 'oumaldi' ? 'arrow' : (ENEMIES[u.key] && ENEMIES[u.key].proj) || '🪨', 280); } else await wait(250);
-    await hit(u, t, { basic: true, melee: !far });
+    if (far) { await wait(140); await projectile(u, t, u.key === 'ladhia' ? '⚙️' : u.key === 'oumaldi' ? 'arrow' : u.key === 'momon' ? '🎵' : u.key === 'yanto' ? '🪨' : (ENEMIES[u.key] && ENEMIES[u.key].proj) || '🪨', 280); } else await wait(250);
+    await hit(u, t, { basic: true, melee: !far, mult: u.surge ? 1.4 : 1 });
+    u.surge = false;
     await p;
   }
   async function useSkill(u, sk, tg) {
@@ -323,6 +325,39 @@
         list.forEach(f => applyDamage(u, f, calcDmg(u, f, { mult: f === tg ? 1 : 0.7 })));
         await p; break;
       }
+      case 'lagu': case 'ceria': {
+        Sound.play('power');
+        const p = playAnim(u, 'skill', 760); await wait(300);
+        const list = G.units.filter(v => v.alive && v.team === 'p' && dist(v, u) <= 2);
+        for (const v of list) {
+          if (sk === 'lagu') { v.buffs.lagu = 1; if (v !== u) v.sp = Math.min(5, v.sp + 1); addText(v, '+2 ⚔️ 🎵', '#ffe08a', 9); burst(v, ['#ffe08a', '#8fd6ff', '#ffffff'], 6); }
+          else { const amt = Math.min(6 + u.lv, v.maxhp - v.hp); v.hp += amt; addText(v, '+' + amt, '#8cff8c', 11); burst(v, ['#8cff8c', '#ffffff'], 6); }
+        }
+        if (sk === 'ceria') Sound.play('heal');
+        await p; break;
+      }
+      case 'batu': {
+        faceTo(u, tg.x, tg.y);
+        const p = playAnim(u, 'skill', 600); await wait(220);
+        await projectile(u, tg, '🪨', 360);
+        applyDamage(u, tg, calcDmg(u, tg, { flat: effAtk(u) + 4, pierce: true }));
+        burst(tg, ['#8a7a6a', '#c8b8a0', '#5ad3ff'], 10);
+        await p; break;
+      }
+      case 'tembok': {
+        faceTo(u, tg.x, tg.y);
+        const p = playAnim(u, 'skill', 650); await wait(300);
+        G.walls.set(key(tg.x, tg.y), { left: 2 }); Sound.play('shield');
+        const [wx, wy] = iso(tg.x, tg.y, tg.h);
+        for (let i = 0; i < 12; i++) { const a = Math.random() * 7, sp = 40 + Math.random() * 60; G.parts.push({ x: wx, y: wy - 10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, t0: now(), life: 0.6, c: ['#8a7a6a', '#c8b8a0'][i % 2] }); }
+        await p; break;
+      }
+      case 'cangkang': {
+        u.buffs.cangkang = 1; Sound.play('shield');
+        const amt = Math.min(5, u.maxhp - u.hp); u.hp += amt;
+        addText(u, '+5 🛡️', '#9fd4ff', 10); if (amt) addText(u, '+' + amt, '#8cff8c', 9, 0.3);
+        u.stance = 'cangkang'; await playAnim(u, 'skill', 600); break;
+      }
       case 'pedas': {
         faceTo(u, tg.x, tg.y);
         const p = playAnim(u, 'skill', 520); await wait(180);
@@ -342,7 +377,7 @@
     G = {
       m, map: buildMap(m), units: [], turn: 1, phase: 'intro', sel: null, info: null, mode: 'idle', reach: null,
       targets: null, tkind: null, skill: null, texts: [], parts: [], projs: [], busy: true, ended: false, madu: 0,
-      stats: { faint: 0 }, waves: (m.waves || []).map(w => ({ ...w, done: false })), tipsSeen: {}, moveFrom: null,
+      stats: { faint: 0 }, waves: (m.waves || []).map(w => ({ ...w, done: false })), tipsSeen: {}, moveFrom: null, walls: new Map(),
     };
     for (const [k, x, y] of m.players) G.units.push(mkUnit(k, 'p', x, y));
     for (const [k, x, y] of (m.npcs || [])) { const u = mkUnit(k, 'n', x, y); u.done = true; G.units.push(u); }
@@ -358,11 +393,12 @@
   }
   function beginPlayerPhase() {
     G.phase = 'player'; G.busy = false;
+    if (G.walls) for (const [k, w] of [...G.walls]) { if (--w.left <= 0) G.walls.delete(k); }
     for (const u of G.units) {
       if (u.team === 'e') continue;
       u.done = !u.alive || u.team === 'n'; u.moved = false;
       if (G.turn > 1 && u.alive) { u.sp = Math.min(5, u.sp + 1); if (u.buffs.sabuk > 0) u.buffs.sabuk--; }
-      u.buffs.benteng = 0; u.buffs.taunt = 0;
+      u.buffs.benteng = 0; u.buffs.taunt = 0; u.buffs.lagu = 0; u.buffs.cangkang = 0; if (u.team === 'p') u.stance = null;
       if (u.team === 'p' && u.alive && u.status.racun > 0) {
         u.status.racun--; const d = Math.min(2, u.hp - 1);
         if (d > 0) { u.hp -= d; addText(u, '-' + d + ' 🤢', '#b8ff7a', 10); }
@@ -422,6 +458,13 @@
     if (u.sp < d.cost) { toast('Semangat ⭐ belum cukup. Tunggu giliran berikutnya!'); return; }
     if (d.target === 'self') { runAction(() => useSkill(u, sk, u)); return; }
     let list;
+    if (d.target === 'tile') {
+      const ts = [];
+      for (const row of G.map.tiles) for (const t of row) { const dd = dist(u, t); if (dd >= d.rmin && dd <= d.rmax && walkable(t) && !unitAt(t.x, t.y) && t.t !== 'f') ts.push(t); }
+      if (!ts.length) { toast('Tidak ada petak kosong di dekat Tung Yanto.'); return; }
+      G.mode = 'target'; G.tkind = 'tile'; G.skill = sk; G.targets = new Map(ts.map(t => [key(t.x, t.y), t])); G.rangeTiles = null;
+      renderPanel(); return;
+    }
     if (d.target === 'enemy') list = foesOf(u).filter(f => canHitFrom(u, u.x, u.y, f, d.rmin, d.rmax));
     else list = G.units.filter(v => v.alive && v.team !== 'e' && dist(u, v) >= d.rmin && dist(u, v) <= d.rmax);
     if (!list.length) { toast(d.target === 'enemy' ? 'Tidak ada musuh dalam jangkauan jurus ini.' : 'Tidak ada teman dalam jangkauan.'); return; }
@@ -569,6 +612,14 @@
     if (e.status.pedas > 0) {
       e.status.pedas--; focus(e); addText(e, 'Huaaa pedas! 🥵', '#ff9b42', 9);
       await playAnim(e, 'hurt', 500); await wait(250); return;
+    }
+    if (e.diving) { e.diving = false; e.stance = null; e.surge = true; focus(e); addText(e, 'Muncul! 💥', '#ffd84d', 10); Sound.play('roar'); await wait(350); }
+    else if (ENEMIES[e.key].dive && e.aggroOn && G.turn % 3 === 0 && T(e.x, e.y).t === 'w') {
+      focus(e); e.diving = true; e.stance = 'selam'; addText(e, 'Menyelam! 🌊', '#8fd6ff', 10); Sound.play('whoosh');
+      const R0 = reach(e), tg = foesOf(e), f = distField(e, tg); let mv = null;
+      for (const [k, p] of R0) { const d = f.get(k); if (d == null || T(p.x, p.y).t !== 'w') continue; if (!mv || d < mv.d) mv = { d, p }; }
+      if (mv) { e.x = mv.p.x; e.y = mv.p.y; }
+      await wait(500); return;
     }
     const targets = foesOf(e); if (!targets.length) return;
     if (!e.aggroOn) { if (targets.some(t => dist(t, e) <= e.aggro) || e.hp < e.maxhp) e.aggroOn = true; else return; }
@@ -772,11 +823,12 @@
   const sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   const SUN = [1.06, 1.0, 0.9], SHADE = [0.72, 0.78, 0.95];
   function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
-  const isWater = t => t.t === 'w';
+  const isWater = t => t.t === 'w' || t.t === 'd';
   const isSea = t => !t || t.t === 'o';
   const GRASS = {
     kebun: ['#456f2c', '#8cb653', '#a9c46a'], desa: ['#4a742e', '#90b856', '#b0c870'], savana: ['#5f7a2c', '#a8b456', '#c9c070'],
     hutan: ['#1f3d22', '#4a7a3a', '#7aa84e'],
+    rawa: ['#203a34', '#4a7458', '#7c9e76'],
   };
   function stoneTop(X, Y, sc) {
     let su = X * sc, sv = Y * sc; const row = Math.floor(sv); if (row % 2) su += 0.5;
@@ -806,9 +858,17 @@
       case 'c': { const r = (X + Y) * 4, f = r - Math.floor(r); let c = mix(C('#5e3e26'), C('#8a6040'), sm(0.1, 0.5, Math.abs(f - 0.5) * 2) * 0.8 + fbm(X * 6, Y * 6, 33) * 0.2);
         if (Math.abs(f - 0.5) < 0.14 && hash(Math.floor(r), Math.floor((X - Y) * 5), 34) > 0.35) { const k = vn((X - Y) * 14, r, 35); if (k > 0.45) c = mix(C('#3f7a2a'), C('#8cc458'), k); } return c; }
       case 'h': case 'k': case 'z': return stoneTop(X, Y, 2.4);
+      case 'd': { // daun teratai di atas air
+        let c = topColor({ t: 'w' }, X, Y, gp);
+        const fx = X - Math.round(X), fy = Y - Math.round(Y), a = Math.atan2(fy, fx), d = Math.hypot(fx, fy);
+        if (d < 0.4 && !(a > 0.2 && a < 0.75 && d > 0.05)) { c = mix(C('#3e7a34'), C('#7cb85a'), 0.3 + 0.5 * fbm(X * 5, Y * 5, 50)); c = mix(c, C('#2c5a26'), sm(0.32, 0.4, d) * 0.7); if (Math.abs(Math.sin(a * 6)) < 0.08 && d < 0.3) c = mix(c, C('#a8d880'), 0.4); }
+        if (hash(Math.round(X), Math.round(Y), 51) > 0.6) { const px = fx + 0.14, py = fy + 0.12, pd = Math.hypot(px, py); if (pd < 0.09) c = mix(C('#f8c8e0'), C('#ffffff'), 0.4 - pd * 3); }
+        return c;
+      }
       case 'w': {
         if (G.m.mud) { const n = fbm(X * 2, Y * 2, 40); let c = mix(C('#4e3826'), C('#7a5a3c'), n); return mix(c, C('#9a7a58'), sm(0.75, 0.9, fbm(X * 6, Y * 6, 41)) * 0.5); }
         const r = 0.5 + 0.5 * Math.sin(X * 7 + Y * 2.5 + fbm(X * 1.5, Y * 1.5, 10) * 5);
+        if (G.m.pal === 'rawa') { let c = mix(mix(C('#0e2a40'), C('#245a78'), 0.35 + r * 0.4), C('#d8ecff'), sm(0.95, 0.995, r) * 0.6); return mix(c, C('#2e5a40'), sm(0.7, 0.8, fbm(X * 2.5, Y * 2.5, 49)) * 0.5); }
         if (G.m.pal === 'hutan') { let c = mix(mix(C('#123a34'), C('#2e6a5a'), 0.35 + r * 0.4), C('#bfe8d0'), sm(0.94, 0.99, r) * 0.5); const ld = fbm(X * 3, Y * 3, 48); return mix(c, C('#4a8a3a'), sm(0.72, 0.78, ld) * 0.8); }
         return mix(mix(C('#18469a'), C('#3c86d8'), 0.35 + r * 0.4), C('#cfe9ff'), sm(0.93, 0.99, r) * 0.7);
       }
@@ -822,7 +882,7 @@
       const e = Math.min(bf, 1 - bf, jf * 0.6, (1 - jf) * 0.6);
       c = mix(C('#857a68'), C('#b2a68c'), 0.3 + hash(Math.floor(bu), r, 14) * 0.5 + (fbm(X * 5 + s * 2, j * 0.12, 15) - 0.5) * 0.3);
       c = mix(C('#3e3630'), mix(c, C('#e2d7bc'), (1 - sm(0, 0.18, jf)) * 0.3), sm(0.01, 0.06, e));
-    } else if (t.t === 'w') c = mix(C('#5a4e40'), C('#7a6c58'), fbm(s * 4 + X, j * 0.1, 42));
+    } else if (isWater(t)) c = mix(C('#5a4e40'), C('#7a6c58'), fbm(s * 4 + X, j * 0.1, 42));
     else {
       const sand = t.t === 'y' || t.t === ',' || t.t === 's';
       const lip = sand ? 3 : 4 + fbm(s * 8 + X, 0, 16) * 6;
@@ -939,6 +999,28 @@
       c.strokeStyle = '#3a6a2a'; c.lineWidth = 2.2; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(x0 + 6, y0 + len * 0.5, x0 - 2, y0 + len); c.stroke();
       c.fillStyle = '#5a8a3a'; for (let q = 0; q < 4; q++) { c.beginPath(); c.ellipse(x0 + 2 - q % 2 * 4, y0 + len * (q + 1) / 5, 3.5, 2, q, 0, 7); c.fill(); } }
   }
+  function drWall(c) { // tembok batu sihir Tung Yanto
+    const a = 0.4, Wh = 44;
+    const A = Q(-a, a, 0), B = Q(a, a, 0), Cc = Q(a, -a, 0), At = Q(-a, a, Wh), Bt = Q(a, a, Wh), Ct = Q(a, -a, Wh), Dt = Q(-a, -a, Wh);
+    gradPoly(c, [A, B, Bt, At], '#a89c88', '#7a705e', At, A); gradPoly(c, [B, Cc, Ct, Bt], '#6e6656', '#4e483c', Bt, B); poly(c, [At, Bt, Ct, Dt], '#c8bca4');
+    c.strokeStyle = 'rgba(40,34,28,0.55)'; c.lineWidth = 2;
+    for (let k = 1; k < 3; k++) { const L = lerp(A, At, k / 3), Rr = lerp(B, Bt, k / 3), R2 = lerp(Cc, Ct, k / 3); c.beginPath(); c.moveTo(L[0], L[1]); c.lineTo(Rr[0], Rr[1]); c.lineTo(R2[0], R2[1]); c.stroke(); }
+    const m = lerp(A, B, 0.5), mt = lerp(At, Bt, 0.5); c.beginPath(); c.moveTo(lerp(m, mt, 0.33)[0], lerp(m, mt, 0.33)[1]); c.lineTo(lerp(m, mt, 0.66)[0], lerp(m, mt, 0.66)[1]); c.stroke();
+    c.fillStyle = 'rgba(110,160,80,0.75)'; c.beginPath(); c.ellipse(Dt[0] * 0.2, (At[1] + Ct[1]) / 2, 14, 5, 0, 0, 7); c.fill();
+    c.fillStyle = 'rgba(120,220,255,0.8)'; c.beginPath(); c.arc(lerp(A, Bt, 0.5)[0], lerp(A, Bt, 0.5)[1], 3, 0, 7); c.fill();
+  }
+  function drMangrove(c, seed) { // bakau: akar tunjang melengkung, tajuk bulat gelap kebiruan
+    c.strokeStyle = '#3e2e22'; c.lineCap = 'round';
+    for (let k = 0; k < 6; k++) { const a = -1 + k * 0.4, x1 = Math.cos(a + 1.57) * 0 + (k - 2.5) * 9; c.lineWidth = 4; c.beginPath(); c.moveTo(x1 * 0.3, -46); c.quadraticCurveTo(x1 * 1.6, -36, x1 * 1.9 + (k % 2 ? 4 : -4), 4); c.stroke(); }
+    const tr = c.createLinearGradient(-8, 0, 8, 0); tr.addColorStop(0, '#5a4636'); tr.addColorStop(1, '#2a1e16');
+    c.fillStyle = tr; c.beginPath(); c.moveTo(-7, -40); c.lineTo(-5, -100); c.lineTo(5, -100); c.lineTo(7, -40); c.fill();
+    blobs(c, [[0, -126, 40], [-32, -106, 30], [32, -104, 30], [-12, -152, 26], [16, -148, 26]], seed, ['#7ea888', '#33604c', '#0e2620']);
+  }
+  function drReeds(c, seed) { // ilalang rawa & bunga purun
+    for (let k = 0; k < 9; k++) { const x = -20 + k * 5 + (hash(k, seed, 90) - 0.5) * 4, hgt = 34 + hash(k, seed, 91) * 26, bend = (hash(k, seed, 92) - 0.5) * 14;
+      c.strokeStyle = k % 2 ? '#5a8a4a' : '#78a858'; c.lineWidth = 2.2; c.beginPath(); c.moveTo(x, 0); c.quadraticCurveTo(x + bend * 0.3, -hgt * 0.6, x + bend, -hgt); c.stroke();
+      if (k % 3 === 0) { c.fillStyle = '#6a4228'; c.beginPath(); c.ellipse(x + bend * 0.85, -hgt + 6, 2.6, 7, bend * 0.02, 0, 7); c.fill(); } }
+  }
   function drShroom(c, seed) { // jamur raksasa bercahaya
     const caps = [[-16, -6, 1], [14, -2, 0.75], [0, 8, 0.55]];
     for (const [x, y, k] of caps) {
@@ -1005,16 +1087,17 @@
     poly(c, [[0, -hh - s / 2], [s, -hh], [0, s / 2 - hh], [-s, -hh]], '#d6a266');
   }
   const DECOR = {
-    t: { draw: (c, s) => G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
+    t: { draw: (c, s) => G.m.pal === 'rawa' ? drMangrove(c, s) : G.m.pal === 'hutan' ? drJungle(c, s) : drTree(c, s, G.m.pal === 'savana'), w: 230, h: 270, sh: [16, 6, 38, 16] },
     J: { draw: drShroom, w: 120, h: 110, sh: [8, 4, 26, 10] },
     L: { draw: drLog, w: 150, h: 80, sh: [6, 6, 34, 12] },
     p: { draw: drPine, w: 120, h: 180, sh: [14, 6, 28, 12] },
-    b: { draw: (c, s) => G.m.pal === 'hutan' ? drFern(c, s) : drBush(c, s), w: 110, h: 80, sh: [8, 4, 26, 10] },
+    b: { draw: (c, s) => G.m.pal === 'rawa' ? drReeds(c, s) : G.m.pal === 'hutan' ? drFern(c, s) : drBush(c, s), w: 110, h: 80, sh: [8, 4, 26, 10] },
     r: { draw: drRock, w: 100, h: 80, sh: [10, 4, 26, 10] },
     h: { draw: drHouse, w: 150, h: 190, sh: [20, 8, 34, 18] },
     k: { draw: drStove, w: 120, h: 120, sh: [10, 6, 24, 10] },
     s: { draw: drWell, w: 120, h: 150, sh: [12, 6, 26, 11] },
     X: { draw: drCrate, w: 80, h: 80, sh: [10, 6, 24, 10] },
+    W: { draw: drWall, w: 110, h: 140, sh: [10, 6, 28, 12] },
   };
   function renderDecor(t) {
     const D = DECOR[t.t]; if (!D) return null;
@@ -1054,13 +1137,21 @@
   const W2S = (wx, wy) => [cam.x + wx * cam.z, cam.y + wy * cam.z];
   let BG = null;
   function bgCanvas() {
-    const pal = G && G.m.pal === 'hutan' ? 'hutan' : 'x';
+    const pal = G && (G.m.pal === 'hutan' || G.m.pal === 'rawa') ? G.m.pal : 'x';
     if (BG && BG.w === VW && BG.h === VH && BG.pal === pal) return BG;
     const back = mkCanvas(Math.round(VW * DPR), Math.round(VH * DPR)), b = back.getContext('2d');
     b.scale(DPR, DPR);
     const g = b.createRadialGradient(VW * 0.5, VH * 0.35, 0, VW * 0.5, VH * 0.5, Math.max(VW, VH) * 0.8);
     if (pal === 'hutan') { g.addColorStop(0, '#2c5a4c'); g.addColorStop(0.55, '#0f2e2a'); g.addColorStop(1, '#030c0c'); }
+    else if (pal === 'rawa') { g.addColorStop(0, '#2a3e78'); g.addColorStop(0.55, '#121c44'); g.addColorStop(1, '#03060f'); }
     else { g.addColorStop(0, '#2f5ea8'); g.addColorStop(0.55, '#14336e'); g.addColorStop(1, '#050d26'); } b.fillStyle = g; b.fillRect(0, 0, VW, VH);
+    if (pal === 'rawa') { // bulan purnama & bintang
+      const mx = VW * 0.82, my = VH * 0.16, mr = Math.min(VW, VH) * 0.07;
+      const hg = b.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 4); hg.addColorStop(0, 'rgba(220,230,255,0.35)'); hg.addColorStop(1, 'rgba(220,230,255,0)'); b.fillStyle = hg; b.fillRect(0, 0, VW, VH);
+      const mg = b.createRadialGradient(mx - mr * 0.3, my - mr * 0.3, 2, mx, my, mr); mg.addColorStop(0, '#fffbe8'); mg.addColorStop(1, '#d8dcc8'); b.fillStyle = mg; b.beginPath(); b.arc(mx, my, mr, 0, 7); b.fill();
+      b.fillStyle = 'rgba(160,170,150,0.35)'; [[0.3, 0.2, 0.18], [-0.25, 0.35, 0.12], [0.1, -0.3, 0.1]].forEach(([a, c2, rr]) => { b.beginPath(); b.arc(mx + a * mr, my + c2 * mr, rr * mr, 0, 7); b.fill(); });
+      for (let i = 0; i < 60; i++) { b.fillStyle = `rgba(255,255,240,${0.2 + hash(i, 1, 7) * 0.6})`; b.fillRect(hash(i, 2, 7) * VW, hash(i, 3, 7) * VH * 0.55, 1.6, 1.6); }
+    }
     const front = mkCanvas(Math.round(VW * DPR), Math.round(VH * DPR)), f = front.getContext('2d');
     f.scale(DPR, DPR);
     const lg = f.createLinearGradient(0, 0, VW, VH); lg.addColorStop(0, 'rgba(255,214,150,0.10)'); lg.addColorStop(0.55, 'rgba(255,214,150,0)'); lg.addColorStop(1, 'rgba(30,50,130,0.14)');
@@ -1105,7 +1196,7 @@
     const done = u.team === 'p' && u.done && G.phase === 'player' && u.alive;
     c.globalAlpha = alpha * (done ? 0.8 : 1);
     c.save(); c.translate(ax + u.ox * R, ay - p.hop * R + drop);
-    SPR.draw(c, u.key, u.facing, u.alive || u.anim === 'faint' ? u.anim : 'faint', clamp((tm - u.a0) / u.adur, 0, 1), tm, { seed: u.id, spin: u.spin, pose: u.pose });
+    SPR.draw(c, u.key, u.facing, u.alive || u.anim === 'faint' ? u.anim : 'faint', clamp((tm - u.a0) / u.adur, 0, 1), tm, { seed: u.id, spin: u.spin, pose: u.pose, stance: u.stance });
     c.restore();
     c.globalAlpha = 1;
     if (u.alive) {
@@ -1152,6 +1243,7 @@
         const t = m.tiles[d - x][x]; if (isSea(t)) continue;
         const dc = G.decC[t.y * m.w + x], [cx, cy] = iso(t.x, t.y, t.h);
         if (dc) ctx.drawImage(dc.cv, cx * R - dc.ax, cy * R - dc.ay);
+        if (G.walls.size && G.walls.has(key(t.x, t.y))) { const wc = G.wallC || (G.wallC = renderDecor({ t: 'W', x: 3, y: 5 })); const w = G.walls.get(key(t.x, t.y)); ctx.globalAlpha = w.left <= 1 ? 0.6 + 0.3 * Math.sin(tm * 8) : 1; ctx.drawImage(wc.cv, cx * R - wc.ax, cy * R - wc.ay); ctx.globalAlpha = 1; }
         if (t.t === 'f') drawFlag(ctx, cx * R, cy * R, tm);
         if (t.t === 'k') { ctx.fillStyle = 'rgba(255,255,255,0.55)'; for (let i = 0; i < 3; i++) { const o = (tm * 18 + i * 12) % 36; ctx.beginPath(); ctx.arc(cx * R + Math.sin(tm * 2 + i) * 6, cy * R - 54 - o * 1.6, 5 + o * 0.2, 0, 7); ctx.globalAlpha = 1 - o / 36; ctx.fill(); } ctx.globalAlpha = 1; }
       }
@@ -1163,7 +1255,7 @@
       ctx.globalAlpha = 1 - k / q.life; ctx.fillStyle = q.c; ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    if (G.m.pal === 'hutan') drawForestAir(ctx, tm);
+    if (G.m.pal === 'hutan' || G.m.pal === 'rawa') drawForestAir(ctx, tm);
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bg.front, 0, 0);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     drawOverlays(ctx, tm);
@@ -1202,6 +1294,9 @@
       if (u.status.pedas > 0) icons.push('🥵');
       if (u.status.tidur > 0 || u.sleeping) icons.push('😴');
       if (u.status.racun > 0) icons.push('🤢');
+      if (u.buffs.lagu > 0) icons.push('🎵');
+      if (u.buffs.cangkang > 0) icons.push('🐢');
+      if (u.diving) icons.push('🌊');
       if (u.buffs.sabuk > 0) icons.push('🥋');
       if (u.team === 'e' && !u.aggroOn && u.aggro < 50) icons.push('💤');
       if (u.boss) icons.push('👑');
@@ -1209,6 +1304,7 @@
     }
     if (G.mode === 'target' && G.targets) {
       for (const tg of G.targets.values()) {
+        if (G.tkind === 'tile') continue;
         const p = unitWorld(tg), hh = SPR.height(tg.key);
         let label = '', color = '#fff';
         if (G.tkind === 'attack' || G.tkind === 'enemy') {
@@ -1217,6 +1313,7 @@
           else if (G.skill === 'kilat') { const one = calcDmg(G.sel, tg, { mult: 0.75 }); r = { dmg: one.dmg * 2, side: one.side }; }
           else if (G.skill === 'jitu') r = calcDmg(G.sel, tg, { mult: 1.3, pierce: true });
           else if (G.skill === 'hujan') r = calcDmg(G.sel, tg, { mult: 1 });
+          else if (G.skill === 'batu') r = calcDmg(G.sel, tg, { flat: effAtk(G.sel) + 4, pierce: true });
           else r = calcDmg(G.sel, tg, { flat: effAtk(G.sel) + 5 + (G.sel.lv - 1), pierce: true });
           label = (r.dmg >= tg.hp ? '💥 ' : '') + '-' + r.dmg + (r.side === 'back' ? ' ↩' : '');
           color = r.dmg >= tg.hp ? '#ffe14d' : '#ffffff';
@@ -1323,6 +1420,9 @@
     if (u.status.pedas > 0) chips.push('🥵 Kepedasan');
     if (u.status.tidur > 0 || u.sleeping) chips.push('😴 Tertidur');
     if (u.status.racun > 0) chips.push(`🤢 Racun ${u.status.racun}`);
+    if (u.buffs.lagu > 0) chips.push('🎵 +2 serang');
+    if (u.buffs.cangkang > 0) chips.push('🐢 Dalam cangkang');
+    if (u.diving) chips.push('🌊 Menyelam: tidak bisa diserang');
     if (u.team === 'p' && T(u.x, u.y).t === 'm') chips.push('🟫 Di lumpur');
     const range = u.rmax > 1 ? `${u.rmin}-${u.rmax}` : '1';
     return h('div', { class: 'ucard ' + u.team },
@@ -1377,7 +1477,7 @@
         break;
       }
       case 'target':
-        hint(G.tkind === 'ally' ? 'Tap teman yang bercincin hijau.' : 'Tap musuh yang menyala merah. Angka = kerusakan, 💥 = langsung kalah.');
+        hint(G.tkind === 'tile' ? 'Tap petak yang menyala untuk memunculkan Tembok Batu.' : G.tkind === 'ally' ? 'Tap teman yang bercincin hijau.' : 'Tap musuh yang menyala merah. Angka = kerusakan, 💥 = langsung kalah.');
         row.append(btn('↩ Kembali', toAction));
         break;
       case 'busy': break;
@@ -1471,7 +1571,8 @@
     1: { name: 'Savana', icon: '🌾', end: 'Ata, Ladhia, dan Bubunti siap melanjutkan perjalanan ke Hutan Lembab.', team: ['ladhia', 'ata', 'bubunti'] },
     2: { name: 'Hutan Lembab', icon: '🌿', end: 'Oumaldi bergabung, Ular Beracun kalah, dan sobekan peta menunjuk ke Rawa Bulan.', team: ['ladhia', 'ata', 'bubunti', 'oumaldi'] },
   };
-  const NEXT = { 1: 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah.', 2: 'Bab 3: Rawa Bulan dan Buaya Serakah. Teman baru: Tung Momon & Tung Yanto. Segera hadir!' };
+  CHAPTERS[3] = { name: 'Rawa Bulan', icon: '🌙', end: 'Tung Momon dan Tung Yanto bergabung, Buaya Serakah mau berbagi, dan peta ketiga menunjuk ke Gunung Kabut.', team: ['momon', 'ladhia', 'ata', 'bubunti', 'oumaldi', 'yanto'] };
+  const NEXT = { 3: 'Bab 4: Gunung Kabut dan Singa Penyiksa. Teman baru: Uti Reni & Uti Lilik. Segera hadir!', 1: 'Bab 2: Hutan Lembab dan Ular Beracun. Teman baru: Oumaldi si tupai pemanah.', 2: 'Bab 3: Rawa Bulan dan Buaya Serakah. Teman baru: Tung Momon & Tung Yanto.' };
   async function chapterEnd(m) {
     const ch = m.chap || 1, C_ = CHAPTERS[ch];
     G = null; hud.hidden = true; panel.hidden = true;
@@ -1484,7 +1585,7 @@
       h('p', {}, C_.end),
       h('p', { class: 'muted' }, NEXT[ch]),
       btn('🗺️ Kembali ke peta', goMap, 'pri big')));
-    Sound.speak('Bab ' + (ch === 1 ? 'satu' : 'dua') + ' selesai! Petualangan berlanjut!', 1.2);
+    Sound.speak('Bab ' + ['', 'satu', 'dua', 'tiga'][ch] + ' selesai! Petualangan berlanjut!', 1.2);
   }
 
   /* ---------------- Layar menu ---------------- */
@@ -1498,7 +1599,7 @@
     screen(h('div', { class: 'title' },
       h('div', { class: 'tsmall' }, 'Petualangan Dunia Satwa'),
       h('h1', {}, 'Ata dan Madu Legendaris', h('span', {}, 'Taktik')),
-      h('div', { class: 'trio' }, portrait('ladhia', 96), portrait('ata', 120), portrait('bubunti', 96), recruited('oumaldi') ? portrait('oumaldi', 90) : null),
+      h('div', { class: 'trio' }, portrait('ladhia', 96), portrait('ata', 120), portrait('bubunti', 96), recruited('oumaldi') ? portrait('oumaldi', 90) : null, recruited('momon') ? portrait('momon', 86) : null, recruited('yanto') ? portrait('yanto', 86) : null),
       h('div', { class: 'col' },
         btn(started ? '▶ Lanjutkan' : '▶ Mulai Petualangan', async () => {
           Sound.resume(); Sound.startMusic('calm');
@@ -1507,7 +1608,7 @@
         }, 'pri big'),
         btn('👥 Tokoh', () => goChars(null, goTitle)),
         btn('⚙️ Pengaturan', goSettings)),
-      h('p', { class: 'muted small' }, 'Bab 1 Savana · Bab 2 Hutan Lembab · 14 misi'),
+      h('p', { class: 'muted small' }, 'Bab 1 Savana · Bab 2 Hutan Lembab · Bab 3 Rawa Bulan · 21 misi'),
       h('div', { class: 'ver' }, 'versi ' + AT.VERSION)));
   }
   function goMap() {
@@ -1524,7 +1625,7 @@
         h('div', { class: 'dot' }, open ? (m.type === 'boss' ? '👑' : m.no) : '🔒'),
         h('div', { class: 'ninfo' }, h('b', {}, m.name), h('small', {}, m.sub), h('span', { class: 'nst' }, open ? stars(S.stars[m.id] || 0) : ''))));
     });
-    path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '🌙'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 3: Rawa Bulan'), h('small', {}, 'Segera hadir'))));
+    path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '⛰️'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 4: Gunung Kabut'), h('small', {}, 'Segera hadir'))));
     screen(topbar('Peta Petualangan', goTitle),
       h('div', { class: 'maphead' }, btn('🏠 Markas', goBase, 'pri2'), btn('👥 Tokoh', () => goChars(null, goMap), 'pri2'), btn('⚙️', goSettings, 'icon')),
       path);
@@ -1648,7 +1749,7 @@
 
   /* ---------------- Mulai ---------------- */
   document.addEventListener('pointerdown', () => Sound.resume(), { once: true });
-  window.__ata = { goChars, get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
+  window.__ata = { goChars, sel: u => selectUnit(u), get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
   scr.classList.add('on'); scr.innerHTML = '<div class="title"><div class="tsmall">Memuat gambar…</div></div>';
   requestAnimationFrame(frame);
   window.__ata.ready = SPR.load().then(goTitle);

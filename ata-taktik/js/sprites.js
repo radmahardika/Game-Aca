@@ -19,6 +19,12 @@ const SPR = (() => {
     oumaldi: { h: 58, ref: 'depan', face: 'wajah', poses: {
       idle: ['kanan', 'R'], walk: ['lari', 'R'], back: ['belakang', 'N'],
       attack: ['jongkok', 'R'], jitu: ['panah', 'R'], hujan: ['loncat-panah', 'R'] } },
+    momon: { h: 56, ref: 'depan', face: 'wajah', poses: {
+      idle: ['kanan', 'R'], walk: ['kanan', 'R'], back: ['belakang', 'N'],
+      attack: ['seruling', 'R'], lagu: ['seruling', 'R'], ceria: ['sorak', 'N'] } },
+    yanto: { h: 60, ref: 'depan', face: 'wajah', poses: {
+      idle: ['kanan', 'R'], walk: ['kanan', 'R'], back: ['belakang', 'N'],
+      attack: ['rapal', 'N'], batu: ['rapal', 'N'], tembok: ['rapal', 'N'], cangkang: ['cangkang', 'N'] } },
     nenek: { h: 52, ref: 'depan', face: 'depan', poses: { idle: ['kanan', 'R'], back: ['belakang', 'N'] } },
     // musuh (folder musuh/, file <nama>-N): idle = sprite battle Pohon Madu (menghadap kanan kecuali L)
     kumbang: { dir: 'musuh', h: 30, ref: 'kumbang-2', face: 'kumbang-1', poses: { idle: ['kumbang-2', 'R'], back: ['kumbang-3', 'R'] } },
@@ -35,6 +41,11 @@ const SPR = (() => {
     katak: { dir: 'musuh', h: 30, ref: 'katak-3', face: 'katak-1', poses: { idle: ['katak-3', 'L'], back: ['katak-4', 'N'] } },
     jamur: { dir: 'musuh', h: 40, ref: 'jamur-3', face: 'jamur-1', poses: { idle: ['jamur-3', 'R'], back: ['jamur-4', 'N'] } },
     belut: { dir: 'musuh', h: 22, ref: 'belut-2', face: 'belut-1', poses: { idle: ['belut-2', 'R'], back: ['belut-1', 'L'] } },
+    capung: { dir: 'musuh', h: 30, lift: 24, ref: 'capung-1', face: 'capung-2', poses: { idle: ['capung-1', 'R'], back: ['capung-3', 'L'] } },
+    kepiting: { dir: 'musuh', h: 30, ref: 'kepiting-1', face: 'kepiting-1', poses: { idle: ['kepiting-1', 'N'], back: ['kepiting-2', 'N'] } },
+    rajaKepiting: { dir: 'musuh', h: 58, ref: 'kepiting-3', face: 'kepiting-3', poses: { idle: ['kepiting-3', 'N'], back: ['kepiting-3', 'N'] } },
+    anakBuaya: { dir: 'musuh', h: 30, ref: 'anak-buaya-3', face: 'anak-buaya-1', poses: { idle: ['anak-buaya-3', 'R'], back: ['anak-buaya-2', 'R'] } },
+    buaya: { dir: 'musuh', h: 74, ref: 'buaya-1', face: 'buaya-1', poses: { idle: ['buaya-2', 'L'], back: ['buaya-4', 'N'], attack: ['buaya-5', 'L'], selam: ['buaya-6', 'N'] } },
     lumpurKecil: { dir: 'musuh', h: 34, ref: 'lumpur-raksasa-2', face: 'lumpur-raksasa-1', poses: { idle: ['lumpur-raksasa-2', 'R'], back: ['lumpur-raksasa-3', 'N'] } },
     ular: { dir: 'musuh', h: 62, ref: 'ular-4', face: 'ular-1', poses: { idle: ['ular-4', 'R'], back: ['ular-7', 'N'], attack: ['ular-8', 'R'] } },
     lumpurRaksasa: { dir: 'musuh', h: 70, ref: 'lumpur-raksasa-2', face: 'lumpur-raksasa-1', poses: { idle: ['lumpur-raksasa-2', 'R'], back: ['lumpur-raksasa-3', 'N'], attack: ['lumpur-raksasa-1', 'N'] } },
@@ -121,6 +132,7 @@ const SPR = (() => {
     else if (anim === 'attack') pose = o.pose && set[o.pose] ? o.pose : 'attack';
     else if (anim === 'skill') pose = o.pose && set[o.pose] ? o.pose : 'idle';
     else if (back && anim !== 'faint') pose = 'back';
+    if (o.stance && set[o.stance] && anim !== 'attack' && anim !== 'skill' && anim !== 'faint') pose = o.stance;
     const p = set[pose] || set.idle;
     const flip = (p.dir === 'R' && !right) || (p.dir === 'L' && right) || (p.dir === 'N' && !right);
     let lx = 0, ly = 0, rot = 0, sy = 1, alpha = 1, flash = 0;
