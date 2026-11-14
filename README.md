@@ -65,6 +65,15 @@ Miqat **Qarnul Manazil** (Taif) → perjalanan Taif–Makkah (larangan ihram) �
 Multazam, Maqam Ibrahim, zamzam) → **sa'i 7 kali** → tahallul → rapor. Bisa main sebagai jamaah pria atau wanita,
 grafis Halus/Ringan. Mohon bacaan doa dicek pembimbing.
 
+## Game kedelapan: Ata dan Madu Legendaris: Taktik ⚔️
+
+Folder `ata-taktik/` → `https://radmahardika.github.io/Game-Aca/ata-taktik/`
+
+Game strategi giliran di papan isometrik (gaya diorama ala Tactics Ogre). Ata si honey badger berpetualang mencari Madu Legendaris
+dari cerita Nenek. Bab 1 Savana: 7 misi, Ladhia dan Bubunti bergabung di perjalanan, bos terakhir Raja Hyena.
+Tap tokoh → tap petak biru untuk berjalan → Serang / Jurus / Madu / Selesai. Serang dari belakang atau dari tempat tinggi lebih sakit.
+Sprite Ata, Ladhia, Bubunti diambil dari folder `pohon-madu/img/`.
+
 ## Main di iPad
 
 1. Buka link GitHub Pages: `https://radmahardika.github.io/Game-Aca/` di **Safari**.

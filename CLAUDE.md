@@ -273,7 +273,34 @@ Untuk **orang tua/keluarga** latihan umroh (bukan game anak 6 tahun), berdasarka
 - Tes: `window.__sim` = {E, S, ui}; `__sim.E.timeScale`, `__sim.E.noAuto=true` (cegah turun otomatis di swiftshader);
   `window.__lv` (haram: T, st, finishThawaf, fin). Swiftshader sangat lambat di mode Halus → pakai Ringan untuk Playwright.
 
+## Game kedelapan: Ata dan Madu Legendaris: Taktik (`ata-taktik/`)
+
+Link: https://radmahardika.github.io/Game-Aca/ata-taktik/ · versi sendiri `AT.VERSION` di `ata-taktik/js/data.js`
++ `?v=N` di `ata-taktik/index.html`. Game strategi giliran **ala Onimusha Tactics / Tactics Ogre** untuk anak (6 tahun),
+dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, dipindah ke repo di pratinjau-v32.
+
+- **Visual (disetujui):** diorama isometrik halus ala Tactics Ogre Reborn: balok petak tebal bertekstur (rumput, paving, tanah,
+  pasir, air), cahaya hangat dari kiri atas + sisi teduh kebiruan, bayangan lembut dipanggang ke permukaan, pulau melayang di
+  latar biru tua bervinyet. Panel UI biru tua berbingkai emas tipis; kartu tokoh kiri bawah, daftar perintah kanan bawah (landscape iPad).
+  Petak 64×32 dunia, digambar 2× (`R`) lalu diskalakan; tekstur per petak dibuat sekali (`prepareMap`).
+- **Sprite:** Ata/Ladhia/Bubunti/Nenek memakai PNG dari `../pohon-madu/img/` (`js/sprites.js`: trim, titik pijak, garis luar,
+  pose per arah: siaga/kanan/kiri/belakang + pose jurus tendang/pukul/ayun/lempar/bertahan/sorak). Hyena, Raja Hyena, Burung
+  Nasar, Zizi masih **gambar vektor bawaan** (`js/art.js`) sampai pengguna membuat sprite (format sama dengan `pohon-madu/ASET.md`).
+- **Bab 1 Savana (7 misi):** Kebun Nenek (tutorial) → Jalan Setapak → Badak di Kubangan (Ladhia bergabung) → Jaga Sumur
+  (bertahan 6 giliran, lindungi Zizi) → Lari ke Bukit Batu (capai bendera) → Dapur Bubunti (Bubunti bergabung) → Batu Singgasana
+  (bos Raja Hyena, memanggil anak buah tiap 3 giliran). Peta = pulau 17×17 (`expandIslands` di `data.js`; `o` = laut, tidak digambar).
+- Mekanik: arah hadap (belakang ×1,5), ketinggian, jangkauan senjata, Semangat ⭐ untuk jurus, musuh tidur 💤 sampai didekati,
+  3 bintang per misi, madu 🍯 untuk naik level di Markas. Ata: Tendangan Kilat/Putar/Mode Sabuk Hitam + Refleks (hindar & balas);
+  Ladhia: Tantang/Benteng Badak; Bubunti: Sup Hangat + **Masakan Pedas** (satu-satunya serangan, musuh tidak bisa bergerak 1 giliran).
+- Suara: **tanpa suara pembaca saat bertarung**; narasi suara (speechSynthesis id-ID) hanya di adegan cerita (permintaan pengguna).
+- Ke depan: Bab 2 Hutan Lembab (Ular Beracun, Oumaldi), Bab 3 Rawa (Buaya Serakah, Tung Momon & Tung Yanto),
+  Bab 4 Gunung (Singa Penyiksa, Utireni & Utililik).
+- Simpanan `localStorage` kunci `ata-taktik-v1`. Tes: buka lewat http (PNG dari folder lain), `window.__ata`
+  (`startMission(i)`, `G`, `S()`, `onTapWorld`, `iso`, `endPlayerTurn`); bot uji ada di riwayat percakapan (pakai `onTapWorld`).
+
 ## Status & yang sedang dibahas
+
+- Branch `pratinjau-v32` = **Ata Taktik versi 1** (game kedelapan, `ata-taktik/`), belum digabung.
 
 - Rilis terakhir di `main`: **versi 31** = **Manasik Umroh versi 1** (game ketujuh, `manasik-umroh/`, dari branch `pratinjau-v31`). Game lain tidak berubah.
 - Branch `pratinjau-v30` (peta Hutan Pinggir, Padang Ilalang, Desa Kerikil, Jembatan Batu untuk Pohon Madu, `img/peta`) **belum digabung** dan belum dipasang;
