@@ -1,16 +1,24 @@
 'use strict';
-const AT = { VERSION: 2 };
+const AT = { VERSION: 3 };
 /* Data karakter, jurus, misi, dan cerita Bab 1. */
 
 const CHARS = {
   ata: { name: 'Ata', job: 'Taekwondoin', desc: 'Honey badger pemberani. Paling cepat!', hp: 26, atk: 8, def: 3, mov: 5, jump: 2, rmin: 1, rmax: 1,
-    skills: ['kilat', 'putar', 'sabuk'], passive: 'Refleks Kilat: kadang menghindar lalu membalas tendangan.' },
+    skills: ['kilat', 'putar', 'sabuk'], passive: 'Refleks Kilat: kadang menghindar lalu membalas tendangan.',
+    animal: 'Honey badger', bio: 'Cucu Nenek dari kebun kecil di tepi Savana. Pemberani, cepat, dan jago taekwondo. Ingin menemukan Madu Legendaris dari dongeng Nenek.',
+    tip: 'Serang musuh dari belakang supaya kerusakannya lebih besar. Ata paling cepat, jadi cocok untuk mengejar musuh!' },
   ladhia: { name: 'Ladhia', job: 'Tanker', desc: 'Badak hitam berarmor. Galak di luar, baik di dalam.', hp: 36, atk: 7, def: 6, mov: 3, jump: 1, rmin: 1, rmax: 2,
-    skills: ['tantang', 'benteng'], passive: 'Kulit Baja: serangan dari belakang tidak terlalu sakit. Rantai meteor menjangkau 2 petak.' },
+    skills: ['tantang', 'benteng'], passive: 'Kulit Baja: serangan dari belakang tidak terlalu sakit. Rantai meteor menjangkau 2 petak.',
+    animal: 'Badak hitam', bio: 'Bertubuh besar dengan armor, perisai, dan rantai meteor. Wajahnya galak, tapi hatinya baik dan selalu melindungi teman.',
+    tip: 'Taruh Ladhia di depan. Pakai Tantang supaya musuh menyerang Ladhia, bukan teman yang lemah.' },
   bubunti: { name: 'Bubunti', job: 'Koki', desc: 'Llama putih berhati lembut, jago masak.', hp: 20, atk: 4, def: 2, mov: 4, jump: 1, rmin: 1, rmax: 1,
-    skills: ['sup', 'pedas'], passive: 'Hati Lembut: masakannya bikin teman semangat.' },
+    skills: ['sup', 'pedas'], passive: 'Hati Lembut: masakannya bikin teman semangat.',
+    animal: 'Llama putih', bio: 'Koki dari desa di lembah. Tidak suka bertengkar. Masakannya menyembuhkan teman, dan masakan pedasnya bikin musuh kepanasan.',
+    tip: 'Jaga Bubunti di belakang. Sembuhkan teman yang nyawanya tinggal sedikit dengan Sup Hangat.' },
   oumaldi: { name: 'Oumaldi', job: 'Pemanah', desc: 'Tupai pemanah yang gesit. Dulu suka bekerja sendirian.', hp: 20, atk: 7, def: 2, mov: 4, jump: 2, rmin: 2, rmax: 4,
-    skills: ['jitu', 'hujan'], passive: 'Mata Elang: dari tempat tinggi, panahnya +1 petak lebih jauh dan pandangannya menembus kabut. Tidak bisa memanah musuh yang menempel.' },
+    skills: ['jitu', 'hujan'], passive: 'Mata Elang: dari tempat tinggi, panahnya +1 petak lebih jauh dan pandangannya menembus kabut. Tidak bisa memanah musuh yang menempel.',
+    animal: 'Tupai', bio: 'Pemanah gesit dari Hutan Lembab. Dulu suka bekerja sendirian, sekarang tahu bahwa menang bersama lebih seru.',
+    tip: 'Naikkan Oumaldi ke tempat tinggi supaya panahnya lebih jauh. Jangan biarkan musuh menempel padanya!' },
 };
 
 const FUTURE = [

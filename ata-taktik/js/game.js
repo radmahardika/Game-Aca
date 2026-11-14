@@ -1505,6 +1505,7 @@
           if (!S.seen.prolog) { await playStory(STORY.prolog); S.seen.prolog = true; persist(); }
           goMap();
         }, 'pri big'),
+        btn('👥 Tokoh', () => goChars(null, goTitle)),
         btn('⚙️ Pengaturan', goSettings)),
       h('p', { class: 'muted small' }, 'Bab 1 Savana · Bab 2 Hutan Lembab · 14 misi'),
       h('div', { class: 'ver' }, 'versi ' + AT.VERSION)));
@@ -1525,7 +1526,7 @@
     });
     path.append(h('div', { class: 'node l locked soon' }, h('div', { class: 'dot' }, '🌙'), h('div', { class: 'ninfo' }, h('b', {}, 'Bab 3: Rawa Bulan'), h('small', {}, 'Segera hadir'))));
     screen(topbar('Peta Petualangan', goTitle),
-      h('div', { class: 'maphead' }, btn('🏠 Markas', goBase, 'pri2'), btn('⚙️', goSettings, 'icon')),
+      h('div', { class: 'maphead' }, btn('🏠 Markas', goBase, 'pri2'), btn('👥 Tokoh', () => goChars(null, goMap), 'pri2'), btn('⚙️', goSettings, 'icon')),
       path);
     requestAnimationFrame(() => { const c = scr.querySelector('.node.cur'); if (c) c.scrollIntoView({ block: 'center' }); });
   }
@@ -1544,7 +1545,7 @@
       if (!recruited(k)) { const jm = MISSIONS.find(m => m.id === JOIN[k]); cards.append(h('div', { class: 'ccard locked' }, h('div', { class: 'silh' }, '?'), h('div', {}, h('b', {}, '???'), h('small', {}, 'Bergabung di Misi ' + jm.no)))); continue; }
       const l = S.lvl[k], s = charStats(k, l), n = charStats(k, l + 1), cost = lvlCost(l), b = CHARS[k];
       cards.append(h('div', { class: 'ccard' },
-        portrait(k, 72),
+        h('button', { class: 'ptbtn', onclick: () => { Sound.play('tap'); goChars(k, goBase); } }, portrait(k, 72), h('small', {}, 'ℹ️ Info')),
         h('div', { class: 'cbody' },
           h('div', { class: 'uname' }, b.name, h('small', {}, ` ${b.job} · Lv ${l}`)),
           h('div', { class: 'cstat' }, `❤️ ${s.hp}  ⚔️ ${s.atk}  🛡️ ${s.def}  👣 ${s.mov}`),
@@ -1560,6 +1561,74 @@
     screen(topbar('Markas', goMap),
       h('p', { class: 'muted pad' }, 'Kumpulkan madu 🍯 dari misi, lalu pakai untuk menaikkan level tim. Misi yang sudah selesai bisa dimainkan lagi.'),
       cards);
+  }
+  /* ---------------- Halaman Tokoh ---------------- */
+  let charLoop = 0;
+  function goChars(sel, back) {
+    back = back || goTitle;
+    const keys = Object.keys(CHARS);
+    if (!sel || !recruited(sel)) sel = keys.find(recruited);
+    const b = CHARS[sel], l = S.lvl[sel] || 1, st = charStats(sel, l);
+    const view = { anim: 'idle', a0: now(), dir: 0, pose: null, sk: -1, label: 'Siaga' };
+    const cvs = h('canvas', { class: 'cstage' });
+    const label = h('div', { class: 'cpose' }, view.label);
+    const play = (anim, pose, text) => { view.anim = anim; view.pose = pose; view.a0 = now(); label.textContent = text; Sound.play(anim === 'attack' ? 'whoosh' : anim === 'skill' ? 'power' : 'tap'); };
+    const poseBtns = h('div', { class: 'cposes' },
+      btn('🧍 Siaga', () => play('idle', null, 'Siaga')),
+      btn('🚶 Jalan', () => play('walk', null, 'Jalan')),
+      btn('👊 Serang', () => play('attack', null, 'Serang')),
+      btn('✨ Jurus', () => { view.sk = (view.sk + 1) % b.skills.length; const k = b.skills[view.sk]; play('skill', k, SKILLS[k].icon + ' ' + SKILLS[k].name); }),
+      btn('🔄 Putar', () => { view.dir = [0, 1, 3, 2][([0, 1, 3, 2].indexOf(view.dir) + 1) % 4]; if (view.anim !== 'walk') play('idle', null, ['Hadap kanan', 'Hadap kiri', 'Hadap belakang', 'Hadap belakang'][view.dir]); }));
+    const bar = (icon, name, v, max, col) => h('div', { class: 'sbar' }, h('span', { class: 'sl' }, icon + ' ' + name), h('div', { class: 'st' }, h('i', { style: `width:${Math.min(100, v / max * 100)}%;background:${col}` })), h('b', {}, v));
+    const range = b.rmax > 1 ? `${b.rmin}–${b.rmax} petak` : '1 petak';
+    const roster = h('div', { class: 'roster' }, keys.map(k => recruited(k)
+      ? h('button', { class: 'rpick' + (k === sel ? ' on' : ''), onclick: () => { Sound.play('tap'); goChars(k, back); } }, portrait(k, 58), h('small', {}, CHARS[k].name))
+      : h('div', { class: 'rpick locked' }, h('div', { class: 'silh' }, '?'), h('small', {}, 'Misi ' + MISSIONS.find(m => m.id === JOIN[k]).no))),
+      FUTURE.map(f => h('div', { class: 'rpick locked' }, h('div', { class: 'silh' }, '?'), h('small', {}, f.bab))));
+    screen(topbar('Tokoh', () => { cancelAnimationFrame(charLoop); back(); }),
+      h('div', { class: 'chars' },
+        h('div', { class: 'cleft' }, h('div', { class: 'cstagebox' }, cvs, label), poseBtns),
+        h('div', { class: 'cright card' },
+          h('div', { class: 'cname' }, b.name, h('span', { class: 'cjob' }, b.job), h('span', { class: 'clv' }, 'Lv ' + l)),
+          h('div', { class: 'canimal' }, '🐾 ' + b.animal),
+          h('p', { class: 'cbio' }, b.bio),
+          h('div', { class: 'csec' }, 'Kemampuan'),
+          bar('❤️', 'Nyawa', st.hp, 60, '#5ad35a'), bar('⚔️', 'Serang', st.atk, 20, '#ff8a5a'), bar('🛡️', 'Tahan', st.def, 14, '#7ab8ff'),
+          bar('👣', 'Langkah', st.mov, 6, '#ffd24a'), bar('⛰️', 'Lompat', b.jump, 3, '#c89aff'),
+          h('div', { class: 'crange' }, '🎯 Jangkauan serangan: ' + range),
+          h('div', { class: 'csec' }, 'Jurus'),
+          h('div', { class: 'cskills2' }, b.skills.map(k => h('div', { class: 'cskill' }, h('span', { class: 'sicon' }, SKILLS[k].icon),
+            h('div', {}, h('b', {}, SKILLS[k].name), h('span', { class: 'scost' }, ' ' + '★'.repeat(SKILLS[k].cost)), h('small', {}, SKILLS[k].desc))))),
+          h('div', { class: 'csec' }, 'Kemampuan khusus'),
+          h('p', { class: 'cpass' }, b.passive),
+          h('div', { class: 'ctip' }, '💡 ' + b.tip))),
+      roster);
+    // panggung tokoh
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const draw = () => {
+      if (!cvs.isConnected) return;
+      const w = cvs.clientWidth, hh = cvs.clientHeight;
+      if (cvs.width !== Math.round(w * dpr)) { cvs.width = Math.round(w * dpr); cvs.height = Math.round(hh * dpr); }
+      const c = cvs.getContext('2d'), tm = now();
+      c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cvs.width, cvs.height);
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const cx = w / 2, fy = hh * 0.7, k = Math.min(3.1, hh * 0.62 / 80), tw = 64 * k * 1.25, th = tw / 2, dp = 22 * k;
+      const g = c.createRadialGradient(cx, fy - hh * 0.3, 10, cx, fy - hh * 0.3, w * 0.6); g.addColorStop(0, 'rgba(255,226,160,0.22)'); g.addColorStop(1, 'rgba(255,226,160,0)'); c.fillStyle = g; c.fillRect(0, 0, w, hh);
+      const P = pts => { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); pts.slice(1).forEach(p => c.lineTo(p[0], p[1])); c.closePath(); };
+      P([[cx - tw / 2, fy], [cx, fy + th / 2], [cx, fy + th / 2 + dp], [cx - tw / 2, fy + dp]]); c.fillStyle = '#6e5034'; c.fill();
+      P([[cx + tw / 2, fy], [cx, fy + th / 2], [cx, fy + th / 2 + dp], [cx + tw / 2, fy + dp]]); c.fillStyle = '#4a3420'; c.fill();
+      const tg = c.createLinearGradient(cx - tw / 2, fy - th / 2, cx + tw / 2, fy + th / 2); tg.addColorStop(0, '#b5d35a'); tg.addColorStop(1, '#6f9a34');
+      P([[cx, fy - th / 2], [cx + tw / 2, fy], [cx, fy + th / 2], [cx - tw / 2, fy]]); c.fillStyle = tg; c.fill();
+      P([[cx - tw / 2, fy], [cx, fy + th / 2], [cx + tw / 2, fy], [cx + tw / 2, fy + 6], [cx, fy + th / 2 + 6], [cx - tw / 2, fy + 6]]); c.fillStyle = '#4e7a2c'; c.fill();
+      c.fillStyle = 'rgba(0,0,0,0.28)'; c.beginPath(); c.ellipse(cx, fy, tw * 0.22, th * 0.22, 0, 0, 7); c.fill();
+      const dur = view.anim === 'skill' ? 0.75 : 0.5, ap = (tm - view.a0) / dur;
+      if ((view.anim === 'attack' || view.anim === 'skill') && ap > 1.6) { view.anim = 'idle'; view.pose = null; }
+      c.save(); c.translate(cx, fy); c.scale(k / R, k / R);
+      SPR.draw(c, sel, view.dir, view.anim, clamp(ap, 0, 1), tm, { seed: 3, pose: view.pose });
+      c.restore();
+      charLoop = requestAnimationFrame(draw);
+    };
+    cancelAnimationFrame(charLoop); charLoop = requestAnimationFrame(draw);
   }
   function flash(t) { const e = h('div', { class: 'flash' }, t); document.body.append(e); setTimeout(() => e.remove(), 2200); }
   function goSettings() {
@@ -1579,7 +1648,7 @@
 
   /* ---------------- Mulai ---------------- */
   document.addEventListener('pointerdown', () => Sound.resume(), { once: true });
-  window.__ata = { get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
+  window.__ata = { goChars, get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
   scr.classList.add('on'); scr.innerHTML = '<div class="title"><div class="tsmall">Memuat gambar…</div></div>';
   requestAnimationFrame(frame);
   window.__ata.ready = SPR.load().then(goTitle);

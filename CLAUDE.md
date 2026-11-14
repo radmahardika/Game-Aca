@@ -302,6 +302,9 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   lebih tinggi), Panah Jitu (tembus, jarak 5), Hujan Panah (sasaran + sebelahnya); sprite `pohon-madu/img/oumaldi/`, Ular di
   `musuh/ular-1..8` (dipotong dari lembar hijau pengguna). Tamu/rekrut baru mendapat level rata-rata tim (`teamLv`).
   Peta misi dikelompokkan per bab. Bot uji: tim Lv 3 menang 7/7; Lv 2 kalah di Rawa Lumpur & Sarang Ular.
+- **Halaman Tokoh (v3, `goChars(key, back)`):** dari tombol 👥 Tokoh di judul & peta, atau ketuk potret di Markas. Panggung
+  isometrik dengan sprite besar + tombol pose (Siaga/Jalan/Serang/Jurus bergilir/Putar arah), kartu info (hewan, `bio`, batang
+  kemampuan, jangkauan, jurus, kemampuan khusus, `tip` cara main), deretan potret untuk memilih tokoh (yang belum bergabung = ?).
 - Mekanik: arah hadap (belakang ×1,5), ketinggian, jangkauan senjata, Semangat ⭐ untuk jurus, musuh tidur 💤 sampai didekati,
   3 bintang per misi, madu 🍯 untuk naik level di Markas. Ata: Tendangan Kilat/Putar/Mode Sabuk Hitam + Refleks (hindar & balas);
   Ladhia: Tantang/Benteng Badak; Bubunti: Sup Hangat + **Masakan Pedas** (satu-satunya serangan, musuh tidak bisa bergerak 1 giliran).
@@ -315,6 +318,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 
 ## Status & yang sedang dibahas
 
+- Branch `pratinjau-v35` = **Ata Taktik versi 3 (Halaman Tokoh)**, belum digabung.
 - Rilis terakhir di `main`: **versi 34** = **Ata Taktik versi 2** (Bab 2 Hutan Lembab, Oumaldi, Ular Beracun). Game lain tidak berubah.
 - Versi 33 = ikon aplikasi Ata Taktik ("ATA Tactics").
 - Versi 32 = **Ata Taktik versi 1** (game kedelapan, `ata-taktik/`, dari branch `pratinjau-v32`;
