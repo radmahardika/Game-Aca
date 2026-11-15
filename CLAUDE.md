@@ -363,9 +363,9 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 
 ## Status & yang sedang dibahas
 
-- Branch `pratinjau-v38` = **Ata Taktik versi 5–7 (Bab 4 Gunung Kabut + Perkemahan + Misi Sampingan + Bab 5–6 + Papot + Tamat)**,
-  dibuat dari `pratinjau-v37`, belum digabung. Saat digabung: rilis sebagai versi 37 (atau berikutnya) untuk keduanya.
-- Rilis terakhir di `main`: **versi 36** = **Ata Taktik versi 4** (Bab 3 Rawa Bulan + tim maksimal 4). Game lain tidak berubah.
+- Rilis terakhir di `main`: **versi 37** = **Ata Taktik versi 7** (Bab 4 Gunung Kabut, Perkemahan, Misi Sampingan, Bab 5 Terowongan
+  Sarang Emas + Papot, Bab 6 Pohon Madu Legendaris + Tamat; dari `pratinjau-v37` & `pratinjau-v38`). Game lain tidak berubah.
+- Versi 36 = **Ata Taktik versi 4** (Bab 3 Rawa Bulan + tim maksimal 4).
 - Versi 35 = **Ata Taktik versi 3** (Halaman Tokoh).
 - Versi 34 = **Ata Taktik versi 2** (Bab 2 Hutan Lembab, Oumaldi, Ular Beracun).
 - Versi 33 = ikon aplikasi Ata Taktik ("ATA Tactics").
@@ -373,7 +373,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   musuh sprite asli, bos Raja Kumbang & Kepala Musang). Game lain tidak berubah.
 - Versi 31 = **Manasik Umroh versi 1** (game ketujuh, `manasik-umroh/`).
 - Branch `pratinjau-v30` (peta Hutan Pinggir, Padang Ilalang, Desa Kerikil, Jembatan Batu untuk Pohon Madu, `img/peta`) **belum digabung** dan belum dipasang;
-  saat dirilis pakai nomor versi berikutnya (≥ 37) dan rebase ke `main` dulu.
+  saat dirilis pakai nomor versi berikutnya (≥ 38) dan rebase ke `main` dulu.
 - Versi 29 = **Ata dan Pohon Madu versi 1** (game keenam: Prolog bisa dimainkan + Arena Latihan Prolog–Bab 2).
 - Versi 28 = **Njajan Fest versi 6** (stok porsi + relawan diseret; susun acara & pos dihapus).
 - Versi 27 = **Njajan Fest versi 5** (Tahap 2 Pasar Malam; fitur hitung lapak dihapus).
