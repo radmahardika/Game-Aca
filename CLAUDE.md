@@ -344,7 +344,7 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   legendaris (`pohon-madu/img/pohon-legendaris.png`) + 9 potret + cerita `STORY.ending` + kartu "Tamat"; node 🏆 Tamat di akhir peta.
   Sampingan baru s5a/s5b/s6a/s6b, Perkemahan Bab 5 (`camp5`, 9 tokoh). Judul "6 bab · 42 misi".
 - Keseimbangan bot (tim 4): Bab 5 Lv 7 (Ratu Laba-laba Lv 7–8), Bab 6 Lv 8, Ratu Tawon butuh Lv 9.
-- **Setelah tamat (v8, pratinjau-v38):** di Peta muncul `modeBar` (tombol Normal/Sulit 🔥 + 🗼 Menara; terkunci sebelum `b6m7`).
+- **Setelah tamat (v8, rilis versi 38):** di Peta muncul `modeBar` (tombol Normal/Sulit 🔥 + 🗼 Menara; terkunci sebelum `b6m7`).
   **Mode Sulit** (`S.hardView`, `goMapHard`, `missionSheet(m, true)`, `startMission(m, {hard})`, `hardEnd`): 42 misi utama berurutan
   (`S.hcleared`, `S.hstars` bintang ungu, 👑 mahkota), musuh `G.elv` = elv+3, +1 musuh tambahan (`freeTile`), AI lebih fokus ke teman
   nyawa ≤½ & keroyokan, tanpa cerita/tips, semua tokoh boleh dipilih (posisi tambahan diisi otomatis dekat tokoh pertama), madu ×2.
@@ -375,7 +375,8 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
 
 ## Status & yang sedang dibahas
 
-- Rilis terakhir di `main`: **versi 37** = **Ata Taktik versi 7** (Bab 4 Gunung Kabut, Perkemahan, Misi Sampingan, Bab 5 Terowongan
+- Rilis terakhir di `main`: **versi 38** = **Ata Taktik versi 8** (Mode Sulit + Menara Tantangan setelah tamat). Game lain tidak berubah.
+- Versi 37 = **Ata Taktik versi 7** (Bab 4 Gunung Kabut, Perkemahan, Misi Sampingan, Bab 5 Terowongan
   Sarang Emas + Papot, Bab 6 Pohon Madu Legendaris + Tamat; dari `pratinjau-v37` & `pratinjau-v38`). Game lain tidak berubah.
 - Versi 36 = **Ata Taktik versi 4** (Bab 3 Rawa Bulan + tim maksimal 4).
 - Versi 35 = **Ata Taktik versi 3** (Halaman Tokoh).
