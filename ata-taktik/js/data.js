@@ -1,5 +1,5 @@
 'use strict';
-const AT = { VERSION: 7 };
+const AT = { VERSION: 8 };
 /* Data karakter, jurus, misi, dan cerita Bab 1. */
 
 const CHARS = {

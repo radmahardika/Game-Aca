@@ -462,6 +462,22 @@
     return defaultParty(m);
   }
 
+  function freeTile(x0, y0, def, skip) {
+    const seenK = new Set([key(x0, y0)]), q = [[x0, y0]];
+    while (q.length) {
+      const [x, y] = q.shift();
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy, k = key(nx, ny); if (seenK.has(k)) continue; seenK.add(k);
+        const t = G.map.tiles[ny] && G.map.tiles[ny][nx]; if (!t || t.t === 'o') continue;
+        q.push([nx, ny]);
+        if (!walkable(t) || t.t === 'f' || (t.t === 'w' && !(def && (def.swim)))) continue;
+        if (G.units.some(u => u.x === nx && u.y === ny) || (skip && skip.has(k))) continue;
+        return t;
+      }
+    }
+    return null;
+  }
+
   /* ---------------- Mulai misi ---------------- */
   async function startMission(m, opts = {}) {
     UID = 0;
@@ -473,14 +489,24 @@
     const party = opts.party || partyOf(m);
     for (const [k, x, y] of m.players) if (party.includes(k)) G.units.push(mkUnit(k, 'p', x, y));
     for (const [k, x, y] of (m.npcs || [])) { const u = mkUnit(k, 'n', x, y); u.done = true; G.units.push(u); }
-    for (const [k, x, y, ag] of m.enemies) G.units.push(mkUnit(k, 'e', x, y, { lv: m.elv || 1, aggro: ag ?? 99 }));
+    G.hard = !!opts.hard; G.tower = opts.tower || null;
+    G.elv = (m.elv || 1) + (G.hard ? 3 : 0);
+    for (const [k, x, y, ag] of m.enemies) G.units.push(mkUnit(k, 'e', x, y, { lv: G.elv, aggro: ag ?? 99 }));
+    const lead = G.units.find(u => u.team === 'p');
+    for (const k of party) if (!G.units.some(u => u.key === k) && lead) { const t = freeTile(lead.x, lead.y, CHARS[k]); if (t) G.units.push(mkUnit(k, 'p', t.x, t.y)); }
+    if (G.hard) { // 1 musuh tambahan di dekat musuh pertama yang bukan bos
+      const base = G.units.find(u => u.team === 'e' && !u.boss) || G.units.find(u => u.team === 'e');
+      const kind = base ? (ENEMIES[base.key].boss ? (ENEMIES[base.key].summonKind || 'kumbang') : base.key) : null;
+      if (kind) { const sp = freeTile(base.x, base.y, ENEMIES[kind]); if (sp) G.units.push(mkUnit(kind, 'e', sp.x, sp.y, { lv: G.elv, aggro: 99 })); }
+    }
+    if (G.tower) towerApply();
     G.units.forEach(faceNearestFoe);
     G.units.filter(u => u.team === 'n').forEach(u => { u.facing = 0; });
     showBattleUI(); fitCam();
     Sound.startMusic(m.music || 'adventure');
-    if (!opts.skipStory && m.pre && !S.seen[m.id + 'pre']) { await playStory(STORY[m.pre]); S.seen[m.id + 'pre'] = true; persist(); }
-    await banner((m.side ? 'Sampingan' : 'Misi ' + m.no) + ': ' + m.name, 'mission');
-    for (const t of (m.tips || [])) await showTip(t);
+    if (!opts.skipStory && !G.hard && !G.tower && m.pre && !S.seen[m.id + 'pre']) { await playStory(STORY[m.pre]); S.seen[m.id + 'pre'] = true; persist(); }
+    await banner(G.tower ? '🗼 Menara · Lantai ' + G.tower.floor : (G.hard ? '🔥 Sulit · ' : '') + (m.side ? 'Sampingan' : 'Misi ' + m.no) + ': ' + m.name, 'mission');
+    if (!G.hard && !G.tower) for (const t of (m.tips || [])) await showTip(t);
     beginPlayerPhase();
   }
   async function startCamp(ch) {
@@ -710,7 +736,7 @@
   }
   function spawnUnit(k, x, y) {
     const p = freeNear(x, y, k); if (!p) return null;
-    const u = mkUnit(k, 'e', p[0], p[1], { lv: G.m.elv || 1 });
+    const u = mkUnit(k, 'e', p[0], p[1], { lv: G.elv || G.m.elv || 1 });
     u.aggroOn = true; u.fresh = true; u.dropIn = now(); faceNearestFoe(u);
     G.units.push(u); burst(u, ['#ffffff', '#e8d9b5'], 8);
     return u;
@@ -788,6 +814,7 @@
         const r = calcDmg(e, t, { ax: p.x, ay: p.y });
         let sc = r.dmg * 2 + (r.dmg >= t.hp ? 15 : 0) + (t.team === 'n' ? 4 : 0) + (t.key === 'bubunti' && !G.m.protect ? 2 : 0) - p.c * 0.1 - (G.focus.get(t.id) || 0) * 10;
         if (taunters.length && !taunters.includes(t)) sc -= 40;
+        if (G.hard || G.tower) sc += (t.hp <= t.maxhp / 2 ? 8 : 0) + (G.focus.get(t.id) || 0) * 12;
         if (e.ranged) { const near = Math.min(...targets.map(o => Math.abs(o.x - p.x) + Math.abs(o.y - p.y))); if (near >= 2) sc += 4; }
         if (!best || sc > best.sc) best = { sc, p, t };
       }
@@ -844,6 +871,8 @@
     await wait(900);
     if (win) Sound.play('win'); else Sound.play('lose');
     const m = G.m;
+    if (G.tower) return towerEnd(win, reason);
+    if (G.hard) return hardEnd(win, reason);
     if (!win) {
       overlay(h('div', { class: 'card result lose' },
         h('div', { class: 'rtitle' }, 'Yah, kalah...'),
@@ -873,6 +902,138 @@
         if (first && m.final) { await chapterEnd(m); return; }
         goMap();
       }, 'pri'))));
+  }
+
+  /* ---------------- Mode Sulit ---------------- */
+  const tamat = () => !!S.cleared.b6m7;
+  const hUnlockedIdx = () => { const hc = S.hcleared || {}; let i = 0; while (i < MISSIONS.length && hc[MISSIONS[i].id]) i++; return Math.min(i, MISSIONS.length - 1); };
+  function hardEnd(win, reason) {
+    const m = G.m, party = G.units.filter(u => u.team === 'p' && !u.summon && CHARS[u.key]).map(u => u.key);
+    if (!win) {
+      overlay(h('div', { class: 'card result lose' },
+        h('div', { class: 'rtitle' }, 'Yah, kalah... 🔥'), portrait('ata', 90), h('p', {}, reason),
+        h('p', { class: 'muted' }, 'Mode Sulit memang berat! Naikkan level di Markas, pilih tim yang cocok, dan lindungi teman yang nyawanya sedikit.'),
+        h('div', { class: 'row' }, btn('🔁 Coba lagi', () => { closeOverlay(); startMission(m, { skipStory: true, hard: true, party }); }, 'pri'), btn('🗺️ Ke peta', () => { closeOverlay(); goMap(); }))));
+      return;
+    }
+    S.hcleared = S.hcleared || {}; S.hstars = S.hstars || {};
+    const st = computeStars(), n = st.filter(Boolean).length, first = !S.hcleared[m.id], prev = S.hstars[m.id] || 0;
+    const bonus = ((first ? (m.reward || 10) : 4) + Math.max(0, n - prev) * 3) * 2, total = G.madu * 2 + bonus;
+    S.madu += total; S.hcleared[m.id] = true; S.hstars[m.id] = Math.max(prev, n); persist();
+    const conds = ['Menang', 'Tidak ada teman yang pingsan', m.star3.text];
+    overlay(h('div', { class: 'card result hard' },
+      h('div', { class: 'rtitle' }, (first ? '👑 ' : '') + 'Menang di Mode Sulit!'),
+      h('div', { class: 'bigstars purple' }, st.map((x, i) => h('span', { class: x ? 'on' : '', style: `animation-delay:${0.2 + i * 0.25}s` }, '★'))),
+      h('ul', { class: 'conds' }, conds.map((c, i) => h('li', { class: st[i] ? 'ok' : '' }, (st[i] ? '✔ ' : '✖ ') + c))),
+      first ? h('p', { class: 'muted' }, 'Kamu mendapat mahkota 👑 untuk misi ini!') : null,
+      h('div', { class: 'madu' }, '🍯 Madu ×2 = ', h('b', {}, '+' + total + ' madu')),
+      h('div', { class: 'row' }, btn('Lanjut ▶', () => { closeOverlay(); goMap(); }, 'pri'))));
+  }
+
+  /* ---------------- Menara Tantangan ---------------- */
+  const BOSS_OF = { 1: ['m4', 'm7'], 2: ['b2m5', 'b2m7'], 3: ['b3m4', 'b3m7'], 4: ['b4m4', 'b4m7'], 5: ['b5m5', 'b5m7'], 6: ['b6m4', 'b6m7'] };
+  const POOL = { 1: ['kumbang', 'tawon', 'siput', 'musang', 'landak'], 2: ['katak', 'nyamuk', 'jamur', 'kadal'], 3: ['kepiting', 'capung', 'anakBuaya'], 4: ['elang', 'kambing', 'serigala'], 5: ['kelelawarGua', 'labaKristal', 'cacingBatu'], 6: ['prajuritTawon', 'tawon', 'capung'] };
+  const rnd = n => Math.floor(Math.random() * n);
+  function towerMission(floor) {
+    const ch = ((floor - 1) % 6) + 1, boss = floor % 5 === 0;
+    let tpl;
+    if (boss) { const ids = BOSS_OF[ch]; tpl = MISSIONS.find(m => m.id === ids[rnd(ids.length)]); }
+    else { let c = MISSIONS.filter(m => (m.chap || 1) === ch && m.type === 'rout' && !m.protect && !m.guests); if (!c.length) c = MISSIONS.filter(m => m.type === 'rout' && !m.protect); tpl = c[rnd(c.length)]; }
+    const pool = (POOL[ch] || []).filter(k => ENEMIES[k]);
+    const enemies = tpl.enemies.map(([k, x, y, ag]) => {
+      const e = ENEMIES[k], t = tpl.t[y][x];
+      if (boss || e.boss || t === 'w' || t === 'o' || !pool.length) return [k, x, y, Math.min(ag ?? 99, 6)];
+      return [pool[rnd(pool.length)], x, y, Math.min(ag ?? 99, 6)];
+    });
+    return { ...tpl, id: 'tower', no: floor, name: (boss ? 'Bos · ' : '') + tpl.name, type: boss ? 'boss' : 'rout', elv: 3 + floor,
+      team: Object.keys(CHARS).filter(recruited), enemies, npcs: [], waves: boss ? (tpl.waves || []) : [], protect: null, guests: null,
+      recruit: null, final: false, pre: null, post: null, limit: null, star3: { type: 'turns', n: 10, text: 'Menang dalam 10 giliran' }, tips: [] };
+  }
+  function towerStart(party) {
+    S.tower = { floor: 1, party, hp: {}, buff: null, seed: Date.now() }; persist(); towerFloor();
+  }
+  function towerFloor() {
+    const T0 = S.tower, m = towerMission(T0.floor);
+    const party = new Set(T0.party), pos = m.players.map(p => [p[1], p[2]]);
+    m.players = T0.party.map((k, i) => [k, ...(pos[i] || pos[0])]).filter((p, i) => pos[i]);
+    m.enemies = m.enemies.filter(([, x, y]) => !m.players.some(p => p[1] === x && p[2] === y));
+    startMission(m, { tower: T0, party: T0.party.slice(), skipStory: true });
+  }
+  function towerApply() {
+    const T0 = G.tower;
+    for (const u of G.units.filter(u => u.team === 'p')) {
+      const f = T0.hp[u.key]; if (f != null) u.hp = Math.max(1, Math.round(u.maxhp * f));
+      if (T0.buff === 'atk') u.atk += 2;
+      if (T0.buff === 'sp') u.sp = 5;
+    }
+  }
+  function towerEnd(win, reason) {
+    const T0 = S.tower, fl = T0.floor;
+    if (!win) {
+      const best = Math.max(S.towerBest || 0, fl - 1), rec = best > (S.towerBest || 0);
+      S.towerBest = best; S.tower = null; persist();
+      overlay(h('div', { class: 'card result lose' },
+        h('div', { class: 'rtitle' }, '🗼 Petualangan menara selesai'), portrait('ata', 90), h('p', {}, reason),
+        h('p', {}, 'Kamu berhasil melewati ', h('b', {}, (fl - 1) + ' lantai'), '.'),
+        rec ? h('p', { class: 'muted' }, '🏆 Rekor baru!') : h('p', { class: 'muted' }, 'Rekor: lantai ' + best),
+        h('div', { class: 'row' }, btn('🗼 Ke menara', () => { closeOverlay(); goTower(); }, 'pri'))));
+      return;
+    }
+    const gain = G.madu + 5 + fl; S.madu += gain;
+    for (const u of G.units.filter(u => u.team === 'p' && !u.summon && CHARS[u.key])) T0.hp[u.key] = Math.min(1, (u.alive ? u.hp / u.maxhp : 0) + 0.3);
+    T0.floor = fl + 1; T0.buff = null; S.towerBest = Math.max(S.towerBest || 0, fl); persist();
+    const pickB = b => { Sound.play('tap'); if (b === 'heal') for (const k of T0.party) T0.hp[k] = 1; else T0.buff = b; persist(); closeOverlay(); towerFloor(); };
+    overlay(h('div', { class: 'card result' },
+      h('div', { class: 'rtitle' }, '🗼 Lantai ' + fl + ' selesai!'),
+      h('div', { class: 'madu' }, '🍯 ', h('b', {}, '+' + gain + ' madu')),
+      h('p', {}, 'Nyawa tim hanya pulih sedikit. Pilih 1 berkah untuk lantai ' + (fl + 1) + ':'),
+      h('div', { class: 'blessings' },
+        h('button', { class: 'bless', onclick: () => pickB('heal') }, h('b', {}, '💚'), 'Pulihkan nyawa tim'),
+        h('button', { class: 'bless', onclick: () => pickB('atk') }, h('b', {}, '⚔️'), '+2 serang lantai ini'),
+        h('button', { class: 'bless', onclick: () => pickB('sp') }, h('b', {}, '⭐'), 'Mulai dengan Semangat penuh')),
+      h('div', { class: 'row' }, btn('Istirahat dulu (keluar)', () => { closeOverlay(); goTower(); }))));
+  }
+  function goTower() {
+    Sound.resume(); if (Sound.kind !== 'calm') Sound.startMusic('calm');
+    const T0 = S.tower, best = S.towerBest || 0;
+    const fl = T0 ? T0.floor : 1, list = h('div', { class: 'tower' });
+    for (let f = fl + 2; f >= Math.max(1, fl - 4); f--) {
+      const ch = ((f - 1) % 6) + 1;
+      list.append(h('div', { class: 'fl' + (f === fl ? ' cur' : f < fl ? ' done' : '') + (f % 5 === 0 ? ' boss' : '') },
+        h('b', {}, f), ' · ', CHAPTERS[ch].icon + ' ' + CHAPTERS[ch].name + (f % 5 === 0 ? ' · 👑 Bos' : '') + (f < fl ? ' ✔' : f === fl ? ' ▶' : '')));
+    }
+    screen(topbar('Menara Tantangan', goMap),
+      h('div', { class: 'tinfo' }, h('div', {}, '🏆 Rekor: ', h('b', {}, 'lantai ' + best)), T0 ? h('div', {}, '▶ Sedang di lantai ', h('b', {}, T0.floor)) : null),
+      h('p', { class: 'muted small tcenter' }, 'Lantai acak tanpa akhir. Nyawa tim tidak pulih penuh antar lantai. Tiap 5 lantai ada bos lama. Makin tinggi, musuh makin kuat!'),
+      list,
+      h('div', { class: 'col tcol' },
+        T0 ? h('div', { class: 'team' }, T0.party.map(k => h('div', { class: 'tm on' }, portrait(k, 50), h('small', {}, CHARS[k].name + ' ' + Math.round((T0.hp[k] ?? 1) * 100) + '%')))) : null,
+        T0 ? btn('⚔️ Lanjut lantai ' + T0.floor, () => towerFloor(), 'pri big') : btn('🗼 Mulai dari lantai 1', towerPick, 'pri big'),
+        T0 ? btn('Mulai ulang dari lantai 1', () => { if (confirmBox('Mulai ulang? Lantai sekarang akan hilang.')) { S.tower = null; persist(); towerPick(); } }) : null));
+  }
+  const confirmBox = msg => { try { return window.confirm(msg); } catch (e) { return true; } };
+  function towerPick() {
+    const all = Object.keys(CHARS).filter(recruited);
+    let party = (S.towerParty || ['ata', 'ladhia', 'bubunti', 'oumaldi']).filter(k => all.includes(k)).slice(0, MAXTEAM);
+    if (!party.includes('ata')) party.unshift('ata');
+    const box = h('div', { class: 'team' }), info = h('div', { class: 'pickinfo' });
+    const go = btn('⚔️ Naik menara!', () => { if (party.length !== MAXTEAM) { toast('Pilih ' + MAXTEAM + ' tokoh dulu.'); return; } S.towerParty = party.slice(); closeOverlay(); towerStart(party.slice()); }, 'pri');
+    const draw = () => {
+      box.innerHTML = '';
+      for (const k of all) {
+        const on = party.includes(k);
+        box.append(h('button', { class: 'tm pk' + (on ? ' on' : ' off'), onclick: () => {
+          if (k === 'ata') { toast('Ata wajib ikut.'); return; }
+          Sound.play('tap');
+          if (on) party = party.filter(x => x !== k); else if (party.length < MAXTEAM) party.push(k); else { toast('Tim penuh! Lepas satu tokoh dulu.'); return; }
+          draw();
+        } }, portrait(k, 54), h('small', {}, CHARS[k].name + ' Lv ' + (S.lvl[k] || 1)), h('span', { class: 'chk' }, on ? '✔' : '')));
+      }
+      info.textContent = `Pilih ${MAXTEAM} tokoh untuk seluruh perjalanan menara: ${party.length}/${MAXTEAM}`;
+      go.classList.toggle('dim', party.length !== MAXTEAM);
+    };
+    draw();
+    overlay(h('div', { class: 'card sheet' }, h('div', { class: 'rtitle sm' }, '🗼 Pilih tim menara'), info, box, h('div', { class: 'row' }, btn('Tutup', closeOverlay), go)));
   }
 
   /* ---------------- Kamera ---------------- */
@@ -1645,7 +1806,7 @@
     hud.innerHTML = '';
     hud.append(...[
       btn('☰', openBattleMenu, 'icon'),
-      h('div', { class: 'hmid' }, h('div', { class: 'htitle' }, G.m.camp ? '🔥 Perkemahan · Bab ' + G.m.chap : `${G.m.side ? 'Sampingan' : 'Misi ' + G.m.no} · ${G.m.name}`), G.m.camp ? null : h('div', { class: 'hobj' }, '🎯 ' + objText())),
+      h('div', { class: 'hmid' }, h('div', { class: 'htitle' }, G.m.camp ? '🔥 Perkemahan · Bab ' + G.m.chap : G.tower ? `🗼 Menara · Lantai ${G.tower.floor}` : `${G.hard ? '🔥 ' : ''}${G.m.side ? 'Sampingan' : 'Misi ' + G.m.no} · ${G.m.name}`), G.m.camp ? null : h('div', { class: 'hobj' }, '🎯 ' + objText())),
       h('div', { class: 'hsp' }),
       G.m.camp ? null : h('div', { class: 'hturn' }, h('small', {}, 'Giliran'), h('b', {}, G.turn)),
       h('div', { class: 'zoom' }, btn('−', () => zoomAt(VW / 2, VH / 2, cam.z / 1.2), 'icon sm'), btn('+', () => zoomAt(VW / 2, VH / 2, cam.z * 1.2), 'icon sm'), btn('⌖', () => fitCam(), 'icon sm')),
@@ -1738,8 +1899,8 @@
       sw('🗣️ Suara cerita', 'voice'), sw('🔊 Efek suara', 'sfx'), sw('🎵 Musik', 'music'),
       h('div', { class: 'col' },
         btn('▶ Lanjut main', closeOverlay, 'pri'),
-        btn('🔁 Ulangi misi', () => { closeOverlay(); startMission(G.m, { skipStory: true }); }),
-        btn('🗺️ Keluar ke peta', () => { closeOverlay(); goMap(); }))));
+        G.tower ? null : btn('🔁 Ulangi misi', () => { closeOverlay(); startMission(G.m, { skipStory: true, hard: G.hard, party: G.units.filter(u => u.team === 'p' && !u.summon && CHARS[u.key]).map(u => u.key) }); }),
+        G.tower ? btn('🗼 Keluar (lantai ini diulang nanti)', () => { closeOverlay(); goTower(); }) : btn('🗺️ Keluar ke peta', () => { closeOverlay(); goMap(); }))));
   }
 
   /* ---------------- Banner, tips, toast ---------------- */
@@ -1883,6 +2044,8 @@
   }
   function goMap() {
     Sound.resume(); if (Sound.kind !== 'calm') Sound.startMusic('calm');
+    const hard = tamat() && !!S.hardView;
+    if (hard) return goMapHard();
     const ui = unlockedIdx();
     const path = h('div', { class: 'path' });
     let lastCh = 0;
@@ -1913,17 +2076,44 @@
     path.append(h('div', { class: 'node l camp' + (fin ? '' : ' locked'), onclick: () => { Sound.play('tap'); if (fin) goEnding(); else toast('Kalahkan Ratu Tawon Emas dulu.'); } }, h('div', { class: 'dot' }, fin ? '🏆' : '🔒'), h('div', { class: 'ninfo' }, h('b', {}, 'Tamat'), h('small', {}, 'Pohon Madu Legendaris'))));
     screen(topbar('Peta Petualangan', goTitle),
       h('div', { class: 'maphead' }, btn('🏠 Markas', goBase, 'pri2'), btn('👥 Tokoh', () => goChars(null, goMap), 'pri2'), btn('⚙️', goSettings, 'icon')),
-      path);
+      modeBar(false), path);
     requestAnimationFrame(() => { const c = scr.querySelector('.node.cur'); if (c) c.scrollIntoView({ block: 'center' }); });
   }
-  function missionSheet(m) {
+  function modeBar(hard) {
+    if (!tamat()) return h('div', { class: 'modebar locked' }, h('span', {}, '🔒 Tamatkan cerita untuk membuka Mode Sulit 🔥 dan Menara Tantangan 🗼'));
+    const sw = v => { Sound.play('tap'); S.hardView = v; persist(); goMap(); };
+    return h('div', { class: 'modebar' },
+      h('div', { class: 'tog' }, h('button', { class: hard ? '' : 'on', onclick: () => sw(false) }, 'Normal'), h('button', { class: hard ? 'on hard' : '', onclick: () => sw(true) }, 'Sulit 🔥')),
+      btn('🗼 Menara' + (S.towerBest ? ' (rekor ' + S.towerBest + ')' : ''), goTower, 'pri2'));
+  }
+  function goMapHard() {
+    const ui = hUnlockedIdx(), hc = S.hcleared || {}, hs = S.hstars || {};
+    const path = h('div', { class: 'path hardpath' });
+    let lastCh = 0;
+    MISSIONS.forEach((m, i) => {
+      const ch = m.chap || 1;
+      if (ch !== lastCh) { lastCh = ch; path.append(h('div', { class: 'chap' }, CHAPTERS[ch].icon + ' Bab ' + ch + ' · ' + CHAPTERS[ch].name + ' 🔥')); }
+      const open = i <= ui, cleared = !!hc[m.id];
+      path.append(h('div', { class: 'node ' + (i % 2 ? 'r' : 'l') + (open ? '' : ' locked') + (cleared ? ' done' : '') + (i === ui && !cleared ? ' cur' : ''),
+        onclick: () => { Sound.play('tap'); if (open) missionSheet(m, true); } },
+        h('div', { class: 'dot' }, open ? (cleared ? '👑' : m.type === 'boss' ? '💀' : m.no) : '🔒'),
+        h('div', { class: 'ninfo' }, h('b', {}, m.name), h('small', {}, 'Sulit · ' + m.sub), h('span', { class: 'nst purple' }, open ? stars(hs[m.id] || 0) : ''))));
+    });
+    const crowns = Object.keys(hc).length;
+    screen(topbar('Peta Mode Sulit 🔥', goTitle),
+      h('div', { class: 'maphead' }, btn('🏠 Markas', goBase, 'pri2'), btn('👥 Tokoh', () => goChars(null, goMap), 'pri2'), btn('⚙️', goSettings, 'icon')),
+      modeBar(true), h('p', { class: 'muted small tcenter' }, '👑 ' + crowns + ' / ' + MISSIONS.length + ' mahkota · musuh +3 level, 1 musuh tambahan, lebih pintar · madu ×2'), path);
+    requestAnimationFrame(() => { const c = scr.querySelector('.node.cur'); if (c) c.scrollIntoView({ block: 'center' }); });
+  }
+  function missionSheet(m, hard) {
+    if (hard) m = { ...m, team: [...new Set([...m.team, ...Object.keys(CHARS).filter(recruited)])] };
     const pick = m.team.length > MAXTEAM, must = mustGo(m);
     let party = partyOf(m);
     const teamBox = h('div', { class: 'team' }), info = h('div', { class: 'pickinfo' });
     const go = btn('⚔️ Mulai!', () => {
       if (pick && party.length !== MAXTEAM) { toast('Pilih ' + MAXTEAM + ' tokoh dulu.'); return; }
       if (pick) { S.party = S.party || {}; S.party[m.id] = party.slice(); persist(); }
-      closeOverlay(); startMission(m, { party: party.slice() });
+      closeOverlay(); startMission(hard ? MISSIONS.find(x => x.id === m.id) : m, { party: party.slice(), hard: !!hard, skipStory: !!hard });
     }, 'pri');
     const draw = () => {
       teamBox.innerHTML = '';
@@ -1945,12 +2135,13 @@
     };
     draw();
     overlay(h('div', { class: 'card sheet' },
-      h('div', { class: 'rtitle sm' }, (m.side ? '★ Misi Sampingan: ' : 'Misi ' + m.no + ': ') + m.name),
+      h('div', { class: 'rtitle sm' }, (hard ? '🔥 Sulit · ' : '') + (m.side ? '★ Misi Sampingan: ' : 'Misi ' + m.no + ': ') + m.name),
+      hard ? h('p', { class: 'muted small' }, 'Musuh +3 level, 1 musuh tambahan, dan lebih pintar. Hadiah madu ×2 dan mahkota 👑.') : null,
       m.side ? h('p', { class: 'muted small' }, 'Misi pilihan untuk mencari madu 🍯 tambahan. Hadiah pertama +' + m.reward + ' madu.') : null,
       h('p', {}, m.desc),
       pick ? info : null,
       teamBox,
-      h('ul', { class: 'conds' }, ['Menang', 'Tidak ada teman yang pingsan', m.star3.text].map((c, i) => h('li', { class: (S.stars[m.id] || 0) > i ? 'ok' : '' }, '★ ' + c))),
+      h('ul', { class: 'conds' }, ['Menang', 'Tidak ada teman yang pingsan', m.star3.text].map((c, i) => h('li', { class: ((hard ? (S.hstars || {}) : S.stars)[m.id] || 0) > i ? 'ok' : '' }, '★ ' + c))),
       h('div', { class: 'row' }, btn('Tutup', closeOverlay), go)));
   }
   function goBase() {
@@ -2062,7 +2253,7 @@
 
   /* ---------------- Mulai ---------------- */
   document.addEventListener('pointerdown', () => Sound.resume(), { once: true });
-  window.__ata = { goChars, startCamp: c => startCamp(c), startSide: id => startMission(SIDE.find(m => m.id === id)), sel: u => selectUnit(u), get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
+  window.__ata = { goTower, towerStart, goMapHard, startHard: (i, party) => startMission(MISSIONS[i], { skipStory: true, hard: true, party }), goChars, startCamp: c => startCamp(c), startSide: id => startMission(SIDE.find(m => m.id === id)), sel: u => selectUnit(u), get G() { return G; }, S: () => S, ai: e => aiAct(e), beginPlayerPhase: () => beginPlayerPhase(), startMission: (i) => startMission(MISSIONS[i], { skipStory: true }), goMap, goBase, goTitle, endPlayerTurn, onTapWorld, iso, cam };
   scr.classList.add('on'); scr.innerHTML = '<div class="title"><div class="tsmall">Memuat gambar…</div></div>';
   requestAnimationFrame(frame);
   window.__ata.ready = SPR.load().then(goTitle);

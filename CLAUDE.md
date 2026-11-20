@@ -344,6 +344,18 @@ dengan tokoh yang sama seperti Pohon Madu. Dibuat dulu sebagai artifact Claude, 
   legendaris (`pohon-madu/img/pohon-legendaris.png`) + 9 potret + cerita `STORY.ending` + kartu "Tamat"; node 🏆 Tamat di akhir peta.
   Sampingan baru s5a/s5b/s6a/s6b, Perkemahan Bab 5 (`camp5`, 9 tokoh). Judul "6 bab · 42 misi".
 - Keseimbangan bot (tim 4): Bab 5 Lv 7 (Ratu Laba-laba Lv 7–8), Bab 6 Lv 8, Ratu Tawon butuh Lv 9.
+- **Setelah tamat (v8, pratinjau-v38):** di Peta muncul `modeBar` (tombol Normal/Sulit 🔥 + 🗼 Menara; terkunci sebelum `b6m7`).
+  **Mode Sulit** (`S.hardView`, `goMapHard`, `missionSheet(m, true)`, `startMission(m, {hard})`, `hardEnd`): 42 misi utama berurutan
+  (`S.hcleared`, `S.hstars` bintang ungu, 👑 mahkota), musuh `G.elv` = elv+3, +1 musuh tambahan (`freeTile`), AI lebih fokus ke teman
+  nyawa ≤½ & keroyokan, tanpa cerita/tips, semua tokoh boleh dipilih (posisi tambahan diisi otomatis dekat tokoh pertama), madu ×2.
+  **Menara Tantangan** (`goTower`, `towerPick`, `towerStart`, `towerFloor`, `towerMission`, `towerApply`, `towerEnd`; simpanan
+  `S.tower {floor, party, hp, buff}`, `S.towerBest`, `S.towerParty`): lantai tanpa akhir, bab = ((lantai−1) mod 6)+1, peta misi `rout`
+  acak dari bab itu dengan musuh acak `POOL`, tiap 5 lantai bos (`BOSS_OF`), elv = 3 + lantai, tim 4 tetap satu perjalanan, nyawa
+  disimpan per tokoh (+30% tiap lantai, pingsan → 30%), berkah: 💚 pulih penuh / ⚔️ +2 serang / ⭐ Semangat penuh; kalah = rekor.
+  Bot tim Lv 10: lantai 8 menang, bos lantai 10 kalah.
+- **Rencana disetujui (menunggu sprite):** Bab 7 Kepulauan Awan (kemarau, Burung Pembawa Hujan, teman Kakak Kakatua, bos Naga Petir),
+  Bab 8 Laut Karang (bajak laut kepiting, ombak mendorong, teman Penyu Laut, bos Gurita Raksasa), Bab 9 Hutan Salju (es licin meluncur,
+  teman Beruang Kutub, bos Rubah Es).
 
 - **Tim maksimal 4 tokoh** (permintaan pengguna, `MAXTEAM`): kalau `m.team` > 4, lembar misi menampilkan pemilih tokoh (Ata,
   tamu & yang dilindungi = wajib), pilihan disimpan per misi di `S.party`; `partyOf(m)` / `defaultParty(m)`. Bab 3 diseimbangkan
